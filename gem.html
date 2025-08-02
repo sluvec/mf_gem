@@ -179,12 +179,370 @@
         .action-btn-group button { margin-right: 0; }
         .field-note { font-size: 0.875rem; color: var(--neutral-600); margin-top: 0.5rem; font-style: italic; }
         
-        /* Responsive Table */
+        /* ========================================
+           ACCESSIBILITY & MOBILE FIRST STYLES
+           ======================================== */
+        
+        /* Screen Reader Only Content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Skip Links for Accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--primary-600);
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 9999;
+            font-weight: 500;
+            transition: top 0.2s ease;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+            outline: 2px solid var(--warning-400);
+            outline-offset: 2px;
+        }
+        
+        /* Enhanced Focus Styles */
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus,
+        .nav-btn:focus,
+        .logo-btn:focus {
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+        
+        /* Logo Button Styling */
+        .logo-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Mobile Navigation Styles */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 44px;
+            height: 44px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            transition: background-color 0.2s ease;
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .hamburger-line {
+            width: 24px;
+            height: 2px;
+            background: white;
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+        
+        .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+        
+        /* Navigation Menu Styles */
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: var(--space-xs);
+        }
+        
+        .nav-menu li {
+            display: flex;
+        }
+        
+        /* Touch-Friendly Button Sizes */
+        .nav-btn,
+        button,
+        .btn {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+        
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            :root {
+                --neutral-900: #000000;
+                --neutral-100: #ffffff;
+                --primary-500: #0000ff;
+                --success-500: #006600;
+                --warning-500: #cc6600;
+                --error-500: #cc0000;
+            }
+        }
+        
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        
+        /* ========================================
+           MOBILE FIRST RESPONSIVE DESIGN
+           ======================================== */
+        
+        /* Base Mobile Styles (320px+) */
+        @media (max-width: 767px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                position: relative;
+            }
+            
+            .nav-left {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--primary-600);
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: var(--shadow-lg);
+                border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+                z-index: 1000;
+            }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+            
+            .nav-menu li {
+                width: 100%;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 1rem;
+                text-align: left;
+                border-radius: var(--radius-md);
+                margin-bottom: var(--space-xs);
+            }
+            
+            .container {
+                padding: 0 1rem;
+            }
+            
+            /* Mobile Quote Builder */
+            .quote-builder {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .summary {
+                position: static;
+                margin-top: 1rem;
+                order: -1;
+            }
+            
+            /* Mobile Tables - Hide desktop table, show cards */
+            .table-responsive {
+                display: none;
+            }
+            
+            .mobile-cards {
+                display: block;
+            }
+            
+            /* Modal adjustments for mobile */
+            .modal-content {
+                width: 95vw;
+                height: 95vh;
+                max-width: none;
+                max-height: none;
+                margin: 2.5vh auto;
+                overflow-y: auto;
+            }
+            
+            /* Form adjustments */
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .form-actions {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .form-actions button {
+                width: 100%;
+            }
+        }
+        
+        /* Tablet Styles (768px - 1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .mobile-menu-toggle {
+                display: none;
+            }
+            
+            .nav-menu {
+                display: flex;
+                position: static;
+                background: transparent;
+                flex-direction: row;
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            .container {
+                padding: 0 1.5rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .quote-builder {
+                grid-template-columns: 2fr 1fr;
+            }
+            
+            /* Show desktop table on tablet */
+            .table-responsive {
+                display: table;
+                width: 100%;
+                overflow-x: auto;
+            }
+            
+            .mobile-cards {
+                display: none;
+            }
+        }
+        
+        /* Desktop Styles (1024px+) */
+        @media (min-width: 1024px) {
+            .navbar {
+                padding: 1rem 2rem;
+                flex-direction: row;
+            }
+            
+            .nav-left {
+                width: auto;
+            }
+            
+            .mobile-menu-toggle {
+                display: none;
+            }
+            
+            .nav-menu {
+                display: flex;
+                position: static;
+                background: transparent;
+                flex-direction: row;
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            .nav-menu li {
+                width: auto;
+            }
+            
+            .nav-btn {
+                width: auto;
+                justify-content: center;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                margin-bottom: 0;
+            }
+            
+            .container {
+                max-width: 1400px;
+                padding: 0 2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .table-responsive {
+                display: table;
+                overflow: visible;
+            }
+            
+            .mobile-cards {
+                display: none;
+            }
+            
+            .form-actions {
+                text-align: right;
+                display: block;
+            }
+            
+            .form-actions button {
+                width: auto;
+            }
+        }
+        
+        /* Legacy responsive rules - keep for compatibility */
         @media (max-width: 768px) {
-            .navbar { flex-direction: column; gap: 1rem; padding: 1rem; }
-            .quote-builder { grid-template-columns: 1fr; }
-            .summary { position: static; margin-top: 2rem; }
-            table { display: block; overflow-x: auto; white-space: nowrap; }
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
         }
         
         /* NEW Sprint 4.2: Calendar Styles */
@@ -2107,31 +2465,163 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-left">
-            <h1 onclick="window.showPage('dashboard')">🏢 CRM Demo</h1>
-            <button onclick="window.showPage('dashboard')" class="nav-btn active">Dashboard</button>
-            <button onclick="window.showPage('pcnumbers')" class="nav-btn">PC Numbers</button>
-            <button onclick="window.showPage('quotes')" class="nav-btn">Quotes</button>
-            <button onclick="window.showPage('templates')" class="nav-btn">📄 Quote Templates</button>
-            <button onclick="window.showPage('activities')" class="nav-btn">Activities</button>
-            <button onclick="window.showPage('activity-templates')" class="nav-btn">📋 Activity Templates</button>
-            <button onclick="window.showPage('resources')" class="nav-btn">Resources</button>
-            <button onclick="window.showPage('resource-allocation')" class="nav-btn">🔧 Resource Allocation</button>
-            <button onclick="window.showPage('analytics')" class="nav-btn">📊 Analytics</button>
-            <button onclick="window.showPage('pricelists')" class="nav-btn">Price Lists</button>
-        </div>
-        <div class="nav-right">
-            <!-- NEW Sprint 4.2.5: Notification Bell -->
-            <div style="position: relative; margin-right: 1rem;">
-                <button id="notification-bell" class="notification-bell" onclick="window.toggleNotificationCenter()">
-                    🔔
-                    <div id="notification-badge" class="notification-badge" style="display: none;">0</div>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header role="banner">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <div class="nav-left">
+                <h1>
+                    <button 
+                        onclick="window.showPage('dashboard')" 
+                        aria-label="Go to dashboard - CRM Demo homepage"
+                        class="logo-btn">
+                        🏢 CRM Demo
+                    </button>
+                </h1>
+                
+                <!-- Mobile hamburger menu toggle -->
+                <button 
+                    id="mobile-menu-toggle" 
+                    class="mobile-menu-toggle" 
+                    aria-expanded="false"
+                    aria-controls="main-navigation"
+                    aria-label="Toggle main navigation menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+                
+                <ul id="main-navigation" class="nav-menu" role="menubar" aria-label="Main menu">
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('dashboard')" 
+                            class="nav-btn active"
+                            role="menuitem"
+                            aria-pressed="true"
+                            aria-describedby="dashboard-desc">
+                            Dashboard
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('pcnumbers')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="pc-numbers-desc">
+                            PC Numbers
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('quotes')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="quotes-desc">
+                            Quotes
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('templates')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="templates-desc">
+                            Quote Templates
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('activities')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="activities-desc">
+                            Activities
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('activity-templates')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="activity-templates-desc">
+                            Activity Templates
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('resources')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="resources-desc">
+                            Resources
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('resource-allocation')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="resource-allocation-desc">
+                            Resource Allocation
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('analytics')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="analytics-desc">
+                            Analytics
+                        </button>
+                    </li>
+                    <li role="none">
+                        <button 
+                            onclick="window.showPage('pricelists')" 
+                            class="nav-btn"
+                            role="menuitem"
+                            aria-describedby="pricelists-desc">
+                            Price Lists
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <!-- NEW Sprint 4.2.5: Notification Bell -->
+                <div style="position: relative; margin-right: 1rem;">
+                    <button 
+                        id="notification-bell" 
+                        class="notification-bell" 
+                        onclick="window.toggleNotificationCenter()"
+                        aria-label="Notifications"
+                        aria-describedby="notification-count">
+                        🔔
+                        <div id="notification-badge" class="notification-badge" style="display: none;" aria-live="polite">0</div>
+                    </button>
+                </div>
+                <button 
+                    onclick="window.resetData()" 
+                    class="nav-btn danger"
+                    aria-label="Reset all demo data - this will delete all current data">
+                    Reset Demo Data
                 </button>
             </div>
-            <button onclick="window.resetData()" class="nav-btn danger">🗑️ Reset Demo Data</button>
-        </div>
-    </nav>
+        </nav>
+    </header>
+    
+    <!-- Screen reader descriptions for navigation items -->
+    <div class="sr-only">
+        <div id="dashboard-desc">Overview of key metrics and recent activity</div>
+        <div id="pc-numbers-desc">Manage project codes and client information</div>
+        <div id="quotes-desc">Create and manage quotes for projects</div>
+        <div id="templates-desc">Reusable quote templates</div>
+        <div id="activities-desc">Schedule and track project activities</div>
+        <div id="activity-templates-desc">Reusable activity templates</div>
+        <div id="resources-desc">Manage equipment, materials and labor resources</div>
+        <div id="resource-allocation-desc">Track resource allocation and availability</div>
+        <div id="analytics-desc">View reports and analytics dashboard</div>
+        <div id="pricelists-desc">Manage pricing and rate cards</div>
+    </div>
 
     <!-- NEW Sprint 4.2.5: Notification Center -->
     <div id="notification-center" class="notification-center">
@@ -2153,8 +2643,9 @@
         </div>
     </div>
 
-    <div class="container">
-        <div id="dashboard" class="page active">
+    <main id="main-content" role="main" tabindex="-1">
+        <div class="container">
+            <div id="dashboard" class="page active">
             <h1>📊 Dashboard</h1>
             <p>Overview of key metrics in the demonstration system.</p>
             
@@ -3501,7 +3992,9 @@
                 </div>
             </div>
         </div>
-    </div>
+                </div>
+        </div>
+    </main>
 
     <div id="quote-modal" class="modal"><div class="modal-content">
         <h2>Select PC Number for new quote</h2>
@@ -14208,6 +14701,220 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Code Quality System initialized');
     console.log('🔍 Analyze code quality with: analyzeCode() or individual checks with checkComplexity(), findDuplicates(), etc.');
+
+    // ========================================
+    // ACCESSIBILITY & MOBILE UX ENHANCEMENTS
+    // ========================================
+    
+    // Mobile Navigation Toggle
+    function initializeMobileNavigation() {
+        const mobileToggle = document.getElementById('mobile-menu-toggle');
+        const navMenu = document.getElementById('main-navigation');
+        
+        if (mobileToggle && navMenu) {
+            mobileToggle.addEventListener('click', () => {
+                const isExpanded = mobileToggle.getAttribute('aria-expanded') === 'true';
+                const newState = !isExpanded;
+                
+                mobileToggle.setAttribute('aria-expanded', newState);
+                
+                if (newState) {
+                    navMenu.classList.add('active');
+                    navMenu.setAttribute('aria-hidden', 'false');
+                    // Focus first menu item
+                    const firstMenuItem = navMenu.querySelector('.nav-btn');
+                    if (firstMenuItem) {
+                        setTimeout(() => firstMenuItem.focus(), 100);
+                    }
+                } else {
+                    navMenu.classList.remove('active');
+                    navMenu.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!mobileToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    navMenu.classList.remove('active');
+                    navMenu.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                    navMenu.classList.remove('active');
+                    navMenu.setAttribute('aria-hidden', 'true');
+                    mobileToggle.focus();
+                }
+            });
+        }
+    }
+    
+    // Enhanced Navigation with ARIA states
+    function updateNavigationState(activePageId) {
+        const navButtons = document.querySelectorAll('.nav-btn');
+        navButtons.forEach(btn => {
+            const isActive = btn.onclick && btn.onclick.toString().includes(activePageId);
+            btn.setAttribute('aria-pressed', isActive);
+            if (isActive) {
+                btn.classList.add('active');
+                btn.setAttribute('aria-current', 'page');
+            } else {
+                btn.classList.remove('active');
+                btn.removeAttribute('aria-current');
+            }
+        });
+    }
+    
+    // Enhanced showPage function with accessibility
+    const originalShowPage = window.showPage;
+    window.showPage = function(pageId) {
+        // Call original function
+        originalShowPage(pageId);
+        
+        // Update ARIA states
+        updateNavigationState(pageId);
+        
+        // Update document title for screen readers
+        const pageTitles = {
+            'dashboard': 'Dashboard - CRM Demo',
+            'pcnumbers': 'PC Numbers - CRM Demo',
+            'quotes': 'Quotes - CRM Demo',
+            'templates': 'Quote Templates - CRM Demo',
+            'activities': 'Activities - CRM Demo',
+            'activity-templates': 'Activity Templates - CRM Demo',
+            'resources': 'Resources - CRM Demo',
+            'resource-allocation': 'Resource Allocation - CRM Demo',
+            'analytics': 'Analytics - CRM Demo',
+            'pricelists': 'Price Lists - CRM Demo'
+        };
+        
+        document.title = pageTitles[pageId] || 'CRM Demo';
+        
+        // Announce page change to screen readers
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.focus();
+            
+            // Create announcement for screen readers
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.setAttribute('aria-atomic', 'true');
+            announcement.className = 'sr-only';
+            announcement.textContent = `Navigated to ${pageTitles[pageId] || pageId} page`;
+            document.body.appendChild(announcement);
+            
+            // Remove announcement after it's been read
+            setTimeout(() => {
+                if (announcement.parentNode) {
+                    announcement.parentNode.removeChild(announcement);
+                }
+            }, 1000);
+        }
+        
+        // Close mobile menu if open
+        const mobileToggle = document.getElementById('mobile-menu-toggle');
+        const navMenu = document.getElementById('main-navigation');
+        if (mobileToggle && navMenu && navMenu.classList.contains('active')) {
+            mobileToggle.setAttribute('aria-expanded', 'false');
+            navMenu.classList.remove('active');
+            navMenu.setAttribute('aria-hidden', 'true');
+        }
+    };
+    
+    // Keyboard Navigation Enhancement
+    function initializeKeyboardNavigation() {
+        // Global keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Skip if user is typing in input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Alt + number for page navigation
+            if (e.altKey && e.key >= '1' && e.key <= '9') {
+                e.preventDefault();
+                const pageMap = {
+                    '1': 'dashboard',
+                    '2': 'pcnumbers', 
+                    '3': 'quotes',
+                    '4': 'activities',
+                    '5': 'resources',
+                    '6': 'analytics'
+                };
+                const pageId = pageMap[e.key];
+                if (pageId) {
+                    showPage(pageId);
+                }
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    const closeButton = activeModal.querySelector('.close, [onclick*="close"]');
+                    if (closeButton) {
+                        closeButton.click();
+                    }
+                }
+            }
+            
+            // Tab navigation improvements
+            if (e.key === 'Tab') {
+                // Ensure focus stays within modals
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    const focusableElements = activeModal.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstElement = focusableElements[0];
+                    const lastElement = focusableElements[focusableElements.length - 1];
+                    
+                    if (e.shiftKey && document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            }
+        });
+        
+        // Improve form navigation
+        const forms = document.querySelectorAll('form, .form-like');
+        forms.forEach(form => {
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && input.type !== 'textarea') {
+                        e.preventDefault();
+                        const nextInput = inputs[index + 1];
+                        if (nextInput) {
+                            nextInput.focus();
+                        } else {
+                            // Focus submit button if it exists
+                            const submitBtn = form.querySelector('button[type="submit"], button[onclick*="save"]');
+                            if (submitBtn) {
+                                submitBtn.focus();
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    }
+    
+    // Initialize accessibility features
+    initializeMobileNavigation();
+    initializeKeyboardNavigation();
+    
+    console.log('✅ Accessibility and mobile navigation initialized');
+    console.log('📱 Mobile menu: Tap hamburger button');
+    console.log('⌨️ Keyboard shortcuts: Alt+1-6 for page navigation, Tab for form navigation, Esc to close modals');
 
     // Initialize IndexedDB and load data
     console.log('🚀 Starting application initialization...');
