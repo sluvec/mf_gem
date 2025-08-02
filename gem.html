@@ -5246,7 +5246,7 @@ function showNewQuoteModal() {
     const pcSelect = document.getElementById('quote-modal-pc');
     pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
     db.pcs.forEach(pc => {
-        pcSelect.innerHTML += `<option value="${pc.id}">${pc.number} - ${pc.company}</option>`;
+        pcSelect.innerHTML += `<option value="${pc.id}">${pc.pc_number || pc.number} - ${pc.company_name || pc.company}</option>`;
     });
     document.getElementById('quote-modal').classList.add('active');
 }
