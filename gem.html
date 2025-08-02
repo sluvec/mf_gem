@@ -11503,24 +11503,270 @@ function removeResourceFromPriceList(resourceId) {
 
 
 // ========================================
+// MODULE ORGANIZATION
+// ========================================
+
+/**
+ * @namespace CRM
+ * @description Main application namespace organizing all functionality into logical modules
+ */
+const CRM = {
+    
+    /**
+     * @namespace CRM.Database
+     * @description Database operations and IndexedDB management
+     */
+    Database: {
+        generateUUID,
+        initialize: initializeIndexedDB,
+        saveWithRetry,
+        save: saveToStore,
+        load: loadFromStore,
+        loadAll: loadAllFromStore,
+        delete: deleteFromStore,
+        loadData: loadDataFromIndexedDB,
+        saveData: saveDataToIndexedDB,
+        reset: resetData,
+        initializeDemo: initializeWithDemoData
+    },
+
+    /**
+     * @namespace CRM.Navigation
+     * @description Page navigation and UI routing
+     */
+    Navigation: {
+        showPage,
+        updateDashboard
+    },
+
+    /**
+     * @namespace CRM.PCNumbers
+     * @description PC Number management functionality
+     */
+    PCNumbers: {
+        render: renderPCList,
+        save: savePC,
+        edit: editPC,
+        view: viewPC,
+        clear: clearPCForm
+    },
+
+    /**
+     * @namespace CRM.Quotes
+     * @description Quote creation and management
+     */
+    Quotes: {
+        render: renderQuotesList,
+        create: createQuote,
+        save: saveQuote,
+        cancel: cancelQuote,
+        calculate: calculateTotal,
+        showModal: showNewQuoteModal,
+        closeModal: closeQuoteModal,
+        proceedToBuilder: proceedToQuoteBuilder,
+        handlePriceListChange,
+        handleStatusChange: handleQuoteStatusChange,
+        validateEditability: validateQuoteEditability,
+        toggleAddressSections,
+        copyCollectionToDelivery,
+        updateAddressValidation,
+        populateActivities: populateQuotedActivities,
+        updateActivities: updateQuotedActivities,
+        addLineItem,
+        updateLinePrice,
+        updateLineQty,
+        removeLine
+    },
+
+    /**
+     * @namespace CRM.Activities
+     * @description Activity management and calendar functionality
+     */
+    Activities: {
+        render: updateActivitiesList,
+        showModal: showActivityModal,
+        closeModal: closeActivityModal,
+        save: saveActivity,
+        switchView: switchActivitiesView,
+        Calendar: {
+            setView: setCalendarView,
+            navigate: navigateCalendar,
+            render: renderCalendar,
+            renderMonth: renderMonthView,
+            renderWeek: renderWeekView,
+            updateTitle: updateCalendarTitle,
+            showSidebar: showActivityInSidebar,
+            closeSidebar: closeCalendarSidebar,
+            editFromCalendar: editActivityFromCalendar
+        }
+    },
+
+    /**
+     * @namespace CRM.Resources
+     * @description Resource and price list management
+     */
+    Resources: {
+        render: updateResourcesList,
+        showModal: showResourceModal,
+        closeModal: closeResourceModal,
+        save: saveResource,
+        edit: editResource,
+        delete: deleteResource,
+        PriceLists: {
+            render: updatePriceListsTable,
+            create: createPriceList,
+            view: viewPriceList,
+            showAddModal: showAddResourceToPriceList,
+            closeAddModal: closeAddResourceModal,
+            calculateMargin,
+            addResource: addResourceToPriceList,
+            removeResource: removeResourceFromPriceList
+        }
+    },
+
+    /**
+     * @namespace CRM.Templates
+     * @description Quote template management
+     */
+    Templates: {
+        render: updateTemplatesList,
+        filter: filterTemplates,
+        showCreateModal: showCreateTemplateFromScratch,
+        closeModal: closeTemplateModal,
+        save: saveTemplate,
+        edit: editTemplate,
+        delete: deleteTemplate,
+        createFromTemplate: createQuoteFromTemplate,
+        saveFromQuote: saveQuoteAsTemplate,
+        duplicate: duplicateCurrentQuote,
+        addItems: addItemsToTemplate
+    },
+
+    /**
+     * @namespace CRM.ActivityTemplates  
+     * @description Activity template management
+     */
+    ActivityTemplates: {
+        render: updateActivityTemplatesList,
+        filter: filterActivityTemplates,
+        showCreateModal: showCreateActivityTemplate,
+        closeModal: closeActivityTemplateModal,
+        save: saveActivityTemplate,
+        edit: editActivityTemplate,
+        delete: deleteActivityTemplate,
+        createFromTemplate: createActivityFromTemplate,
+        saveFromActivity: saveActivityAsTemplate
+    },
+
+    /**
+     * @namespace CRM.EnhancedResources
+     * @description Enhanced resource lookup and bulk operations  
+     */
+    EnhancedResources: {
+        showModal: showEnhancedResourceModal,
+        closeModal: closeEnhancedResourceModal,
+        filter: filterResources,
+        render: renderResourcesList,
+        toggleSelection: toggleResourceSelection,
+        updateTotal: updateResourceTotal,
+        selectAllFiltered: selectAllFilteredResources,
+        clearSelection: clearResourceSelection,
+        updateCount: updateSelectionCount,
+        addToQuote: addSelectedResourcesToQuote,
+        Bulk: {
+            updateSelection: updateBulkSelection,
+            toggleCategorySelection,
+            clearSelection: clearBulkSelection,
+            updateQuantity: bulkUpdateQuantity,
+            applyDiscount: bulkApplyDiscount,
+            deleteItems: bulkDeleteItems,
+            closeQuantityModal: closeBulkQuantityModal,
+            applyQuantityUpdate: applyBulkQuantityUpdate,
+            closeDiscountModal: closeBulkDiscountModal
+        }
+    },
+
+    /**
+     * @namespace CRM.UI
+     * @description UI utilities and common interface functions
+     */
+    UI: {
+        getNotificationIcon,
+        clearPCForm,
+        clearPriceListForm
+    }
+};
+
+// ========================================
 // Inicjalizacja Aplikacji
 // ========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Expose functions to window object
-    window.showPage = showPage;
-    window.savePC = savePC;
-    window.editPC = editPC;
-    window.viewPC = viewPC;
-    window.createQuote = createQuote;
-    window.showNewQuoteModal = showNewQuoteModal;
-    window.closeQuoteModal = closeQuoteModal;
-    window.proceedToQuoteBuilder = proceedToQuoteBuilder;
-    window.onPriceListChange = onPriceListChange;
-    window.addLineItem = addLineItem;
-    window.updateLinePrice = updateLinePrice;
-    window.updateLineQty = updateLineQty;
-    window.removeLine = removeLine;
-    window.saveQuote = saveQuote;
+    // ========================================
+    // EXPOSE CRM MODULES TO WINDOW OBJECT
+    // ========================================
+    
+    // Expose main CRM namespace
+    window.CRM = CRM;
+    
+    // Navigation & Core
+    window.showPage = CRM.Navigation.showPage;
+    window.resetData = CRM.Database.reset;
+    
+    // PC Numbers Module
+    window.savePC = CRM.PCNumbers.save;
+    window.editPC = CRM.PCNumbers.edit;
+    window.viewPC = CRM.PCNumbers.view;
+    
+    // Quotes Module  
+    window.createQuote = CRM.Quotes.create;
+    window.showNewQuoteModal = CRM.Quotes.showModal;
+    window.closeQuoteModal = CRM.Quotes.closeModal;
+    window.proceedToQuoteBuilder = CRM.Quotes.proceedToBuilder;
+    window.handlePriceListChange = CRM.Quotes.handlePriceListChange;
+    window.addLineItem = CRM.Quotes.addLineItem;
+    window.updateLinePrice = CRM.Quotes.updateLinePrice;
+    window.updateLineQty = CRM.Quotes.updateLineQty;
+    window.removeLine = CRM.Quotes.removeLine;
+    window.saveQuote = CRM.Quotes.save;
+    window.calculateTotal = CRM.Quotes.calculate;
+    window.cancelQuote = CRM.Quotes.cancel;
+    window.toggleAddressSections = CRM.Quotes.toggleAddressSections;
+    window.copyCollectionToDelivery = CRM.Quotes.copyCollectionToDelivery;
+    window.handleQuoteStatusChange = CRM.Quotes.handleStatusChange;
+    window.populateQuotedActivities = CRM.Quotes.populateActivities;
+    window.updateQuotedActivities = CRM.Quotes.updateActivities;
+    
+    // Activities Module
+    window.showActivityModal = CRM.Activities.showModal;
+    window.closeActivityModal = CRM.Activities.closeModal;
+    window.saveActivity = CRM.Activities.save;
+    window.switchActivitiesView = CRM.Activities.switchView;
+    window.setCalendarView = CRM.Activities.Calendar.setView;
+    window.navigateCalendar = CRM.Activities.Calendar.navigate;
+    window.closeCalendarSidebar = CRM.Activities.Calendar.closeSidebar;
+    
+    // Templates Module
+    window.filterTemplates = CRM.Templates.filter;
+    window.showCreateTemplateFromScratch = CRM.Templates.showCreateModal;
+    window.saveQuoteAsTemplate = CRM.Templates.saveFromQuote;
+    window.duplicateCurrentQuote = CRM.Templates.duplicate;
+    window.createQuoteFromTemplate = CRM.Templates.createFromTemplate;
+    window.editTemplate = CRM.Templates.edit;
+    window.deleteTemplate = CRM.Templates.delete;
+    
+    // Enhanced Resources & Bulk Operations
+    window.showEnhancedResourceModal = CRM.EnhancedResources.showModal;
+    window.closeEnhancedResourceModal = CRM.EnhancedResources.closeModal;
+    window.filterResources = CRM.EnhancedResources.filter;
+    window.selectAllFilteredResources = CRM.EnhancedResources.selectAllFiltered;
+    window.clearResourceSelection = CRM.EnhancedResources.clearSelection;
+    window.addSelectedResourcesToQuote = CRM.EnhancedResources.addToQuote;
+    window.bulkUpdateQuantity = CRM.EnhancedResources.Bulk.updateQuantity;
+    window.bulkApplyDiscount = CRM.EnhancedResources.Bulk.applyDiscount;
+    window.bulkDeleteItems = CRM.EnhancedResources.Bulk.deleteItems;
+    window.toggleCategorySelection = CRM.EnhancedResources.Bulk.toggleCategorySelection;
+    window.clearBulkSelection = CRM.EnhancedResources.Bulk.clearSelection;
+    window.updateBulkSelection = CRM.EnhancedResources.Bulk.updateSelection;
     window.cancelQuote = cancelQuote;
     window.showActivityModal = showActivityModal;
     window.closeActivityModal = closeActivityModal;
