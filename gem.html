@@ -5240,6 +5240,12 @@ function clearPCForm() {
 // ========================================
 
 function updateDashboard() {
+    // Guard clause: ensure db is initialized
+    if (!db || !db.pcs || !db.quotes || !db.activities) {
+        console.warn('⚠️ updateDashboard called before db initialization');
+        return;
+    }
+    
     document.getElementById('stat-pc').textContent = db.pcs.length;
     document.getElementById('stat-quotes').textContent = db.quotes.length;
     document.getElementById('stat-activities').textContent = db.activities.length;
@@ -5258,6 +5264,12 @@ function updateDashboard() {
 // ========================================
 
 function renderPCList() {
+    // Guard clause: ensure db is initialized
+    if (!db || !db.pcs) {
+        console.warn('⚠️ renderPCList called before db initialization');
+        return;
+    }
+    
     const tbody = document.getElementById('pc-list');
     tbody.innerHTML = '';
     db.pcs.forEach(pc => {
@@ -5903,6 +5915,12 @@ function cancelQuote() {
 }
 
 function renderQuotesList() {
+    // Guard clause: ensure db is initialized
+    if (!db || !db.quotes || !db.pcs) {
+        console.warn('⚠️ renderQuotesList called before db initialization');
+        return;
+    }
+    
     const tbody = document.getElementById('quotes-list');
     tbody.innerHTML = '';
     db.quotes.forEach(q => {
@@ -11089,6 +11107,12 @@ async function saveActivity() {
 }
 
 function updateActivitiesList() {
+    // Guard clause: ensure db is initialized
+    if (!db || !db.activities || !db.pcs) {
+        console.warn('⚠️ updateActivitiesList called before db initialization');
+        return;
+    }
+    
     const tbody = document.getElementById('activities-list');
     tbody.innerHTML = '';
     db.activities.forEach(a => {
@@ -11767,91 +11791,36 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toggleCategorySelection = CRM.EnhancedResources.Bulk.toggleCategorySelection;
     window.clearBulkSelection = CRM.EnhancedResources.Bulk.clearSelection;
     window.updateBulkSelection = CRM.EnhancedResources.Bulk.updateSelection;
-    window.cancelQuote = cancelQuote;
-    window.showActivityModal = showActivityModal;
-    window.closeActivityModal = closeActivityModal;
-    window.saveActivity = saveActivity;
-    window.showResourceModal = showResourceModal;
-    window.closeResourceModal = closeResourceModal;
-    window.saveResource = saveResource;
-    window.editResource = editResource;
-    window.deleteResource = deleteResource;
-    window.updatePriceListsTable = updatePriceListsTable;
-    window.createPriceList = createPriceList;
-    window.viewPriceList = viewPriceList;
-    window.showAddResourceToPriceList = showAddResourceToPriceList;
-    window.closeAddResourceModal = closeAddResourceModal;
-    window.calculateMargin = calculateMargin;
-    window.addResourceToPriceList = addResourceToPriceList;
-    window.removeResourceFromPriceList = removeResourceFromPriceList;
-    // NEW Sprint 2: Address & Move Type functions
-    window.toggleAddressSections = toggleAddressSections;
-    window.copyCollectionToDelivery = copyCollectionToDelivery;
-    window.updateAddressValidation = updateAddressValidation;
-    window.populateQuotedActivities = populateQuotedActivities;
-    window.updateQuotedActivities = updateQuotedActivities;
-    window.onQuoteStatusChange = onQuoteStatusChange;
-    window.validateQuoteEditability = validateQuoteEditability;
-    // NEW Sprint 3: Enhanced Resource Lookup functions
-    window.showEnhancedResourceModal = showEnhancedResourceModal;
-    window.closeEnhancedResourceModal = closeEnhancedResourceModal;
-    window.filterResources = filterResources;
-    window.renderResourcesList = renderResourcesList;
-    window.toggleResourceSelection = toggleResourceSelection;
-    window.updateResourceTotal = updateResourceTotal;
-    window.selectAllFilteredResources = selectAllFilteredResources;
-    window.clearResourceSelection = clearResourceSelection;
-    window.updateSelectionCount = updateSelectionCount;
-    window.addSelectedResourcesToQuote = addSelectedResourcesToQuote;
-    window.addResourceToQuoteCategory = addResourceToQuoteCategory;
-    // NEW Sprint 3.2: Bulk Operations functions
-    window.updateBulkSelection = updateBulkSelection;
-    window.toggleCategorySelection = toggleCategorySelection;
-    window.clearBulkSelection = clearBulkSelection;
-    window.bulkUpdateQuantity = bulkUpdateQuantity;
-    window.closeBulkQuantityModal = closeBulkQuantityModal;
-    window.applyBulkQuantityUpdate = applyBulkQuantityUpdate;
-    window.bulkApplyDiscount = bulkApplyDiscount;
-    window.closeBulkDiscountModal = closeBulkDiscountModal;
-    window.applyBulkDiscount = applyBulkDiscount;
-    window.bulkDeleteItems = bulkDeleteItems;
-    // NEW Sprint 3.3: Template Management functions
-    window.updateTemplatesList = updateTemplatesList;
-    window.filterTemplates = filterTemplates;
-    window.showCreateTemplateFromScratch = showCreateTemplateFromScratch;
-    window.saveQuoteAsTemplate = saveQuoteAsTemplate;
-    window.duplicateCurrentQuote = duplicateCurrentQuote;
-    window.closeTemplateModal = closeTemplateModal;
-    window.saveTemplate = saveTemplate;
-    window.editTemplate = editTemplate;
-    window.deleteTemplate = deleteTemplate;
-    window.createQuoteFromTemplate = createQuoteFromTemplate;
-    window.addItemsToTemplate = addItemsToTemplate;
-    // NEW Sprint 4.1: Activity Template Management functions
-    window.updateActivityTemplatesList = updateActivityTemplatesList;
-    window.filterActivityTemplates = filterActivityTemplates;
-    window.showCreateActivityTemplate = showCreateActivityTemplate;
-    window.closeActivityTemplateModal = closeActivityTemplateModal;
-    window.saveActivityTemplate = saveActivityTemplate;
-    window.editActivityTemplate = editActivityTemplate;
-    window.deleteActivityTemplate = deleteActivityTemplate;
-    window.createActivityFromTemplate = createActivityFromTemplate;
-    window.saveActivityAsTemplate = saveActivityAsTemplate;
-    // NEW Sprint 4.2: Calendar Management functions
-    window.switchActivitiesView = switchActivitiesView;
-    window.setCalendarView = setCalendarView;
-    window.navigateCalendar = navigateCalendar;
-    window.renderCalendar = renderCalendar;
-    window.renderMonthView = renderMonthView;
-    window.renderWeekView = renderWeekView;
-    window.showActivityInSidebar = showActivityInSidebar;
-    window.closeCalendarSidebar = closeCalendarSidebar;
-    window.editActivityFromCalendar = editActivityFromCalendar;
-    // NEW Sprint 4.2.2: Drag & Drop Time Slot Management functions
-    window.enableDragAndDrop = enableDragAndDrop;
+    
+    // Resources Module  
+    window.showResourceModal = CRM.Resources.showModal;
+    window.closeResourceModal = CRM.Resources.closeModal;
+    window.saveResource = CRM.Resources.save;
+    window.editResource = CRM.Resources.edit;
+    window.deleteResource = CRM.Resources.delete;
+    
+    // Price Lists Module
+    window.updatePriceListsTable = CRM.Resources.PriceLists.render;
+    window.createPriceList = CRM.Resources.PriceLists.create;
+    window.viewPriceList = CRM.Resources.PriceLists.view;
+    window.showAddResourceToPriceList = CRM.Resources.PriceLists.showAddModal;
+    window.closeAddResourceModal = CRM.Resources.PriceLists.closeAddModal;
+    window.calculateMargin = CRM.Resources.PriceLists.calculateMargin;
+    window.addResourceToPriceList = CRM.Resources.PriceLists.addResource;
+    window.removeResourceFromPriceList = CRM.Resources.PriceLists.removeResource;
+    
+    // Activity Templates Module
+    window.filterActivityTemplates = CRM.ActivityTemplates.filter;
+    window.showCreateActivityTemplate = CRM.ActivityTemplates.showCreateModal;
+    window.saveActivityAsTemplate = CRM.ActivityTemplates.saveFromActivity;
+    
+    // ========================================
+    // LEGACY FUNCTIONS NOT YET IN CRM MODULES  
+    // ========================================
+    
+    // Advanced Functions (Sprint 4.2+) - need to be added to CRM modules later
     window.closeQuickCreate = closeQuickCreate;
     window.submitQuickCreate = submitQuickCreate;
-    // NEW Sprint 4.2.3: Team Management & Workload Balancing functions
     window.initializeTeamManagement = initializeTeamManagement;
     window.filterByTeamMember = filterByTeamMember;
     window.toggleWorkloadPanel = toggleWorkloadPanel;
@@ -11859,7 +11828,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeTeamManagement = closeTeamManagement;
     window.addTeamMember = addTeamMember;
     window.removeTeamMember = removeTeamMember;
-    // NEW Sprint 4.2.4: Recurring Activities functions
     window.toggleRecurringOptions = toggleRecurringOptions;
     window.updateRecurringPreview = updateRecurringPreview;
     window.showRecurringEditModal = showRecurringEditModal;
@@ -11867,11 +11835,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.editRecurringActivity = editRecurringActivity;
     window.deleteRecurringSeries = deleteRecurringSeries;
     window.editActivityFromCalendarRecurring = editActivityFromCalendarRecurring;
-    // NEW Sprint 4.2.5: Notifications & Reminders functions
     window.toggleNotificationCenter = toggleNotificationCenter;
     window.markAllNotificationsRead = markAllNotificationsRead;
     window.handleNotificationClick = handleNotificationClick;
-    // NEW Sprint 4.3: Resource Allocation functions
     window.filterResourcesByType = filterResourcesByType;
     window.filterResourcesByStatus = filterResourcesByStatus;
     window.refreshResourceAllocation = refreshResourceAllocation;
@@ -11887,7 +11853,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.confirmActivityResourceSelection = confirmActivityResourceSelection;
     window.removeActivityResource = removeActivityResource;
     window.checkResourceAvailability = checkResourceAvailability;
-    // NEW Sprint 4.4: Workflow & Dependencies functions
     window.setWorkflowMode = setWorkflowMode;
     window.autoLayoutWorkflow = autoLayoutWorkflow;
     window.calculateCriticalPath = calculateCriticalPath;
@@ -11900,14 +11865,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.removeDependency = removeDependency;
     window.editDependency = editDependency;
     window.calculateActivitySchedule = calculateActivitySchedule;
-    // NEW Sprint 4.5: Analytics functions
     window.updateAnalytics = updateAnalytics;
     window.setChartPeriod = setChartPeriod;
     window.exportAnalyticsReport = exportAnalyticsReport;
-    window.resetData = resetData;
     window.clearPCForm = clearPCForm;
     window.clearPriceListForm = clearPriceListForm;
     window.editPriceList = editPriceList;
+    
+    // Direct function exposures (to be cleaned up)
+    window.enableDragAndDrop = enableDragAndDrop;
+    window.renderResourcesList = renderResourcesList;
+    window.toggleResourceSelection = toggleResourceSelection;
+    window.updateResourceTotal = updateResourceTotal;
+    window.updateSelectionCount = updateSelectionCount;
+    window.addResourceToQuoteCategory = addResourceToQuoteCategory;
 
     // Initialize IndexedDB and load data
     console.log('🚀 Starting application initialization...');
