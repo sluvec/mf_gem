@@ -4293,6 +4293,12 @@ let db = {}; // In-memory cache for compatibility
 // IndexedDB Management
 // ========================================
 
+/**
+ * @description Generate a UUID v4 using crypto.randomUUID() or fallback method
+ * @returns {string} A valid UUID v4 string
+ * @example
+ * const id = generateUUID(); // "12345678-1234-4xxx-yxxx-123456789abc"
+ */
 function generateUUID() {
     if (crypto && crypto.randomUUID) {
         return crypto.randomUUID();
@@ -4305,6 +4311,19 @@ function generateUUID() {
     });
 }
 
+/**
+ * @description Initialize IndexedDB connection and create object stores with indexes
+ * @async
+ * @returns {Promise<IDBDatabase>} Promise that resolves to the database connection
+ * @throws {Error} If IndexedDB is not supported or connection fails
+ * @example
+ * try {
+ *   await initializeIndexedDB();
+ *   console.log('Database ready');
+ * } catch (error) {
+ *   console.error('Database initialization failed:', error);
+ * }
+ */
 async function initializeIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -4422,7 +4441,20 @@ async function saveWithRetry(storeName, data, maxRetries = CONFIG.LIMITS.MAX_RET
     }
 }
 
-// Generic CRUD operations
+// ========================================
+// Generic CRUD Operations
+// ========================================
+
+/**
+ * @description Save data to specified IndexedDB store
+ * @async
+ * @param {string} storeName - Name of the IndexedDB store
+ * @param {Object} data - Data object to save (must have 'id' property)
+ * @returns {Promise<void>} Promise that resolves when save is complete
+ * @throws {Error} If transaction fails or store doesn't exist
+ * @example
+ * await saveToStore('pcs', { id: 'pc-123', company_name: 'Acme Corp' });
+ */
 async function saveToStore(storeName, data) {
     return new Promise((resolve, reject) => {
         const transaction = dbConnection.transaction([storeName], 'readwrite');
@@ -4434,6 +4466,17 @@ async function saveToStore(storeName, data) {
     });
 }
 
+/**
+ * @description Load a single record from IndexedDB store by ID
+ * @async
+ * @param {string} storeName - Name of the IndexedDB store
+ * @param {string} id - Unique identifier for the record
+ * @returns {Promise<Object|undefined>} Promise that resolves to the record or undefined if not found
+ * @throws {Error} If transaction fails or store doesn't exist
+ * @example
+ * const pc = await loadFromStore('pcs', 'pc-123');
+ * if (pc) console.log('Found PC:', pc.company_name);
+ */
 async function loadFromStore(storeName, id) {
     return new Promise((resolve, reject) => {
         const transaction = dbConnection.transaction([storeName], 'readonly');
@@ -4445,6 +4488,16 @@ async function loadFromStore(storeName, id) {
     });
 }
 
+/**
+ * @description Load all records from an IndexedDB store
+ * @async
+ * @param {string} storeName - Name of the IndexedDB store
+ * @returns {Promise<Array>} Promise that resolves to array of all records in the store
+ * @throws {Error} If transaction fails or store doesn't exist
+ * @example
+ * const allPCs = await loadAllFromStore('pcs');
+ * console.log(`Found ${allPCs.length} PC numbers`);
+ */
 async function loadAllFromStore(storeName) {
     return new Promise((resolve, reject) => {
         const transaction = dbConnection.transaction([storeName], 'readonly');
@@ -5106,6 +5159,13 @@ async function resetData() {
 // Nawigacja i UI
 // ========================================
 
+/**
+ * @description Navigate to a specific page in the SPA, updating navigation and clearing edit states
+ * @param {string} pageId - The ID of the page element to display
+ * @example
+ * showPage('dashboard'); // Shows dashboard page and updates navigation
+ * showPage('pcnumbers'); // Shows PC Numbers page
+ */
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
@@ -5215,6 +5275,14 @@ function renderPCList() {
     });
 }
 
+/**
+ * @description Save or update a PC Number record from form data
+ * @async
+ * @throws {Error} If form validation fails or database save fails
+ * @example
+ * // Called when user clicks "Save PC Number" button
+ * await savePC(); // Validates form, saves to database, redirects to list
+ */
 async function savePC() {
     const id = document.getElementById('pc-id').value;
     const now = new Date().toISOString();
@@ -5367,6 +5435,11 @@ function viewPC(id) {
 // Oferty
 // ========================================
 
+/**
+ * @description Show the new quote creation modal with PC number selection dropdown
+ * @example
+ * showNewQuoteModal(); // Opens modal with all PC numbers for selection
+ */
 function showNewQuoteModal() {
     const pcSelect = document.getElementById('quote-modal-pc');
     pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
@@ -5534,6 +5607,12 @@ function removeLine(lineId, category) {
 }
 
 
+/**
+ * @description Calculate and update quote totals for all categories including VAT
+ * @description Updates DOM elements with calculated subtotals, VAT amount, and final total
+ * @example
+ * calculateTotal(); // Recalculates all quote totals and updates UI display
+ */
 function calculateTotal() {
     let totals = { human: 0, vehicles: 0, materials: 0, other: 0 };
     for (let cat in db.quoteItems) {
