@@ -3432,6 +3432,417 @@
                 width: 100%;
             }
         }
+        
+        /* ========================================
+           GLOBAL SEARCH SYSTEM
+           ======================================== */
+        
+        /* Search Container */
+        .global-search-container {
+            position: relative;
+            margin-right: var(--space-4);
+        }
+        
+        .global-search {
+            position: relative;
+            width: 320px;
+        }
+        
+        /* Search Input */
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-xl);
+            transition: all 0.2s ease;
+        }
+        
+        .search-input-wrapper:focus-within {
+            background: white;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+        
+        .global-search-input {
+            flex: 1;
+            padding: var(--space-3) var(--space-4);
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: var(--text-sm);
+            outline: none;
+        }
+        
+        .global-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-input-wrapper:focus-within .global-search-input {
+            color: var(--neutral-700);
+        }
+        
+        .search-input-wrapper:focus-within .global-search-input::placeholder {
+            color: var(--neutral-500);
+        }
+        
+        .search-btn {
+            padding: var(--space-2);
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+        }
+        
+        .search-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .search-input-wrapper:focus-within .search-btn {
+            color: var(--neutral-600);
+        }
+        
+        .search-input-wrapper:focus-within .search-btn:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+        }
+        
+        .search-clear {
+            padding: var(--space-1);
+            background: none;
+            border: none;
+            color: var(--neutral-500);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-right: var(--space-2);
+        }
+        
+        .search-clear:hover {
+            background: var(--neutral-200);
+            color: var(--neutral-700);
+        }
+        
+        /* Search Results Container */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            z-index: 2000;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: var(--space-2);
+        }
+        
+        .search-content {
+            padding: var(--space-4);
+        }
+        
+        /* Search Sections */
+        .search-section {
+            margin-bottom: var(--space-6);
+        }
+        
+        .search-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .search-section-title {
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--neutral-700);
+            margin: 0 0 var(--space-3) 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Recent Searches */
+        .recent-searches {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .recent-search-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--neutral-600);
+            font-size: var(--text-sm);
+        }
+        
+        .recent-search-item:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+        }
+        
+        .recent-search-icon {
+            color: var(--neutral-500);
+            font-size: 0.875rem;
+        }
+        
+        /* Search Tips */
+        .search-tips {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .search-tips li {
+            padding: var(--space-2) 0;
+            font-size: var(--text-sm);
+            color: var(--neutral-600);
+            line-height: var(--leading-relaxed);
+        }
+        
+        /* Search Results */
+        .search-category {
+            margin-bottom: var(--space-6);
+        }
+        
+        .search-category:last-child {
+            margin-bottom: 0;
+        }
+        
+        .search-category-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            color: var(--neutral-700);
+            margin: 0 0 var(--space-3) 0;
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+        
+        .search-category-count {
+            background: var(--neutral-200);
+            color: var(--neutral-600);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+        }
+        
+        .search-items {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .search-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .search-item:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .search-item-icon {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            background: var(--neutral-100);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+        
+        .search-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .search-item-title {
+            font-weight: var(--font-semibold);
+            color: var(--neutral-900);
+            margin: 0 0 var(--space-1) 0;
+            font-size: var(--text-sm);
+        }
+        
+        .search-item-subtitle {
+            color: var(--neutral-600);
+            font-size: var(--text-xs);
+            margin: 0 0 var(--space-1) 0;
+        }
+        
+        .search-item-description {
+            color: var(--neutral-500);
+            font-size: var(--text-xs);
+            line-height: var(--leading-relaxed);
+            margin: 0;
+        }
+        
+        .search-item-meta {
+            flex-shrink: 0;
+            text-align: right;
+            color: var(--neutral-500);
+            font-size: var(--text-xs);
+        }
+        
+        /* Highlighted Search Terms */
+        .search-highlight {
+            background: var(--warning-200);
+            color: var(--warning-800);
+            padding: 1px 2px;
+            border-radius: 2px;
+            font-weight: var(--font-medium);
+        }
+        
+        /* Empty Search State */
+        .search-empty {
+            text-align: center;
+            padding: var(--space-8) var(--space-4);
+        }
+        
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-4);
+            opacity: 0.5;
+        }
+        
+        .search-empty h4 {
+            margin: 0 0 var(--space-2) 0;
+            color: var(--neutral-700);
+            font-size: var(--text-lg);
+        }
+        
+        .search-empty p {
+            margin: 0 0 var(--space-4) 0;
+            color: var(--neutral-500);
+        }
+        
+        .search-suggestions {
+            text-align: left;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        .search-suggestions p {
+            margin-bottom: var(--space-2);
+            font-weight: var(--font-semibold);
+        }
+        
+        .search-suggestions ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .search-suggestions li {
+            padding: var(--space-1) 0;
+            font-size: var(--text-sm);
+            color: var(--neutral-600);
+        }
+        
+        /* Loading State */
+        .search-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-6);
+            color: var(--neutral-500);
+            font-size: var(--text-sm);
+        }
+        
+        .search-loading-dots {
+            display: flex;
+            gap: var(--space-1);
+        }
+        
+        .search-loading-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--primary-500);
+            border-radius: 50%;
+            animation: loading-dots 1.4s infinite;
+        }
+        
+        .search-loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .search-loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        /* Mobile Search Adjustments */
+        @media (max-width: 767px) {
+            .global-search-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: var(--primary-600);
+                z-index: 3000;
+                padding: var(--space-4);
+                transform: translateY(-100%);
+                transition: transform 0.3s ease;
+                display: none;
+            }
+            
+            .global-search-container.active {
+                display: block;
+                transform: translateY(0);
+            }
+            
+            .global-search {
+                width: 100%;
+            }
+            
+            .search-results {
+                position: fixed;
+                top: 80px;
+                left: var(--space-4);
+                right: var(--space-4);
+                max-height: calc(100vh - 120px);
+            }
+        }
+        
+        /* Desktop Search Positioning */
+        @media (min-width: 768px) {
+            .global-search-container {
+                margin-right: var(--space-6);
+            }
+        }
     </style>
 </head>
 <body>
@@ -3666,26 +4077,93 @@
                     </li>
                 </ul>
             </div>
-            <div class="nav-right">
-                <!-- NEW Sprint 4.2.5: Notification Bell -->
-                <div style="position: relative; margin-right: 1rem;">
+                            <div class="nav-right">
+                    <!-- Global Search -->
+                    <div class="global-search-container">
+                        <div class="global-search" id="global-search">
+                            <div class="search-input-wrapper">
+                                <input 
+                                    type="search" 
+                                    id="global-search-input"
+                                    class="global-search-input"
+                                    placeholder="Search PC Numbers, Quotes, Activities..."
+                                    aria-expanded="false"
+                                    aria-controls="search-results"
+                                    aria-label="Search across all CRM data"
+                                    autocomplete="off"
+                                    spellcheck="false">
+                                <button class="search-btn" aria-label="Search" onclick="performGlobalSearch()">
+                                    <span class="search-icon" aria-hidden="true">🔍</span>
+                                </button>
+                                <button class="search-clear" id="search-clear" aria-label="Clear search" onclick="clearGlobalSearch()" hidden>
+                                    <span aria-hidden="true">✕</span>
+                                </button>
+                            </div>
+                            
+                            <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results">
+                                <div class="search-content">
+                                    <!-- Recent Searches (shown when empty) -->
+                                    <div class="search-section" id="recent-section">
+                                        <h4 class="search-section-title">Recent Searches</h4>
+                                        <ul class="recent-searches" id="recent-searches-list">
+                                            <!-- Populated dynamically -->
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Quick Tips (shown when empty) -->
+                                    <div class="search-section" id="tips-section">
+                                        <h4 class="search-section-title">Search Tips</h4>
+                                        <ul class="search-tips">
+                                            <li>💼 <strong>PC Numbers:</strong> "PC-000123" or company name</li>
+                                            <li>💰 <strong>Quotes:</strong> Search by amount, client, or status</li>
+                                            <li>📅 <strong>Activities:</strong> Search by type, date, or description</li>
+                                            <li>🛠️ <strong>Resources:</strong> Search by name, type, or category</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Search Results (shown during search) -->
+                                    <div class="search-results-container" id="search-results-container" hidden>
+                                        <!-- Results grouped by category -->
+                                    </div>
+                                    
+                                    <!-- No Results -->
+                                    <div class="search-empty" id="search-empty" hidden>
+                                        <div class="empty-icon">🔍</div>
+                                        <h4>No results found</h4>
+                                        <p id="empty-message">Try different keywords or check your spelling</p>
+                                        <div class="search-suggestions">
+                                            <p><strong>Suggestions:</strong></p>
+                                            <ul>
+                                                <li>Use fewer words</li>
+                                                <li>Try broader terms</li>
+                                                <li>Check spelling</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW Sprint 4.2.5: Notification Bell -->
+                    <div style="position: relative; margin-right: 1rem;">
+                        <button 
+                            id="notification-bell" 
+                            class="notification-bell" 
+                            onclick="window.toggleNotificationCenter()"
+                            aria-label="Notifications"
+                            aria-describedby="notification-count">
+                            🔔
+                            <div id="notification-badge" class="notification-badge" style="display: none;" aria-live="polite">0</div>
+                        </button>
+                    </div>
                     <button 
-                        id="notification-bell" 
-                        class="notification-bell" 
-                        onclick="window.toggleNotificationCenter()"
-                        aria-label="Notifications"
-                        aria-describedby="notification-count">
-                        🔔
-                        <div id="notification-badge" class="notification-badge" style="display: none;" aria-live="polite">0</div>
+                        onclick="window.resetData()" 
+                        class="nav-btn danger"
+                        aria-label="Reset all demo data - this will delete all current data">
+                        Reset Demo Data
                     </button>
                 </div>
-                <button 
-                    onclick="window.resetData()" 
-                    class="nav-btn danger"
-                    aria-label="Reset all demo data - this will delete all current data">
-                    Reset Demo Data
-                </button>
-            </div>
         </nav>
     </header>
     
@@ -17136,6 +17614,519 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Progressive form wizard initialized');
     console.log('📝 3-step PC Number creation with live validation, auto-save, and draft restoration');
+    
+    // ========================================
+    // GLOBAL SEARCH SYSTEM
+    // ========================================
+    
+    // Global Search Manager
+    class GlobalSearchManager {
+        constructor() {
+            this.searchIndex = new Map();
+            this.recentSearches = JSON.parse(localStorage.getItem('globalSearchHistory') || '[]');
+            this.maxRecentSearches = 5;
+            this.currentQuery = '';
+            this.isOpen = false;
+            this.initializeSearch();
+        }
+        
+        initializeSearch() {
+            this.setupEventListeners();
+            this.buildSearchIndex();
+            this.showRecentSearches();
+        }
+        
+        setupEventListeners() {
+            const searchInput = document.getElementById('global-search-input');
+            const searchResults = document.getElementById('search-results');
+            const searchClear = document.getElementById('search-clear');
+            
+            if (!searchInput) return;
+            
+            let searchTimeout;
+            
+            // Input handling with debouncing
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                this.currentQuery = query;
+                
+                // Show/hide clear button
+                searchClear.hidden = !query;
+                
+                if (!query) {
+                    this.showRecentSearches();
+                } else if (query.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        this.performSearch(query);
+                    }, 300);
+                }
+            });
+            
+            // Focus handling
+            searchInput.addEventListener('focus', () => {
+                this.openSearch();
+            });
+            
+            // Keyboard navigation
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closeSearch();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.performSearch(this.currentQuery);
+                } else if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
+                    e.preventDefault();
+                    this.handleArrowNavigation(e.key);
+                }
+            });
+            
+            // Close on click outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.closest('.global-search').contains(e.target)) {
+                    this.closeSearch();
+                }
+            });
+            
+            // Clear search
+            searchClear.addEventListener('click', () => {
+                this.clearSearch();
+            });
+        }
+        
+        openSearch() {
+            if (this.isOpen) return;
+            
+            this.isOpen = true;
+            const searchResults = document.getElementById('search-results');
+            const searchInput = document.getElementById('global-search-input');
+            
+            searchResults.hidden = false;
+            searchInput.setAttribute('aria-expanded', 'true');
+            
+            if (!this.currentQuery) {
+                this.showRecentSearches();
+            }
+        }
+        
+        closeSearch() {
+            if (!this.isOpen) return;
+            
+            this.isOpen = false;
+            const searchResults = document.getElementById('search-results');
+            const searchInput = document.getElementById('global-search-input');
+            
+            searchResults.hidden = true;
+            searchInput.setAttribute('aria-expanded', 'false');
+        }
+        
+        clearSearch() {
+            const searchInput = document.getElementById('global-search-input');
+            const searchClear = document.getElementById('search-clear');
+            
+            searchInput.value = '';
+            this.currentQuery = '';
+            searchClear.hidden = true;
+            
+            this.showRecentSearches();
+            searchInput.focus();
+        }
+        
+        buildSearchIndex() {
+            this.searchIndex.clear();
+            
+            // Index PC Numbers
+            if (db.pcs) {
+                db.pcs.forEach(pc => {
+                    this.indexItem('pc', pc.id, {
+                        title: pc.pc_number,
+                        subtitle: pc.company_name,
+                        description: `${pc.project_name} • ${pc.status}`,
+                        content: `${pc.project_name} ${pc.account_manager} ${pc.client_industry} ${pc.contact_name}`,
+                        data: pc,
+                        icon: '📋'
+                    });
+                });
+            }
+            
+            // Index Quotes
+            if (db.quotes) {
+                db.quotes.forEach(quote => {
+                    const pc = db.pcs?.find(p => p.id === quote.pc_id);
+                    const value = quote.total_inc_vat ? `£${quote.total_inc_vat.toLocaleString()}` : 'No value';
+                    
+                    this.indexItem('quote', quote.id, {
+                        title: `Quote ${quote.quote_number || 'Draft'}`,
+                        subtitle: pc?.company_name || 'Unknown Company',
+                        description: `${value} • ${quote.status || 'draft'}`,
+                        content: `${quote.title} ${quote.description} ${pc?.pc_number} ${pc?.project_name}`,
+                        data: quote,
+                        icon: '💰'
+                    });
+                });
+            }
+            
+            // Index Activities
+            if (db.activities) {
+                db.activities.forEach(activity => {
+                    const pc = db.pcs?.find(p => p.id === activity.pc_id);
+                    const date = activity.start_date ? new Date(activity.start_date).toLocaleDateString() : 'No date';
+                    
+                    this.indexItem('activity', activity.id, {
+                        title: activity.title,
+                        subtitle: `${pc?.pc_number || 'No PC'} • ${activity.type}`,
+                        description: `${date} • ${activity.status}`,
+                        content: `${activity.description} ${activity.notes} ${pc?.company_name} ${activity.team_member}`,
+                        data: activity,
+                        icon: '📅'
+                    });
+                });
+            }
+            
+            // Index Resources
+            if (db.resources) {
+                db.resources.forEach(resource => {
+                    const rate = resource.daily_rate ? `£${resource.daily_rate}/day` : 'No rate';
+                    
+                    this.indexItem('resource', resource.id, {
+                        title: resource.name,
+                        subtitle: resource.category,
+                        description: `${rate} • ${resource.status}`,
+                        content: `${resource.description} ${resource.location} ${resource.specifications}`,
+                        data: resource,
+                        icon: '🛠️'
+                    });
+                });
+            }
+        }
+        
+        indexItem(type, id, item) {
+            const searchableText = `${item.title} ${item.subtitle} ${item.content}`.toLowerCase();
+            this.searchIndex.set(`${type}-${id}`, {
+                type,
+                id,
+                searchableText,
+                ...item
+            });
+        }
+        
+        performSearch(query) {
+            if (!query || query.length < 2) {
+                this.showRecentSearches();
+                return;
+            }
+            
+            this.showLoading();
+            
+            // Simulate search delay for better UX
+            setTimeout(() => {
+                const results = this.searchItems(query);
+                this.displayResults(results, query);
+                this.addToRecentSearches(query);
+            }, 150);
+        }
+        
+        searchItems(query) {
+            const normalizedQuery = query.toLowerCase();
+            const results = new Map();
+            
+            // Search through index
+            this.searchIndex.forEach((item, key) => {
+                if (item.searchableText.includes(normalizedQuery)) {
+                    if (!results.has(item.type)) {
+                        results.set(item.type, []);
+                    }
+                    
+                    // Calculate relevance score
+                    const relevance = this.calculateRelevance(item, normalizedQuery);
+                    results.get(item.type).push({ ...item, relevance });
+                }
+            });
+            
+            // Sort results by relevance within each category
+            results.forEach((items, type) => {
+                items.sort((a, b) => b.relevance - a.relevance);
+            });
+            
+            return results;
+        }
+        
+        calculateRelevance(item, query) {
+            let score = 0;
+            const title = item.title.toLowerCase();
+            const subtitle = item.subtitle.toLowerCase();
+            
+            // Exact title match gets highest score
+            if (title === query) score += 100;
+            else if (title.startsWith(query)) score += 50;
+            else if (title.includes(query)) score += 25;
+            
+            // Subtitle matches
+            if (subtitle.includes(query)) score += 15;
+            
+            // Word boundary matches
+            const words = query.split(' ');
+            words.forEach(word => {
+                if (word.length > 2) {
+                    const regex = new RegExp(`\\b${word}`, 'gi');
+                    const titleMatches = title.match(regex);
+                    if (titleMatches) score += titleMatches.length * 10;
+                    
+                    const contentMatches = item.searchableText.match(regex);
+                    if (contentMatches) score += contentMatches.length * 2;
+                }
+            });
+            
+            return score;
+        }
+        
+        showLoading() {
+            const container = document.getElementById('search-results-container');
+            const recentSection = document.getElementById('recent-section');
+            const tipsSection = document.getElementById('tips-section');
+            const emptySection = document.getElementById('search-empty');
+            
+            // Hide other sections
+            recentSection.hidden = true;
+            tipsSection.hidden = true;
+            emptySection.hidden = true;
+            container.hidden = false;
+            
+            container.innerHTML = `
+                <div class="search-loading">
+                    <div class="search-loading-dots">
+                        <div class="search-loading-dot"></div>
+                        <div class="search-loading-dot"></div>
+                        <div class="search-loading-dot"></div>
+                    </div>
+                    Searching...
+                </div>
+            `;
+        }
+        
+        displayResults(results, query) {
+            const container = document.getElementById('search-results-container');
+            const recentSection = document.getElementById('recent-section');
+            const tipsSection = document.getElementById('tips-section');
+            const emptySection = document.getElementById('search-empty');
+            
+            // Hide loading and other sections
+            recentSection.hidden = true;
+            tipsSection.hidden = true;
+            container.hidden = false;
+            
+            if (results.size === 0) {
+                this.showNoResults(query);
+                return;
+            }
+            
+            emptySection.hidden = true;
+            
+            const typeLabels = {
+                pc: 'PC Numbers',
+                quote: 'Quotes',
+                activity: 'Activities',
+                resource: 'Resources'
+            };
+            
+            container.innerHTML = Array.from(results.entries()).map(([type, items]) => `
+                <div class="search-category">
+                    <div class="search-category-title">
+                        <span>${typeLabels[type]}</span>
+                        <span class="search-category-count">${items.length}</span>
+                    </div>
+                    <ul class="search-items">
+                        ${items.slice(0, 5).map(item => `
+                            <li class="search-item" 
+                                role="option" 
+                                tabindex="0"
+                                onclick="selectSearchResult('${type}', '${item.id}')"
+                                onkeydown="handleSearchItemKeydown(event, '${type}', '${item.id}')">
+                                <div class="search-item-icon">
+                                    ${item.icon}
+                                </div>
+                                <div class="search-item-content">
+                                    <div class="search-item-title">${this.highlightQuery(item.title, query)}</div>
+                                    <div class="search-item-subtitle">${this.highlightQuery(item.subtitle, query)}</div>
+                                    <div class="search-item-description">${item.description}</div>
+                                </div>
+                                <div class="search-item-meta">
+                                    ${typeLabels[type]}
+                                </div>
+                            </li>
+                        `).join('')}
+                        ${items.length > 5 ? `
+                            <li class="search-item" onclick="showAllResults('${type}', '${query}')">
+                                <div class="search-item-content">
+                                    <div class="search-item-title">View all ${items.length} ${typeLabels[type]}</div>
+                                </div>
+                            </li>
+                        ` : ''}
+                    </ul>
+                </div>
+            `).join('');
+        }
+        
+        showNoResults(query) {
+            const container = document.getElementById('search-results-container');
+            const emptySection = document.getElementById('search-empty');
+            const emptyMessage = document.getElementById('empty-message');
+            
+            container.hidden = true;
+            emptySection.hidden = false;
+            emptyMessage.textContent = `No results found for "${query}"`;
+        }
+        
+        highlightQuery(text, query) {
+            if (!query) return text;
+            
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+        
+        showRecentSearches() {
+            const container = document.getElementById('search-results-container');
+            const recentSection = document.getElementById('recent-section');
+            const tipsSection = document.getElementById('tips-section');
+            const emptySection = document.getElementById('search-empty');
+            const recentList = document.getElementById('recent-searches-list');
+            
+            // Show initial sections
+            container.hidden = true;
+            emptySection.hidden = true;
+            recentSection.hidden = false;
+            tipsSection.hidden = false;
+            
+            if (this.recentSearches.length === 0) {
+                recentSection.hidden = true;
+            } else {
+                recentList.innerHTML = this.recentSearches.map(search => `
+                    <li class="recent-search-item" 
+                        role="option"
+                        tabindex="0"
+                        onclick="performSearchFromRecent('${search}')"
+                        onkeydown="handleRecentSearchKeydown(event, '${search}')">
+                        <span class="recent-search-icon">🔍</span>
+                        ${search}
+                    </li>
+                `).join('');
+            }
+        }
+        
+        addToRecentSearches(query) {
+            // Remove if already exists
+            this.recentSearches = this.recentSearches.filter(s => s !== query);
+            
+            // Add to beginning
+            this.recentSearches.unshift(query);
+            
+            // Limit to max
+            this.recentSearches = this.recentSearches.slice(0, this.maxRecentSearches);
+            
+            // Save to localStorage
+            localStorage.setItem('globalSearchHistory', JSON.stringify(this.recentSearches));
+        }
+        
+        handleArrowNavigation(direction) {
+            const items = document.querySelectorAll('.search-item[tabindex="0"], .recent-search-item[tabindex="0"]');
+            const currentIndex = Array.from(items).findIndex(item => item === document.activeElement);
+            
+            let nextIndex;
+            if (direction === 'ArrowDown') {
+                nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+            } else {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+            }
+            
+            if (items[nextIndex]) {
+                items[nextIndex].focus();
+            }
+        }
+    }
+    
+    // Global search instance
+    const globalSearch = new GlobalSearchManager();
+    
+    // Global functions for search interaction
+    window.performGlobalSearch = () => {
+        const query = document.getElementById('global-search-input').value.trim();
+        if (query) {
+            globalSearch.performSearch(query);
+        }
+    };
+    
+    window.clearGlobalSearch = () => {
+        globalSearch.clearSearch();
+    };
+    
+    window.selectSearchResult = (type, id) => {
+        const actions = {
+            pc: () => {
+                globalSearch.closeSearch();
+                showPage('pcnumbers');
+                setTimeout(() => viewPC(id), 100);
+            },
+            quote: () => {
+                globalSearch.closeSearch();
+                showPage('quotes');
+                setTimeout(() => viewQuote(id), 100);
+            },
+            activity: () => {
+                globalSearch.closeSearch();
+                showPage('activities');
+                setTimeout(() => viewActivity(id), 100);
+            },
+            resource: () => {
+                globalSearch.closeSearch();
+                showPage('resources');
+                setTimeout(() => viewResource(id), 100);
+            }
+        };
+        
+        if (actions[type]) {
+            actions[type]();
+        }
+    };
+    
+    window.performSearchFromRecent = (query) => {
+        const searchInput = document.getElementById('global-search-input');
+        searchInput.value = query;
+        globalSearch.currentQuery = query;
+        globalSearch.performSearch(query);
+    };
+    
+    window.handleSearchItemKeydown = (event, type, id) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectSearchResult(type, id);
+        }
+    };
+    
+    window.handleRecentSearchKeydown = (event, query) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            performSearchFromRecent(query);
+        }
+    };
+    
+    // Rebuild search index when data changes
+    CRM.EventBus.on('data:fully-loaded', () => {
+        globalSearch.buildSearchIndex();
+    });
+    
+    // Update search index on entity changes
+    ['pc:created', 'pc:updated', 'quote:created', 'quote:updated', 'activity:created', 'activity:updated', 'resource:created', 'resource:updated'].forEach(event => {
+        CRM.EventBus.on(event, () => {
+            // Debounced rebuild
+            clearTimeout(globalSearch.rebuildTimeout);
+            globalSearch.rebuildTimeout = setTimeout(() => {
+                globalSearch.buildSearchIndex();
+            }, 500);
+        });
+    });
+    
+    console.log('✅ Global search system initialized');
+    console.log('🔍 Search across PC Numbers, Quotes, Activities, and Resources with real-time results');
     
     // ========================================
     // ACCESSIBILITY & MOBILE UX ENHANCEMENTS
