@@ -17089,14 +17089,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Set active state for current page
             const pageToDropdownItem = {
                 'dashboard': null,
-                'pcnumbers': 'projects-menu .dropdown-item[onclick*="pcnumbers"]',
-                'activities': 'projects-menu .dropdown-item[onclick*="activities"]',
-                'quotes': 'sales-menu .dropdown-item[onclick*="quotes"]',
-                'pricelists': 'sales-menu .dropdown-item[onclick*="pricelists"]',
-                'resources': 'resources-menu .dropdown-item[onclick*="resources"][onclick*="\'resources\'"]',
-                'resource-allocation': 'resources-menu .dropdown-item[onclick*="resource-allocation"]',
-                'templates': 'templates-menu .dropdown-item[onclick*="templates"][onclick*="\'templates\'"]',
-                'activity-templates': 'templates-menu .dropdown-item[onclick*="activity-templates"]',
+                'pcnumbers': '#projects-menu .dropdown-item[onclick*="pcnumbers"]',
+                'activities': '#projects-menu .dropdown-item[onclick*="activities"]',
+                'quotes': '#sales-menu .dropdown-item[onclick*="quotes"]',
+                'pricelists': '#sales-menu .dropdown-item[onclick*="pricelists"]',
+                'resources': '#resources-menu .dropdown-item[onclick*="resources"]',
+                'resource-allocation': '#resources-menu .dropdown-item[onclick*="resource-allocation"]',
+                'templates': '#templates-menu .dropdown-item[onclick*="templates"]',
+                'activity-templates': '#templates-menu .dropdown-item[onclick*="activity-templates"]',
                 'analytics': '.nav-btn[onclick*="analytics"]'
             };
             
@@ -17109,7 +17109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 const selector = pageToDropdownItem[pageId];
                 if (selector) {
-                    const element = document.querySelector(`#${selector}`);
+                    const element = document.querySelector(selector);
                     if (element) {
                         element.classList.add('active');
                         element.setAttribute('aria-current', 'page');
@@ -18144,6 +18144,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeMobileNavigation() {
         const mobileToggle = document.getElementById('mobile-menu-toggle');
         const navMenu = document.getElementById('main-navigation');
+        
+        // Initialize navigation accessibility state
+        if (navMenu) {
+            // For desktop, navigation should always be visible
+            navMenu.setAttribute('aria-hidden', 'false');
+            
+            // Reset navigation state on window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    // Desktop mode - ensure navigation is accessible
+                    navMenu.setAttribute('aria-hidden', 'false');
+                    navMenu.classList.remove('active');
+                    if (mobileToggle) {
+                        mobileToggle.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        }
         
         if (mobileToggle && navMenu) {
             mobileToggle.addEventListener('click', () => {
