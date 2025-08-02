@@ -12913,6 +12913,725 @@ const CRM = {
     },
 
     /**
+     * @namespace CRM.CodeQuality
+     * @description Static analysis and code quality validation system for maintaining high code standards
+     * @example
+     * // Run full code quality analysis
+     * const report = await CRM.CodeQuality.analyzeCodebase();
+     * 
+     * // Check specific aspects
+     * const complexity = CRM.CodeQuality.analyzeFunctionComplexity();
+     * const duplicates = CRM.CodeQuality.detectCodeDuplication();
+     * const naming = CRM.CodeQuality.validateNamingConventions();
+     * const docs = CRM.CodeQuality.checkDocumentationCoverage();
+     * const security = CRM.CodeQuality.scanSecurityVulnerabilities();
+     * 
+     * // Generate quality score
+     * const score = CRM.CodeQuality.calculateQualityScore();
+     */
+    CodeQuality: {
+        // Quality metrics storage
+        _metrics: {
+            complexity: {},
+            duplication: {},
+            naming: {},
+            documentation: {},
+            security: {},
+            overallScore: 0
+        },
+
+        // Quality thresholds and standards
+        standards: {
+            maxFunctionComplexity: 10,
+            maxFunctionLength: 50,
+            minDocumentationCoverage: 80,
+            maxCodeDuplication: 5,
+            requiredNamingPatterns: {
+                functions: /^[a-z][a-zA-Z0-9]*$/,
+                constants: /^[A-Z][A-Z0-9_]*$/,
+                classes: /^[A-Z][a-zA-Z0-9]*$/,
+                variables: /^[a-z][a-zA-Z0-9]*$/
+            }
+        },
+
+        /**
+         * Analyze function complexity (cyclomatic complexity approximation)
+         * @returns {Object} Complexity analysis results
+         */
+        analyzeFunctionComplexity() {
+            console.log('🔍 Analyzing function complexity...');
+            const results = {
+                functions: [],
+                violations: [],
+                averageComplexity: 0,
+                maxComplexity: 0
+            };
+
+            try {
+                // Get all function definitions from the current script
+                const scriptContent = document.documentElement.outerHTML;
+                const functionRegex = /(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?(?:function|\(.*?\)\s*=>))\s*\([^)]*\)\s*\{/g;
+                
+                let match;
+                while ((match = functionRegex.exec(scriptContent)) !== null) {
+                    const functionName = match[1] || match[2];
+                    if (!functionName) continue;
+
+                    // Find function body and analyze complexity
+                    const functionStartIndex = match.index;
+                    const functionBody = this.extractFunctionBody(scriptContent, functionStartIndex);
+                    const complexity = this.calculateCyclomaticComplexity(functionBody);
+                    const lineCount = functionBody.split('\n').length;
+
+                    const analysis = {
+                        name: functionName,
+                        complexity,
+                        lineCount,
+                        startIndex: functionStartIndex,
+                        violatesComplexity: complexity > this.standards.maxFunctionComplexity,
+                        violatesLength: lineCount > this.standards.maxFunctionLength
+                    };
+
+                    results.functions.push(analysis);
+
+                    if (analysis.violatesComplexity || analysis.violatesLength) {
+                        results.violations.push({
+                            function: functionName,
+                            issues: [
+                                ...(analysis.violatesComplexity ? [`High complexity: ${complexity} (max: ${this.standards.maxFunctionComplexity})`] : []),
+                                ...(analysis.violatesLength ? [`Long function: ${lineCount} lines (max: ${this.standards.maxFunctionLength})`] : [])
+                            ]
+                        });
+                    }
+
+                    results.maxComplexity = Math.max(results.maxComplexity, complexity);
+                }
+
+                results.averageComplexity = results.functions.length > 0 
+                    ? (results.functions.reduce((sum, f) => sum + f.complexity, 0) / results.functions.length).toFixed(2)
+                    : 0;
+
+                this._metrics.complexity = results;
+
+                console.log(`📊 Complexity Analysis Complete:`);
+                console.log(`  Functions analyzed: ${results.functions.length}`);
+                console.log(`  Average complexity: ${results.averageComplexity}`);
+                console.log(`  Max complexity: ${results.maxComplexity}`);
+                console.log(`  Violations: ${results.violations.length}`);
+
+                return results;
+            } catch (error) {
+                console.error('❌ Error in complexity analysis:', error);
+                return results;
+            }
+        },
+
+        /**
+         * Extract function body from script content
+         * @param {string} content - Script content
+         * @param {number} startIndex - Function start index
+         * @returns {string} Function body
+         */
+        extractFunctionBody(content, startIndex) {
+            let braceCount = 0;
+            let i = startIndex;
+            let functionStart = -1;
+            
+            // Find opening brace
+            while (i < content.length) {
+                if (content[i] === '{') {
+                    if (functionStart === -1) functionStart = i;
+                    braceCount++;
+                } else if (content[i] === '}') {
+                    braceCount--;
+                    if (braceCount === 0) {
+                        return content.substring(functionStart + 1, i);
+                    }
+                }
+                i++;
+            }
+            
+            return content.substring(functionStart + 1, Math.min(i, startIndex + 2000)); // Limit to prevent infinite parsing
+        },
+
+        /**
+         * Calculate approximate cyclomatic complexity
+         * @param {string} functionBody - Function body code
+         * @returns {number} Complexity score
+         */
+        calculateCyclomaticComplexity(functionBody) {
+            // Base complexity is 1
+            let complexity = 1;
+            
+            // Count decision points that increase complexity
+            const complexityPatterns = [
+                /\bif\s*\(/g,           // if statements
+                /\belse\s+if\b/g,       // else if statements
+                /\bwhile\s*\(/g,        // while loops
+                /\bfor\s*\(/g,          // for loops
+                /\bdo\s*\{/g,           // do-while loops
+                /\bswitch\s*\(/g,       // switch statements
+                /\bcase\s+/g,           // case statements
+                /\bcatch\s*\(/g,        // catch blocks
+                /\?\s*.*?\s*:/g,        // ternary operators
+                /&&/g,                  // logical AND
+                /\|\|/g                 // logical OR
+            ];
+
+            complexityPatterns.forEach(pattern => {
+                const matches = functionBody.match(pattern);
+                if (matches) {
+                    complexity += matches.length;
+                }
+            });
+
+            return complexity;
+        },
+
+        /**
+         * Detect code duplication patterns
+         * @returns {Object} Duplication analysis results
+         */
+        detectCodeDuplication() {
+            console.log('🔍 Detecting code duplication...');
+            const results = {
+                duplicates: [],
+                duplicatedLines: 0,
+                totalLines: 0,
+                duplicationPercentage: 0
+            };
+
+            try {
+                const scriptContent = document.documentElement.outerHTML;
+                const lines = scriptContent.split('\n');
+                results.totalLines = lines.length;
+
+                // Analyze code blocks for duplication (minimum 3 lines)
+                const codeBlocks = this.extractCodeBlocks(lines);
+                const duplicateGroups = this.findDuplicateBlocks(codeBlocks);
+
+                duplicateGroups.forEach(group => {
+                    if (group.blocks.length > 1) {
+                        results.duplicates.push({
+                            pattern: group.pattern,
+                            locations: group.blocks.map(block => ({
+                                startLine: block.startLine,
+                                endLine: block.endLine,
+                                lineCount: block.lines.length
+                            })),
+                            duplicateCount: group.blocks.length,
+                            linesPerDuplicate: group.blocks[0].lines.length
+                        });
+
+                        results.duplicatedLines += group.blocks[0].lines.length * (group.blocks.length - 1);
+                    }
+                });
+
+                results.duplicationPercentage = results.totalLines > 0 
+                    ? ((results.duplicatedLines / results.totalLines) * 100).toFixed(2)
+                    : 0;
+
+                this._metrics.duplication = results;
+
+                console.log(`📊 Duplication Analysis Complete:`);
+                console.log(`  Total lines: ${results.totalLines}`);
+                console.log(`  Duplicated lines: ${results.duplicatedLines}`);
+                console.log(`  Duplication percentage: ${results.duplicationPercentage}%`);
+                console.log(`  Duplicate patterns found: ${results.duplicates.length}`);
+
+                return results;
+            } catch (error) {
+                console.error('❌ Error in duplication analysis:', error);
+                return results;
+            }
+        },
+
+        /**
+         * Extract meaningful code blocks for duplication analysis
+         * @param {string[]} lines - Source code lines
+         * @returns {Array} Code blocks
+         */
+        extractCodeBlocks(lines) {
+            const blocks = [];
+            const minBlockSize = 3;
+            
+            for (let i = 0; i <= lines.length - minBlockSize; i++) {
+                const block = {
+                    startLine: i + 1,
+                    endLine: i + minBlockSize,
+                    lines: lines.slice(i, i + minBlockSize)
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0 && !line.startsWith('//') && !line.startsWith('*'))
+                };
+                
+                if (block.lines.length >= minBlockSize) {
+                    blocks.push(block);
+                }
+            }
+            
+            return blocks;
+        },
+
+        /**
+         * Find duplicate code blocks
+         * @param {Array} blocks - Code blocks to analyze
+         * @returns {Array} Groups of duplicate blocks
+         */
+        findDuplicateBlocks(blocks) {
+            const groups = [];
+            const processed = new Set();
+
+            blocks.forEach((block, index) => {
+                if (processed.has(index)) return;
+
+                const pattern = block.lines.join('\n');
+                const duplicates = [block];
+
+                blocks.slice(index + 1).forEach((otherBlock, otherIndex) => {
+                    const otherPattern = otherBlock.lines.join('\n');
+                    if (pattern === otherPattern && !processed.has(index + 1 + otherIndex)) {
+                        duplicates.push(otherBlock);
+                        processed.add(index + 1 + otherIndex);
+                    }
+                });
+
+                if (duplicates.length > 1) {
+                    groups.push({
+                        pattern,
+                        blocks: duplicates
+                    });
+                }
+
+                processed.add(index);
+            });
+
+            return groups;
+        },
+
+        /**
+         * Validate naming conventions across the codebase
+         * @returns {Object} Naming validation results
+         */
+        validateNamingConventions() {
+            console.log('🔍 Validating naming conventions...');
+            const results = {
+                functions: { valid: [], invalid: [] },
+                variables: { valid: [], invalid: [] },
+                constants: { valid: [], invalid: [] },
+                violations: [],
+                compliancePercentage: 0
+            };
+
+            try {
+                const scriptContent = document.documentElement.outerHTML;
+
+                // Analyze function names
+                const functionMatches = scriptContent.matchAll(/(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?(?:function|\())/g);
+                for (const match of functionMatches) {
+                    const functionName = match[1] || match[2];
+                    if (functionName && !functionName.startsWith('_')) {
+                        if (this.standards.requiredNamingPatterns.functions.test(functionName)) {
+                            results.functions.valid.push(functionName);
+                        } else {
+                            results.functions.invalid.push(functionName);
+                            results.violations.push({
+                                type: 'function',
+                                name: functionName,
+                                issue: 'Should use camelCase pattern (e.g., myFunction)'
+                            });
+                        }
+                    }
+                }
+
+                // Analyze variable/constant names
+                const variableMatches = scriptContent.matchAll(/(?:const|let|var)\s+([A-Z_][A-Z0-9_]*|[a-z][a-zA-Z0-9]*)\s*=/g);
+                for (const match of variableMatches) {
+                    const varName = match[1];
+                    if (varName) {
+                        // Check if it's a constant (all caps)
+                        if (/^[A-Z][A-Z0-9_]*$/.test(varName)) {
+                            if (this.standards.requiredNamingPatterns.constants.test(varName)) {
+                                results.constants.valid.push(varName);
+                            } else {
+                                results.constants.invalid.push(varName);
+                                results.violations.push({
+                                    type: 'constant',
+                                    name: varName,
+                                    issue: 'Should use UPPER_SNAKE_CASE pattern (e.g., MY_CONSTANT)'
+                                });
+                            }
+                        } else {
+                            // Regular variable
+                            if (this.standards.requiredNamingPatterns.variables.test(varName)) {
+                                results.variables.valid.push(varName);
+                            } else {
+                                results.variables.invalid.push(varName);
+                                results.violations.push({
+                                    type: 'variable',
+                                    name: varName,
+                                    issue: 'Should use camelCase pattern (e.g., myVariable)'
+                                });
+                            }
+                        }
+                    }
+                }
+
+                // Calculate compliance
+                const totalItems = results.functions.valid.length + results.functions.invalid.length +
+                                 results.variables.valid.length + results.variables.invalid.length +
+                                 results.constants.valid.length + results.constants.invalid.length;
+                
+                const validItems = results.functions.valid.length + results.variables.valid.length + results.constants.valid.length;
+                
+                results.compliancePercentage = totalItems > 0 ? ((validItems / totalItems) * 100).toFixed(2) : 100;
+
+                this._metrics.naming = results;
+
+                console.log(`📊 Naming Convention Analysis Complete:`);
+                console.log(`  Functions: ${results.functions.valid.length} valid, ${results.functions.invalid.length} invalid`);
+                console.log(`  Variables: ${results.variables.valid.length} valid, ${results.variables.invalid.length} invalid`);
+                console.log(`  Constants: ${results.constants.valid.length} valid, ${results.constants.invalid.length} invalid`);
+                console.log(`  Compliance: ${results.compliancePercentage}%`);
+
+                return results;
+            } catch (error) {
+                console.error('❌ Error in naming convention analysis:', error);
+                return results;
+            }
+        },
+
+        /**
+         * Check documentation coverage (JSDoc comments)
+         * @returns {Object} Documentation coverage results
+         */
+        checkDocumentationCoverage() {
+            console.log('🔍 Checking documentation coverage...');
+            const results = {
+                functions: { documented: [], undocumented: [] },
+                coverage: 0,
+                missingDocs: [],
+                qualityScore: 0
+            };
+
+            try {
+                const scriptContent = document.documentElement.outerHTML;
+
+                // Find all function definitions
+                const functionMatches = [...scriptContent.matchAll(/(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?(?:function|\())/g)];
+                
+                functionMatches.forEach(match => {
+                    const functionName = match[1] || match[2];
+                    if (!functionName || functionName.startsWith('_')) return;
+
+                    const functionIndex = match.index;
+                    const beforeFunction = scriptContent.substring(Math.max(0, functionIndex - 500), functionIndex);
+                    
+                    // Check for JSDoc comment before function
+                    const hasJSDoc = /\/\*\*[\s\S]*?\*\/\s*$/.test(beforeFunction);
+                    
+                    if (hasJSDoc) {
+                        results.functions.documented.push(functionName);
+                    } else {
+                        results.functions.undocumented.push(functionName);
+                        results.missingDocs.push({
+                            function: functionName,
+                            issue: 'Missing JSDoc documentation'
+                        });
+                    }
+                });
+
+                const totalFunctions = results.functions.documented.length + results.functions.undocumented.length;
+                results.coverage = totalFunctions > 0 
+                    ? ((results.functions.documented.length / totalFunctions) * 100).toFixed(2)
+                    : 100;
+
+                // Calculate quality score based on coverage
+                results.qualityScore = Math.min(100, Math.max(0, results.coverage));
+
+                this._metrics.documentation = results;
+
+                console.log(`📊 Documentation Coverage Analysis Complete:`);
+                console.log(`  Total functions: ${totalFunctions}`);
+                console.log(`  Documented: ${results.functions.documented.length}`);
+                console.log(`  Undocumented: ${results.functions.undocumented.length}`);
+                console.log(`  Coverage: ${results.coverage}%`);
+
+                return results;
+            } catch (error) {
+                console.error('❌ Error in documentation analysis:', error);
+                return results;
+            }
+        },
+
+        /**
+         * Scan for common security vulnerabilities
+         * @returns {Object} Security analysis results
+         */
+        scanSecurityVulnerabilities() {
+            console.log('🔍 Scanning for security vulnerabilities...');
+            const results = {
+                vulnerabilities: [],
+                riskLevel: 'LOW',
+                recommendations: []
+            };
+
+            try {
+                const scriptContent = document.documentElement.outerHTML;
+
+                // Common security anti-patterns
+                const securityChecks = [
+                    {
+                        pattern: /innerHTML\s*=\s*[^;]*\+/g,
+                        risk: 'HIGH',
+                        issue: 'Potential XSS vulnerability with innerHTML concatenation',
+                        recommendation: 'Use textContent or properly sanitize HTML'
+                    },
+                    {
+                        pattern: /eval\s*\(/g,
+                        risk: 'CRITICAL',
+                        issue: 'Use of eval() function',
+                        recommendation: 'Avoid eval() - use JSON.parse() or other safe alternatives'
+                    },
+                    {
+                        pattern: /document\.write\s*\(/g,
+                        risk: 'MEDIUM',
+                        issue: 'Use of document.write()',
+                        recommendation: 'Use modern DOM manipulation methods'
+                    },
+                    {
+                        pattern: /localStorage\.setItem\s*\([^,]*,\s*[^)]*password[^)]*\)/gi,
+                        risk: 'HIGH',
+                        issue: 'Storing password in localStorage',
+                        recommendation: 'Never store passwords in localStorage'
+                    },
+                    {
+                        pattern: /console\.log\s*\([^)]*password[^)]*\)/gi,
+                        risk: 'MEDIUM',
+                        issue: 'Logging sensitive information',
+                        recommendation: 'Remove console.log statements with sensitive data'
+                    }
+                ];
+
+                securityChecks.forEach(check => {
+                    const matches = scriptContent.match(check.pattern);
+                    if (matches) {
+                        matches.forEach(match => {
+                            results.vulnerabilities.push({
+                                type: check.issue,
+                                risk: check.risk,
+                                recommendation: check.recommendation,
+                                pattern: match,
+                                count: matches.length
+                            });
+                        });
+                    }
+                });
+
+                // Determine overall risk level
+                if (results.vulnerabilities.some(v => v.risk === 'CRITICAL')) {
+                    results.riskLevel = 'CRITICAL';
+                } else if (results.vulnerabilities.some(v => v.risk === 'HIGH')) {
+                    results.riskLevel = 'HIGH';
+                } else if (results.vulnerabilities.some(v => v.risk === 'MEDIUM')) {
+                    results.riskLevel = 'MEDIUM';
+                } else {
+                    results.riskLevel = 'LOW';
+                }
+
+                // Generate recommendations
+                results.recommendations = [
+                    'Implement Content Security Policy (CSP) headers',
+                    'Validate and sanitize all user inputs',
+                    'Use HTTPS for all communications',
+                    'Implement proper authentication and authorization',
+                    'Regularly update dependencies and libraries'
+                ];
+
+                this._metrics.security = results;
+
+                console.log(`📊 Security Analysis Complete:`);
+                console.log(`  Vulnerabilities found: ${results.vulnerabilities.length}`);
+                console.log(`  Risk level: ${results.riskLevel}`);
+
+                return results;
+            } catch (error) {
+                console.error('❌ Error in security analysis:', error);
+                return results;
+            }
+        },
+
+        /**
+         * Calculate overall code quality score
+         * @returns {Object} Quality score and breakdown
+         */
+        calculateQualityScore() {
+            const complexity = this._metrics.complexity;
+            const duplication = this._metrics.duplication;
+            const naming = this._metrics.naming;
+            const documentation = this._metrics.documentation;
+            const security = this._metrics.security;
+
+            // Calculate component scores (0-100)
+            const complexityScore = complexity.violations ? 
+                Math.max(0, 100 - (complexity.violations.length * 10)) : 100;
+            
+            const duplicationScore = duplication.duplicationPercentage ? 
+                Math.max(0, 100 - (parseFloat(duplication.duplicationPercentage) * 2)) : 100;
+            
+            const namingScore = parseFloat(naming.compliancePercentage) || 100;
+            
+            const documentationScore = parseFloat(documentation.coverage) || 0;
+            
+            const securityScore = security.riskLevel === 'CRITICAL' ? 0 :
+                                security.riskLevel === 'HIGH' ? 25 :
+                                security.riskLevel === 'MEDIUM' ? 50 : 100;
+
+            // Weighted overall score
+            const weights = {
+                complexity: 0.25,
+                duplication: 0.15,
+                naming: 0.20,
+                documentation: 0.25,
+                security: 0.15
+            };
+
+            const overallScore = (
+                complexityScore * weights.complexity +
+                duplicationScore * weights.duplication +
+                namingScore * weights.naming +
+                documentationScore * weights.documentation +
+                securityScore * weights.security
+            ).toFixed(1);
+
+            const breakdown = {
+                overall: parseFloat(overallScore),
+                components: {
+                    complexity: complexityScore,
+                    duplication: duplicationScore,
+                    naming: namingScore,
+                    documentation: documentationScore,
+                    security: securityScore
+                },
+                grade: this.getGrade(overallScore),
+                recommendations: this.getRecommendations()
+            };
+
+            this._metrics.overallScore = breakdown;
+
+            return breakdown;
+        },
+
+        /**
+         * Get letter grade based on score
+         * @param {number} score - Quality score
+         * @returns {string} Letter grade
+         */
+        getGrade(score) {
+            if (score >= 90) return 'A';
+            if (score >= 80) return 'B';
+            if (score >= 70) return 'C';
+            if (score >= 60) return 'D';
+            return 'F';
+        },
+
+        /**
+         * Get improvement recommendations
+         * @returns {Array} List of recommendations
+         */
+        getRecommendations() {
+            const recommendations = [];
+            
+            if (this._metrics.complexity.violations?.length > 0) {
+                recommendations.push('Reduce function complexity by breaking down large functions');
+            }
+            
+            if (parseFloat(this._metrics.duplication.duplicationPercentage) > 5) {
+                recommendations.push('Eliminate code duplication by extracting common functionality');
+            }
+            
+            if (parseFloat(this._metrics.naming.compliancePercentage) < 90) {
+                recommendations.push('Improve naming conventions to follow camelCase/UPPER_SNAKE_CASE standards');
+            }
+            
+            if (parseFloat(this._metrics.documentation.coverage) < 80) {
+                recommendations.push('Add JSDoc documentation to improve code maintainability');
+            }
+            
+            if (this._metrics.security.vulnerabilities?.length > 0) {
+                recommendations.push('Address security vulnerabilities to improve application safety');
+            }
+
+            return recommendations;
+        },
+
+        /**
+         * Run comprehensive codebase analysis
+         * @returns {Promise<Object>} Complete analysis results
+         */
+        async analyzeCodebase() {
+            console.log('🚀 Starting comprehensive code quality analysis...');
+            const startTime = performance.now();
+
+            try {
+                // Run all analyses
+                const complexity = this.analyzeFunctionComplexity();
+                await new Promise(resolve => setTimeout(resolve, 100)); // Brief pause for UI
+
+                const duplication = this.detectCodeDuplication();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const naming = this.validateNamingConventions();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const documentation = this.checkDocumentationCoverage();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const security = this.scanSecurityVulnerabilities();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const qualityScore = this.calculateQualityScore();
+
+                const duration = performance.now() - startTime;
+
+                const report = {
+                    timestamp: new Date().toISOString(),
+                    duration: duration.toFixed(2),
+                    complexity,
+                    duplication,
+                    naming,
+                    documentation,
+                    security,
+                    qualityScore
+                };
+
+                // Generate summary report
+                console.log('\n📋 CODE QUALITY ANALYSIS REPORT');
+                console.log('═'.repeat(50));
+                console.log(`🏆 Overall Score: ${qualityScore.overall}/100 (Grade: ${qualityScore.grade})`);
+                console.log(`⏱️ Analysis Duration: ${duration.toFixed(2)}ms`);
+                console.log('\n📊 Component Scores:');
+                console.log(`  🔧 Complexity: ${qualityScore.components.complexity}/100`);
+                console.log(`  📋 Duplication: ${qualityScore.components.duplication}/100`);
+                console.log(`  🏷️ Naming: ${qualityScore.components.naming}/100`);
+                console.log(`  📚 Documentation: ${qualityScore.components.documentation}/100`);
+                console.log(`  🔒 Security: ${qualityScore.components.security}/100`);
+
+                if (qualityScore.recommendations.length > 0) {
+                    console.log('\n💡 Recommendations:');
+                    qualityScore.recommendations.forEach((rec, i) => {
+                        console.log(`  ${i + 1}. ${rec}`);
+                    });
+                }
+
+                return report;
+            } catch (error) {
+                console.error('❌ Error in codebase analysis:', error);
+                throw error;
+            }
+        }
+    },
+
+    /**
      * @namespace CRM.Navigation
      * @description Page navigation and UI routing
      */
@@ -13105,6 +13824,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Testing Framework - expose for quality assurance and development
     window.Testing = CRM.Testing;
+    
+    // Code Quality - expose for static analysis and quality validation
+    window.CodeQuality = CRM.CodeQuality;
     
     // PC Numbers Module
     window.savePC = CRM.PCNumbers.save;
@@ -13439,6 +14161,53 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Testing Framework initialized');
     console.log('💡 Run tests with: runTests() or individual suites with testDAL(), testEvents(), etc.');
+
+    // ========================================
+    // CODE QUALITY SYSTEM SETUP
+    // ========================================
+    console.log('🔍 Setting up Code Quality Analysis...');
+    
+    // Development helper function for code quality analysis
+    window.analyzeCode = async () => {
+        console.log('\n🔍 RUNNING COMPREHENSIVE CODE QUALITY ANALYSIS...');
+        console.log('══════════════════════════════════════════════════════');
+        
+        const report = await CRM.CodeQuality.analyzeCodebase();
+        
+        // Additional quality insights
+        console.log('\n📈 QUALITY INSIGHTS:');
+        if (report.qualityScore.grade === 'A') {
+            console.log('🏆 Excellent code quality! Keep up the great work!');
+        } else if (report.qualityScore.grade === 'B') {
+            console.log('👍 Good code quality with room for improvement');
+        } else if (report.qualityScore.grade === 'C') {
+            console.log('⚠️ Average code quality - consider refactoring priorities');
+        } else {
+            console.log('🚨 Code quality needs immediate attention');
+        }
+        
+        // Quality commands
+        console.log('\n⚡ QUALITY ANALYSIS COMMANDS:');
+        console.log('  CRM.CodeQuality.analyzeFunctionComplexity() - Check function complexity');
+        console.log('  CRM.CodeQuality.detectCodeDuplication() - Find duplicate code');
+        console.log('  CRM.CodeQuality.validateNamingConventions() - Check naming standards');
+        console.log('  CRM.CodeQuality.checkDocumentationCoverage() - Verify JSDoc coverage');
+        console.log('  CRM.CodeQuality.scanSecurityVulnerabilities() - Security audit');
+        console.log('  CRM.CodeQuality.calculateQualityScore() - Overall quality metrics');
+        
+        return report;
+    };
+    
+    // Quality analysis shortcuts
+    window.checkComplexity = () => CRM.CodeQuality.analyzeFunctionComplexity();
+    window.findDuplicates = () => CRM.CodeQuality.detectCodeDuplication();
+    window.checkNaming = () => CRM.CodeQuality.validateNamingConventions();
+    window.checkDocs = () => CRM.CodeQuality.checkDocumentationCoverage();
+    window.scanSecurity = () => CRM.CodeQuality.scanSecurityVulnerabilities();
+    window.qualityScore = () => CRM.CodeQuality.calculateQualityScore();
+    
+    console.log('✅ Code Quality System initialized');
+    console.log('🔍 Analyze code quality with: analyzeCode() or individual checks with checkComplexity(), findDuplicates(), etc.');
 
     // Initialize IndexedDB and load data
     console.log('🚀 Starting application initialization...');
