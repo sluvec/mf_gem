@@ -4152,24 +4152,142 @@ Next steps:
 // CRM Demo - Portable Version with IndexedDB
 // =================================================================
 
-// Global database connection
+/**
+ * @fileoverview CRM System Configuration & Core Setup
+ * @version 2.0.0
+ * @author MF CRM Team
+ */
+
+// ========================================
+// GLOBAL CONFIGURATION
+// ========================================
+
+/**
+ * @namespace CONFIG
+ * @description Centralized configuration for the entire CRM system
+ */
+const CONFIG = {
+    // Database Configuration
+    DATABASE: {
+        NAME: 'MF_CRM_Database',
+        VERSION: 3, // Incremented for activity templates store
+        STORES: {
+            PCS: 'pcs',
+            QUOTES: 'quotes', 
+            ACTIVITIES: 'activities',
+            RESOURCES: 'resources',
+            PRICE_LISTS: 'price_lists',
+            TEMPLATES: 'templates',
+            ACTIVITY_TEMPLATES: 'activity_templates'
+        }
+    },
+
+    // Business Rules & Defaults
+    BUSINESS: {
+        DEFAULT_VAT_RATE: 20.0,
+        DEFAULT_MARKUP_PERCENTAGE: 35.00,
+        DEFAULT_QUOTE_VALIDITY_DAYS: 30,
+        DEFAULT_QUOTE_LIMIT: 5,
+        MAX_RECURRING_OCCURRENCES: 365,
+        DEFAULT_ACTIVITY_TIME: '9:00 AM',
+        DEFAULT_TERMS: 'Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.'
+    },
+
+    // UI Configuration
+    UI: {
+        CALENDAR: {
+            DEFAULT_VIEW: 'month', // 'month' or 'week'
+            DEFAULT_ACTIVITIES_VIEW: 'list', // 'list' or 'calendar'
+        },
+        ANALYTICS: {
+            DEFAULT_PERIOD_DAYS: 30,
+            DEFAULT_CHART_PERIOD: 'month'
+        },
+        NOTIFICATION: {
+            DEFAULT_ICON: '🔔',
+            ICONS: {
+                'activity': '📋',
+                'quote': '💰',
+                'deadline': '⏰',
+                'reminder': '🔔',
+                'warning': '⚠️',
+                'success': '✅',
+                'error': '❌',
+                'overdue': '⏰',
+                'due_today': '📅',
+                'due_tomorrow': '📋',
+                'overloaded': '⚠️',
+                'unassigned_urgent': '🚨',
+                'default': '🔔'
+            }
+        }
+    },
+
+    // Default Team Members
+    TEAM: {
+        DEFAULT_MEMBERS: [
+            {
+                id: 'tm1',
+                name: 'John Smith',
+                role: 'Senior Engineer',
+                email: 'john.smith@company.com',
+                max_hours: 40,
+                color: '#3b82f6'
+            },
+            {
+                id: 'tm2',
+                name: 'Sarah Johnson',
+                role: 'Project Manager',
+                email: 'sarah.johnson@company.com',
+                max_hours: 40,
+                color: '#10b981'
+            },
+            {
+                id: 'tm3',
+                name: 'Mike Brown',
+                role: 'Technician',
+                email: 'mike.brown@company.com',
+                max_hours: 35,
+                color: '#f59e0b'
+            }
+        ],
+        DEFAULT_FILTER: 'all'
+    },
+
+    // Workflow & Dependencies
+    WORKFLOW: {
+        DEFAULT_MODE: 'view', // 'view', 'edit', 'connect'
+        DEFAULT_DEPENDENCY_TYPE: 'predecessor',
+        DEPENDENCY_TYPES: {
+            FINISH_TO_START: 'finish-to-start',
+            START_TO_START: 'start-to-start',
+            FINISH_TO_FINISH: 'finish-to-finish'
+        }
+    },
+
+    // System Limits & Validation
+    LIMITS: {
+        MAX_RETRY_ATTEMPTS: 3,
+        RETRY_DELAY_MS: 1000,
+        MAX_FILE_SIZE_MB: 10,
+        MAX_DESCRIPTION_LENGTH: 1000
+    }
+};
+
+// Legacy constants for backward compatibility
+const DB_NAME = CONFIG.DATABASE.NAME;
+const DB_VERSION = CONFIG.DATABASE.VERSION;
+const STORES = CONFIG.DATABASE.STORES;
+
+// ========================================
+// GLOBAL STATE
+// ========================================
+
+/**
+ * @description Global database connection and state management
+ */
 let dbConnection = null;
 let db = {}; // In-memory cache for compatibility
-
-// IndexedDB configuration
-const DB_NAME = 'MF_CRM_Database';
-const DB_VERSION = 3; // NEW Sprint 4.1: Incremented for activity templates store
-
-// Store names
-const STORES = {
-    PCS: 'pcs',
-    QUOTES: 'quotes', 
-    ACTIVITIES: 'activities',
-    RESOURCES: 'resources',
-    PRICE_LISTS: 'price_lists',
-    TEMPLATES: 'templates', // Sprint 3.3: Quote templates
-    ACTIVITY_TEMPLATES: 'activity_templates' // NEW Sprint 4.1: Activity templates
-};
 
 // ========================================
 // IndexedDB Management
@@ -4278,8 +4396,15 @@ async function initializeIndexedDB() {
     });
 }
 
-// Enhanced error handling with retry logic
-async function saveWithRetry(storeName, data, maxRetries = 3, delay = 1000) {
+/**
+ * @description Enhanced error handling with retry logic
+ * @param {string} storeName - IndexedDB store name
+ * @param {Object} data - Data to save
+ * @param {number} maxRetries - Maximum retry attempts (defaults to CONFIG)
+ * @param {number} delay - Delay between retries in ms (defaults to CONFIG)
+ * @returns {Promise<void>}
+ */
+async function saveWithRetry(storeName, data, maxRetries = CONFIG.LIMITS.MAX_RETRY_ATTEMPTS, delay = CONFIG.LIMITS.RETRY_DELAY_MS) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             await saveToStore(storeName, data);
@@ -5103,7 +5228,7 @@ async function savePC() {
         // NEW FIELDS according to system_improvements.md:
         client_industry: document.getElementById('pc-client-industry').value,
         client_source: document.getElementById('pc-client-source').value,
-        quote_limit: parseInt(document.getElementById('pc-quote-limit').value) || 5,
+        quote_limit: parseInt(document.getElementById('pc-quote-limit').value) || CONFIG.BUSINESS.DEFAULT_QUOTE_LIMIT,
         status: document.getElementById('pc-status').value,
         
         // SIMPLIFIED CONTACT FIELDS:
@@ -5174,7 +5299,7 @@ function editPC(id) {
     // NEW FIELDS:
     document.getElementById('pc-client-industry').value = pc.client_industry || '';
     document.getElementById('pc-client-source').value = pc.client_source || '';
-    document.getElementById('pc-quote-limit').value = pc.quote_limit || 5;
+    document.getElementById('pc-quote-limit').value = pc.quote_limit || CONFIG.BUSINESS.DEFAULT_QUOTE_LIMIT;
     document.getElementById('pc-status').value = pc.status || 'active';
     
     // SIMPLIFIED CONTACT FIELDS:
@@ -5203,7 +5328,7 @@ function viewPC(id) {
     // NEW FIELDS:
     document.getElementById('pc-detail-client-industry').textContent = pc.client_industry || '-';
     document.getElementById('pc-detail-client-source').textContent = pc.client_source || '-';
-    document.getElementById('pc-detail-quote-limit').textContent = pc.quote_limit || '5';
+    document.getElementById('pc-detail-quote-limit').textContent = pc.quote_limit || CONFIG.BUSINESS.DEFAULT_QUOTE_LIMIT;
     document.getElementById('pc-detail-status').textContent = pc.status || 'active';
     document.getElementById('pc-detail-project-description').textContent = pc.project_description || '-';
     
@@ -5280,14 +5405,14 @@ function createQuote() {
 
     // Initialize quote fields with defaults
     const validUntilDate = new Date();
-    validUntilDate.setDate(validUntilDate.getDate() + 30); // Default 30 days validity
+    validUntilDate.setDate(validUntilDate.getDate() + CONFIG.BUSINESS.DEFAULT_QUOTE_VALIDITY_DAYS);
     document.getElementById('quote-valid-until').value = validUntilDate.toISOString().split('T')[0];
     
-    document.getElementById('quote-vat-rate').value = '20.00';
+    document.getElementById('quote-vat-rate').value = CONFIG.BUSINESS.DEFAULT_VAT_RATE.toFixed(2);
     document.getElementById('quote-title').value = '';
     document.getElementById('quote-description').value = '';
     document.getElementById('quote-notes').value = '';
-    document.getElementById('quote-terms').value = 'Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.';
+    document.getElementById('quote-terms').value = CONFIG.BUSINESS.DEFAULT_TERMS;
 
     // NEW Sprint 2: Initialize status, address and move type fields
     document.getElementById('quote-status').value = 'DRAFT'; // Always start as DRAFT
@@ -6776,8 +6901,8 @@ function saveActivityAsTemplate() {
 
 // Global calendar state
 let currentCalendarDate = new Date();
-let currentCalendarView = 'month'; // 'month' or 'week'
-let currentActivitiesView = 'list'; // 'list' or 'calendar'
+let currentCalendarView = CONFIG.UI.CALENDAR.DEFAULT_VIEW;
+let currentActivitiesView = CONFIG.UI.CALENDAR.DEFAULT_ACTIVITIES_VIEW;
 
 function switchActivitiesView(view) {
     console.log('🔄 Switching activities view to:', view);
@@ -7335,7 +7460,7 @@ function getTimeSlotData(slotElement) {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + dayIndex);
     
-    const timeSlot = timeSlots[timeIndex] || '9:00 AM';
+            const timeSlot = timeSlots[timeIndex] || CONFIG.BUSINESS.DEFAULT_ACTIVITY_TIME;
     
     return {
         date: date,
@@ -7569,7 +7694,7 @@ function makeMonthDayDroppable(dayElement) {
             const dayDate = getDateFromMonthDay(dayElement);
             const slotData = {
                 date: dayDate,
-                time: '9:00 AM', // Default time for month view
+                time: CONFIG.BUSINESS.DEFAULT_ACTIVITY_TIME, // Default time for month view
                 slotElement: dayElement
             };
             showQuickCreateForm(slotData);
@@ -7688,35 +7813,10 @@ function showNotification(message, type = 'info') {
 // NEW Sprint 4.2.3: Team Management & Workload Balancing
 // ========================================
 
-// Default team members data
-let teamMembers = [
-    {
-        id: 'tm1',
-        name: 'John Smith',
-        role: 'Senior Engineer',
-        email: 'john.smith@company.com',
-        max_hours: 40,
-        color: '#3b82f6'
-    },
-    {
-        id: 'tm2',
-        name: 'Sarah Johnson',
-        role: 'Project Manager',
-        email: 'sarah.johnson@company.com',
-        max_hours: 40,
-        color: '#10b981'
-    },
-    {
-        id: 'tm3',
-        name: 'Mike Brown',
-        role: 'Technician',
-        email: 'mike.brown@company.com',
-        max_hours: 35,
-        color: '#f59e0b'
-    }
-];
+// Team members data - loaded from CONFIG
+let teamMembers = [...CONFIG.TEAM.DEFAULT_MEMBERS];
 
-let currentTeamFilter = 'all';
+let currentTeamFilter = CONFIG.TEAM.DEFAULT_FILTER;
 let workloadPanelVisible = false;
 
 function initializeTeamManagement() {
@@ -8131,7 +8231,7 @@ function generateRecurringDates(startDate, frequency, interval, endDate, count, 
     const dates = [];
     let currentDate = new Date(startDate);
     const endDateTime = endDate ? new Date(endDate) : null;
-    const maxOccurrences = count || 365; // Default max to prevent infinite loops
+    const maxOccurrences = count || CONFIG.BUSINESS.MAX_RECURRING_OCCURRENCES; // Default max to prevent infinite loops
     
     let occurrenceCount = 0;
     
@@ -8658,16 +8758,13 @@ function updateNotificationList() {
     }).join('');
 }
 
+/**
+ * @description Get notification icon for given type
+ * @param {string} type - Notification type
+ * @returns {string} Emoji icon
+ */
 function getNotificationIcon(type) {
-    const icons = {
-        'overdue': '⏰',
-        'due_today': '📅',
-        'due_tomorrow': '📋',
-        'overloaded': '⚠️',
-        'unassigned_urgent': '🚨',
-        'default': '🔔'
-    };
-    return icons[type] || icons.default;
+    return CONFIG.UI.NOTIFICATION.ICONS[type] || CONFIG.UI.NOTIFICATION.DEFAULT_ICON;
 }
 
 function getIconBackground(priority) {
@@ -9520,9 +9617,9 @@ function checkResourceAvailability() {
 // NEW Sprint 4.4: Activity Dependencies & Workflow System
 // ========================================
 
-let currentWorkflowMode = 'view'; // view, edit, connect
+let currentWorkflowMode = CONFIG.WORKFLOW.DEFAULT_MODE;
 let selectedActivityForConnection = null;
-let currentDependencyType = 'predecessor';
+let currentDependencyType = CONFIG.WORKFLOW.DEFAULT_DEPENDENCY_TYPE;
 let selectedDependencyActivity = null;
 let activityDependencies = []; // Current activity's dependencies
 
@@ -10269,8 +10366,8 @@ function calculateActivitySchedule() {
 // NEW Sprint 4.5: Analytics & Reporting System
 // ========================================
 
-let currentAnalyticsPeriod = 30; // days
-let currentChartPeriod = 'month';
+let currentAnalyticsPeriod = CONFIG.UI.ANALYTICS.DEFAULT_PERIOD_DAYS;
+let currentChartPeriod = CONFIG.UI.ANALYTICS.DEFAULT_CHART_PERIOD;
 
 function initializeAnalyticsSystem() {
     console.log('📊 Initializing analytics system...');
