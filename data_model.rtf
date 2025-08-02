@@ -1,0 +1,362 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fnil\fcharset0 Menlo-Italic;}
+{\colortbl;\red255\green255\blue255;\red205\green204\blue213;\red20\green20\blue20;\red207\green214\blue228;
+\red115\green207\blue184;\red245\green188\blue80;\red218\green124\blue212;\red114\green201\blue195;\red229\green189\blue123;
+}
+{\*\expandedcolortbl;;\cssrgb\c83922\c83922\c86667;\cssrgb\c10196\c10196\c10196;\cssrgb\c84706\c87059\c91373;
+\cssrgb\c51373\c83922\c77255;\cssrgb\c97255\c78039\c38431;\cssrgb\c89020\c58039\c86275;\cssrgb\c50980\c82353\c80784;\cssrgb\c92157\c78431\c55294;
+}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 # MF CRM - Complete Data Model Documentation\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\i \cf5 \cb3 \strokec5 *Generated from index.html and database schema analysis*
+\f0\i0 \cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ## 1. Object Types Overview\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 The CRM system operates on 6 main object types:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **user_profiles**\cf4 \strokec4  - System users and authentication\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **pcs**\cf4 \strokec4  - PC Numbers (client projects/jobs)\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **quotes**\cf4 \strokec4  - Commercial proposals linked to PCs\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **activities**\cf4 \strokec4  - Tasks and events\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **resources**\cf4 \strokec4  - Catalog of materials/services/equipment\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **price_lists**\cf4 \strokec4  - Versioned pricing schemes\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ## 2. Complete Object Definitions\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 2.1 USER_PROFILES\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : System users, roles, and authentication data\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key, auto-generated | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `email`\cf4 \strokec4  | VARCHAR(255) | \uc0\u9733  | Login email (unique) | \cf7 \strokec7 `john.smith@mfcrm.local`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `username`\cf4 \strokec4  | VARCHAR(50) | \uc0\u9733  | Display username | \cf7 \strokec7 `john.smith`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `full_name`\cf4 \strokec4  | VARCHAR(100) | \uc0\u9733  | Full employee name | \cf7 \strokec7 `John Smith`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `role`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Access level | \cf7 \strokec7 `user`\cf4 \strokec4 , \cf7 \strokec7 `admin`\cf4 \strokec4 , \cf7 \strokec7 `master_admin`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `status`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Account state | \cf7 \strokec7 `active`\cf4 \strokec4 , \cf7 \strokec7 `inactive`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `phone`\cf4 \strokec4  | VARCHAR(20) | \'97 | Contact number | \cf7 \strokec7 `+44 20 1234 5678`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `department`\cf4 \strokec4  | VARCHAR(50) | \'97 | Employee department | \cf7 \strokec7 `Sales`\cf4 \strokec4 , \cf7 \strokec7 `Operations`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `hire_date`\cf4 \strokec4  | DATE | \'97 | Employment start | \cf7 \strokec7 `2024-01-15`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `last_login`\cf4 \strokec4  | TIMESTAMP | \'97 | Last access time | \cf7 \strokec7 `2024-03-15 14:30:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-01-01 09:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-03-15 16:45:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `email`\cf4 \strokec4  (unique), \cf7 \strokec7 `username`\cf4 \strokec4  (unique), \cf7 \strokec7 `role`\cf4 \strokec4 , \cf7 \strokec7 `status`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 2.2 PCS (PC Numbers)\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : Client projects/jobs - central entity linking quotes and activities\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440001`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pc_number`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Formatted identifier (unique) | \cf7 \strokec7 `PC-000123`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `company_name`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Client company | \cf7 \strokec7 `Acme Construction Ltd`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `crown_branch`\cf4 \strokec4  | VARCHAR(100) | \'97 | Crown court branch | \cf7 \strokec7 `Birmingham Crown Court`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `project_name`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Project title | \cf7 \strokec7 `Office Refurbishment Phase 2`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `project_description`\cf4 \strokec4  | TEXT | \'97 | Detailed description | \cf7 \strokec7 `Complete electrical rewiring...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `account_manager`\cf4 \strokec4  | VARCHAR(100) | \uc0\u9733  | Assigned sales person | \cf7 \strokec7 `John Smith`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `surveyor`\cf4 \strokec4  | VARCHAR(100) | \'97 | Technical surveyor | \cf7 \strokec7 `Mike Johnson`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_first_name`\cf4 \strokec4  | VARCHAR(50) | \'97 | Collection contact | \cf7 \strokec7 `Sarah`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_surname`\cf4 \strokec4  | VARCHAR(50) | \'97 | Collection surname | \cf7 \strokec7 `Williams`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_email`\cf4 \strokec4  | VARCHAR(100) | \'97 | Collection email | \cf7 \strokec7 `sarah.w@acme.com`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_phone`\cf4 \strokec4  | VARCHAR(20) | \'97 | Collection phone | \cf7 \strokec7 `07123456789`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_mobile`\cf4 \strokec4  | VARCHAR(20) | \'97 | Collection mobile | \cf7 \strokec7 `07987654321`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_address_1`\cf4 \strokec4  | VARCHAR(100) | \'97 | Collection address line 1 | \cf7 \strokec7 `123 High Street`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_address_2`\cf4 \strokec4  | VARCHAR(100) | \'97 | Collection address line 2 | \cf7 \strokec7 `Industrial Estate`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_city`\cf4 \strokec4  | VARCHAR(50) | \'97 | Collection city | \cf7 \strokec7 `Birmingham`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_county`\cf4 \strokec4  | VARCHAR(50) | \'97 | Collection county | \cf7 \strokec7 `West Midlands`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_postcode`\cf4 \strokec4  | VARCHAR(10) | \'97 | Collection postcode | \cf7 \strokec7 `B1 1AA`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `collection_date`\cf4 \strokec4  | DATE | \'97 | Planned collection | \cf7 \strokec7 `2024-04-15`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_first_name`\cf4 \strokec4  | VARCHAR(50) | \'97 | Delivery contact | \cf7 \strokec7 `Mark`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_surname`\cf4 \strokec4  | VARCHAR(50) | \'97 | Delivery surname | \cf7 \strokec7 `Thompson`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_email`\cf4 \strokec4  | VARCHAR(100) | \'97 | Delivery email | \cf7 \strokec7 `mark.t@newsite.com`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_phone`\cf4 \strokec4  | VARCHAR(20) | \'97 | Delivery phone | \cf7 \strokec7 `01234567890`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_mobile`\cf4 \strokec4  | VARCHAR(20) | \'97 | Delivery mobile | \cf7 \strokec7 `07111222333`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_address_1`\cf4 \strokec4  | VARCHAR(100) | \'97 | Delivery address line 1 | \cf7 \strokec7 `456 New Road`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_address_2`\cf4 \strokec4  | VARCHAR(100) | \'97 | Delivery address line 2 | \cf7 \strokec7 `Business Park`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_city`\cf4 \strokec4  | VARCHAR(50) | \'97 | Delivery city | \cf7 \strokec7 `Manchester`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_county`\cf4 \strokec4  | VARCHAR(50) | \'97 | Delivery county | \cf7 \strokec7 `Greater Manchester`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_postcode`\cf4 \strokec4  | VARCHAR(10) | \'97 | Delivery postcode | \cf7 \strokec7 `M1 2BB`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `delivery_date`\cf4 \strokec4  | DATE | \'97 | Planned delivery | \cf7 \strokec7 `2024-04-20`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `status`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Project status | \cf7 \strokec7 `active`\cf4 \strokec4 , \cf7 \strokec7 `completed`\cf4 \strokec4 , \cf7 \strokec7 `cancelled`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_by`\cf4 \strokec4  | UUID | \uc0\u9733  | Creator user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-03-01 10:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-03-15 14:30:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `pc_number`\cf4 \strokec4  (unique), \cf7 \strokec7 `company_name`\cf4 \strokec4 , \cf7 \strokec7 `account_manager`\cf4 \strokec4 , \cf7 \strokec7 `status`\cf4 \strokec4 , \cf7 \strokec7 `created_at`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 2.3 QUOTES\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : Commercial proposals linked to specific PC Numbers\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440002`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `quote_number`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Formatted identifier (unique) | \cf7 \strokec7 `QT-000456`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pc_id`\cf4 \strokec4  | UUID | \uc0\u9733  | Foreign key to pcs.id | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440001`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pc_number`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Denormalized PC reference | \cf7 \strokec7 `PC-000123`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `company_name`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Client company (denormalized) | \cf7 \strokec7 `Acme Construction Ltd`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `title`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Quote title | \cf7 \strokec7 `Electrical Works - Phase 2`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `description`\cf4 \strokec4  | TEXT | \'97 | Quote description | \cf7 \strokec7 `Supply and installation of...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `status`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Quote status | \cf7 \strokec7 `draft`\cf4 \strokec4 , \cf7 \strokec7 `pending`\cf4 \strokec4 , \cf7 \strokec7 `approved`\cf4 \strokec4 , \cf7 \strokec7 `rejected`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `valid_until`\cf4 \strokec4  | DATE | \'97 | Quote expiry date | \cf7 \strokec7 `2024-04-30`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `subtotal`\cf4 \strokec4  | DECIMAL(10,2) | \uc0\u9733  | Pre-VAT total | \cf7 \strokec7 `15000.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `vat_rate`\cf4 \strokec4  | DECIMAL(5,2) | \uc0\u9733  | VAT percentage | \cf7 \strokec7 `20.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `vat_amount`\cf4 \strokec4  | DECIMAL(10,2) | \uc0\u9733  | VAT amount | \cf7 \strokec7 `3000.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `total_cost`\cf4 \strokec4  | DECIMAL(10,2) | \uc0\u9733  | Final total (inc VAT) | \cf7 \strokec7 `18000.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `notes`\cf4 \strokec4  | TEXT | \'97 | Internal notes | \cf7 \strokec7 `Client requested delivery...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `terms_conditions`\cf4 \strokec4  | TEXT | \'97 | T&C text | \cf7 \strokec7 `Payment terms: 30 days...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `line_items`\cf4 \strokec4  | JSONB | \'97 | Quote breakdown | \cf7 \strokec7 `[\{"resource_id": "...", "qty": 10, ...\}]`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_by`\cf4 \strokec4  | UUID | \uc0\u9733  | Creator user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-03-05 11:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-03-15 15:00:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `quote_number`\cf4 \strokec4  (unique), \cf7 \strokec7 `pc_id`\cf4 \strokec4 , \cf7 \strokec7 `company_name`\cf4 \strokec4 , \cf7 \strokec7 `status`\cf4 \strokec4 , \cf7 \strokec7 `created_at`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 2.4 ACTIVITIES\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : Tasks, events, and operational activities linked to PCs\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440003`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `title`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Activity title | \cf7 \strokec7 `Site Survey - Electrical Assessment`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `description`\cf4 \strokec4  | TEXT | \'97 | Activity details | \cf7 \strokec7 `Initial site survey to assess...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pc_id`\cf4 \strokec4  | UUID | \uc0\u9733  | Foreign key to pcs.id | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440001`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pc_number`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Denormalized PC reference | \cf7 \strokec7 `PC-000123`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `company_name`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Client company (denormalized) | \cf7 \strokec7 `Acme Construction Ltd`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `type`\cf4 \strokec4  | VARCHAR(50) | \uc0\u9733  | Activity category | \cf7 \strokec7 `survey`\cf4 \strokec4 , \cf7 \strokec7 `delivery`\cf4 \strokec4 , \cf7 \strokec7 `installation`\cf4 \strokec4 , \cf7 \strokec7 `meeting`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `status`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Activity status | \cf7 \strokec7 `pending`\cf4 \strokec4 , \cf7 \strokec7 `in_progress`\cf4 \strokec4 , \cf7 \strokec7 `completed`\cf4 \strokec4 , \cf7 \strokec7 `cancelled`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `priority`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Priority level | \cf7 \strokec7 `low`\cf4 \strokec4 , \cf7 \strokec7 `medium`\cf4 \strokec4 , \cf7 \strokec7 `high`\cf4 \strokec4 , \cf7 \strokec7 `urgent`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `scheduled_date`\cf4 \strokec4  | DATE | \'97 | Planned date | \cf7 \strokec7 `2024-04-10`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `scheduled_time`\cf4 \strokec4  | TIME | \'97 | Planned time | \cf7 \strokec7 `09:30:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `duration_hours`\cf4 \strokec4  | DECIMAL(4,2) | \'97 | Expected duration | \cf7 \strokec7 `2.50`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `assigned_to`\cf4 \strokec4  | UUID | \'97 | Assigned user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `assigned_to_name`\cf4 \strokec4  | VARCHAR(100) | \'97 | Assigned user name (denormalized) | \cf7 \strokec7 `John Smith`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `location`\cf4 \strokec4  | VARCHAR(200) | \'97 | Activity location | \cf7 \strokec7 `Client Site - Birmingham`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `contact_name`\cf4 \strokec4  | VARCHAR(100) | \'97 | Site contact | \cf7 \strokec7 `Sarah Williams`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `contact_phone`\cf4 \strokec4  | VARCHAR(20) | \'97 | Contact number | \cf7 \strokec7 `07123456789`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `completion_notes`\cf4 \strokec4  | TEXT | \'97 | Post-completion notes | \cf7 \strokec7 `Survey completed successfully...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `completed_at`\cf4 \strokec4  | TIMESTAMP | \'97 | Actual completion time | \cf7 \strokec7 `2024-04-10 12:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_by`\cf4 \strokec4  | UUID | \uc0\u9733  | Creator user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-03-08 14:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-04-10 12:00:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `pc_id`\cf4 \strokec4 , \cf7 \strokec7 `company_name`\cf4 \strokec4 , \cf7 \strokec7 `type`\cf4 \strokec4 , \cf7 \strokec7 `status`\cf4 \strokec4 , \cf7 \strokec7 `assigned_to`\cf4 \strokec4 , \cf7 \strokec7 `scheduled_date`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 2.5 RESOURCES\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : Catalog of materials, services, equipment available for quoting\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440004`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `name`\cf4 \strokec4  | VARCHAR(200) | \uc0\u9733  | Resource name | \cf7 \strokec7 `LED Downlight - 10W Cool White`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `description`\cf4 \strokec4  | TEXT | \'97 | Detailed description | \cf7 \strokec7 `Energy efficient LED downlight...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `category`\cf4 \strokec4  | VARCHAR(50) | \uc0\u9733  | Resource category | \cf7 \strokec7 `lighting`\cf4 \strokec4 , \cf7 \strokec7 `electrical`\cf4 \strokec4 , \cf7 \strokec7 `labour`\cf4 \strokec4 , \cf7 \strokec7 `transport`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `subcategory`\cf4 \strokec4  | VARCHAR(50) | \'97 | Resource subcategory | \cf7 \strokec7 `downlights`\cf4 \strokec4 , \cf7 \strokec7 `cable`\cf4 \strokec4 , \cf7 \strokec7 `installation`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `sku`\cf4 \strokec4  | VARCHAR(50) | \'97 | Stock keeping unit | \cf7 \strokec7 `LED-DL-10W-CW`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `unit`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Unit of measure | \cf7 \strokec7 `each`\cf4 \strokec4 , \cf7 \strokec7 `metre`\cf4 \strokec4 , \cf7 \strokec7 `hour`\cf4 \strokec4 , \cf7 \strokec7 `day`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `net_cost`\cf4 \strokec4  | DECIMAL(10,2) | \uc0\u9733  | Base cost (ex VAT) | \cf7 \strokec7 `25.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `supplier`\cf4 \strokec4  | VARCHAR(100) | \'97 | Primary supplier | \cf7 \strokec7 `Electrical Supplies Ltd`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `supplier_code`\cf4 \strokec4  | VARCHAR(50) | \'97 | Supplier product code | \cf7 \strokec7 `ESL-LED-001`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `is_active`\cf4 \strokec4  | BOOLEAN | \uc0\u9733  | Available for use | \cf7 \strokec7 `true`\cf4 \strokec4 , \cf7 \strokec7 `false`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `min_quantity`\cf4 \strokec4  | INTEGER | \'97 | Minimum order quantity | \cf7 \strokec7 `10`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `lead_time_days`\cf4 \strokec4  | INTEGER | \'97 | Delivery lead time | \cf7 \strokec7 `5`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `weight_kg`\cf4 \strokec4  | DECIMAL(8,3) | \'97 | Unit weight | \cf7 \strokec7 `0.150`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `dimensions`\cf4 \strokec4  | VARCHAR(100) | \'97 | Physical dimensions | \cf7 \strokec7 `85mm diameter x 25mm depth`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `warranty_months`\cf4 \strokec4  | INTEGER | \'97 | Warranty period | \cf7 \strokec7 `24`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_by`\cf4 \strokec4  | UUID | \uc0\u9733  | Creator user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-01-15 10:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-03-01 09:00:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `name`\cf4 \strokec4 , \cf7 \strokec7 `category`\cf4 \strokec4 , \cf7 \strokec7 `sku`\cf4 \strokec4 , \cf7 \strokec7 `is_active`\cf4 \strokec4 , \cf7 \strokec7 `supplier`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 2.6 PRICE_LISTS\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Purpose**\cf4 \strokec4 : Versioned pricing schemes with resource-specific rates\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 | Field Name | Type | Required | Description | Example |\cb1 \
+\cb3 |------------|------|----------|-------------|---------|\cb1 \
+\cb3 | \cf7 \strokec7 `id`\cf4 \strokec4  | UUID | \uc0\u9733  | Primary key | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440005`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `name`\cf4 \strokec4  | VARCHAR(100) | \uc0\u9733  | Price list name | \cf7 \strokec7 `Standard Commercial Rates 2024`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `version`\cf4 \strokec4  | VARCHAR(20) | \uc0\u9733  | Version identifier | \cf7 \strokec7 `v2.1`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `description`\cf4 \strokec4  | TEXT | \'97 | Price list description | \cf7 \strokec7 `Updated rates for commercial projects...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `effective_from`\cf4 \strokec4  | DATE | \uc0\u9733  | Valid from date | \cf7 \strokec7 `2024-01-01`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `effective_to`\cf4 \strokec4  | DATE | \'97 | Valid until date | \cf7 \strokec7 `2024-12-31`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `is_default`\cf4 \strokec4  | BOOLEAN | \uc0\u9733  | Default price list flag | \cf7 \strokec7 `true`\cf4 \strokec4 , \cf7 \strokec7 `false`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `markup_percentage`\cf4 \strokec4  | DECIMAL(5,2) | \uc0\u9733  | Default markup | \cf7 \strokec7 `35.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `discount_percentage`\cf4 \strokec4  | DECIMAL(5,2) | \'97 | Volume discount | \cf7 \strokec7 `5.00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `currency`\cf4 \strokec4  | VARCHAR(3) | \uc0\u9733  | Currency code | \cf7 \strokec7 `GBP`\cf4 \strokec4 , \cf7 \strokec7 `EUR`\cf4 \strokec4 , \cf7 \strokec7 `USD`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `pricing_data`\cf4 \strokec4  | JSONB | \uc0\u9733  | Resource prices | \cf7 \strokec7 `\{"resource_id": \{"price": 30.00, "markup": 40.00\}\}`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `terms`\cf4 \strokec4  | TEXT | \'97 | Pricing terms | \cf7 \strokec7 `Prices valid for 30 days...`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_by`\cf4 \strokec4  | UUID | \uc0\u9733  | Creator user ID | \cf7 \strokec7 `550e8400-e29b-41d4-a716-446655440000`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `created_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Record creation | \cf7 \strokec7 `2024-01-01 08:00:00`\cf4 \strokec4  |\cb1 \
+\cb3 | \cf7 \strokec7 `updated_at`\cf4 \strokec4  | TIMESTAMP | \uc0\u9733  | Last modification | \cf7 \strokec7 `2024-02-15 10:00:00`\cf4 \strokec4  |\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **Indexes**\cf4 \strokec4 : \cf7 \strokec7 `name`\cf4 \strokec4 , \cf7 \strokec7 `version`\cf4 \strokec4 , \cf7 \strokec7 `effective_from`\cf4 \strokec4 , \cf7 \strokec7 `is_default`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ## 3. Object Relationships\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 3.1 Primary Relationships\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ```\cb1 \
+\cb3 user_profiles (1) \uc0\u8592 \u8594  (N) pcs [created_by]\cb1 \
+\cb3 user_profiles (1) \uc0\u8592 \u8594  (N) quotes [created_by]\cb1 \
+\cb3 user_profiles (1) \uc0\u8592 \u8594  (N) activities [created_by, assigned_to]\cb1 \
+\cb3 user_profiles (1) \uc0\u8592 \u8594  (N) resources [created_by]\cb1 \
+\cb3 user_profiles (1) \uc0\u8592 \u8594  (N) price_lists [created_by]\cb1 \
+\
+\cb3 pcs (1) \uc0\u8592 \u8594  (N) quotes [pc_id]\cb1 \
+\cb3 pcs (1) \uc0\u8592 \u8594  (N) activities [pc_id]\cb1 \
+\
+\cb3 resources (N) \uc0\u8592 \u8594  (N) quotes [via line_items JSONB]\cb1 \
+\cb3 resources (N) \uc0\u8592 \u8594  (N) price_lists [via pricing_data JSONB]\cb1 \
+\cb3 ```\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 3.2 Denormalization for Performance\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **quotes.pc_number**\cf4 \strokec4  - copied from pcs.pc_number\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **quotes.company_name**\cf4 \strokec4  - copied from pcs.company_name\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **activities.pc_number**\cf4 \strokec4  - copied from pcs.pc_number\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **activities.company_name**\cf4 \strokec4  - copied from pcs.company_name\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **activities.assigned_to_name**\cf4 \strokec4  - copied from user_profiles.full_name\cb1 \
+\
+\cf2 \cb3 \strokec2 ### 3.3 JSONB Relationships\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **quotes.line_items**\cf4 \strokec4  structure:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ```json\cb1 \
+\cb3 [\cb1 \
+\cb3   \{\cb1 \
+\cb3     \cf8 \strokec8 "resource_id"\cf4 \strokec4 : \cf7 \strokec7 "550e8400-e29b-41d4-a716-446655440004"\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "resource_name"\cf4 \strokec4 : \cf7 \strokec7 "LED Downlight - 10W Cool White"\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "quantity"\cf4 \strokec4 : \cf9 \strokec9 20\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "unit_price"\cf4 \strokec4 : \cf9 \strokec9 30.00\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "line_total"\cf4 \strokec4 : \cf9 \strokec9 600.00\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "notes"\cf4 \strokec4 : \cf7 \strokec7 "Cool white temperature specified"\cf4 \cb1 \strokec4 \
+\cb3   \}\cb1 \
+\cb3 ]\cb1 \
+\cb3 ```\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **price_lists.pricing_data**\cf4 \strokec4  structure:\cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ```json\cb1 \
+\cb3 \{\cb1 \
+\cb3   \cf8 \strokec8 "550e8400-e29b-41d4-a716-446655440004"\cf4 \strokec4 : \{\cb1 \
+\cb3     \cf8 \strokec8 "price"\cf4 \strokec4 : \cf9 \strokec9 30.00\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "markup_percentage"\cf4 \strokec4 : \cf9 \strokec9 40.00\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "effective_price"\cf4 \strokec4 : \cf9 \strokec9 42.00\cf4 \strokec4 ,\cb1 \
+\cb3     \cf8 \strokec8 "min_quantity"\cf4 \strokec4 : \cf9 \strokec9 10\cf4 \cb1 \strokec4 \
+\cb3   \}\cb1 \
+\cb3 \}\cb1 \
+\cb3 ```\cb1 \
+\
+\cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ## 4. Business Rules & Constraints\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 4.1 Unique Identifiers\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf7 \strokec7 `user_profiles.email`\cf4 \strokec4  - globally unique\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf7 \strokec7 `user_profiles.username`\cf4 \strokec4  - globally unique\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf7 \strokec7 `pcs.pc_number`\cf4 \strokec4  - auto-generated, format: \cf7 \strokec7 `PC-NNNNNN`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf7 \strokec7 `quotes.quote_number`\cf4 \strokec4  - auto-generated, format: \cf7 \strokec7 `QT-NNNNNN`\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 4.2 Status Workflows\cf4 \cb1 \strokec4 \
+\pard\pardeftab720\partightenfactor0
+\cf6 \cb3 \strokec6 **PC Status**\cf4 \strokec4 : \cf7 \strokec7 `active`\cf4 \strokec4  \uc0\u8594  \cf7 \strokec7 `completed`\cf4 \strokec4  / \cf7 \strokec7 `cancelled`\cf4 \cb1 \strokec4 \
+\cf6 \cb3 \strokec6 **Quote Status**\cf4 \strokec4 : \cf7 \strokec7 `draft`\cf4 \strokec4  \uc0\u8594  \cf7 \strokec7 `pending`\cf4 \strokec4  \uc0\u8594  \cf7 \strokec7 `approved`\cf4 \strokec4  / \cf7 \strokec7 `rejected`\cf4 \cb1 \strokec4 \
+\cf6 \cb3 \strokec6 **Activity Status**\cf4 \strokec4 : \cf7 \strokec7 `pending`\cf4 \strokec4  \uc0\u8594  \cf7 \strokec7 `in_progress`\cf4 \strokec4  \uc0\u8594  \cf7 \strokec7 `completed`\cf4 \strokec4  / \cf7 \strokec7 `cancelled`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ### 4.3 Access Control (RLS Policies)\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **user**\cf4 \strokec4 : read own records, read/write assigned activities\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **admin**\cf4 \strokec4 : full CRUD on pcs, quotes, activities, resources, price_lists\cb1 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **master_admin**\cf4 \strokec4 : full system access including user management\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \strokec2 ## 5. Calculated Fields & Aggregations\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 5.1 Dashboard KPIs\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Total PCs**\cf4 \strokec4 : \cf7 \strokec7 `COUNT(pcs)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Total Quotes**\cf4 \strokec4 : \cf7 \strokec7 `COUNT(quotes)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Total Activities**\cf4 \strokec4 : \cf7 \strokec7 `COUNT(activities)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Total Value**\cf4 \strokec4 : \cf7 \strokec7 `SUM(quotes.total_cost WHERE status = 'approved')`\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 5.2 PC Number Counters\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Quote Count**\cf4 \strokec4 : \cf7 \strokec7 `COUNT(quotes WHERE pc_id = pcs.id)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Activity Count**\cf4 \strokec4 : \cf7 \strokec7 `COUNT(activities WHERE pc_id = pcs.id)`\cf4 \cb1 \strokec4 \
+\
+\cf2 \cb3 \strokec2 ### 5.3 Quote Calculations\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Subtotal**\cf4 \strokec4 : \cf7 \strokec7 `SUM(line_items.line_total)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **VAT Amount**\cf4 \strokec4 : \cf7 \strokec7 `subtotal * (vat_rate / 100)`\cf4 \cb1 \strokec4 \
+\cf2 \cb3 \strokec2 -\cf4 \strokec4  \cf6 \strokec6 **Total Cost**\cf4 \strokec4 : \cf7 \strokec7 `subtotal + vat_amount`\cf4 \cb1 \strokec4 \
+\
+\pard\pardeftab720\partightenfactor0
+\cf4 \cb3 ---\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\i \cf5 \cb3 \strokec5 *End of Data Model Documentation*
+\f0\i0 \cf4 \cb1 \strokec4 \
+}

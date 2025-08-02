@@ -1,0 +1,2450 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Demo - Portable Version</title>
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6; --primary-50: #eff6ff; --primary-100: #dbeafe; --primary-200: #bfdbfe; --primary-300: #93c5fd; --primary-400: #60a5fa; --primary-500: #3b82f6; --primary-600: #2563eb; --primary-700: #1d4ed8; --primary-800: #1e40af; --primary-900: #1e3a8a;
+            --secondary-50: #f8fafc; --secondary-100: #f1f5f9; --secondary-200: #e2e8f0; --secondary-300: #cbd5e1; --secondary-400: #94a3b8; --secondary-500: #64748b; --secondary-600: #475569; --secondary-700: #334155; --secondary-800: #1e293b; --secondary-900: #0f172a;
+            --success-50: #f0fdf4; --success-100: #dcfce7; --success-200: #bbf7d0; --success-300: #86efac; --success-400: #4ade80; --success-500: #22c55e; --success-600: #16a34a; --success-700: #15803d; --success-800: #166534; --success-900: #14532d;
+            --warning-50: #fffbeb; --warning-100: #fef3c7; --warning-200: #fde68a; --warning-300: #fcd34d; --warning-400: #fbbf24; --warning-500: #f59e0b; --warning-600: #d97706; --warning-700: #b45309; --warning-800: #92400e; --warning-900: #78350f;
+            --error-50: #fef2f2; --error-100: #fee2e2; --error-200: #fecaca; --error-300: #fca5a5; --error-400: #f87171; --error-500: #ef4444; --error-600: #dc2626; --error-700: #b91c1c; --error-800: #991b1b; --error-900: #7f1d1d;
+            --neutral-50: #f8fafc; --neutral-100: #f1f5f9; --neutral-200: #e2e8f0; --neutral-300: #cbd5e1; --neutral-400: #94a3b8; --neutral-500: #64748b; --neutral-600: #475569; --neutral-700: #334155; --neutral-800: #1e293b; --neutral-900: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05); --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
+            --space-xs: 0.25rem; --space-sm: 0.5rem; --space-md: 1rem; --space-lg: 1.5rem; --space-xl: 2rem; --space-2xl: 3rem;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--secondary-50);
+            color: var(--neutral-800);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .navbar { 
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white; 
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar .nav-left, .navbar .nav-right { display: flex; align-items: center; }
+        .navbar h1 { 
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 2rem;
+            cursor: pointer;
+        }
+        .navbar .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            padding: 0.5rem 1rem;
+            margin: 0 var(--space-xs);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .navbar .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        .navbar .nav-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .container { max-width: 1400px; margin: var(--space-xl) auto; padding: 0 var(--space-lg); }
+        .page { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card { 
+            background: white;
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--neutral-200);
+        }
+        .card h2 { margin-bottom: var(--space-lg); color: var(--neutral-900); font-size: 1.5rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+        .stat-card { 
+            background: white;
+            padding: var(--space-lg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-200);
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-card h3 { color: var(--neutral-600); font-size: 0.875rem; margin-bottom: var(--space-sm); font-weight: 600; text-transform: uppercase; }
+        .stat-card .value { font-size: 2.2rem; font-weight: 700; color: var(--neutral-900); }
+        button { 
+            background: var(--primary-500);
+            color: white;
+            border: none;
+            padding: var(--space-sm) var(--space-lg);
+            cursor: pointer;
+            margin-right: var(--space-sm);
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+        }
+        button:hover { background: var(--primary-600); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+        button.secondary { background: var(--neutral-200); color: var(--neutral-700); }
+        button.secondary:hover { background: var(--neutral-300); }
+        button.danger { background: var(--error-500); }
+        button.danger:hover { background: var(--error-600); }
+        button.warning { background: var(--warning-500); }
+        button.warning:hover { background: var(--warning-600); }
+        input, select, textarea { 
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--neutral-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 2px var(--primary-100); }
+        label { display: block; margin-bottom: var(--space-xs); font-weight: 600; color: var(--neutral-700); }
+        .input-error { border-color: var(--error-500) !important; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius-lg); overflow: hidden; }
+        th, td { padding: var(--space-md); text-align: left; border-bottom: 1px solid var(--neutral-200); }
+        th { background: var(--neutral-100); font-weight: 600; color: var(--neutral-700); font-size: 0.875rem; text-transform: uppercase; }
+        tr:hover td { background: var(--primary-50); }
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 2000;
+            align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content { 
+            background: white; padding: var(--space-xl); border-radius: var(--radius-lg);
+            width: 90%; max-width: 1000px; max-height: 90vh; overflow-y: auto;
+        }
+        .quote-builder { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .line-item { display: grid; grid-template-columns: 3fr 1fr 1.5fr 1fr auto; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+        .line-item input, .line-item select { margin-bottom: 0; padding: 0.5rem; }
+        .remove-btn { background: var(--error-500); padding: 0.5rem; color: white; border: none; cursor: pointer; }
+        .summary { background: var(--neutral-100); padding: 1.5rem; border-radius: 8px; position: sticky; top: 100px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .summary-total { border-top: 2px solid var(--neutral-300); padding-top: 1rem; margin-top: 1rem; font-weight: bold; font-size: 1.2rem; }
+        .activity-status {
+            display: inline-block; padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-lg); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+        }
+        .activity-status.draft { background-color: var(--neutral-200); color: var(--neutral-700); }
+        .activity-status.ready { background-color: var(--primary-200); color: var(--primary-800); }
+        .activity-status.sent { background-color: var(--success-200); color: var(--success-800); }
+        .activity-status.cancelled { background-color: var(--error-200); color: var(--error-800); }
+        .activity-status.pending { background-color: var(--neutral-200); color: var(--neutral-700); }
+        .activity-status.in_progress { background-color: var(--primary-200); color: var(--primary-800); }
+        .activity-status.completed { background-color: var(--success-200); color: var(--success-800); }
+        
+        .priority-low { background: #e2e8f0; color: #475569; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+        .priority-medium { background: #fbbf24; color: #92400e; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+        .priority-high { background: #f87171; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+        .priority-urgent { background: #dc2626; color: white; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: bold; }
+        .form-section { border: 1px solid var(--neutral-200); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius-lg); }
+        .form-section h3 { margin-top: 0; border-bottom: 1px solid var(--neutral-200); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .form-actions { margin-top: 1.5rem; text-align: right; }
+        .action-btn-group { display: flex; gap: 0.5rem; align-items: center; }
+        .action-btn-group button { margin-right: 0; }
+        
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .quote-builder { grid-template-columns: 1fr; }
+            .summary { position: static; margin-top: 2rem; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <h1 onclick="window.showPage('dashboard')">🏢 CRM Demo</h1>
+            <button onclick="window.showPage('dashboard')" class="nav-btn active">Dashboard</button>
+            <button onclick="window.showPage('pcnumbers')" class="nav-btn">PC Numbers</button>
+            <button onclick="window.showPage('quotes')" class="nav-btn">Quotes</button>
+            <button onclick="window.showPage('activities')" class="nav-btn">Activities</button>
+            <button onclick="window.showPage('resources')" class="nav-btn">Resources</button>
+            <button onclick="window.showPage('pricelists')" class="nav-btn">Price Lists</button>
+        </div>
+        <div class="nav-right">
+            <button onclick="window.resetData()" class="nav-btn danger">🗑️ Reset Demo Data</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="dashboard" class="page active">
+            <h1>📊 Dashboard</h1>
+            <p>Overview of key metrics in the demonstration system.</p>
+            <div class="stats">
+                <div class="stat-card clickable" onclick="window.showPage('pcnumbers')">
+                    <h3>PC Numbers</h3>
+                    <div class="value" id="stat-pc">0</div>
+                </div>
+                <div class="stat-card clickable" onclick="window.showPage('quotes')">
+                    <h3>Quotes</h3>
+                    <div class="value" id="stat-quotes">0</div>
+                </div>
+                <div class="stat-card clickable" onclick="window.showPage('activities')">
+                    <h3>Activities</h3>
+                    <div class="value" id="stat-activities">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Quote Value</h3>
+                    <div class="value" id="stat-value">£0</div>
+                </div>
+            </div>
+
+             <div class="card">
+                <h2>Recent PC Numbers</h2>
+                <table>
+                    <thead>
+                        <tr><th>PC Number</th><th>Company</th><th>Reference</th></tr>
+                    </thead>
+                    <tbody id="recent-pc"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pcnumbers" class="page">
+            <h1>🔢 PC Numbers</h1>
+            <button onclick="window.showPage('new-pc')">+ New PC Number</button>
+            <div class="card">
+                <h2>PC Numbers List</h2>
+                <table>
+                    <thead><tr><th>PC Number</th><th>Company</th><th>Reference</th><th>Contact</th><th>Actions</th></tr></thead>
+                    <tbody id="pc-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="new-pc" class="page">
+            <h1 id="pc-form-title">New PC Number</h1>
+            <div class="card">
+                <input type="hidden" id="pc-id">
+                
+                <!-- Main Data Section -->
+                <div class="form-section">
+                    <h3>Main Data</h3>
+                    <div class="form-grid">
+                        <div><label>PC Number *</label><input type="text" id="pc-number" placeholder="e.g. PC-000001" required></div>
+                        <div><label>Company Name *</label><input type="text" id="pc-company-name" placeholder="Company name" required></div>
+                        <div><label>Crown Branch</label><input type="text" id="pc-crown-branch" placeholder="e.g. Birmingham Crown Court"></div>
+                        <div><label>Project Name *</label><input type="text" id="pc-project-name" placeholder="Project name" required></div>
+                        <div><label>Account Manager *</label><input type="text" id="pc-account-manager" placeholder="Account manager name" required></div>
+                        <div><label>Surveyor</label><input type="text" id="pc-surveyor" placeholder="Surveyor name"></div>
+                        <div><label>Status</label><select id="pc-status">
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select></div>
+                    </div>
+                    <div><label>Project Description</label><textarea id="pc-project-description" rows="3" placeholder="Detailed project description..."></textarea></div>
+                </div>
+                
+                <!-- Collection Address Section -->
+                <div class="form-section">
+                    <h3>Collection Address & Contact</h3>
+                    <div class="form-grid">
+                        <div><label>First Name</label><input type="text" id="pc-collection-first-name" placeholder="First name"></div>
+                        <div><label>Surname</label><input type="text" id="pc-collection-surname" placeholder="Surname"></div>
+                        <div><label>Email</label><input type="email" id="pc-collection-email" placeholder="email@address.com"></div>
+                        <div><label>Phone</label><input type="tel" id="pc-collection-phone" placeholder="Phone number"></div>
+                        <div><label>Mobile</label><input type="tel" id="pc-collection-mobile" placeholder="Mobile number"></div>
+                        <div><label>Collection Date</label><input type="date" id="pc-collection-date"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div><label>Address Line 1</label><input type="text" id="pc-collection-address-1" placeholder="Street address"></div>
+                        <div><label>Address Line 2</label><input type="text" id="pc-collection-address-2" placeholder="Additional address info"></div>
+                        <div><label>City</label><input type="text" id="pc-collection-city" placeholder="City"></div>
+                        <div><label>County</label><input type="text" id="pc-collection-county" placeholder="County"></div>
+                        <div><label>Postcode</label><input type="text" id="pc-collection-postcode" placeholder="Postcode"></div>
+                </div>
+                </div>
+                
+                <!-- Delivery Address Section -->
+                <div class="form-section">
+                    <h3>Delivery Address & Contact</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="pc-same-as-collection" onchange="window.copyCollectionToDelivery()" style="margin-right: 0.5rem;">
+                            Same as collection address
+                        </label>
+                    </div>
+                    <div class="form-grid">
+                        <div><label>First Name</label><input type="text" id="pc-delivery-first-name" placeholder="First name"></div>
+                        <div><label>Surname</label><input type="text" id="pc-delivery-surname" placeholder="Surname"></div>
+                        <div><label>Email</label><input type="email" id="pc-delivery-email" placeholder="email@address.com"></div>
+                        <div><label>Phone</label><input type="tel" id="pc-delivery-phone" placeholder="Phone number"></div>
+                        <div><label>Mobile</label><input type="tel" id="pc-delivery-mobile" placeholder="Mobile number"></div>
+                        <div><label>Delivery Date</label><input type="date" id="pc-delivery-date"></div>
+                    </div>
+                    <div class="form-grid">
+                        <div><label>Address Line 1</label><input type="text" id="pc-delivery-address-1" placeholder="Street address"></div>
+                        <div><label>Address Line 2</label><input type="text" id="pc-delivery-address-2" placeholder="Additional address info"></div>
+                        <div><label>City</label><input type="text" id="pc-delivery-city" placeholder="City"></div>
+                        <div><label>County</label><input type="text" id="pc-delivery-county" placeholder="County"></div>
+                        <div><label>Postcode</label><input type="text" id="pc-delivery-postcode" placeholder="Postcode"></div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button onclick="window.savePC()">Save PC Number</button>
+                    <button onclick="window.showPage('pcnumbers')" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pc-detail" class="page">
+            <h1 id="pc-detail-title">PC Details</h1>
+            
+            <!-- Main Data -->
+            <div class="card">
+                <h2>Main Project Data</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    <div><strong>PC Number:</strong> <span id="pc-detail-number"></span></div>
+                    <div><strong>Company Name:</strong> <span id="pc-detail-company-name"></span></div>
+                    <div><strong>Crown Branch:</strong> <span id="pc-detail-crown-branch"></span></div>
+                    <div><strong>Project Name:</strong> <span id="pc-detail-project-name"></span></div>
+                    <div><strong>Account Manager:</strong> <span id="pc-detail-account-manager"></span></div>
+                    <div><strong>Surveyor:</strong> <span id="pc-detail-surveyor"></span></div>
+                    <div><strong>Status:</strong> <span id="pc-detail-status"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Project Description:</strong><br>
+                    <span id="pc-detail-project-description" style="white-space: pre-wrap;"></span>
+                </div>
+                <div class="form-actions">
+                    <button onclick="window.editPC(db.currentPC.id)" class="warning">Edit</button>
+                    <button onclick="window.createQuote()">Create Quote</button>
+                    <button onclick="window.showActivityModal()">Add Activity</button>
+                    <button onclick="window.showPage('pcnumbers')" class="secondary">Back to list</button>
+                </div>
+            </div>
+            
+            <!-- Collection Address -->
+            <div class="card">
+                <h2>Collection Address & Contact</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div><strong>Contact Name:</strong> <span id="pc-detail-collection-name"></span></div>
+                    <div><strong>Email:</strong> <span id="pc-detail-collection-email"></span></div>
+                    <div><strong>Phone:</strong> <span id="pc-detail-collection-phone"></span></div>
+                    <div><strong>Mobile:</strong> <span id="pc-detail-collection-mobile"></span></div>
+                    <div><strong>Collection Date:</strong> <span id="pc-detail-collection-date"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="pc-detail-collection-address"></span>
+                </div>
+            </div>
+            
+            <!-- Delivery Address -->
+            <div class="card">
+                <h2>Delivery Address & Contact</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div><strong>Contact Name:</strong> <span id="pc-detail-delivery-name"></span></div>
+                    <div><strong>Email:</strong> <span id="pc-detail-delivery-email"></span></div>
+                    <div><strong>Phone:</strong> <span id="pc-detail-delivery-phone"></span></div>
+                    <div><strong>Mobile:</strong> <span id="pc-detail-delivery-mobile"></span></div>
+                    <div><strong>Delivery Date:</strong> <span id="pc-detail-delivery-date"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="pc-detail-delivery-address"></span>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Related Quotes</h2>
+                <table>
+                    <thead><tr><th>Quote Number</th><th>Title</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="pc-quotes"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h2>Related Activities</h2>
+                <table>
+                     <thead><tr><th>ID</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="pc-activities"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="quotes" class="page">
+            <h1>💰 Quotes</h1>
+            <button onclick="window.showNewQuoteModal()">+ New Quote</button>
+            <div class="card">
+                <h2>Quote List</h2>
+                <table>
+                    <thead><tr><th>Quote Number</th><th>PC Number</th><th>Company</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="quotes-list"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div id="quote-builder" class="page">
+            <h1 id="quote-builder-title">New Quote</h1>
+            <div class="card" id="price-list-selector">
+                <h2>Step 1: Select Price List</h2>
+                <label>Available Price Lists *</label>
+                <select id="quote-price-list" onchange="window.onPriceListChange()"></select>
+            </div>
+            <div class="quote-builder" id="quote-items-section" style="display: none;">
+                <div class="card">
+                    <h2>Step 2: Build Quote</h2>
+                    <div class="category-section">
+                        <h3>Human Resources</h3>
+                        <div id="quote-human"></div>
+                        <button onclick="window.addLineItem('human')">+ Add resource</button>
+                    </div>
+                    <div class="category-section">
+                        <h3>Vehicles</h3>
+                        <div id="quote-vehicles"></div>
+                        <button onclick="window.addLineItem('vehicles')">+ Add vehicle</button>
+                    </div>
+                    <div class="category-section">
+                        <h3>Materials</h3>
+                        <div id="quote-materials"></div>
+                        <button onclick="window.addLineItem('materials')">+ Add material</button>
+                    </div>
+                     <div class="category-section">
+                        <h3>Other</h3>
+                        <div id="quote-other"></div>
+                        <button onclick="window.addLineItem('other')">+ Add other</button>
+                    </div>
+                </div>
+                <div class="summary">
+                    <h3>Quote Summary</h3>
+                    <div class="summary-line"><span>Human Resources:</span><span id="sum-human">£0.00</span></div>
+                    <div class="summary-line"><span>Vehicles:</span><span id="sum-vehicles">£0.00</span></div>
+                    <div class="summary-line"><span>Materials:</span><span id="sum-materials">£0.00</span></div>
+                    <div class="summary-line"><span>Other:</span><span id="sum-other">£0.00</span></div>
+                    <div class="summary-line"><span>Net Total:</span><span id="sum-subtotal">£0.00</span></div>
+                    <div class="summary-line">
+                        <span>VAT Rate:</span>
+                        <input type="number" id="quote-vat-rate" value="20.00" step="0.01" min="0" max="100" 
+                               style="width: 60px; margin: 0; padding: 0.25rem;" onchange="window.calculateTotal()">%
+                    </div>
+                    <div class="summary-line"><span>VAT Amount:</span><span id="sum-vat">£0.00</span></div>
+                    <div class="summary-total"><span>Total (inc VAT):</span><span id="sum-total">£0.00</span></div>
+                    
+                    <!-- Additional Quote Fields -->
+                    <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label>Valid Until *</label>
+                            <input type="date" id="quote-valid-until" required>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label>Quote Title *</label>
+                            <input type="text" id="quote-title" placeholder="Brief quote description" required>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label>Description</label>
+                            <textarea id="quote-description" rows="2" placeholder="Detailed quote description..."></textarea>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label>Internal Notes</label>
+                            <textarea id="quote-notes" rows="2" placeholder="Internal notes (not visible to client)..."></textarea>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label>Terms & Conditions</label>
+                            <textarea id="quote-terms" rows="3" placeholder="Payment terms, delivery conditions, etc...">Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions" style="text-align: center;">
+                        <button onclick="window.saveQuote()">Save Quote</button>
+                        <button onclick="window.cancelQuote()" class="secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="activities" class="page">
+            <h1>📋 Activities</h1>
+            <button onclick="window.showActivityModal()">+ New Activity</button>
+            <div class="card">
+                <h2>Activity List</h2>
+                <table>
+                    <thead><tr><th>Title</th><th>PC Number</th><th>Company</th><th>Type</th><th>Scheduled</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="activities-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="resources" class="page">
+            <h1>🔧 Resources</h1>
+            <button onclick="window.showResourceModal()">+ New Resource</button>
+            <div class="card">
+                <h2>Resource Database</h2>
+                <table>
+                    <thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Net Cost</th><th>Supplier</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="resources-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pricelists" class="page">
+             <h1>🏷️ Price Lists</h1>
+            <button onclick="window.showPage('new-pricelist')">+ New Price List</button>
+            <div class="card">
+                <h2>Available Price Lists</h2>
+                <table>
+                    <thead><tr><th>Name</th><th>Version</th><th>Currency</th><th>Effective Period</th><th>Default</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="pricelist-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="new-pricelist" class="page">
+            <h1 id="pricelist-form-title">New Price List</h1>
+            <div class="card">
+                <input type="hidden" id="pricelist-id">
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-grid">
+                        <div><label>Price List Name *</label><input type="text" id="pricelist-name" placeholder="e.g. Standard Commercial Rates 2024" required></div>
+                        <div><label>Version *</label><input type="text" id="pricelist-version" placeholder="e.g. v2.1" required></div>
+                        <div><label>Currency</label><select id="pricelist-currency">
+                            <option value="GBP" selected>GBP (£)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select></div>
+                        <div><label>Status</label><select id="pricelist-status">
+                            <option value="draft">Draft</option>
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select></div>
+                    </div>
+                    <div>
+                        <label>Description</label>
+                        <textarea id="pricelist-description" rows="2" placeholder="Brief description of this price list..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Pricing Configuration -->
+                <div class="form-section">
+                    <h3>Pricing Configuration</h3>
+                    <div class="form-grid">
+                        <div><label>Default Markup (%) *</label><input type="number" id="pricelist-markup" step="0.01" min="0" placeholder="35.00" required></div>
+                        <div><label>Discount (%)</label><input type="number" id="pricelist-discount" step="0.01" min="0" max="100" placeholder="0.00"></div>
+                        <div><label>Effective From *</label><input type="date" id="pricelist-effective-from" required></div>
+                        <div><label>Effective Until</label><input type="date" id="pricelist-effective-to"></div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="pricelist-is-default" style="margin-right: 0.5rem;">
+                            Set as default price list
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Terms & Conditions -->
+                <div class="form-section">
+                    <h3>Terms & Conditions</h3>
+                    <div>
+                        <label>Default Terms</label>
+                        <textarea id="pricelist-terms" rows="3" placeholder="Pricing terms, payment conditions, delivery notes...">Prices valid for 30 days from quote date. Payment terms: 30 days net. Delivery charges may apply.</textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button onclick="window.createPriceList()">Create Price List</button>
+                    <button onclick="window.showPage('pricelists')" class="secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pricelist-detail" class="page">
+            <h1 id="pricelist-title">Price List Details</h1>
+             <div class="card">
+                <button onclick="window.showAddResourceToPriceList()">+ Add Item to Price List</button>
+                <button onclick="window.showPage('pricelists')" class="secondary">Back to list</button>
+            </div>
+            <div class="card">
+                <h2>Price List Items</h2>
+                <table>
+                    <thead><tr><th>Resource</th><th>Net Cost</th><th>Client Price</th><th>Margin %</th><th>Actions</th></tr></thead>
+                    <tbody id="pricelist-items"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="quote-modal" class="modal"><div class="modal-content">
+        <h2>Select PC Number for new quote</h2>
+        <label>PC Number *</label>
+        <select id="quote-modal-pc"></select>
+        <div class="form-actions">
+            <button onclick="window.proceedToQuoteBuilder()">Continue</button>
+            <button onclick="window.closeQuoteModal()" class="secondary">Cancel</button>
+        </div>
+    </div></div>
+
+    <div id="activity-modal" class="modal"><div class="modal-content">
+        <h2 id="activity-modal-title">New Activity</h2>
+        <input type="hidden" id="activity-id">
+        
+        <!-- Basic Info Section -->
+        <div class="form-section">
+            <h3>Basic Information</h3>
+        <div class="form-grid">
+                <div><label>PC Number *</label><select id="activity-pc-select"></select></div>
+                <div><label>Activity Type *</label><input type="text" id="activity-type" placeholder="e.g. Survey, Delivery, Installation"></div>
+                <div><label>Priority</label><select id="activity-priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select></div>
+                <div><label>Status</label><select id="activity-status">
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select></div>
+        </div>
+            <div>
+                <label>Activity Title *</label>
+                <input type="text" id="activity-title" placeholder="Brief description of the activity" required>
+            </div>
+            <div>
+                <label>Description</label>
+                <textarea id="activity-description" rows="2" placeholder="Detailed activity description..."></textarea>
+            </div>
+        </div>
+        
+        <!-- Scheduling Section -->
+        <div class="form-section">
+            <h3>Scheduling</h3>
+            <div class="form-grid">
+                <div><label>Scheduled Date</label><input type="date" id="activity-scheduled-date"></div>
+                <div><label>Scheduled Time</label><input type="time" id="activity-scheduled-time"></div>
+                <div><label>Duration (hours)</label><input type="number" id="activity-duration" step="0.5" min="0" placeholder="e.g. 2.5"></div>
+                <div><label>Assigned To</label><input type="text" id="activity-assigned-to-name" placeholder="Person responsible"></div>
+            </div>
+        </div>
+        
+        <!-- Location & Contact Section -->
+        <div class="form-section">
+            <h3>Location & Contact</h3>
+            <div class="form-grid">
+                <div><label>Location</label><input type="text" id="activity-location" placeholder="e.g. Client Site - Birmingham"></div>
+                <div><label>Contact Name</label><input type="text" id="activity-contact-name" placeholder="Site contact person"></div>
+                <div><label>Contact Phone</label><input type="tel" id="activity-contact-phone" placeholder="Contact phone number"></div>
+            </div>
+        </div>
+        
+        <!-- Completion Section (shown only for completed activities) -->
+        <div class="form-section" id="activity-completion-section" style="display: none;">
+            <h3>Completion Details</h3>
+            <div>
+                <label>Completion Notes</label>
+                <textarea id="activity-completion-notes" rows="3" placeholder="Notes about the completed activity..."></textarea>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button onclick="window.saveActivity()">Save Activity</button>
+            <button onclick="window.closeActivityModal()" class="secondary">Cancel</button>
+        </div>
+    </div></div>
+
+    <div id="resource-modal" class="modal"><div class="modal-content" style="max-width: 800px;">
+        <h2 id="resource-modal-title">New Resource</h2>
+        <input type="hidden" id="resource-id">
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h3>Basic Information</h3>
+            <div class="form-grid">
+                <div><label>Resource Name *</label><input type="text" id="resource-name" placeholder="e.g. LED Downlight - 10W Cool White" required></div>
+                <div><label>SKU</label><input type="text" id="resource-sku" placeholder="e.g. LED-DL-10W-CW"></div>
+                <div><label>Category *</label><select id="resource-category" required>
+                    <option value="">Select...</option>
+                    <option value="lighting">Lighting</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="labour">Labour</option>
+                    <option value="transport">Transport</option>
+                    <option value="materials">Materials</option>
+                    <option value="other">Other</option>
+                </select></div>
+                <div><label>Subcategory</label><input type="text" id="resource-subcategory" placeholder="e.g. downlights, cable"></div>
+            </div>
+            <div>
+                <label>Description</label>
+                <textarea id="resource-description" rows="2" placeholder="Detailed resource description..."></textarea>
+            </div>
+        </div>
+        
+        <!-- Pricing & Units -->
+        <div class="form-section">
+            <h3>Pricing & Units</h3>
+            <div class="form-grid">
+                <div><label>Net Cost (£) *</label><input type="number" id="resource-cost" step="0.01" min="0" placeholder="25.00" required></div>
+                <div><label>Unit *</label><select id="resource-unit" required>
+                    <option value="">Select...</option>
+                    <option value="each">Each</option>
+                    <option value="metre">Metre</option>
+                    <option value="hour">Hour</option>
+                    <option value="day">Day</option>
+                    <option value="kg">Kilogram</option>
+                    <option value="m2">Square Metre</option>
+                </select></div>
+                <div><label>Min Quantity</label><input type="number" id="resource-min-quantity" min="1" placeholder="10"></div>
+                <div><label>Lead Time (days)</label><input type="number" id="resource-lead-time" min="0" placeholder="5"></div>
+            </div>
+        </div>
+        
+        <!-- Supplier Information -->
+        <div class="form-section">
+            <h3>Supplier Information</h3>
+            <div class="form-grid">
+                <div><label>Supplier</label><input type="text" id="resource-supplier" placeholder="e.g. Electrical Supplies Ltd"></div>
+                <div><label>Supplier Code</label><input type="text" id="resource-supplier-code" placeholder="e.g. ESL-LED-001"></div>
+                <div><label>Warranty (months)</label><input type="number" id="resource-warranty" min="0" placeholder="24"></div>
+                <div><label>Status</label><select id="resource-status">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select></div>
+            </div>
+        </div>
+        
+        <!-- Physical Properties -->
+        <div class="form-section">
+            <h3>Physical Properties</h3>
+            <div class="form-grid">
+                <div><label>Weight (kg)</label><input type="number" id="resource-weight" step="0.001" min="0" placeholder="0.150"></div>
+                <div><label>Dimensions</label><input type="text" id="resource-dimensions" placeholder="e.g. 85mm diameter x 25mm depth"></div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button onclick="window.saveResource()">Save Resource</button>
+            <button onclick="window.closeResourceModal()" class="secondary">Cancel</button>
+        </div>
+    </div></div>
+
+    <div id="add-resource-modal" class="modal"><div class="modal-content" style="max-width: 500px;">
+        <h2>Add item to Price List</h2>
+        <label>Select Resource *</label><select id="modal-resource-item-select"></select>
+        <div id="resource-info" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa;"></div>
+        <label>Client Price (£) *</label><input type="number" id="modal-client-price" step="0.01" min="0" oninput="window.calculateMargin()">
+        <div id="margin-info" style="margin-top: 0.5rem;"></div>
+        <div class="form-actions">
+             <button onclick="window.addResourceToPriceList()">Add to Price List</button>
+            <button onclick="window.closeAddResourceModal()" class="secondary">Cancel</button>
+        </div>
+    </div></div>
+
+<script>
+// =================================================================
+// CRM Demo - Portable Version with IndexedDB
+// =================================================================
+
+// Global database connection
+let dbConnection = null;
+let db = {}; // In-memory cache for compatibility
+
+// IndexedDB configuration
+const DB_NAME = 'MF_CRM_Database';
+const DB_VERSION = 1;
+
+// Store names
+const STORES = {
+    PCS: 'pcs',
+    QUOTES: 'quotes', 
+    ACTIVITIES: 'activities',
+    RESOURCES: 'resources',
+    PRICE_LISTS: 'price_lists'
+};
+
+// ========================================
+// IndexedDB Management
+// ========================================
+
+function generateUUID() {
+    if (crypto && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    // Fallback UUID generation
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+async function initializeIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = () => {
+            console.error('❌ IndexedDB connection failed:', request.error);
+            reject(request.error);
+        };
+        
+        request.onsuccess = () => {
+            dbConnection = request.result;
+            console.log('✅ IndexedDB connected successfully');
+            resolve(dbConnection);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            console.log('🏗️ Setting up IndexedDB schema...');
+            
+            // Create PCS store
+            if (!db.objectStoreNames.contains(STORES.PCS)) {
+                const pcsStore = db.createObjectStore(STORES.PCS, { keyPath: 'id' });
+                pcsStore.createIndex('pc_number', 'pc_number', { unique: true });
+                pcsStore.createIndex('company_name', 'company_name', { unique: false });
+                pcsStore.createIndex('account_manager', 'account_manager', { unique: false });
+                pcsStore.createIndex('status', 'status', { unique: false });
+                pcsStore.createIndex('created_at', 'created_at', { unique: false });
+            }
+            
+            // Create QUOTES store
+            if (!db.objectStoreNames.contains(STORES.QUOTES)) {
+                const quotesStore = db.createObjectStore(STORES.QUOTES, { keyPath: 'id' });
+                quotesStore.createIndex('quote_number', 'quote_number', { unique: true });
+                quotesStore.createIndex('pc_id', 'pc_id', { unique: false });
+                quotesStore.createIndex('company_name', 'company_name', { unique: false });
+                quotesStore.createIndex('status', 'status', { unique: false });
+                quotesStore.createIndex('created_at', 'created_at', { unique: false });
+            }
+            
+            // Create ACTIVITIES store
+            if (!db.objectStoreNames.contains(STORES.ACTIVITIES)) {
+                const activitiesStore = db.createObjectStore(STORES.ACTIVITIES, { keyPath: 'id' });
+                activitiesStore.createIndex('pc_id', 'pc_id', { unique: false });
+                activitiesStore.createIndex('company_name', 'company_name', { unique: false });
+                activitiesStore.createIndex('type', 'type', { unique: false });
+                activitiesStore.createIndex('status', 'status', { unique: false });
+                activitiesStore.createIndex('assigned_to', 'assigned_to', { unique: false });
+                activitiesStore.createIndex('scheduled_date', 'scheduled_date', { unique: false });
+            }
+            
+            // Create RESOURCES store
+            if (!db.objectStoreNames.contains(STORES.RESOURCES)) {
+                const resourcesStore = db.createObjectStore(STORES.RESOURCES, { keyPath: 'id' });
+                resourcesStore.createIndex('name', 'name', { unique: false });
+                resourcesStore.createIndex('category', 'category', { unique: false });
+                resourcesStore.createIndex('sku', 'sku', { unique: false });
+                resourcesStore.createIndex('is_active', 'is_active', { unique: false });
+                resourcesStore.createIndex('supplier', 'supplier', { unique: false });
+            }
+            
+            // Create PRICE_LISTS store
+            if (!db.objectStoreNames.contains(STORES.PRICE_LISTS)) {
+                const priceListsStore = db.createObjectStore(STORES.PRICE_LISTS, { keyPath: 'id' });
+                priceListsStore.createIndex('name', 'name', { unique: false });
+                priceListsStore.createIndex('version', 'version', { unique: false });
+                priceListsStore.createIndex('effective_from', 'effective_from', { unique: false });
+                priceListsStore.createIndex('is_default', 'is_default', { unique: false });
+            }
+        };
+    });
+}
+
+// Generic CRUD operations
+async function saveToStore(storeName, data) {
+    return new Promise((resolve, reject) => {
+        const transaction = dbConnection.transaction([storeName], 'readwrite');
+        const store = transaction.objectStore(storeName);
+        const request = store.put(data);
+        
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function loadFromStore(storeName, id) {
+    return new Promise((resolve, reject) => {
+        const transaction = dbConnection.transaction([storeName], 'readonly');
+        const store = transaction.objectStore(storeName);
+        const request = store.get(id);
+        
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function loadAllFromStore(storeName) {
+    return new Promise((resolve, reject) => {
+        const transaction = dbConnection.transaction([storeName], 'readonly');
+        const store = transaction.objectStore(storeName);
+        const request = store.getAll();
+        
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function deleteFromStore(storeName, id) {
+    return new Promise((resolve, reject) => {
+        const transaction = dbConnection.transaction([storeName], 'readwrite');
+        const store = transaction.objectStore(storeName);
+        const request = store.delete(id);
+        
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Load all data into memory cache for UI compatibility
+async function loadDataFromIndexedDB() {
+    try {
+        const [pcs, quotes, activities, resources, priceLists] = await Promise.all([
+            loadAllFromStore(STORES.PCS),
+            loadAllFromStore(STORES.QUOTES),
+            loadAllFromStore(STORES.ACTIVITIES), 
+            loadAllFromStore(STORES.RESOURCES),
+            loadAllFromStore(STORES.PRICE_LISTS)
+        ]);
+        
+        db = {
+            pcs: pcs || [],
+            quotes: quotes || [],
+            activities: activities || [],
+            resources: resources || [],
+            priceLists: priceLists || [],
+            // Compatibility fields
+            currentPC: null,
+            currentQuote: null,
+            currentActivity: null,
+            currentPriceList: null,
+            currentResource: null,
+            editingPC: null,
+            editingQuote: null,
+            editingActivity: null,
+            editingResource: null,
+            selectedPriceListId: null,
+            quoteItems: { human: [], vehicles: [], materials: [], other: [] }
+        };
+        
+        console.log('📦 Data loaded from IndexedDB:', {
+            pcs: db.pcs.length,
+            quotes: db.quotes.length,
+            activities: db.activities.length,
+            resources: db.resources.length,
+            priceLists: db.priceLists.length
+        });
+        
+        if (db.pcs.length === 0) {
+            console.log('🌱 No data found, initializing with demo data.');
+            await initializeWithDemoData();
+        }
+    } catch (error) {
+        console.error('❌ Error loading from IndexedDB:', error);
+        throw error;
+    }
+}
+
+// Save data back to IndexedDB
+async function saveDataToIndexedDB() {
+    try {
+        // Save all arrays back to their respective stores
+        const savePromises = [
+            ...db.pcs.map(pc => saveToStore(STORES.PCS, pc)),
+            ...db.quotes.map(quote => saveToStore(STORES.QUOTES, quote)),
+            ...db.activities.map(activity => saveToStore(STORES.ACTIVITIES, activity)),
+            ...db.resources.map(resource => saveToStore(STORES.RESOURCES, resource)),
+            ...db.priceLists.map(priceList => saveToStore(STORES.PRICE_LISTS, priceList))
+        ];
+        
+        await Promise.all(savePromises);
+        console.log('💾 Data saved to IndexedDB successfully');
+    } catch (error) {
+        console.error('❌ Error saving to IndexedDB:', error);
+        throw error;
+    }
+}
+
+async function initializeWithDemoData() {
+    const now = new Date().toISOString();
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Generate UUIDs for demo data
+    const demoUUIDs = {
+        pc1: generateUUID(),
+        pc2: generateUUID(),
+        res1: generateUUID(),
+        res2: generateUUID(),
+        res3: generateUUID(),
+        res4: generateUUID(),
+        res5: generateUUID(),
+        pl1: generateUUID(),
+        q1: generateUUID(),
+        act1: generateUUID(),
+        act2: generateUUID()
+    };
+    
+    // Enhanced PC Numbers with full specification fields
+    const demoPCs = [
+        {
+            id: demoUUIDs.pc1,
+            pc_number: 'PC-000001',
+            company_name: 'Acme Construction Ltd',
+            crown_branch: 'Birmingham Crown Court',
+            project_name: 'Office Refurbishment Phase 2',
+            project_description: 'Complete electrical rewiring and lighting upgrade for main office building including installation of modern LED systems and emergency lighting.',
+            account_manager: 'John Smith',
+            surveyor: 'Mike Johnson',
+            collection_first_name: 'Sarah',
+            collection_surname: 'Williams',
+            collection_email: 'sarah.w@acme.com',
+            collection_phone: '01216549870',
+            collection_mobile: '07123456789',
+            collection_address_1: '123 High Street',
+            collection_address_2: 'Industrial Estate',
+            collection_city: 'Birmingham',
+            collection_county: 'West Midlands',
+            collection_postcode: 'B1 1AA',
+            collection_date: '2024-04-15',
+            delivery_first_name: 'Mark',
+            delivery_surname: 'Thompson',
+            delivery_email: 'mark.t@newsite.com',
+            delivery_phone: '01234567890',
+            delivery_mobile: '07111222333',
+            delivery_address_1: '456 New Road',
+            delivery_address_2: 'Business Park',
+            delivery_city: 'Manchester',
+            delivery_county: 'Greater Manchester',
+            delivery_postcode: 'M1 2BB',
+            delivery_date: '2024-04-20',
+            status: 'active',
+            created_at: now,
+            updated_at: now
+        },
+        {
+            id: demoUUIDs.pc2,
+            pc_number: 'PC-000002',
+            company_name: 'Globex Industries Ltd',
+            crown_branch: 'Manchester Crown Court',
+            project_name: 'Warehouse Lighting Upgrade',
+            project_description: 'Replacement of old fluorescent lighting with energy-efficient LED lighting throughout the main warehouse facility.',
+            account_manager: 'Anna Brown',
+            surveyor: 'David Wilson',
+            collection_first_name: 'James',
+            collection_surname: 'Roberts',
+            collection_email: 'james.r@globex.com',
+            collection_phone: '01619876543',
+            collection_mobile: '07987654321',
+            collection_address_1: '789 Industrial Road',
+            collection_address_2: null,
+            collection_city: 'Manchester',
+            collection_county: 'Greater Manchester',
+            collection_postcode: 'M2 3CC',
+            collection_date: '2024-04-25',
+            delivery_first_name: 'Emma',
+            delivery_surname: 'Davis',
+            delivery_email: 'emma.d@globex.com',
+            delivery_phone: '01619876543',
+            delivery_mobile: '07444555666',
+            delivery_address_1: '789 Industrial Road',
+            delivery_address_2: 'Warehouse Complex',
+            delivery_city: 'Manchester',
+            delivery_county: 'Greater Manchester',
+            delivery_postcode: 'M2 3CC',
+            delivery_date: '2024-04-25',
+            status: 'active',
+            created_at: now,
+            updated_at: now
+        }
+    ];
+    
+    // Enhanced Resources with supplier information
+    const demoResources = [
+        {
+            id: demoUUIDs.res1,
+            name: 'LED Downlight - 10W Cool White',
+            description: 'Energy efficient LED downlight with 10W power consumption, cool white temperature (4000K), suitable for commercial installations.',
+            category: 'lighting',
+            subcategory: 'downlights',
+            sku: 'LED-DL-10W-CW',
+            unit: 'each',
+            net_cost: 25.00,
+            supplier: 'Electrical Supplies Ltd',
+            supplier_code: 'ESL-LED-001',
+            is_active: true,
+            min_quantity: 10,
+            lead_time_days: 5,
+            weight_kg: 0.150,
+            dimensions: '85mm diameter x 25mm depth',
+            warranty_months: 24,
+            created_at: now,
+            updated_at: now
+        },
+        {
+            id: demoUUIDs.res2,
+            name: 'Electrician - Senior Level',
+            description: 'Qualified electrician with 5+ years commercial experience',
+            category: 'labour',
+            subcategory: 'installation',
+            sku: 'LAB-ELEC-SR',
+            unit: 'hour',
+            net_cost: 45.00,
+            supplier: 'Internal',
+            supplier_code: null,
+            is_active: true,
+            min_quantity: 1,
+            lead_time_days: 0,
+            weight_kg: null,
+            dimensions: null,
+            warranty_months: null,
+            created_at: now,
+            updated_at: now
+        }
+    ];
+    
+    // Enhanced Price Lists with versioning
+    const demoPriceLists = [
+        {
+            id: demoUUIDs.pl1,
+            name: 'Standard Commercial Rates 2024',
+            version: 'v2.1',
+            description: 'Updated rates for commercial electrical projects including new LED technology pricing',
+            effective_from: '2024-01-01',
+            effective_to: '2024-12-31',
+            is_default: true,
+            markup_percentage: 35.00,
+            discount_percentage: 0.00,
+            currency: 'GBP',
+            pricing_data: {
+                [demoUUIDs.res1]: { price: 35.00, markup_percentage: 40.00, effective_price: 35.00, min_quantity: 10 },
+                [demoUUIDs.res2]: { price: 65.00, markup_percentage: 44.44, effective_price: 65.00, min_quantity: 1 }
+            },
+            terms: 'Prices valid for 30 days from quote date. Payment terms: 30 days net. Delivery charges may apply.',
+            created_at: now,
+            updated_at: now
+        }
+    ];
+    
+    // Enhanced Quotes with proper structure
+    const demoQuotes = [
+        {
+            id: demoUUIDs.q1,
+            quote_number: 'QT-000001',
+            pc_id: demoUUIDs.pc1,
+            pc_number: 'PC-000001',
+            company_name: 'Acme Construction Ltd',
+            title: 'Office Refurbishment - Electrical Works',
+            description: 'Supply and installation of LED lighting system including downlights, emergency lighting and associated electrical work.',
+            status: 'pending',
+            valid_until: '2024-05-15',
+            subtotal: 1750.00,
+            vat_rate: 20.00,
+            vat_amount: 350.00,
+            total_cost: 2100.00,
+            notes: 'Client requested delivery in phases to minimize disruption to operations.',
+            terms_conditions: 'Payment terms: 30 days net. All work carried out to BS 7671 standards. Materials warranty as per manufacturer specifications.',
+            line_items: [
+                {
+                    resource_id: demoUUIDs.res1,
+                    resource_name: 'LED Downlight - 10W Cool White',
+                    quantity: 50,
+                    unit_price: 35.00,
+                    line_total: 1750.00,
+                    notes: 'Cool white temperature specified by client'
+                }
+            ],
+            created_at: now,
+            updated_at: now
+        }
+    ];
+    
+    // Enhanced Activities with scheduling
+    const demoActivities = [
+        {
+            id: demoUUIDs.act1,
+            title: 'Site Survey - Electrical Assessment',
+            description: 'Initial site survey to assess existing electrical infrastructure and plan LED lighting installation.',
+            pc_id: demoUUIDs.pc1,
+            pc_number: 'PC-000001',
+            company_name: 'Acme Construction Ltd',
+            type: 'survey',
+            status: 'completed',
+            priority: 'high',
+            scheduled_date: '2024-04-08',
+            scheduled_time: '09:30:00',
+            duration_hours: 3.0,
+            assigned_to: null,
+            assigned_to_name: 'Mike Johnson',
+            location: 'Client Site - Birmingham',
+            contact_name: 'Sarah Williams',
+            contact_phone: '07123456789',
+            completion_notes: 'Survey completed successfully. Existing electrical infrastructure adequate for LED upgrade. Access arrangements confirmed with site contact.',
+            completed_at: '2024-04-08T12:30:00.000Z',
+            created_at: now,
+            updated_at: '2024-04-08T12:30:00.000Z'
+        }
+    ];
+    
+    // Set data in memory cache
+    db = {
+        pcs: demoPCs,
+        quotes: demoQuotes,
+        activities: demoActivities,
+        resources: demoResources,
+        priceLists: demoPriceLists,
+        // Compatibility fields
+        currentPC: null,
+        currentQuote: null,
+        currentActivity: null,
+        currentPriceList: null,
+        currentResource: null,
+        editingPC: null,
+        editingQuote: null,
+        editingActivity: null,
+        editingResource: null,
+        selectedPriceListId: null,
+        quoteItems: { human: [], vehicles: [], materials: [], other: [] }
+    };
+    
+    // Save to IndexedDB
+    await saveDataToIndexedDB();
+    console.log('✅ Demo data initialized successfully');
+}
+
+async function resetData() {
+    if (confirm('Are you sure you want to delete all demo data and start over? This operation is irreversible.')) {
+        try {
+            // Clear IndexedDB
+            if (dbConnection) {
+                dbConnection.close();
+            }
+            await new Promise((resolve, reject) => {
+                const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
+                deleteRequest.onsuccess = () => resolve();
+                deleteRequest.onerror = () => reject(deleteRequest.error);
+            });
+            console.log('🗑️ IndexedDB cleared successfully');
+        location.reload();
+        } catch (error) {
+            console.error('❌ Error clearing IndexedDB:', error);
+            alert('Error clearing database. Please refresh the page manually.');
+        }
+    }
+}
+
+// ========================================
+// Nawigacja i UI
+// ========================================
+
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const pageToNavMap = {
+        'dashboard': 'dashboard', 'pcnumbers': 'pcnumbers', 'new-pc': 'pcnumbers', 'pc-detail': 'pcnumbers',
+        'quotes': 'quotes', 'quote-builder': 'quotes', 'activities': 'activities', 'resources': 'resources',
+        'pricelists': 'pricelists', 'new-pricelist': 'pricelists', 'pricelist-detail': 'pricelists'
+    };
+    const navButton = document.querySelector(`.nav-btn[onclick="window.showPage('${pageToNavMap[pageId]}')"]`);
+    if (navButton) navButton.classList.add('active');
+
+    // Reset stanów edycji przy zmianie strony (chyba, że idziemy do formularza)
+    if (pageId !== 'new-pc') db.editingPC = null;
+    if (pageId !== 'quote-builder') db.editingQuote = null;
+    if (pageId !== 'new-pricelist') db.currentPriceList = null;
+    
+    // Clear PC form when going to new PC page
+    if (pageId === 'new-pc' && !db.editingPC) {
+        clearPCForm();
+    }
+    
+    // Clear price list form when going to new price list page
+    if (pageId === 'new-pricelist' && !document.getElementById('pricelist-id').value) {
+        clearPriceListForm();
+        // Set default effective date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('pricelist-effective-from').value = today;
+    }
+
+    // Odśwież widok
+    switch(pageId) {
+        case 'dashboard': updateDashboard(); break;
+        case 'pcnumbers': updatePCList(); break;
+        case 'quotes': updateQuotesList(); break;
+        case 'activities': updateActivitiesList(); break;
+        case 'resources': updateResourcesList(); break;
+        case 'pricelists': updatePriceListsTable(); break;
+    }
+}
+
+function clearPCForm() {
+    document.getElementById('pc-form-title').textContent = 'New PC Number';
+    document.getElementById('pc-id').value = '';
+    
+    // Main data fields
+    document.getElementById('pc-number').value = '';
+    document.getElementById('pc-company-name').value = '';
+    document.getElementById('pc-crown-branch').value = '';
+    document.getElementById('pc-project-name').value = '';
+    document.getElementById('pc-project-description').value = '';
+    document.getElementById('pc-account-manager').value = '';
+    document.getElementById('pc-surveyor').value = '';
+    document.getElementById('pc-status').value = 'active';
+    
+    // Collection address fields
+    document.getElementById('pc-collection-first-name').value = '';
+    document.getElementById('pc-collection-surname').value = '';
+    document.getElementById('pc-collection-email').value = '';
+    document.getElementById('pc-collection-phone').value = '';
+    document.getElementById('pc-collection-mobile').value = '';
+    document.getElementById('pc-collection-address-1').value = '';
+    document.getElementById('pc-collection-address-2').value = '';
+    document.getElementById('pc-collection-city').value = '';
+    document.getElementById('pc-collection-county').value = '';
+    document.getElementById('pc-collection-postcode').value = '';
+    document.getElementById('pc-collection-date').value = '';
+    
+    // Delivery address fields
+    document.getElementById('pc-delivery-first-name').value = '';
+    document.getElementById('pc-delivery-surname').value = '';
+    document.getElementById('pc-delivery-email').value = '';
+    document.getElementById('pc-delivery-phone').value = '';
+    document.getElementById('pc-delivery-mobile').value = '';
+    document.getElementById('pc-delivery-address-1').value = '';
+    document.getElementById('pc-delivery-address-2').value = '';
+    document.getElementById('pc-delivery-city').value = '';
+    document.getElementById('pc-delivery-county').value = '';
+    document.getElementById('pc-delivery-postcode').value = '';
+    document.getElementById('pc-delivery-date').value = '';
+    
+    // Uncheck the same address checkbox
+    document.getElementById('pc-same-as-collection').checked = false;
+}
+
+// ========================================
+// Dashboard
+// ========================================
+
+function updateDashboard() {
+    document.getElementById('stat-pc').textContent = db.pcs.length;
+    document.getElementById('stat-quotes').textContent = db.quotes.length;
+    document.getElementById('stat-activities').textContent = db.activities.length;
+    const totalValue = db.quotes.reduce((sum, q) => sum + (q.total || 0), 0);
+    document.getElementById('stat-value').textContent = '£' + totalValue.toFixed(2);
+    
+    const recentPCBody = document.getElementById('recent-pc');
+    recentPCBody.innerHTML = '';
+    db.pcs.slice(-5).reverse().forEach(pc => {
+        recentPCBody.innerHTML += `<tr><td>${pc.pc_number || pc.number}</td><td>${pc.company_name || pc.company}</td><td>${pc.project_name || pc.reference || '-'}</td></tr>`;
+    });
+}
+
+// ========================================
+// Numery PC
+// ========================================
+
+function updatePCList() {
+    const tbody = document.getElementById('pc-list');
+    tbody.innerHTML = '';
+    db.pcs.forEach(pc => {
+        const contact = [pc.collection_first_name, pc.collection_surname].filter(Boolean).join(' ') || pc.contactPerson || '-';
+        tbody.innerHTML += `<tr>
+            <td>${pc.pc_number || pc.number}</td>
+            <td>${pc.company_name || pc.company}</td>
+            <td>${pc.project_name || pc.reference || '-'}</td>
+            <td>${contact}</td>
+            <td><div class="action-btn-group">
+                <button onclick="window.viewPC('${pc.id}')" class="secondary">Show</button>
+                <button onclick="window.editPC('${pc.id}')" class="warning">Edit</button>
+            </div></td>
+        </tr>`;
+    });
+}
+
+async function savePC() {
+    const id = document.getElementById('pc-id').value;
+    const now = new Date().toISOString();
+    
+    const pcData = {
+        pc_number: document.getElementById('pc-number').value.trim(),
+        company_name: document.getElementById('pc-company-name').value.trim(),
+        crown_branch: document.getElementById('pc-crown-branch').value.trim(),
+        project_name: document.getElementById('pc-project-name').value.trim(),
+        project_description: document.getElementById('pc-project-description').value.trim(),
+        account_manager: document.getElementById('pc-account-manager').value.trim(),
+        surveyor: document.getElementById('pc-surveyor').value.trim(),
+        status: document.getElementById('pc-status').value,
+        
+        // Collection address fields
+        collection_first_name: document.getElementById('pc-collection-first-name').value.trim(),
+        collection_surname: document.getElementById('pc-collection-surname').value.trim(),
+        collection_email: document.getElementById('pc-collection-email').value.trim(),
+        collection_phone: document.getElementById('pc-collection-phone').value.trim(),
+        collection_mobile: document.getElementById('pc-collection-mobile').value.trim(),
+        collection_address_1: document.getElementById('pc-collection-address-1').value.trim(),
+        collection_address_2: document.getElementById('pc-collection-address-2').value.trim(),
+        collection_city: document.getElementById('pc-collection-city').value.trim(),
+        collection_county: document.getElementById('pc-collection-county').value.trim(),
+        collection_postcode: document.getElementById('pc-collection-postcode').value.trim(),
+        collection_date: document.getElementById('pc-collection-date').value,
+        
+        // Delivery address fields
+        delivery_first_name: document.getElementById('pc-delivery-first-name').value.trim(),
+        delivery_surname: document.getElementById('pc-delivery-surname').value.trim(),
+        delivery_email: document.getElementById('pc-delivery-email').value.trim(),
+        delivery_phone: document.getElementById('pc-delivery-phone').value.trim(),
+        delivery_mobile: document.getElementById('pc-delivery-mobile').value.trim(),
+        delivery_address_1: document.getElementById('pc-delivery-address-1').value.trim(),
+        delivery_address_2: document.getElementById('pc-delivery-address-2').value.trim(),
+        delivery_city: document.getElementById('pc-delivery-city').value.trim(),
+        delivery_county: document.getElementById('pc-delivery-county').value.trim(),
+        delivery_postcode: document.getElementById('pc-delivery-postcode').value.trim(),
+        delivery_date: document.getElementById('pc-delivery-date').value,
+        
+        updated_at: now
+    };
+
+    // Validation - only PC Number, Company Name, Project Name, and Account Manager are required
+    if (!pcData.pc_number || !pcData.company_name || !pcData.project_name || !pcData.account_manager) {
+        alert('PC Number, Company Name, Project Name, and Account Manager are required!');
+        return;
+    }
+
+    try {
+        if (id) { // Edit
+        const index = db.pcs.findIndex(p => p.id === id);
+            if (index !== -1) {
+        db.pcs[index] = { ...db.pcs[index], ...pcData };
+                await saveToStore(STORES.PCS, db.pcs[index]);
+            }
+        } else { // New
+            pcData.id = generateUUID();
+            pcData.created_at = now;
+        db.pcs.push(pcData);
+            await saveToStore(STORES.PCS, pcData);
+    }
+    
+        console.log('✅ PC Number saved successfully');
+    showPage('pcnumbers');
+    } catch (error) {
+        console.error('❌ Error saving PC Number:', error);
+        alert('Error saving PC Number. Please try again.');
+    }
+}
+
+function editPC(id) {
+    const pc = db.pcs.find(p => p.id === id);
+    if (!pc) return;
+    db.editingPC = pc;
+    
+    document.getElementById('pc-form-title').textContent = 'Edit PC Number';
+    document.getElementById('pc-id').value = pc.id;
+    
+    // Main data fields
+    document.getElementById('pc-number').value = pc.pc_number || '';
+    document.getElementById('pc-company-name').value = pc.company_name || '';
+    document.getElementById('pc-crown-branch').value = pc.crown_branch || '';
+    document.getElementById('pc-project-name').value = pc.project_name || '';
+    document.getElementById('pc-project-description').value = pc.project_description || '';
+    document.getElementById('pc-account-manager').value = pc.account_manager || '';
+    document.getElementById('pc-surveyor').value = pc.surveyor || '';
+    document.getElementById('pc-status').value = pc.status || 'active';
+    
+    // Collection address fields
+    document.getElementById('pc-collection-first-name').value = pc.collection_first_name || '';
+    document.getElementById('pc-collection-surname').value = pc.collection_surname || '';
+    document.getElementById('pc-collection-email').value = pc.collection_email || '';
+    document.getElementById('pc-collection-phone').value = pc.collection_phone || '';
+    document.getElementById('pc-collection-mobile').value = pc.collection_mobile || '';
+    document.getElementById('pc-collection-address-1').value = pc.collection_address_1 || '';
+    document.getElementById('pc-collection-address-2').value = pc.collection_address_2 || '';
+    document.getElementById('pc-collection-city').value = pc.collection_city || '';
+    document.getElementById('pc-collection-county').value = pc.collection_county || '';
+    document.getElementById('pc-collection-postcode').value = pc.collection_postcode || '';
+    document.getElementById('pc-collection-date').value = pc.collection_date || '';
+    
+    // Delivery address fields
+    document.getElementById('pc-delivery-first-name').value = pc.delivery_first_name || '';
+    document.getElementById('pc-delivery-surname').value = pc.delivery_surname || '';
+    document.getElementById('pc-delivery-email').value = pc.delivery_email || '';
+    document.getElementById('pc-delivery-phone').value = pc.delivery_phone || '';
+    document.getElementById('pc-delivery-mobile').value = pc.delivery_mobile || '';
+    document.getElementById('pc-delivery-address-1').value = pc.delivery_address_1 || '';
+    document.getElementById('pc-delivery-address-2').value = pc.delivery_address_2 || '';
+    document.getElementById('pc-delivery-city').value = pc.delivery_city || '';
+    document.getElementById('pc-delivery-county').value = pc.delivery_county || '';
+    document.getElementById('pc-delivery-postcode').value = pc.delivery_postcode || '';
+    document.getElementById('pc-delivery-date').value = pc.delivery_date || '';
+    
+    showPage('new-pc');
+}
+
+function copyCollectionToDelivery() {
+    const checkbox = document.getElementById('pc-same-as-collection');
+    if (checkbox.checked) {
+        // Copy collection data to delivery fields
+        document.getElementById('pc-delivery-first-name').value = document.getElementById('pc-collection-first-name').value;
+        document.getElementById('pc-delivery-surname').value = document.getElementById('pc-collection-surname').value;
+        document.getElementById('pc-delivery-email').value = document.getElementById('pc-collection-email').value;
+        document.getElementById('pc-delivery-phone').value = document.getElementById('pc-collection-phone').value;
+        document.getElementById('pc-delivery-mobile').value = document.getElementById('pc-collection-mobile').value;
+        document.getElementById('pc-delivery-address-1').value = document.getElementById('pc-collection-address-1').value;
+        document.getElementById('pc-delivery-address-2').value = document.getElementById('pc-collection-address-2').value;
+        document.getElementById('pc-delivery-city').value = document.getElementById('pc-collection-city').value;
+        document.getElementById('pc-delivery-county').value = document.getElementById('pc-collection-county').value;
+        document.getElementById('pc-delivery-postcode').value = document.getElementById('pc-collection-postcode').value;
+        document.getElementById('pc-delivery-date').value = document.getElementById('pc-collection-date').value;
+    }
+}
+
+function viewPC(id) {
+    const pc = db.pcs.find(p => p.id === id);
+    if (!pc) return;
+    db.currentPC = pc;
+    
+    document.getElementById('pc-detail-title').textContent = `Details: ${pc.pc_number || pc.number}`;
+    
+    // Main data
+    document.getElementById('pc-detail-number').textContent = pc.pc_number || pc.number || '-';
+    document.getElementById('pc-detail-company-name').textContent = pc.company_name || pc.company || '-';
+    document.getElementById('pc-detail-crown-branch').textContent = pc.crown_branch || '-';
+    document.getElementById('pc-detail-project-name').textContent = pc.project_name || pc.reference || '-';
+    document.getElementById('pc-detail-account-manager').textContent = pc.account_manager || '-';
+    document.getElementById('pc-detail-surveyor').textContent = pc.surveyor || '-';
+    document.getElementById('pc-detail-status').textContent = pc.status || 'active';
+    document.getElementById('pc-detail-project-description').textContent = pc.project_description || '-';
+    
+    // Collection address
+    const collectionName = [pc.collection_first_name, pc.collection_surname].filter(Boolean).join(' ') || pc.contactPerson || '-';
+    document.getElementById('pc-detail-collection-name').textContent = collectionName;
+    document.getElementById('pc-detail-collection-email').textContent = pc.collection_email || pc.email || '-';
+    document.getElementById('pc-detail-collection-phone').textContent = pc.collection_phone || '-';
+    document.getElementById('pc-detail-collection-mobile').textContent = pc.collection_mobile || pc.mobilePhone || '-';
+    document.getElementById('pc-detail-collection-date').textContent = pc.collection_date ? new Date(pc.collection_date).toLocaleDateString() : '-';
+    
+    const collectionAddress = [
+        pc.collection_address_1,
+        pc.collection_address_2,
+        pc.collection_city,
+        pc.collection_county,
+        pc.collection_postcode
+    ].filter(Boolean).join(', ') || pc.address || '-';
+    document.getElementById('pc-detail-collection-address').textContent = collectionAddress;
+    
+    // Delivery address
+    const deliveryName = [pc.delivery_first_name, pc.delivery_surname].filter(Boolean).join(' ') || '-';
+    document.getElementById('pc-detail-delivery-name').textContent = deliveryName;
+    document.getElementById('pc-detail-delivery-email').textContent = pc.delivery_email || '-';
+    document.getElementById('pc-detail-delivery-phone').textContent = pc.delivery_phone || '-';
+    document.getElementById('pc-detail-delivery-mobile').textContent = pc.delivery_mobile || '-';
+    document.getElementById('pc-detail-delivery-date').textContent = pc.delivery_date ? new Date(pc.delivery_date).toLocaleDateString() : '-';
+    
+    const deliveryAddress = [
+        pc.delivery_address_1,
+        pc.delivery_address_2,
+        pc.delivery_city,
+        pc.delivery_county,
+        pc.delivery_postcode
+    ].filter(Boolean).join(', ') || '-';
+    document.getElementById('pc-detail-delivery-address').textContent = deliveryAddress;
+
+    const quotesTbody = document.getElementById('pc-quotes');
+    quotesTbody.innerHTML = '';
+    db.quotes.filter(q => (q.pc_id === id || q.pcId === id)).forEach(q => {
+        const quoteNumber = q.quote_number || q.number;
+        const totalCost = q.total_cost || q.total || 0;
+        const validUntil = q.valid_until ? ` (Valid until: ${new Date(q.valid_until).toLocaleDateString()})` : '';
+        quotesTbody.innerHTML += `<tr>
+            <td>${quoteNumber}</td>
+            <td>${q.title || 'v' + (q.version || 1)}</td>
+            <td>£${totalCost.toFixed(2)}</td>
+            <td>${q.status}${validUntil}</td>
+            <td><button onclick="alert('Feature under development')">Show</button></td>
+        </tr>`;
+    });
+
+    const activitiesTbody = document.getElementById('pc-activities');
+    activitiesTbody.innerHTML = '';
+    db.activities.filter(a => a.pcId === id).forEach(a => {
+        activitiesTbody.innerHTML += `<tr><td>${a.crmId}</td><td>${a.type}</td><td>${new Date(a.date).toLocaleDateString()}</td><td>${a.status}</td>
+        <td><button onclick="alert('Feature under development')">Show</button></td></tr>`;
+    });
+
+    showPage('pc-detail');
+}
+
+// ========================================
+// Oferty
+// ========================================
+
+function showNewQuoteModal() {
+    const pcSelect = document.getElementById('quote-modal-pc');
+    pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
+    db.pcs.forEach(pc => {
+        pcSelect.innerHTML += `<option value="${pc.id}">${pc.number} - ${pc.company}</option>`;
+    });
+    document.getElementById('quote-modal').classList.add('active');
+}
+
+function closeQuoteModal() {
+    document.getElementById('quote-modal').classList.remove('active');
+}
+
+function proceedToQuoteBuilder() {
+    const pcId = document.getElementById('quote-modal-pc').value;
+    if (!pcId) {
+        alert('Please select PC number!');
+        return;
+    }
+    db.currentPC = db.pcs.find(p => p.id === pcId);
+    closeQuoteModal();
+    createQuote();
+}
+
+function createQuote() {
+    if (!db.currentPC) return;
+    db.editingQuote = null;
+    db.quoteItems = { human: [], vehicles: [], materials: [], other: [] };
+    
+    document.getElementById('quote-builder-title').textContent = `New Quote for: ${db.currentPC.pc_number || db.currentPC.number}`;
+    const priceListSelect = document.getElementById('quote-price-list');
+    priceListSelect.innerHTML = '<option value="">Select price list...</option>';
+    db.priceLists.filter(pl => pl.status === 'active' || pl.is_default).forEach(pl => {
+        priceListSelect.innerHTML += `<option value="${pl.id}">${pl.name}</option>`;
+    });
+
+    // Initialize quote fields with defaults
+    const validUntilDate = new Date();
+    validUntilDate.setDate(validUntilDate.getDate() + 30); // Default 30 days validity
+    document.getElementById('quote-valid-until').value = validUntilDate.toISOString().split('T')[0];
+    
+    document.getElementById('quote-vat-rate').value = '20.00';
+    document.getElementById('quote-title').value = '';
+    document.getElementById('quote-description').value = '';
+    document.getElementById('quote-notes').value = '';
+    document.getElementById('quote-terms').value = 'Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.';
+
+    document.getElementById('quote-items-section').style.display = 'none';
+    document.getElementById('price-list-selector').style.display = 'block';
+    showPage('quote-builder');
+}
+
+function onPriceListChange() {
+    db.selectedPriceListId = document.getElementById('quote-price-list').value;
+    if (db.selectedPriceListId) {
+        document.getElementById('quote-items-section').style.display = 'grid';
+        // Wyczyść istniejące pozycje przy zmianie cennika
+        db.quoteItems = { human: [], vehicles: [], materials: [], other: [] };
+        document.getElementById('quote-human').innerHTML = '';
+        document.getElementById('quote-vehicles').innerHTML = '';
+        document.getElementById('quote-materials').innerHTML = '';
+        document.getElementById('quote-other').innerHTML = '';
+        calculateTotal();
+    } else {
+        document.getElementById('quote-items-section').style.display = 'none';
+    }
+}
+
+function addLineItem(category) {
+    const priceList = db.priceLists.find(p => p.id === db.selectedPriceListId);
+    if (!priceList) return;
+
+    const categoryItems = priceList.items.filter(item => {
+        const resource = db.resources.find(r => r.id === item.resourceId);
+        return resource && resource.category === category;
+    });
+
+    if (categoryItems.length === 0) {
+        alert(`No resources in category "${category}" in this price list.`);
+        return;
+    }
+
+    const lineId = 'line_' + Date.now();
+    const container = document.getElementById('quote-' + category);
+    const lineDiv = document.createElement('div');
+    lineDiv.className = 'line-item';
+    lineDiv.id = lineId;
+
+    let options = '<option value="">Select...</option>';
+    categoryItems.forEach(item => {
+        const resource = db.resources.find(r => r.id === item.resourceId);
+        options += `<option value="${resource.id}" data-price="${item.clientPrice}">${resource.name}</option>`;
+    });
+
+    lineDiv.innerHTML = `
+        <select onchange="window.updateLinePrice('${lineId}', '${category}')">${options}</select>
+        <input type="number" value="1" min="1" onchange="window.updateLineQty('${lineId}', '${category}')">
+        <input type="text" readonly value="£0.00">
+        <span class="line-item-total">£0.00</span>
+        <button class="remove-btn" onclick="window.removeLine('${lineId}', '${category}')">×</button>
+    `;
+    container.appendChild(lineDiv);
+    db.quoteItems[category].push({ id: lineId, resourceId: '', name: '', qty: 1, rate: 0, total: 0 });
+}
+
+function updateLinePrice(lineId, category) {
+    const line = document.getElementById(lineId);
+    const select = line.querySelector('select');
+    const option = select.options[select.selectedIndex];
+    const price = parseFloat(option.dataset.price || 0);
+    const resourceId = select.value;
+
+    const item = db.quoteItems[category].find(i => i.id === lineId);
+    if (item) {
+        item.resourceId = resourceId;
+        item.name = option.text;
+        item.rate = price;
+        line.querySelectorAll('input')[1].value = '£' + price.toFixed(2);
+        updateLineQty(lineId, category);
+    }
+}
+
+function updateLineQty(lineId, category) {
+    const line = document.getElementById(lineId);
+    const qty = parseFloat(line.querySelectorAll('input')[0].value) || 1;
+    const item = db.quoteItems[category].find(i => i.id === lineId);
+    if(item) {
+        item.qty = qty;
+        item.total = item.qty * item.rate;
+        line.querySelector('.line-item-total').textContent = '£' + item.total.toFixed(2);
+    }
+    calculateTotal();
+}
+
+function removeLine(lineId, category) {
+    document.getElementById(lineId).remove();
+    db.quoteItems[category] = db.quoteItems[category].filter(i => i.id !== lineId);
+    calculateTotal();
+}
+
+
+function calculateTotal() {
+    let totals = { human: 0, vehicles: 0, materials: 0, other: 0 };
+    for (let cat in db.quoteItems) {
+        db.quoteItems[cat].forEach(item => { totals[cat] += item.total; });
+    }
+    
+    document.getElementById('sum-human').textContent = '£' + totals.human.toFixed(2);
+    document.getElementById('sum-vehicles').textContent = '£' + totals.vehicles.toFixed(2);
+    document.getElementById('sum-materials').textContent = '£' + totals.materials.toFixed(2);
+    document.getElementById('sum-other').textContent = '£' + totals.other.toFixed(2);
+    
+    const subtotal = totals.human + totals.vehicles + totals.materials + totals.other;
+    document.getElementById('sum-subtotal').textContent = '£' + subtotal.toFixed(2);
+    
+    // Get configurable VAT rate
+    const vatRateElement = document.getElementById('quote-vat-rate');
+    const vatRate = vatRateElement ? parseFloat(vatRateElement.value) || 0 : 20;
+    const vatAmount = subtotal * (vatRate / 100);
+    const total = subtotal + vatAmount;
+    
+    // Update VAT amount display
+    const vatAmountElement = document.getElementById('sum-vat');
+    if (vatAmountElement) {
+        vatAmountElement.textContent = '£' + vatAmount.toFixed(2);
+    }
+    
+    document.getElementById('sum-total').textContent = '£' + total.toFixed(2);
+}
+
+async function saveQuote() {
+    if (!db.currentPC) return;
+    
+    const now = new Date().toISOString();
+    const title = document.getElementById('quote-title').value.trim();
+    const validUntil = document.getElementById('quote-valid-until').value;
+    
+    if (!title || !validUntil) {
+        alert('Quote title and valid until date are required!');
+        return;
+    }
+    
+    const subtotal = parseFloat(document.getElementById('sum-subtotal').textContent.replace('£', ''));
+    const vatRate = parseFloat(document.getElementById('quote-vat-rate').value) || 20;
+    const vatAmount = subtotal * (vatRate / 100);
+    const totalCost = subtotal + vatAmount;
+    
+    // Convert old-style items to new line_items structure
+    const lineItems = [];
+    for (let category in db.quoteItems) {
+        db.quoteItems[category].forEach(item => {
+            if (item.resourceId) {
+                lineItems.push({
+                    resource_id: item.resourceId,
+                    resource_name: item.name,
+                    quantity: item.qty,
+                    unit_price: item.rate,
+                    line_total: item.total,
+                    notes: `Category: ${category}`
+                });
+            }
+        });
+    }
+    
+    const pcQuotes = db.quotes.filter(q => q.pc_id === db.currentPC.id || q.pcId === db.currentPC.id);
+    const quote = {
+        id: generateUUID(),
+        quote_number: `QT-${String(db.quotes.length + 1).padStart(6, '0')}`,
+        pc_id: db.currentPC.id,
+        pc_number: db.currentPC.pc_number || db.currentPC.number,
+        company_name: db.currentPC.company_name || db.currentPC.company,
+        title: title,
+        description: document.getElementById('quote-description').value.trim(),
+        status: 'draft',
+        valid_until: validUntil,
+        subtotal: subtotal,
+        vat_rate: vatRate,
+        vat_amount: vatAmount,
+        total_cost: totalCost,
+        notes: document.getElementById('quote-notes').value.trim(),
+        terms_conditions: document.getElementById('quote-terms').value.trim(),
+        line_items: lineItems,
+        created_at: now,
+        updated_at: now
+    };
+
+    try {
+    db.quotes.push(quote);
+        await saveToStore(STORES.QUOTES, quote);
+        console.log('✅ Quote saved successfully');
+        alert('Quote ' + quote.quote_number + ' has been saved!');
+    viewPC(db.currentPC.id);
+    } catch (error) {
+        console.error('❌ Error saving quote:', error);
+        alert('Error saving quote. Please try again.');
+    }
+}
+
+function cancelQuote() {
+    if (confirm('Are you sure you want to cancel quote creation?')) {
+        viewPC(db.currentPC.id);
+    }
+}
+
+function updateQuotesList() {
+    const tbody = document.getElementById('quotes-list');
+    tbody.innerHTML = '';
+    db.quotes.forEach(q => {
+        const pc = db.pcs.find(p => p.id === (q.pc_id || q.pcId));
+        const quoteNumber = q.quote_number || q.number;
+        const pcNumber = pc ? (pc.pc_number || pc.number) : q.pc_number || '-';
+        const companyName = pc ? (pc.company_name || pc.company) : q.company_name || '-';
+        const totalCost = q.total_cost || q.total || 0;
+        tbody.innerHTML += `<tr>
+            <td>${quoteNumber}</td><td>${pcNumber}</td><td>${companyName}</td><td>£${totalCost.toFixed(2)}</td><td>${q.status}</td>
+            <td><button class="secondary" onclick="alert('Feature under development')">Show</button></td>
+        </tr>`;
+    });
+}
+
+// ========================================
+// Aktywności
+// ========================================
+
+function showActivityModal() {
+    db.editingActivity = null;
+    document.getElementById('activity-modal-title').textContent = 'New Activity';
+    
+    // Clear all form fields
+    document.getElementById('activity-id').value = '';
+    document.getElementById('activity-title').value = '';
+    document.getElementById('activity-description').value = '';
+    document.getElementById('activity-type').value = '';
+    document.getElementById('activity-priority').value = 'medium';
+    document.getElementById('activity-status').value = 'pending';
+    document.getElementById('activity-scheduled-date').value = '';
+    document.getElementById('activity-scheduled-time').value = '';
+    document.getElementById('activity-duration').value = '';
+    document.getElementById('activity-assigned-to-name').value = '';
+    document.getElementById('activity-location').value = '';
+    document.getElementById('activity-contact-name').value = '';
+    document.getElementById('activity-contact-phone').value = '';
+    document.getElementById('activity-completion-notes').value = '';
+
+    const pcSelect = document.getElementById('activity-pc-select');
+    pcSelect.innerHTML = '<option value="">Select...</option>';
+    db.pcs.forEach(pc => {
+        const pcNumber = pc.pc_number || pc.number;
+        const companyName = pc.company_name || pc.company;
+        pcSelect.innerHTML += `<option value="${pc.id}">${pcNumber} - ${companyName}</option>`;
+    });
+    if(db.currentPC) pcSelect.value = db.currentPC.id;
+
+    // Hide completion section initially
+    document.getElementById('activity-completion-section').style.display = 'none';
+    
+    // Add event listener for status change
+    document.getElementById('activity-status').addEventListener('change', function() {
+        const completionSection = document.getElementById('activity-completion-section');
+        if (this.value === 'completed') {
+            completionSection.style.display = 'block';
+        } else {
+            completionSection.style.display = 'none';
+        }
+    });
+
+    document.getElementById('activity-modal').classList.add('active');
+}
+
+function closeActivityModal() {
+    document.getElementById('activity-modal').classList.remove('active');
+}
+
+async function saveActivity() {
+    const id = document.getElementById('activity-id').value;
+    const now = new Date().toISOString();
+    
+    const activityData = {
+        title: document.getElementById('activity-title').value.trim(),
+        description: document.getElementById('activity-description').value.trim(),
+        pc_id: document.getElementById('activity-pc-select').value,
+        type: document.getElementById('activity-type').value.trim(),
+        status: document.getElementById('activity-status').value,
+        priority: document.getElementById('activity-priority').value,
+        scheduled_date: document.getElementById('activity-scheduled-date').value,
+        scheduled_time: document.getElementById('activity-scheduled-time').value,
+        duration_hours: parseFloat(document.getElementById('activity-duration').value) || null,
+        assigned_to: null, // UUID would go here if we had user management
+        assigned_to_name: document.getElementById('activity-assigned-to-name').value.trim(),
+        location: document.getElementById('activity-location').value.trim(),
+        contact_name: document.getElementById('activity-contact-name').value.trim(),
+        contact_phone: document.getElementById('activity-contact-phone').value.trim(),
+        completion_notes: document.getElementById('activity-completion-notes').value.trim(),
+        updated_at: now
+    };
+
+    // Required fields validation
+    if(!activityData.pc_id || !activityData.title || !activityData.type) {
+        alert("PC Number, Activity Title, and Activity Type are required!");
+        return;
+    }
+
+    // Get PC data for denormalization
+    const pc = db.pcs.find(p => p.id === activityData.pc_id);
+    if (pc) {
+        activityData.pc_number = pc.pc_number || pc.number;
+        activityData.company_name = pc.company_name || pc.company;
+    }
+    
+    // Set completed_at if status is completed
+    if (activityData.status === 'completed' && !id) {
+        activityData.completed_at = now;
+    }
+
+    try {
+        if (id) { // Edit existing
+            const index = db.activities.findIndex(a => a.id === id);
+            if (index !== -1) {
+                db.activities[index] = { ...db.activities[index], ...activityData };
+                await saveToStore(STORES.ACTIVITIES, db.activities[index]);
+            }
+        } else { // Create new
+            activityData.id = generateUUID();
+            activityData.created_at = now;
+    db.activities.push(activityData);
+            await saveToStore(STORES.ACTIVITIES, activityData);
+        }
+    
+        console.log('✅ Activity saved successfully');
+    closeActivityModal();
+    updateActivitiesList();
+    } catch (error) {
+        console.error('❌ Error saving activity:', error);
+        alert('Error saving activity. Please try again.');
+    }
+}
+
+function updateActivitiesList() {
+    const tbody = document.getElementById('activities-list');
+    tbody.innerHTML = '';
+    db.activities.forEach(a => {
+        const pc = db.pcs.find(p => p.id === (a.pc_id || a.pcId));
+        const pcNumber = pc ? (pc.pc_number || pc.number) : (a.pc_number || '-');
+        const companyName = pc ? (pc.company_name || pc.company) : (a.company_name || '-');
+        const scheduledDate = a.scheduled_date ? new Date(a.scheduled_date).toLocaleDateString() : (a.date ? new Date(a.date).toLocaleDateString() : '-');
+        const title = a.title || a.type || '-';
+        const priority = a.priority ? `<span class="priority-${a.priority}">${a.priority.toUpperCase()}</span>` : '-';
+        tbody.innerHTML += `<tr>
+            <td>${title}</td>
+            <td>${pcNumber}</td>
+            <td>${companyName}</td>
+            <td>${a.type}</td>
+            <td>${scheduledDate}</td>
+            <td>${priority}</td>
+            <td><span class="activity-status ${a.status}">${a.status}</span></td>
+            <td><button class="secondary" onclick="alert('Feature under development')">Show</button></td>
+        </tr>`;
+    });
+}
+
+
+// ========================================
+// Zasoby i Cenniki
+// ========================================
+
+function updateResourcesList() {
+    const tbody = document.getElementById('resources-list');
+    tbody.innerHTML = '';
+    db.resources.forEach(res => {
+        const netCost = res.net_cost || res.netCost || 0;
+        const status = res.is_active !== false ? 'Active' : 'Inactive';
+        const statusClass = res.is_active !== false ? 'success' : 'secondary';
+        tbody.innerHTML += `<tr>
+            <td>${res.name}</td>
+            <td>${res.sku || '-'}</td>
+            <td>${res.category}</td>
+            <td>£${netCost.toFixed(2)}</td>
+            <td>${res.supplier || '-'}</td>
+            <td><span class="${statusClass}">${status}</span></td>
+            <td><div class="action-btn-group">
+                <button onclick="window.editResource('${res.id}')" class="warning">Edit</button>
+                <button onclick="window.deleteResource('${res.id}')" class="danger">Remove</button>
+            </div></td>
+        </tr>`;
+    });
+}
+
+function showResourceModal() {
+    db.editingResource = null;
+    document.getElementById('resource-modal-title').textContent = 'New Resource';
+    
+    // Clear all form fields
+    document.getElementById('resource-id').value = '';
+    document.getElementById('resource-name').value = '';
+    document.getElementById('resource-description').value = '';
+    document.getElementById('resource-category').value = '';
+    document.getElementById('resource-subcategory').value = '';
+    document.getElementById('resource-sku').value = '';
+    document.getElementById('resource-unit').value = '';
+    document.getElementById('resource-cost').value = '';
+    document.getElementById('resource-supplier').value = '';
+    document.getElementById('resource-supplier-code').value = '';
+    document.getElementById('resource-status').value = 'true';
+    document.getElementById('resource-min-quantity').value = '';
+    document.getElementById('resource-lead-time').value = '';
+    document.getElementById('resource-weight').value = '';
+    document.getElementById('resource-dimensions').value = '';
+    document.getElementById('resource-warranty').value = '';
+    
+    document.getElementById('resource-modal').classList.add('active');
+}
+
+function closeResourceModal() {
+    document.getElementById('resource-modal').classList.remove('active');
+}
+
+async function saveResource() {
+    const id = document.getElementById('resource-id').value;
+    const now = new Date().toISOString();
+    
+    const resourceData = {
+        name: document.getElementById('resource-name').value.trim(),
+        description: document.getElementById('resource-description').value.trim(),
+        category: document.getElementById('resource-category').value,
+        subcategory: document.getElementById('resource-subcategory').value.trim(),
+        sku: document.getElementById('resource-sku').value.trim(),
+        unit: document.getElementById('resource-unit').value,
+        net_cost: parseFloat(document.getElementById('resource-cost').value),
+        supplier: document.getElementById('resource-supplier').value.trim(),
+        supplier_code: document.getElementById('resource-supplier-code').value.trim(),
+        is_active: document.getElementById('resource-status').value === 'true',
+        min_quantity: parseInt(document.getElementById('resource-min-quantity').value) || null,
+        lead_time_days: parseInt(document.getElementById('resource-lead-time').value) || null,
+        weight_kg: parseFloat(document.getElementById('resource-weight').value) || null,
+        dimensions: document.getElementById('resource-dimensions').value.trim(),
+        warranty_months: parseInt(document.getElementById('resource-warranty').value) || null,
+        updated_at: now
+    };
+
+    // Required fields validation
+    if(!resourceData.name || !resourceData.category || isNaN(resourceData.net_cost) || !resourceData.unit) {
+        alert("Resource Name, Category, Net Cost, and Unit are required!");
+        return;
+    }
+
+    try {
+        if (id) { // Edit existing
+            const index = db.resources.findIndex(r => r.id === id);
+            if (index !== -1) {
+                db.resources[index] = { ...db.resources[index], ...resourceData };
+                await saveToStore(STORES.RESOURCES, db.resources[index]);
+            }
+        } else { // Create new
+            resourceData.id = generateUUID();
+            resourceData.created_at = now;
+        db.resources.push(resourceData);
+            await saveToStore(STORES.RESOURCES, resourceData);
+    }
+
+        console.log('✅ Resource saved successfully');
+    closeResourceModal();
+    updateResourcesList();
+    } catch (error) {
+        console.error('❌ Error saving resource:', error);
+        alert('Error saving resource. Please try again.');
+    }
+}
+
+function editResource(id) {
+    const res = db.resources.find(r => r.id === id);
+    if (!res) return;
+    db.editingResource = res;
+    
+    document.getElementById('resource-modal-title').textContent = 'Edit Resource';
+    document.getElementById('resource-id').value = res.id;
+    document.getElementById('resource-name').value = res.name || '';
+    document.getElementById('resource-description').value = res.description || '';
+    document.getElementById('resource-category').value = res.category || '';
+    document.getElementById('resource-subcategory').value = res.subcategory || '';
+    document.getElementById('resource-sku').value = res.sku || '';
+    document.getElementById('resource-unit').value = res.unit || '';
+    document.getElementById('resource-cost').value = res.net_cost || res.netCost || '';
+    document.getElementById('resource-supplier').value = res.supplier || '';
+    document.getElementById('resource-supplier-code').value = res.supplier_code || '';
+    document.getElementById('resource-status').value = res.is_active !== undefined ? res.is_active.toString() : 'true';
+    document.getElementById('resource-min-quantity').value = res.min_quantity || '';
+    document.getElementById('resource-lead-time').value = res.lead_time_days || '';
+    document.getElementById('resource-weight').value = res.weight_kg || '';
+    document.getElementById('resource-dimensions').value = res.dimensions || '';
+    document.getElementById('resource-warranty').value = res.warranty_months || '';
+    
+    document.getElementById('resource-modal').classList.add('active');
+}
+
+function deleteResource(id) {
+    if (confirm('Are you sure you want to delete this resource? It cannot be used in future quotes.')) {
+        db.resources = db.resources.filter(r => r.id !== id);
+        // Należy też usunąć zasób z cenników
+        db.priceLists.forEach(pl => {
+            pl.items = pl.items.filter(item => item.resourceId !== id);
+        });
+        saveDataToIndexedDB();
+        updateResourcesList();
+    }
+}
+
+
+function updatePriceListsTable() {
+    const tbody = document.getElementById('pricelist-table');
+    tbody.innerHTML = '';
+    db.priceLists.forEach(pl => {
+        const effectiveFrom = pl.effective_from ? new Date(pl.effective_from).toLocaleDateString() : '-';
+        const effectiveTo = pl.effective_to ? new Date(pl.effective_to).toLocaleDateString() : 'No expiry';
+        const effectivePeriod = `${effectiveFrom} - ${effectiveTo}`;
+        const isDefault = pl.is_default ? '<span class="success">✓ Default</span>' : '-';
+        const statusClass = pl.status === 'active' ? 'success' : (pl.status === 'draft' ? 'warning' : 'secondary');
+        
+        tbody.innerHTML += `<tr>
+            <td>${pl.name}</td>
+            <td>${pl.version || '-'}</td>
+            <td>${pl.currency || 'GBP'}</td>
+            <td>${effectivePeriod}</td>
+            <td>${isDefault}</td>
+            <td><span class="${statusClass}">${pl.status}</span></td>
+            <td><div class="action-btn-group">
+                <button class="secondary" onclick="window.viewPriceList('${pl.id}')">Manage</button>
+                <button class="warning" onclick="window.editPriceList('${pl.id}')">Edit</button>
+            </div></td>
+        </tr>`;
+    });
+}
+
+async function createPriceList() {
+    const id = document.getElementById('pricelist-id').value;
+    const now = new Date().toISOString();
+    
+    const priceListData = {
+        name: document.getElementById('pricelist-name').value.trim(),
+        version: document.getElementById('pricelist-version').value.trim(),
+        description: document.getElementById('pricelist-description').value.trim(),
+        currency: document.getElementById('pricelist-currency').value,
+        status: document.getElementById('pricelist-status').value,
+        markup_percentage: parseFloat(document.getElementById('pricelist-markup').value) || 0,
+        discount_percentage: parseFloat(document.getElementById('pricelist-discount').value) || 0,
+        effective_from: document.getElementById('pricelist-effective-from').value,
+        effective_to: document.getElementById('pricelist-effective-to').value,
+        is_default: document.getElementById('pricelist-is-default').checked,
+        terms: document.getElementById('pricelist-terms').value.trim(),
+        updated_at: now
+    };
+
+    // Required fields validation
+    if (!priceListData.name || !priceListData.version || !priceListData.effective_from) {
+        alert('Price List Name, Version, and Effective From date are required!');
+        return;
+    }
+
+    try {
+        if (id) { // Edit existing
+            const index = db.priceLists.findIndex(pl => pl.id === id);
+            if (index !== -1) {
+                // Preserve existing pricing_data
+                priceListData.pricing_data = db.priceLists[index].pricing_data || {};
+                db.priceLists[index] = { ...db.priceLists[index], ...priceListData };
+                await saveToStore(STORES.PRICE_LISTS, db.priceLists[index]);
+            }
+        } else { // Create new
+            priceListData.id = generateUUID();
+            priceListData.created_at = now;
+            priceListData.pricing_data = {};
+            
+            // If this is set as default, unset other defaults
+            if (priceListData.is_default) {
+                db.priceLists.forEach(pl => {
+                    if (pl.is_default) {
+                        pl.is_default = false;
+                        saveToStore(STORES.PRICE_LISTS, pl);
+                    }
+                });
+            }
+            
+            db.priceLists.push(priceListData);
+            await saveToStore(STORES.PRICE_LISTS, priceListData);
+        }
+
+        console.log('✅ Price List saved successfully');
+    showPage('pricelists');
+    } catch (error) {
+        console.error('❌ Error saving price list:', error);
+        alert('Error saving price list. Please try again.');
+    }
+}
+
+function clearPriceListForm() {
+    document.getElementById('pricelist-form-title').textContent = 'New Price List';
+    document.getElementById('pricelist-id').value = '';
+    document.getElementById('pricelist-name').value = '';
+    document.getElementById('pricelist-version').value = '';
+    document.getElementById('pricelist-description').value = '';
+    document.getElementById('pricelist-currency').value = 'GBP';
+    document.getElementById('pricelist-status').value = 'active';
+    document.getElementById('pricelist-markup').value = '';
+    document.getElementById('pricelist-discount').value = '';
+    document.getElementById('pricelist-effective-from').value = '';
+    document.getElementById('pricelist-effective-to').value = '';
+    document.getElementById('pricelist-is-default').checked = false;
+    document.getElementById('pricelist-terms').value = 'Prices valid for 30 days from quote date. Payment terms: 30 days net. Delivery charges may apply.';
+}
+
+function editPriceList(id) {
+    const pl = db.priceLists.find(p => p.id === id);
+    if (!pl) return;
+    
+    document.getElementById('pricelist-form-title').textContent = 'Edit Price List';
+    document.getElementById('pricelist-id').value = pl.id;
+    document.getElementById('pricelist-name').value = pl.name || '';
+    document.getElementById('pricelist-version').value = pl.version || '';
+    document.getElementById('pricelist-description').value = pl.description || '';
+    document.getElementById('pricelist-currency').value = pl.currency || 'GBP';
+    document.getElementById('pricelist-status').value = pl.status || 'active';
+    document.getElementById('pricelist-markup').value = pl.markup_percentage || '';
+    document.getElementById('pricelist-discount').value = pl.discount_percentage || '';
+    document.getElementById('pricelist-effective-from').value = pl.effective_from || '';
+    document.getElementById('pricelist-effective-to').value = pl.effective_to || '';
+    document.getElementById('pricelist-is-default').checked = pl.is_default || false;
+    document.getElementById('pricelist-terms').value = pl.terms || '';
+    
+    showPage('new-pricelist');
+}
+
+function viewPriceList(id) {
+    const pl = db.priceLists.find(p => p.id === id);
+    if (!pl) return;
+    db.currentPriceList = pl;
+    document.getElementById('pricelist-title').textContent = pl.name;
+    const tbody = document.getElementById('pricelist-items');
+    tbody.innerHTML = '';
+    pl.items.forEach(item => {
+        const resource = db.resources.find(r => r.id === item.resourceId);
+        if (resource) {
+            const margin = item.clientPrice > 0 ? ((item.clientPrice - resource.netCost) / item.clientPrice * 100) : 0;
+            tbody.innerHTML += `<tr>
+                <td>${resource.name}</td><td>£${resource.netCost.toFixed(2)}</td><td>£${item.clientPrice.toFixed(2)}</td><td>${margin.toFixed(1)}%</td>
+                <td><button class="danger" onclick="window.removeResourceFromPriceList('${item.resourceId}')">Remove</button></td>
+            </tr>`;
+        }
+    });
+    showPage('pricelist-detail');
+}
+
+function showAddResourceToPriceList() {
+    const select = document.getElementById('modal-resource-item-select');
+    select.innerHTML = '<option value="">Select resource...</option>';
+    db.resources.forEach(res => {
+        // Nie dodawaj, jeśli już jest na liście
+        if (!db.currentPriceList.items.some(item => item.resourceId === res.id)) {
+            select.innerHTML += `<option value="${res.id}">${res.name}</option>`;
+        }
+    });
+    document.getElementById('add-resource-modal').classList.add('active');
+}
+
+function closeAddResourceModal() {
+    document.getElementById('add-resource-modal').classList.remove('active');
+}
+
+function updateResourceInfo() {
+    const resId = document.getElementById('modal-resource-item-select').value;
+    const infoDiv = document.getElementById('resource-info');
+    if(resId) {
+        const res = db.resources.find(r => r.id === resId);
+        infoDiv.innerHTML = `Net Cost: £${res.netCost.toFixed(2)}`;
+        infoDiv.style.display = 'block';
+    } else {
+        infoDiv.style.display = 'none';
+    }
+}
+document.getElementById('modal-resource-item-select').addEventListener('change', updateResourceInfo);
+
+
+function calculateMargin() {
+    const resId = document.getElementById('modal-resource-item-select').value;
+    const clientPrice = parseFloat(document.getElementById('modal-client-price').value);
+    const marginDiv = document.getElementById('margin-info');
+    if (resId && clientPrice > 0) {
+        const res = db.resources.find(r => r.id === resId);
+        const margin = ((clientPrice - res.netCost) / clientPrice * 100).toFixed(1);
+        marginDiv.innerHTML = `Margin: ${margin}%`;
+    } else {
+        marginDiv.innerHTML = '';
+    }
+}
+
+async function addResourceToPriceList() {
+    const resourceId = document.getElementById('modal-resource-item-select').value;
+    const clientPrice = parseFloat(document.getElementById('modal-client-price').value);
+
+    if(!resourceId || isNaN(clientPrice)) {
+        alert('Select resource and enter price!');
+        return;
+    }
+
+    const resource = db.resources.find(r => r.id === resourceId);
+    if (!resource) return;
+
+    const netCost = resource.net_cost || resource.netCost || 0;
+    const calculatedMarkup = netCost > 0 ? ((clientPrice - netCost) / netCost * 100) : 0;
+
+    const pricingItem = {
+        price: clientPrice,
+        markup_percentage: calculatedMarkup,
+        effective_price: clientPrice,
+        min_quantity: resource.min_quantity || 1,
+        notes: ''
+    };
+
+    // Initialize pricing_data if it doesn't exist
+    if (!db.currentPriceList.pricing_data) {
+        db.currentPriceList.pricing_data = {};
+    }
+    
+    // Add or update resource in pricing_data (JSONB structure)
+    db.currentPriceList.pricing_data[resourceId] = pricingItem;
+
+    // Keep backward compatibility with old items structure
+    if (!db.currentPriceList.items) db.currentPriceList.items = [];
+    const existingIndex = db.currentPriceList.items.findIndex(item => item.resourceId === resourceId);
+    if (existingIndex >= 0) {
+        db.currentPriceList.items[existingIndex] = { resourceId, clientPrice };
+    } else {
+    db.currentPriceList.items.push({ resourceId, clientPrice });
+    }
+
+    try {
+        await saveToStore(STORES.PRICE_LISTS, db.currentPriceList);
+        console.log('✅ Resource added to price list successfully');
+    closeAddResourceModal();
+    viewPriceList(db.currentPriceList.id);
+    } catch (error) {
+        console.error('❌ Error adding resource to price list:', error);
+        alert('Error adding resource to price list. Please try again.');
+    }
+}
+
+function removeResourceFromPriceList(resourceId) {
+    db.currentPriceList.items = db.currentPriceList.items.filter(item => item.resourceId !== resourceId);
+    saveDataToIndexedDB();
+    viewPriceList(db.currentPriceList.id);
+}
+
+
+// ========================================
+// Inicjalizacja Aplikacji
+// ========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Expose functions to window object
+    window.showPage = showPage;
+    window.savePC = savePC;
+    window.editPC = editPC;
+    window.viewPC = viewPC;
+    window.createQuote = createQuote;
+    window.showNewQuoteModal = showNewQuoteModal;
+    window.closeQuoteModal = closeQuoteModal;
+    window.proceedToQuoteBuilder = proceedToQuoteBuilder;
+    window.onPriceListChange = onPriceListChange;
+    window.addLineItem = addLineItem;
+    window.updateLinePrice = updateLinePrice;
+    window.updateLineQty = updateLineQty;
+    window.removeLine = removeLine;
+    window.saveQuote = saveQuote;
+    window.cancelQuote = cancelQuote;
+    window.showActivityModal = showActivityModal;
+    window.closeActivityModal = closeActivityModal;
+    window.saveActivity = saveActivity;
+    window.showResourceModal = showResourceModal;
+    window.closeResourceModal = closeResourceModal;
+    window.saveResource = saveResource;
+    window.editResource = editResource;
+    window.deleteResource = deleteResource;
+    window.updatePriceListsTable = updatePriceListsTable;
+    window.createPriceList = createPriceList;
+    window.viewPriceList = viewPriceList;
+    window.showAddResourceToPriceList = showAddResourceToPriceList;
+    window.closeAddResourceModal = closeAddResourceModal;
+    window.calculateMargin = calculateMargin;
+    window.addResourceToPriceList = addResourceToPriceList;
+    window.removeResourceFromPriceList = removeResourceFromPriceList;
+    window.resetData = resetData;
+    window.copyCollectionToDelivery = copyCollectionToDelivery;
+    window.clearPCForm = clearPCForm;
+    window.clearPriceListForm = clearPriceListForm;
+    window.editPriceList = editPriceList;
+
+    // Initialize IndexedDB and load data
+    initializeIndexedDB()
+        .then(() => loadDataFromIndexedDB())
+        .then(() => showPage('dashboard'))
+        .catch(error => {
+            console.error('❌ Failed to initialize application:', error);
+            alert('Failed to initialize database. Please refresh the page.');
+        });
+});
+
+</script>
+
+</body>
+</html>
+```
