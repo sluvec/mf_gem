@@ -11023,6 +11023,14 @@ function checkForNotifications() {
     updateUpcomingActivitiesWidget();
 }
 
+// Alias function for event handlers
+function updateNotificationSystem() {
+    console.log('🔔 Updating notification system...');
+    if (typeof checkForNotifications === 'function') {
+        checkForNotifications();
+    }
+}
+
 function checkOverdueActivities(today) {
     const overdueActivities = db.activities.filter(activity => 
         activity.scheduled_date && 
@@ -18153,6 +18161,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         setTimeout(() => firstMenuItem.focus(), 100);
                     }
                 } else {
+                    // Remove focus from any focused element inside menu before hiding
+                    const focusedElement = navMenu.querySelector(':focus');
+                    if (focusedElement) {
+                        focusedElement.blur();
+                    }
                     navMenu.classList.remove('active');
                     navMenu.setAttribute('aria-hidden', 'true');
                 }
@@ -18161,6 +18174,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
                 if (!mobileToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                    // Remove focus from any focused element inside menu before hiding
+                    const focusedElement = navMenu.querySelector(':focus');
+                    if (focusedElement) {
+                        focusedElement.blur();
+                    }
                     mobileToggle.setAttribute('aria-expanded', 'false');
                     navMenu.classList.remove('active');
                     navMenu.setAttribute('aria-hidden', 'true');
@@ -18170,6 +18188,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Handle escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                    // Remove focus from any focused element inside menu before hiding
+                    const focusedElement = navMenu.querySelector(':focus');
+                    if (focusedElement) {
+                        focusedElement.blur();
+                    }
                     mobileToggle.setAttribute('aria-expanded', 'false');
                     navMenu.classList.remove('active');
                     navMenu.setAttribute('aria-hidden', 'true');
@@ -18245,6 +18268,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileToggle = document.getElementById('mobile-menu-toggle');
         const navMenu = document.getElementById('main-navigation');
         if (mobileToggle && navMenu && navMenu.classList.contains('active')) {
+            // Remove focus from any focused element inside menu before hiding
+            const focusedElement = navMenu.querySelector(':focus');
+            if (focusedElement) {
+                focusedElement.blur();
+            }
             mobileToggle.setAttribute('aria-expanded', 'false');
             navMenu.classList.remove('active');
             navMenu.setAttribute('aria-hidden', 'true');
