@@ -2352,7 +2352,7 @@
             <div class="card" id="price-list-selector">
                 <h2>Step 1: Select Price List</h2>
                 <label>Available Price Lists *</label>
-                <select id="quote-price-list" onchange="window.onPriceListChange()"></select>
+                <select id="quote-price-list" onchange="window.handlePriceListChange()"></select>
             </div>
             <div class="quote-builder" id="quote-items-section" style="display: none;">
                 <div class="card">
@@ -2537,7 +2537,7 @@
                     <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
                         <div style="margin-bottom: 1rem;">
                             <label>Quote Status *</label>
-                            <select id="quote-status" onchange="window.onQuoteStatusChange()" required>
+                            <select id="quote-status" onchange="window.handleQuoteStatusChange()" required>
                                 <option value="DRAFT">DRAFT - Work in progress (editable)</option>
                                 <option value="ISSUED">ISSUED - Sent to client (not editable)</option>
                                 <option value="WON">WON - Quote accepted by client</option>
@@ -5140,8 +5140,8 @@ function showPage(pageId) {
     // Odśwież widok
     switch(pageId) {
         case 'dashboard': updateDashboard(); break;
-        case 'pcnumbers': updatePCList(); break;
-        case 'quotes': updateQuotesList(); break;
+        case 'pcnumbers': renderPCList(); break;
+        case 'quotes': renderQuotesList(); break;
         case 'activities': updateActivitiesList(); break;
         case 'resources': updateResourcesList(); break;
         case 'resource-allocation': updateResourceAllocationPage(); break; // NEW Sprint 4.3: Resource allocation page
@@ -5197,7 +5197,7 @@ function updateDashboard() {
 // Numery PC
 // ========================================
 
-function updatePCList() {
+function renderPCList() {
     const tbody = document.getElementById('pc-list');
     tbody.innerHTML = '';
     db.pcs.forEach(pc => {
@@ -5443,7 +5443,7 @@ function createQuote() {
     showPage('quote-builder');
 }
 
-function onPriceListChange() {
+function handlePriceListChange() {
     db.selectedPriceListId = document.getElementById('quote-price-list').value;
     if (db.selectedPriceListId) {
         document.getElementById('quote-items-section').style.display = 'grid';
@@ -5661,7 +5661,7 @@ function updateQuotedActivities() {
     // The selected activities will be collected in saveQuote()
 }
 
-function onQuoteStatusChange() {
+function handleQuoteStatusChange() {
     const status = document.getElementById('quote-status').value;
     const warningMessages = {
         'ISSUED': 'WARNING: Once marked as ISSUED, this quote cannot be edited!',
@@ -5823,7 +5823,7 @@ function cancelQuote() {
     }
 }
 
-function updateQuotesList() {
+function renderQuotesList() {
     const tbody = document.getElementById('quotes-list');
     tbody.innerHTML = '';
     db.quotes.forEach(q => {
