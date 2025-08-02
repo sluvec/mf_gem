@@ -3046,6 +3046,392 @@
         .toast-action.primary:hover {
             background: var(--primary-600);
         }
+        
+        /* ========================================
+           PROGRESSIVE FORM WIZARD SYSTEM  
+           ======================================== */
+        
+        /* Form Wizard Container */
+        .form-wizard {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        /* Progress Indicator */
+        .wizard-progress {
+            background: var(--neutral-50);
+            padding: var(--space-6) var(--space-8);
+            border-bottom: 1px solid var(--neutral-200);
+        }
+        
+        .wizard-progress h2 {
+            margin: 0 0 var(--space-4) 0;
+            color: var(--neutral-900);
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+        }
+        
+        .progress-bar-container {
+            margin-bottom: var(--space-6);
+        }
+        
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: var(--neutral-200);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-400));
+            border-radius: 4px;
+            transition: width 0.4s ease;
+            position: relative;
+        }
+        
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progress-shimmer 2s infinite;
+        }
+        
+        @keyframes progress-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Step Indicators */
+        .wizard-steps {
+            display: flex;
+            justify-content: space-between;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        
+        .wizard-step {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            flex: 1;
+            position: relative;
+        }
+        
+        .wizard-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: calc(100% - var(--space-4));
+            right: calc(-100% + var(--space-4));
+            height: 2px;
+            background: var(--neutral-300);
+            z-index: 1;
+        }
+        
+        .wizard-step.completed::after {
+            background: var(--primary-500);
+        }
+        
+        .step-indicator {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--neutral-300);
+            color: var(--neutral-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-semibold);
+            font-size: var(--text-sm);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .wizard-step.active .step-indicator {
+            background: var(--primary-500);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+        
+        .wizard-step.completed .step-indicator {
+            background: var(--success-500);
+            color: white;
+        }
+        
+        .wizard-step.completed .step-indicator::after {
+            content: '✓';
+            position: absolute;
+        }
+        
+        .step-label {
+            font-weight: var(--font-medium);
+            color: var(--neutral-700);
+            font-size: var(--text-sm);
+        }
+        
+        .wizard-step.active .step-label {
+            color: var(--primary-700);
+            font-weight: var(--font-semibold);
+        }
+        
+        .wizard-step.completed .step-label {
+            color: var(--success-700);
+        }
+        
+        /* Step Content */
+        .wizard-content {
+            padding: var(--space-8);
+        }
+        
+        .step-panel {
+            display: none;
+        }
+        
+        .step-panel.active {
+            display: block;
+            animation: step-fade-in 0.3s ease-out;
+        }
+        
+        @keyframes step-fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .step-header {
+            margin-bottom: var(--space-6);
+        }
+        
+        .step-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--neutral-900);
+            margin: 0 0 var(--space-2) 0;
+        }
+        
+        .step-description {
+            color: var(--neutral-600);
+            font-size: var(--text-base);
+            margin: 0;
+            line-height: var(--leading-relaxed);
+        }
+        
+        /* Enhanced Form Fields */
+        .wizard-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+        
+        .wizard-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .wizard-field-label {
+            font-weight: var(--font-medium);
+            color: var(--neutral-700);
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+        
+        .field-required {
+            color: var(--error-500);
+            font-weight: var(--font-semibold);
+        }
+        
+        .wizard-field-input {
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--neutral-300);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .wizard-field-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+        
+        .wizard-field-input.error {
+            border-color: var(--error-500);
+            box-shadow: 0 0 0 3px var(--error-100);
+        }
+        
+        .wizard-field-input.success {
+            border-color: var(--success-500);
+            box-shadow: 0 0 0 3px var(--success-100);
+        }
+        
+        .field-help {
+            font-size: var(--text-xs);
+            color: var(--neutral-500);
+            margin-top: var(--space-1);
+        }
+        
+        .field-error {
+            font-size: var(--text-xs);
+            color: var(--error-600);
+            margin-top: var(--space-1);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+        
+        .field-success {
+            font-size: var(--text-xs);
+            color: var(--success-600);
+            margin-top: var(--space-1);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+        
+        /* Wizard Actions */
+        .wizard-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--space-6);
+            border-top: 1px solid var(--neutral-200);
+            margin-top: var(--space-8);
+        }
+        
+        .wizard-actions-left {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        .wizard-actions-right {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        .wizard-btn {
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+        
+        .wizard-btn-primary {
+            background: var(--primary-500);
+            color: white;
+        }
+        
+        .wizard-btn-primary:hover:not(:disabled) {
+            background: var(--primary-600);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .wizard-btn-primary:disabled {
+            background: var(--neutral-300);
+            color: var(--neutral-500);
+            cursor: not-allowed;
+        }
+        
+        .wizard-btn-secondary {
+            background: white;
+            color: var(--neutral-700);
+            border-color: var(--neutral-300);
+        }
+        
+        .wizard-btn-secondary:hover {
+            background: var(--neutral-50);
+            border-color: var(--neutral-400);
+        }
+        
+        .wizard-btn-ghost {
+            background: transparent;
+            color: var(--neutral-600);
+        }
+        
+        .wizard-btn-ghost:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-700);
+        }
+        
+        /* Save Draft Indicator */
+        .draft-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--warning-600);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+        }
+        
+        .draft-indicator.saved {
+            color: var(--success-600);
+        }
+        
+        /* Mobile Wizard Adjustments */
+        @media (max-width: 767px) {
+            .wizard-content {
+                padding: var(--space-6) var(--space-4);
+            }
+            
+            .wizard-progress {
+                padding: var(--space-4);
+            }
+            
+            .wizard-form-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .wizard-steps {
+                display: none;
+            }
+            
+            .wizard-actions {
+                flex-direction: column;
+                gap: var(--space-3);
+            }
+            
+            .wizard-actions-left,
+            .wizard-actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .wizard-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3406,61 +3792,347 @@
 
         <div id="new-pc" class="page">
             <h1 id="pc-form-title">New PC Number</h1>
-            <div class="card">
+            
+            <!-- Progressive Form Wizard -->
+            <div class="form-wizard" id="pc-wizard">
                 <input type="hidden" id="pc-id">
                 
-                <!-- Main Data Section -->
-                <div class="form-section">
-                    <h3>Main Data</h3>
-                    <div class="form-grid">
-                        <div><label>PC Number *</label><input type="text" id="pc-number" placeholder="e.g. PC-000001" required></div>
-                        <div><label>Company Name *</label><input type="text" id="pc-company-name" placeholder="Company name" required></div>
-                        <div><label>Project Name *</label><input type="text" id="pc-project-name" placeholder="Project name" required></div>
-                        <div><label>Account Manager *</label><input type="text" id="pc-account-manager" placeholder="Account manager name" required></div>
-                        <div><label>Client Industry *</label><select id="pc-client-industry" required>
-                            <option value="">Select industry...</option>
-                            <option value="Media">Media</option>
-                            <option value="Education">Education</option>
-                            <option value="Healthcare">Healthcare</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Government">Government</option>
-                            <option value="Technology">Technology</option>
-                            <option value="Manufacturing">Manufacturing</option>
-                            <option value="Other">Other</option>
-                        </select></div>
-                        <div><label>Client Source *</label><select id="pc-client-source" required>
-                            <option value="">Select source...</option>
-                            <option value="Web Enquiry">Web Enquiry</option>
-                            <option value="Business Development">Business Development</option>
-                            <option value="Existing Customer">Existing Customer</option>
-                            <option value="Cross Referral">Cross Referral</option>
-                            <option value="Internal (CWS/Crown)">Internal (CWS/Crown)</option>
-                        </select></div>
-                        <div><label>Quote Limit</label><input type="number" id="pc-quote-limit" min="1" max="20" placeholder="5" value="5"></div>
-                        <div><label>Status</label><select id="pc-status">
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select></div>
+                <!-- Progress Header -->
+                <div class="wizard-progress">
+                    <h2>Create PC Number</h2>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="wizard-progress-bar" style="width: 33%"></div>
+                        </div>
                     </div>
-                    <div><label>Project Description</label><textarea id="pc-project-description" rows="3" placeholder="Detailed project description..."></textarea></div>
-                </div>
-                                
-                <!-- Simplified Contact Section -->
-                <div class="form-section">
-                    <h3>Primary Contact</h3>
-                    <div class="form-grid">
-                        <div><label>Contact Name *</label><input type="text" id="pc-contact-name" placeholder="Primary contact person" required></div>
-                        <div><label>Phone</label><input type="tel" id="pc-contact-phone" placeholder="Phone number"></div>
-                        <div><label>Email</label><input type="email" id="pc-contact-email" placeholder="email@address.com"></div>
-                        <div><label>Postcode (optional)</label><input type="text" id="pc-postcode" placeholder="e.g. SW1A 1AA"></div>
-                    </div>
-                    <p class="field-note">* Minimum requirement: Contact name + (Phone OR Email)</p>
+                    <ol class="wizard-steps">
+                        <li class="wizard-step active" id="step-1-indicator">
+                            <div class="step-indicator">1</div>
+                            <span class="step-label">Basic Info</span>
+                        </li>
+                        <li class="wizard-step" id="step-2-indicator">
+                            <div class="step-indicator">2</div>
+                            <span class="step-label">Client Details</span>
+                        </li>
+                        <li class="wizard-step" id="step-3-indicator">
+                            <div class="step-indicator">3</div>
+                            <span class="step-label">Contact Info</span>
+                        </li>
+                    </ol>
                 </div>
                 
-                <div class="form-actions">
-                    <button onclick="window.savePC()">Save PC Number</button>
-                    <button onclick="window.showPage('pcnumbers')" class="secondary">Cancel</button>
+                <!-- Wizard Content -->
+                <div class="wizard-content">
+                    <!-- Step 1: Basic Information -->
+                    <div class="step-panel active" id="step-1" data-step="1">
+                        <div class="step-header">
+                            <h3 class="step-title">Let's start with basic project information</h3>
+                            <p class="step-description">
+                                This information helps us organize and track your project effectively.
+                            </p>
+                        </div>
+                        
+                        <div class="wizard-form-grid">
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-number">
+                                    PC Number 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-number" 
+                                    class="wizard-field-input"
+                                    placeholder="PC-000001"
+                                    pattern="^PC-\d{6}$"
+                                    required
+                                    data-validate="pc-number">
+                                <div class="field-help">Format: PC- followed by 6 digits (e.g., PC-000001)</div>
+                                <div class="field-error" id="pc-number-error" hidden></div>
+                                <div class="field-success" id="pc-number-success" hidden>✓ Valid PC Number format</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-company-name">
+                                    Company Name 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-company-name" 
+                                    class="wizard-field-input"
+                                    placeholder="Enter company name"
+                                    required
+                                    data-validate="required">
+                                <div class="field-help">The official company name for this project</div>
+                                <div class="field-error" id="pc-company-name-error" hidden></div>
+                                <div class="field-success" id="pc-company-name-success" hidden>✓ Company name entered</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-project-name">
+                                    Project Name 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-project-name" 
+                                    class="wizard-field-input"
+                                    placeholder="Enter project name"
+                                    required
+                                    data-validate="required">
+                                <div class="field-help">A descriptive name for the project</div>
+                                <div class="field-error" id="pc-project-name-error" hidden></div>
+                                <div class="field-success" id="pc-project-name-success" hidden>✓ Project name entered</div>
+                            </div>
+                        </div>
+                        
+                        <div class="wizard-actions">
+                            <div class="wizard-actions-left">
+                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
+                                    💾 Save Draft
+                                </button>
+                                <div class="draft-indicator" id="draft-status" hidden>
+                                    ⏳ Saving draft...
+                                </div>
+                            </div>
+                            <div class="wizard-actions-right">
+                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="cancelWizard()">
+                                    Cancel
+                                </button>
+                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-1-next" onclick="nextWizardStep()" disabled>
+                                    Next: Client Details →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Client Details -->
+                    <div class="step-panel" id="step-2" data-step="2">
+                        <div class="step-header">
+                            <h3 class="step-title">Tell us about your client</h3>
+                            <p class="step-description">
+                                Client information helps us provide better service and track project sources.
+                            </p>
+                        </div>
+                        
+                        <div class="wizard-form-grid">
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-account-manager">
+                                    Account Manager 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-account-manager" 
+                                    class="wizard-field-input"
+                                    placeholder="Account manager name"
+                                    required
+                                    data-validate="required">
+                                <div class="field-help">Person responsible for this account</div>
+                                <div class="field-error" id="pc-account-manager-error" hidden></div>
+                                <div class="field-success" id="pc-account-manager-success" hidden>✓ Account manager assigned</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-client-industry">
+                                    Client Industry 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <select 
+                                    id="pc-client-industry" 
+                                    class="wizard-field-input"
+                                    required
+                                    data-validate="required">
+                                    <option value="">Select industry...</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Government">Government</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="field-help">Primary industry sector of the client</div>
+                                <div class="field-error" id="pc-client-industry-error" hidden></div>
+                                <div class="field-success" id="pc-client-industry-success" hidden>✓ Industry selected</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-client-source">
+                                    Client Source 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <select 
+                                    id="pc-client-source" 
+                                    class="wizard-field-input"
+                                    required
+                                    data-validate="required">
+                                    <option value="">Select source...</option>
+                                    <option value="Web Enquiry">Web Enquiry</option>
+                                    <option value="Business Development">Business Development</option>
+                                    <option value="Existing Customer">Existing Customer</option>
+                                    <option value="Cross Referral">Cross Referral</option>
+                                    <option value="Internal (CWS/Crown)">Internal (CWS/Crown)</option>
+                                </select>
+                                <div class="field-help">How did this client find us?</div>
+                                <div class="field-error" id="pc-client-source-error" hidden></div>
+                                <div class="field-success" id="pc-client-source-success" hidden>✓ Source recorded</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-quote-limit">
+                                    Quote Limit
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="pc-quote-limit" 
+                                    class="wizard-field-input"
+                                    min="1" 
+                                    max="20" 
+                                    value="5"
+                                    placeholder="5"
+                                    data-validate="number">
+                                <div class="field-help">Maximum number of quotes for this project (1-20)</div>
+                                <div class="field-error" id="pc-quote-limit-error" hidden></div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-status">
+                                    Project Status
+                                </label>
+                                <select id="pc-status" class="wizard-field-input">
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                                <div class="field-help">Current status of the project</div>
+                            </div>
+                        </div>
+                        
+                        <div class="wizard-field-group">
+                            <label class="wizard-field-label" for="pc-project-description">
+                                Project Description
+                            </label>
+                            <textarea 
+                                id="pc-project-description" 
+                                class="wizard-field-input"
+                                rows="4" 
+                                placeholder="Detailed project description..."
+                                style="resize: vertical; min-height: 120px;"></textarea>
+                            <div class="field-help">Detailed description of the project requirements and scope</div>
+                        </div>
+                        
+                        <div class="wizard-actions">
+                            <div class="wizard-actions-left">
+                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
+                                    💾 Save Draft
+                                </button>
+                            </div>
+                            <div class="wizard-actions-right">
+                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="prevWizardStep()">
+                                    ← Back
+                                </button>
+                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-2-next" onclick="nextWizardStep()" disabled>
+                                    Next: Contact Info →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Contact Information -->
+                    <div class="step-panel" id="step-3" data-step="3">
+                        <div class="step-header">
+                            <h3 class="step-title">Primary contact information</h3>
+                            <p class="step-description">
+                                We need at least a contact name and either phone or email to reach your client.
+                            </p>
+                        </div>
+                        
+                        <div class="wizard-form-grid">
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-contact-name">
+                                    Contact Name 
+                                    <span class="field-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-contact-name" 
+                                    class="wizard-field-input"
+                                    placeholder="Primary contact person"
+                                    required
+                                    data-validate="required">
+                                <div class="field-help">Name of the main contact person for this project</div>
+                                <div class="field-error" id="pc-contact-name-error" hidden></div>
+                                <div class="field-success" id="pc-contact-name-success" hidden>✓ Contact name entered</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-contact-phone">
+                                    Phone Number
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    id="pc-contact-phone" 
+                                    class="wizard-field-input"
+                                    placeholder="Phone number"
+                                    data-validate="phone">
+                                <div class="field-help">Contact phone number (mobile or landline)</div>
+                                <div class="field-error" id="pc-contact-phone-error" hidden></div>
+                                <div class="field-success" id="pc-contact-phone-success" hidden>✓ Valid phone number</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-contact-email">
+                                    Email Address
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="pc-contact-email" 
+                                    class="wizard-field-input"
+                                    placeholder="email@address.com"
+                                    data-validate="email">
+                                <div class="field-help">Contact email address</div>
+                                <div class="field-error" id="pc-contact-email-error" hidden></div>
+                                <div class="field-success" id="pc-contact-email-success" hidden>✓ Valid email address</div>
+                            </div>
+                            
+                            <div class="wizard-field-group">
+                                <label class="wizard-field-label" for="pc-postcode">
+                                    Postcode
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="pc-postcode" 
+                                    class="wizard-field-input"
+                                    placeholder="e.g. SW1A 1AA"
+                                    data-validate="postcode">
+                                <div class="field-help">UK postcode (optional)</div>
+                                <div class="field-error" id="pc-postcode-error" hidden></div>
+                                <div class="field-success" id="pc-postcode-success" hidden>✓ Valid postcode</div>
+                            </div>
+                        </div>
+                        
+                        <div class="field-note" style="margin-top: var(--space-4); padding: var(--space-3); background: var(--warning-50); border: 1px solid var(--warning-200); border-radius: var(--radius-md);">
+                            📞 <strong>Contact Requirement:</strong> Please provide at least phone OR email for the contact person.
+                        </div>
+                        
+                        <div class="wizard-actions">
+                            <div class="wizard-actions-left">
+                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
+                                    💾 Save Draft
+                                </button>
+                            </div>
+                            <div class="wizard-actions-right">
+                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="prevWizardStep()">
+                                    ← Back
+                                </button>
+                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-3-save" onclick="saveWizardPC()" disabled>
+                                    ✓ Create PC Number
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -15980,6 +16652,490 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Hierarchical dropdown navigation initialized');
     console.log('📁 Navigation organized into logical groups: Projects, Sales, Resources, Templates');
+    
+    // ========================================
+    // PROGRESSIVE FORM WIZARD SYSTEM
+    // ========================================
+    
+    // Form Wizard Manager
+    class FormWizardManager {
+        constructor() {
+            this.currentStep = 1;
+            this.totalSteps = 3;
+            this.formData = {};
+            this.stepValidation = {
+                1: false,
+                2: false,
+                3: false
+            };
+            this.draftSaveTimeout = null;
+            this.initializeWizard();
+        }
+        
+        initializeWizard() {
+            this.setupValidation();
+            this.setupAutoSave();
+            this.restoreDraft();
+        }
+        
+        setupValidation() {
+            const inputs = document.querySelectorAll('.wizard-field-input[data-validate]');
+            
+            inputs.forEach(input => {
+                // Live validation on input with debouncing
+                let timeout;
+                input.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        this.validateField(input);
+                        this.updateStepValidation();
+                    }, 500);
+                });
+                
+                // Immediate validation on blur
+                input.addEventListener('blur', () => {
+                    clearTimeout(timeout);
+                    this.validateField(input);
+                    this.updateStepValidation();
+                });
+            });
+        }
+        
+        validateField(input) {
+            const value = input.value.trim();
+            const validationType = input.getAttribute('data-validate');
+            const fieldId = input.id;
+            
+            this.clearFieldState(input);
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Required field validation
+            if (input.required && !value) {
+                isValid = false;
+                errorMessage = `${this.getFieldLabel(input)} is required`;
+            }
+            // Specific validation types
+            else if (value && validationType) {
+                const validation = this.getValidationResult(validationType, value);
+                isValid = validation.isValid;
+                errorMessage = validation.message;
+            }
+            
+            // Special case: contact validation (phone OR email required)
+            if (fieldId === 'pc-contact-phone' || fieldId === 'pc-contact-email') {
+                const phoneValue = document.getElementById('pc-contact-phone').value.trim();
+                const emailValue = document.getElementById('pc-contact-email').value.trim();
+                
+                if (!phoneValue && !emailValue) {
+                    // Show validation message only after user interacts with both fields
+                    const phoneTouched = document.getElementById('pc-contact-phone').hasAttribute('data-touched');
+                    const emailTouched = document.getElementById('pc-contact-email').hasAttribute('data-touched');
+                    
+                    if (phoneTouched && emailTouched) {
+                        isValid = false;
+                        errorMessage = 'Please provide either phone or email';
+                    }
+                }
+            }
+            
+            // Mark field as touched
+            input.setAttribute('data-touched', 'true');
+            
+            // Update UI
+            if (isValid && value) {
+                this.showFieldSuccess(input);
+            } else if (!isValid) {
+                this.showFieldError(input, errorMessage);
+            }
+            
+            return isValid;
+        }
+        
+        getValidationResult(type, value) {
+            const validators = {
+                'pc-number': {
+                    test: (val) => /^PC-\d{6}$/.test(val),
+                    message: 'PC Number must be in format PC-000001'
+                },
+                'email': {
+                    test: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+                    message: 'Please enter a valid email address'
+                },
+                'phone': {
+                    test: (val) => /^[\+]?[0-9\s\-\(\)]{10,}$/.test(val),
+                    message: 'Please enter a valid phone number'
+                },
+                'postcode': {
+                    test: (val) => /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i.test(val),
+                    message: 'Please enter a valid UK postcode'
+                },
+                'number': {
+                    test: (val) => !isNaN(val) && val >= 1 && val <= 20,
+                    message: 'Please enter a number between 1 and 20'
+                },
+                'required': {
+                    test: (val) => val.length > 0,
+                    message: 'This field is required'
+                }
+            };
+            
+            const validator = validators[type];
+            if (validator) {
+                return {
+                    isValid: validator.test(value),
+                    message: validator.message
+                };
+            }
+            
+            return { isValid: true, message: '' };
+        }
+        
+        clearFieldState(input) {
+            input.classList.remove('error', 'success');
+            const errorEl = document.getElementById(`${input.id}-error`);
+            const successEl = document.getElementById(`${input.id}-success`);
+            
+            if (errorEl) {
+                errorEl.hidden = true;
+                errorEl.textContent = '';
+            }
+            if (successEl) {
+                successEl.hidden = true;
+            }
+        }
+        
+        showFieldError(input, message) {
+            input.classList.add('error');
+            const errorEl = document.getElementById(`${input.id}-error`);
+            if (errorEl) {
+                errorEl.textContent = `⚠ ${message}`;
+                errorEl.hidden = false;
+            }
+        }
+        
+        showFieldSuccess(input) {
+            input.classList.add('success');
+            const successEl = document.getElementById(`${input.id}-success`);
+            if (successEl) {
+                successEl.hidden = false;
+            }
+        }
+        
+        getFieldLabel(input) {
+            const label = document.querySelector(`label[for="${input.id}"]`);
+            return label ? label.textContent.replace('*', '').trim() : 'This field';
+        }
+        
+        updateStepValidation() {
+            const stepValidation = {
+                1: this.validateStep1(),
+                2: this.validateStep2(), 
+                3: this.validateStep3()
+            };
+            
+            this.stepValidation = stepValidation;
+            
+            // Update next/save button states
+            const step1Next = document.getElementById('step-1-next');
+            const step2Next = document.getElementById('step-2-next');
+            const step3Save = document.getElementById('step-3-save');
+            
+            if (step1Next) step1Next.disabled = !stepValidation[1];
+            if (step2Next) step2Next.disabled = !stepValidation[2];
+            if (step3Save) step3Save.disabled = !stepValidation[3];
+        }
+        
+        validateStep1() {
+            const requiredFields = ['pc-number', 'pc-company-name', 'pc-project-name'];
+            return requiredFields.every(fieldId => {
+                const input = document.getElementById(fieldId);
+                return input && input.value.trim() && this.validateField(input);
+            });
+        }
+        
+        validateStep2() {
+            const requiredFields = ['pc-account-manager', 'pc-client-industry', 'pc-client-source'];
+            return requiredFields.every(fieldId => {
+                const input = document.getElementById(fieldId);
+                return input && input.value.trim();
+            });
+        }
+        
+        validateStep3() {
+            const contactName = document.getElementById('pc-contact-name').value.trim();
+            const phone = document.getElementById('pc-contact-phone').value.trim();
+            const email = document.getElementById('pc-contact-email').value.trim();
+            
+            // Contact name is required, and either phone OR email
+            return contactName && (phone || email);
+        }
+        
+        nextStep() {
+            if (this.currentStep < this.totalSteps && this.stepValidation[this.currentStep]) {
+                this.goToStep(this.currentStep + 1);
+            }
+        }
+        
+        prevStep() {
+            if (this.currentStep > 1) {
+                this.goToStep(this.currentStep - 1);
+            }
+        }
+        
+        goToStep(stepNumber) {
+            if (stepNumber < 1 || stepNumber > this.totalSteps) return;
+            
+            // Hide current step
+            document.querySelector(`#step-${this.currentStep}`).classList.remove('active');
+            document.querySelector(`#step-${this.currentStep}-indicator`).classList.remove('active');
+            
+            // Mark completed steps
+            if (stepNumber > this.currentStep) {
+                document.querySelector(`#step-${this.currentStep}-indicator`).classList.add('completed');
+            } else {
+                // Remove completed state when going backwards
+                for (let i = stepNumber; i <= this.totalSteps; i++) {
+                    document.querySelector(`#step-${i}-indicator`).classList.remove('completed');
+                }
+            }
+            
+            // Show new step
+            document.querySelector(`#step-${stepNumber}`).classList.add('active');
+            document.querySelector(`#step-${stepNumber}-indicator`).classList.add('active');
+            
+            // Update progress bar
+            const progress = (stepNumber / this.totalSteps) * 100;
+            document.getElementById('wizard-progress-bar').style.width = `${progress}%`;
+            
+            this.currentStep = stepNumber;
+            
+            // Auto-save when moving between steps
+            this.saveDraft();
+            
+            // Focus first input in new step
+            const firstInput = document.querySelector(`#step-${stepNumber} .wizard-field-input`);
+            if (firstInput) {
+                setTimeout(() => firstInput.focus(), 300);
+            }
+        }
+        
+        setupAutoSave() {
+            const inputs = document.querySelectorAll('.wizard-field-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    clearTimeout(this.draftSaveTimeout);
+                    this.draftSaveTimeout = setTimeout(() => {
+                        this.saveDraft();
+                    }, 2000);
+                });
+            });
+        }
+        
+        saveDraft() {
+            const formData = this.collectFormData();
+            localStorage.setItem('pc-wizard-draft', JSON.stringify({
+                data: formData,
+                step: this.currentStep,
+                timestamp: new Date().toISOString()
+            }));
+            
+            // Show draft saved indicator
+            const draftStatus = document.getElementById('draft-status');
+            if (draftStatus) {
+                draftStatus.className = 'draft-indicator saved';
+                draftStatus.textContent = '✓ Draft saved';
+                draftStatus.hidden = false;
+                
+                setTimeout(() => {
+                    draftStatus.hidden = true;
+                }, 2000);
+            }
+        }
+        
+        restoreDraft() {
+            const draftData = localStorage.getItem('pc-wizard-draft');
+            if (draftData) {
+                try {
+                    const draft = JSON.parse(draftData);
+                    
+                    // Check if draft is recent (within 24 hours)
+                    const draftAge = Date.now() - new Date(draft.timestamp).getTime();
+                    if (draftAge < 24 * 60 * 60 * 1000) {
+                        
+                        // Show restore option
+                        toastManager.show({
+                            type: 'info',
+                            title: 'Draft Found',
+                            message: 'We found a saved draft from your previous session.',
+                            actions: [
+                                { 
+                                    label: 'Restore Draft', 
+                                    style: 'primary', 
+                                    onclick: `pcWizard.loadDraft('${draftData}')` 
+                                },
+                                { 
+                                    label: 'Start Fresh', 
+                                    style: '', 
+                                    onclick: `localStorage.removeItem('pc-wizard-draft')` 
+                                }
+                            ],
+                            duration: 8000
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error restoring draft:', error);
+                }
+            }
+        }
+        
+        loadDraft(draftData) {
+            try {
+                const draft = JSON.parse(draftData);
+                
+                // Populate form fields
+                Object.entries(draft.data).forEach(([fieldId, value]) => {
+                    const input = document.getElementById(fieldId);
+                    if (input) {
+                        input.value = value;
+                        // Trigger validation
+                        this.validateField(input);
+                    }
+                });
+                
+                // Go to saved step
+                this.goToStep(draft.step);
+                this.updateStepValidation();
+                
+                toastManager.show({
+                    type: 'success',
+                    message: 'Draft restored successfully',
+                    duration: 3000
+                });
+                
+            } catch (error) {
+                toastManager.show({
+                    type: 'error',
+                    message: 'Failed to restore draft',
+                    duration: 3000
+                });
+            }
+        }
+        
+        collectFormData() {
+            const formData = {};
+            const inputs = document.querySelectorAll('.wizard-field-input');
+            
+            inputs.forEach(input => {
+                if (input.type !== 'hidden') {
+                    formData[input.id] = input.value;
+                }
+            });
+            
+            return formData;
+        }
+        
+        cancel() {
+            // Clear draft
+            localStorage.removeItem('pc-wizard-draft');
+            
+            // Reset form
+            this.resetWizard();
+            
+            // Navigate back
+            window.showPage('pcnumbers');
+        }
+        
+        resetWizard() {
+            // Reset to step 1
+            this.goToStep(1);
+            
+            // Clear all form fields
+            const inputs = document.querySelectorAll('.wizard-field-input');
+            inputs.forEach(input => {
+                input.value = '';
+                this.clearFieldState(input);
+            });
+            
+            // Reset validation states
+            this.stepValidation = { 1: false, 2: false, 3: false };
+            this.updateStepValidation();
+        }
+        
+        async savePC() {
+            try {
+                // Show loading on save button
+                const saveButton = document.getElementById('step-3-save');
+                loadingManager.setButtonLoading(saveButton, true);
+                
+                // Collect and validate all form data
+                const formData = this.collectFormData();
+                
+                // Final validation
+                if (!this.validateStep1() || !this.validateStep2() || !this.validateStep3()) {
+                    throw new Error('Please complete all required fields');
+                }
+                
+                // Create PC object (using existing savePC logic)
+                const pcData = {
+                    pc_number: formData['pc-number'],
+                    company_name: formData['pc-company-name'],
+                    project_name: formData['pc-project-name'],
+                    account_manager: formData['pc-account-manager'],
+                    client_industry: formData['pc-client-industry'],
+                    client_source: formData['pc-client-source'],
+                    quote_limit: parseInt(formData['pc-quote-limit']) || 5,
+                    status: formData['pc-status'] || 'active',
+                    project_description: formData['pc-project-description'],
+                    contact_name: formData['pc-contact-name'],
+                    contact_phone: formData['pc-contact-phone'],
+                    contact_email: formData['pc-contact-email'],
+                    postcode: formData['pc-postcode']
+                };
+                
+                // Save using existing logic
+                await window.savePC();
+                
+                // Clear draft on successful save
+                localStorage.removeItem('pc-wizard-draft');
+                
+                // Show success and navigate
+                toastManager.show({
+                    type: 'success',
+                    title: 'PC Number Created',
+                    message: `${pcData.pc_number} has been created successfully.`,
+                    actions: [
+                        { 
+                            label: 'Create Quote', 
+                            style: 'primary', 
+                            onclick: `window.createQuote('${pcData.pc_number}')` 
+                        }
+                    ],
+                    duration: 6000
+                });
+                
+            } catch (error) {
+                toastManager.showError('pc-save', error);
+            } finally {
+                const saveButton = document.getElementById('step-3-save');
+                loadingManager.setButtonLoading(saveButton, false);
+            }
+        }
+    }
+    
+    // Global wizard instance
+    const pcWizard = new FormWizardManager();
+    
+    // Global functions for wizard navigation
+    window.nextWizardStep = () => pcWizard.nextStep();
+    window.prevWizardStep = () => pcWizard.prevStep();
+    window.cancelWizard = () => pcWizard.cancel();
+    window.saveWizardPC = () => pcWizard.savePC();
+    window.saveDraft = () => pcWizard.saveDraft();
+    
+    console.log('✅ Progressive form wizard initialized');
+    console.log('📝 3-step PC Number creation with live validation, auto-save, and draft restoration');
     
     // ========================================
     // ACCESSIBILITY & MOBILE UX ENHANCEMENTS
