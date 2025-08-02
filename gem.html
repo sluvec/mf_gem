@@ -12390,6 +12390,529 @@ const CRM = {
     },
 
     /**
+     * @namespace CRM.Testing
+     * @description Comprehensive testing framework for code quality assurance and developer experience
+     * @example
+     * // Run all tests
+     * await CRM.Testing.runAllTests();
+     * 
+     * // Run specific test suite
+     * await CRM.Testing.runTestSuite('DataAccess');
+     * 
+     * // Add custom test
+     * CRM.Testing.addTest('MyModule', 'should do something', async () => {
+     *     const result = await myFunction();
+     *     CRM.Testing.assert(result === expected, 'Result should match expected');
+     * });
+     * 
+     * // Performance benchmark
+     * const metrics = await CRM.Testing.benchmark('savePC', () => CRM.DataAccess.save('pc', testData));
+     */
+    Testing: {
+        // Test results storage
+        _testResults: {},
+        _performanceMetrics: {},
+        _coverageData: {},
+        
+        // Test configuration
+        config: {
+            verbose: true,
+            stopOnError: false,
+            runPerformanceTests: true,
+            trackCoverage: false,
+            timeout: 5000 // 5 seconds default timeout
+        },
+
+        /**
+         * Assertion library for tests
+         * @param {boolean} condition - Condition to assert
+         * @param {string} message - Error message if assertion fails
+         * @throws {Error} If assertion fails
+         */
+        assert(condition, message = 'Assertion failed') {
+            if (!condition) {
+                throw new Error(`❌ ASSERTION FAILED: ${message}`);
+            }
+        },
+
+        /**
+         * Assert equality with detailed comparison
+         * @param {*} actual - Actual value
+         * @param {*} expected - Expected value
+         * @param {string} message - Custom message
+         */
+        assertEqual(actual, expected, message = null) {
+            const defaultMessage = `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`;
+            this.assert(actual === expected, message || defaultMessage);
+        },
+
+        /**
+         * Assert deep equality for objects
+         * @param {*} actual - Actual value
+         * @param {*} expected - Expected value
+         * @param {string} message - Custom message
+         */
+        assertDeepEqual(actual, expected, message = null) {
+            const defaultMessage = `Deep equality failed: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`;
+            this.assert(JSON.stringify(actual) === JSON.stringify(expected), message || defaultMessage);
+        },
+
+        /**
+         * Assert that a value is truthy
+         * @param {*} value - Value to check
+         * @param {string} message - Custom message
+         */
+        assertTruthy(value, message = null) {
+            this.assert(!!value, message || `Expected truthy value, got ${value}`);
+        },
+
+        /**
+         * Assert that a function throws an error
+         * @param {Function} fn - Function that should throw
+         * @param {string} message - Custom message
+         */
+        async assertThrows(fn, message = null) {
+            let thrown = false;
+            try {
+                await fn();
+            } catch (error) {
+                thrown = true;
+            }
+            this.assert(thrown, message || 'Expected function to throw an error');
+        },
+
+        /**
+         * Add a test to a test suite
+         * @param {string} suiteName - Name of the test suite
+         * @param {string} testName - Name of the test
+         * @param {Function} testFn - Test function (async supported)
+         */
+        addTest(suiteName, testName, testFn) {
+            if (!this._testResults[suiteName]) {
+                this._testResults[suiteName] = {
+                    tests: {},
+                    passed: 0,
+                    failed: 0,
+                    total: 0
+                };
+            }
+            
+            this._testResults[suiteName].tests[testName] = {
+                fn: testFn,
+                status: 'pending',
+                error: null,
+                duration: 0
+            };
+            
+            this._testResults[suiteName].total++;
+        },
+
+        /**
+         * Run a single test with timeout and error handling
+         * @param {string} suiteName - Test suite name
+         * @param {string} testName - Test name
+         * @param {Function} testFn - Test function
+         * @returns {Promise<Object>} Test result
+         */
+        async runSingleTest(suiteName, testName, testFn) {
+            const startTime = performance.now();
+            const test = this._testResults[suiteName].tests[testName];
+            
+            try {
+                // Run test with timeout
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Test timeout')), this.config.timeout)
+                );
+                
+                await Promise.race([testFn(), timeoutPromise]);
+                
+                test.status = 'passed';
+                test.duration = performance.now() - startTime;
+                this._testResults[suiteName].passed++;
+                
+                if (this.config.verbose) {
+                    console.log(`✅ ${suiteName} → ${testName} (${test.duration.toFixed(2)}ms)`);
+                }
+                
+                return { passed: true, duration: test.duration };
+            } catch (error) {
+                test.status = 'failed';
+                test.error = error.message;
+                test.duration = performance.now() - startTime;
+                this._testResults[suiteName].failed++;
+                
+                console.error(`❌ ${suiteName} → ${testName}: ${error.message}`);
+                
+                if (this.config.stopOnError) {
+                    throw error;
+                }
+                
+                return { passed: false, error: error.message, duration: test.duration };
+            }
+        },
+
+        /**
+         * Run all tests in a specific test suite
+         * @param {string} suiteName - Name of the test suite
+         * @returns {Promise<Object>} Suite results
+         */
+        async runTestSuite(suiteName) {
+            if (!this._testResults[suiteName]) {
+                console.warn(`⚠️ Test suite '${suiteName}' not found`);
+                return { passed: 0, failed: 0, total: 0 };
+            }
+
+            console.log(`🧪 Running test suite: ${suiteName}`);
+            const suite = this._testResults[suiteName];
+            const startTime = performance.now();
+            
+            suite.passed = 0;
+            suite.failed = 0;
+            
+            for (const [testName, test] of Object.entries(suite.tests)) {
+                await this.runSingleTest(suiteName, testName, test.fn);
+            }
+            
+            const duration = performance.now() - startTime;
+            
+            console.log(`📊 ${suiteName} Results: ${suite.passed}/${suite.total} passed (${duration.toFixed(2)}ms)`);
+            
+            return {
+                suiteName,
+                passed: suite.passed,
+                failed: suite.failed,
+                total: suite.total,
+                duration
+            };
+        },
+
+        /**
+         * Run all registered test suites
+         * @returns {Promise<Object>} Complete test results
+         */
+        async runAllTests() {
+            console.log('🚀 Starting comprehensive test suite...');
+            const overallStart = performance.now();
+            
+            const results = {
+                suites: {},
+                totalPassed: 0,
+                totalFailed: 0,
+                totalTests: 0,
+                duration: 0
+            };
+            
+            for (const suiteName of Object.keys(this._testResults)) {
+                const suiteResult = await this.runTestSuite(suiteName);
+                results.suites[suiteName] = suiteResult;
+                results.totalPassed += suiteResult.passed;
+                results.totalFailed += suiteResult.failed;
+                results.totalTests += suiteResult.total;
+            }
+            
+            results.duration = performance.now() - overallStart;
+            
+            // Summary report
+            console.log('\n📋 TEST SUMMARY REPORT');
+            console.log('═'.repeat(50));
+            console.log(`Total Tests: ${results.totalTests}`);
+            console.log(`✅ Passed: ${results.totalPassed}`);
+            console.log(`❌ Failed: ${results.totalFailed}`);
+            console.log(`⏱️ Duration: ${results.duration.toFixed(2)}ms`);
+            console.log(`📈 Success Rate: ${((results.totalPassed / results.totalTests) * 100).toFixed(1)}%`);
+            
+            if (results.totalFailed > 0) {
+                console.log('\n❌ FAILED TESTS:');
+                for (const [suiteName, suite] of Object.entries(this._testResults)) {
+                    for (const [testName, test] of Object.entries(suite.tests)) {
+                        if (test.status === 'failed') {
+                            console.log(`  ${suiteName} → ${testName}: ${test.error}`);
+                        }
+                    }
+                }
+            }
+            
+            return results;
+        },
+
+        /**
+         * Performance benchmark utility
+         * @param {string} name - Benchmark name
+         * @param {Function} fn - Function to benchmark
+         * @param {number} iterations - Number of iterations (default: 1000)
+         * @returns {Promise<Object>} Performance metrics
+         */
+        async benchmark(name, fn, iterations = 1000) {
+            console.log(`⚡ Running benchmark: ${name} (${iterations} iterations)`);
+            
+            const results = [];
+            const startTime = performance.now();
+            
+            for (let i = 0; i < iterations; i++) {
+                const iterStart = performance.now();
+                await fn();
+                results.push(performance.now() - iterStart);
+            }
+            
+            const totalTime = performance.now() - startTime;
+            const avgTime = results.reduce((a, b) => a + b, 0) / results.length;
+            const minTime = Math.min(...results);
+            const maxTime = Math.max(...results);
+            
+            const metrics = {
+                name,
+                iterations,
+                totalTime: totalTime.toFixed(2),
+                avgTime: avgTime.toFixed(4),
+                minTime: minTime.toFixed(4),
+                maxTime: maxTime.toFixed(4),
+                opsPerSecond: (1000 / avgTime).toFixed(0)
+            };
+            
+            this._performanceMetrics[name] = metrics;
+            
+            console.log(`📊 ${name} Benchmark Results:`);
+            console.log(`  Average: ${metrics.avgTime}ms`);
+            console.log(`  Min: ${metrics.minTime}ms`);
+            console.log(`  Max: ${metrics.maxTime}ms`);
+            console.log(`  Ops/sec: ${metrics.opsPerSecond}`);
+            
+            return metrics;
+        },
+
+        /**
+         * Memory usage analysis
+         * @returns {Object} Memory metrics
+         */
+        getMemoryMetrics() {
+            if (performance.memory) {
+                return {
+                    usedJSHeapSize: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
+                    totalJSHeapSize: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024),
+                    jsHeapSizeLimit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)
+                };
+            }
+            return { message: 'Memory metrics not available in this browser' };
+        },
+
+        /**
+         * Initialize built-in test suites
+         */
+        initializeTestSuites() {
+            this.setupDataAccessTests();
+            this.setupEventBusTests();
+            this.setupErrorHandlerTests();
+            this.setupPerformanceTests();
+            this.setupIntegrationTests();
+        },
+
+        /**
+         * Setup Data Access Layer tests
+         */
+        setupDataAccessTests() {
+            // Test data generation
+            const generateTestPC = () => ({
+                pc_number: `TEST-${Date.now()}`,
+                company_name: 'Test Company',
+                project_name: 'Test Project',
+                account_manager: 'Test Manager',
+                client_industry: 'technology',
+                client_source: 'website',
+                contact_name: 'Test Contact',
+                contact_email: 'test@example.com'
+            });
+
+            this.addTest('DataAccess', 'should save and retrieve PC data', async () => {
+                const testData = generateTestPC();
+                const saved = await CRM.DataAccess.save('pc', testData);
+                
+                this.assertTruthy(saved.id, 'Saved PC should have ID');
+                this.assertEqual(saved.pc_number, testData.pc_number, 'PC number should match');
+                this.assertTruthy(saved.created_at, 'Should have created_at timestamp');
+                this.assertTruthy(saved.updated_at, 'Should have updated_at timestamp');
+                
+                const retrieved = await CRM.DataAccess.findById('pc', saved.id);
+                this.assertDeepEqual(retrieved, saved, 'Retrieved data should match saved data');
+            });
+
+            this.addTest('DataAccess', 'should update existing data', async () => {
+                const testData = generateTestPC();
+                const saved = await CRM.DataAccess.save('pc', testData);
+                
+                const updates = { company_name: 'Updated Company' };
+                const updated = await CRM.DataAccess.update('pc', saved.id, updates);
+                
+                this.assertEqual(updated.company_name, 'Updated Company', 'Company name should be updated');
+                this.assertEqual(updated.id, saved.id, 'ID should remain the same');
+                this.assertEqual(updated.created_at, saved.created_at, 'Created date should be preserved');
+                this.assert(updated.updated_at > saved.updated_at, 'Updated timestamp should be newer');
+            });
+
+            this.addTest('DataAccess', 'should handle validation errors', async () => {
+                await this.assertThrows(async () => {
+                    await CRM.DataAccess.save('pc', { pc_number: '' }); // Invalid data
+                }, 'Should throw validation error for empty PC number');
+            });
+
+            this.addTest('DataAccess', 'should delete data correctly', async () => {
+                const testData = generateTestPC();
+                const saved = await CRM.DataAccess.save('pc', testData);
+                
+                const deleted = await CRM.DataAccess.delete('pc', saved.id);
+                this.assert(deleted === true, 'Delete should return true');
+                
+                const retrieved = await CRM.DataAccess.findById('pc', saved.id);
+                this.assert(retrieved === null || retrieved === undefined, 'Deleted data should not be retrievable');
+            });
+        },
+
+        /**
+         * Setup Event Bus tests
+         */
+        setupEventBusTests() {
+            this.addTest('EventBus', 'should register and emit events', async () => {
+                let receivedData = null;
+                let callCount = 0;
+                
+                const unsubscribe = CRM.EventBus.on('test:event', (data) => {
+                    receivedData = data;
+                    callCount++;
+                });
+                
+                await CRM.EventBus.emit('test:event', { test: 'data' });
+                
+                this.assertEqual(callCount, 1, 'Event handler should be called once');
+                this.assertDeepEqual(receivedData, { test: 'data' }, 'Should receive correct data');
+                
+                unsubscribe();
+            });
+
+            this.addTest('EventBus', 'should handle event priorities', async () => {
+                const callOrder = [];
+                
+                CRM.EventBus.on('priority:test', () => callOrder.push('low'), { priority: 1 });
+                CRM.EventBus.on('priority:test', () => callOrder.push('high'), { priority: 10 });
+                CRM.EventBus.on('priority:test', () => callOrder.push('medium'), { priority: 5 });
+                
+                await CRM.EventBus.emit('priority:test');
+                
+                this.assertDeepEqual(callOrder, ['high', 'medium', 'low'], 'Events should execute in priority order');
+                
+                CRM.EventBus.clear('priority:test');
+            });
+
+            this.addTest('EventBus', 'should handle once() listeners', async () => {
+                let callCount = 0;
+                
+                CRM.EventBus.once('once:test', () => callCount++);
+                
+                await CRM.EventBus.emit('once:test');
+                await CRM.EventBus.emit('once:test');
+                
+                this.assertEqual(callCount, 1, 'Once listener should only be called once');
+            });
+        },
+
+        /**
+         * Setup Error Handler tests
+         */
+        setupErrorHandlerTests() {
+            this.addTest('ErrorHandler', 'should categorize errors correctly', () => {
+                const validationError = new Error('PC number is required');
+                const category = CRM.ErrorHandler.categorize(validationError);
+                
+                this.assertEqual(category.type, 'validation', 'Should categorize as validation error');
+                this.assertEqual(category.icon, '⚠️', 'Should have correct icon');
+            });
+
+            this.addTest('ErrorHandler', 'should handle errors with context', async () => {
+                let toastShown = false;
+                const originalShowToast = CRM.ErrorHandler.showToast;
+                
+                CRM.ErrorHandler.showToast = () => { toastShown = true; };
+                
+                try {
+                    await CRM.ErrorHandler.handle(new Error('Test error'), 'Test Context', {
+                        showUser: true,
+                        logError: false,
+                        emitEvent: false
+                    });
+                    
+                    this.assert(toastShown, 'Should show toast notification');
+                } finally {
+                    CRM.ErrorHandler.showToast = originalShowToast;
+                }
+            });
+        },
+
+        /**
+         * Setup performance tests
+         */
+        setupPerformanceTests() {
+            this.addTest('Performance', 'should measure DAL operations', async () => {
+                const testData = {
+                    pc_number: `PERF-${Date.now()}`,
+                    company_name: 'Performance Test',
+                    project_name: 'Performance Project',
+                    account_manager: 'Performance Manager',
+                    client_industry: 'technology',
+                    client_source: 'website',
+                    contact_name: 'Performance Contact',
+                    contact_email: 'perf@example.com'
+                };
+                
+                const startTime = performance.now();
+                const saved = await CRM.DataAccess.save('pc', testData);
+                const saveTime = performance.now() - startTime;
+                
+                this.assert(saveTime < 100, `Save operation should be fast (${saveTime.toFixed(2)}ms)`);
+                
+                const retrieveStart = performance.now();
+                await CRM.DataAccess.findById('pc', saved.id);
+                const retrieveTime = performance.now() - retrieveStart;
+                
+                this.assert(retrieveTime < 50, `Retrieve operation should be fast (${retrieveTime.toFixed(2)}ms)`);
+            });
+        },
+
+        /**
+         * Setup integration tests
+         */
+        setupIntegrationTests() {
+            this.addTest('Integration', 'should integrate DAL with EventBus', async () => {
+                let eventReceived = false;
+                let eventData = null;
+                
+                const unsubscribe = CRM.EventBus.on('pc:created', (data) => {
+                    eventReceived = true;
+                    eventData = data;
+                });
+                
+                const testData = {
+                    pc_number: `INT-${Date.now()}`,
+                    company_name: 'Integration Test',
+                    project_name: 'Integration Project',
+                    account_manager: 'Integration Manager',
+                    client_industry: 'technology',
+                    client_source: 'website',
+                    contact_name: 'Integration Contact',
+                    contact_email: 'int@example.com'
+                };
+                
+                const saved = await CRM.DataAccess.save('pc', testData);
+                
+                // Wait a bit for event to be processed
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                this.assert(eventReceived, 'Should receive pc:created event');
+                this.assertEqual(eventData.id, saved.id, 'Event data should match saved data');
+                
+                unsubscribe();
+            });
+        }
+    },
+
+    /**
      * @namespace CRM.Navigation
      * @description Page navigation and UI routing
      */
@@ -12579,6 +13102,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Error Handler - expose for centralized error management
     window.ErrorHandler = CRM.ErrorHandler;
+    
+    // Testing Framework - expose for quality assurance and development
+    window.Testing = CRM.Testing;
     
     // PC Numbers Module
     window.savePC = CRM.PCNumbers.save;
@@ -12867,6 +13393,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { priority: -10 }); // Low priority, runs last
     
     console.log('✅ Event System listeners configured:', CRM.EventBus.getStats());
+
+    // ========================================
+    // TESTING SYSTEM SETUP
+    // ========================================
+    console.log('🧪 Setting up Testing Framework...');
+    
+    // Initialize test suites
+    CRM.Testing.initializeTestSuites();
+    
+    // Development helper function for running tests in console
+    window.runTests = async () => {
+        console.log('\n🚀 RUNNING COMPREHENSIVE TEST SUITE...');
+        console.log('══════════════════════════════════════════');
+        
+        const results = await CRM.Testing.runAllTests();
+        
+        // Show memory metrics
+        const memory = CRM.Testing.getMemoryMetrics();
+        console.log('\n💾 MEMORY METRICS:');
+        if (memory.message) {
+            console.log(`  ${memory.message}`);
+        } else {
+            console.log(`  Used: ${memory.usedJSHeapSize}MB`);
+            console.log(`  Total: ${memory.totalJSHeapSize}MB`);
+            console.log(`  Limit: ${memory.jsHeapSizeLimit}MB`);
+        }
+        
+        // Performance summary
+        console.log('\n⚡ QUICK PERFORMANCE COMMANDS:');
+        console.log('  CRM.Testing.benchmark("save-pc", () => CRM.DataAccess.save("pc", testData))');
+        console.log('  CRM.Testing.runTestSuite("DataAccess")');
+        console.log('  CRM.Testing.runTestSuite("EventBus")');
+        console.log('  CRM.Testing.getMemoryMetrics()');
+        
+        return results;
+    };
+    
+    // Developer shortcuts
+    window.testDAL = () => CRM.Testing.runTestSuite('DataAccess');
+    window.testEvents = () => CRM.Testing.runTestSuite('EventBus');
+    window.testErrors = () => CRM.Testing.runTestSuite('ErrorHandler');
+    window.testPerf = () => CRM.Testing.runTestSuite('Performance');
+    window.testIntegration = () => CRM.Testing.runTestSuite('Integration');
+    
+    console.log('✅ Testing Framework initialized');
+    console.log('💡 Run tests with: runTests() or individual suites with testDAL(), testEvents(), etc.');
 
     // Initialize IndexedDB and load data
     console.log('🚀 Starting application initialization...');
