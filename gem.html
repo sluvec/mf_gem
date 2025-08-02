@@ -164,6 +164,13 @@
         .priority-medium { background: #fbbf24; color: #92400e; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
         .priority-high { background: #f87171; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
         .priority-urgent { background: #dc2626; color: white; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: bold; }
+        
+        /* Quote Status Styling */
+        .quote-status-draft { background: #f3f4f6; color: #374151; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; text-transform: uppercase; }
+        .quote-status-issued { background: #dbeafe; color: #1e40af; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; text-transform: uppercase; }
+        .quote-status-won { background: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+        .quote-status-lost { background: #fee2e2; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; text-transform: uppercase; }
+        
         .form-section { border: 1px solid var(--neutral-200); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius-lg); }
         .form-section h3 { margin-top: 0; border-bottom: 1px solid var(--neutral-200); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
@@ -418,8 +425,85 @@
                     <div class="summary-line"><span>VAT Amount:</span><span id="sum-vat">£0.00</span></div>
                     <div class="summary-total"><span>Total (inc VAT):</span><span id="sum-total">£0.00</span></div>
                     
+                    <!-- NEW: Move Type & Addresses Section -->
+                    <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                        <h3 style="margin-bottom: 1rem;">📦 Move Type & Addresses</h3>
+                        
+                        <!-- Move Type Selection -->
+                        <div style="margin-bottom: 1rem;">
+                            <label>Move Type *</label>
+                            <select id="quote-move-type" onchange="window.toggleAddressSections()" required>
+                                <option value="">Select move type...</option>
+                                <option value="Collection Only">Collection Only</option>
+                                <option value="Delivery Only">Delivery Only</option>
+                                <option value="Collection + Delivery">Collection + Delivery</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Collection Address Section -->
+                        <div id="collection-section" style="display: none; margin-bottom: 1rem; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem;">
+                            <h4 style="margin-top: 0; margin-bottom: 1rem;">📍 Collection Address</h4>
+                            <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                                <div><label>Contact Name *</label><input type="text" id="quote-collection-name" placeholder="Contact person"></div>
+                                <div><label>Phone</label><input type="tel" id="quote-collection-phone" placeholder="Phone number"></div>
+                                <div><label>Email</label><input type="email" id="quote-collection-email" placeholder="Email"></div>
+                                <div><label>Date</label><input type="date" id="quote-collection-date"></div>
+                            </div>
+                            <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.75rem;">
+                                <div><label>Address Line 1 *</label><input type="text" id="quote-collection-address1" placeholder="Street address"></div>
+                                <div><label>Address Line 2</label><input type="text" id="quote-collection-address2" placeholder="Additional info"></div>
+                                <div><label>City *</label><input type="text" id="quote-collection-city" placeholder="City"></div>
+                                <div><label>County</label><input type="text" id="quote-collection-county" placeholder="County"></div>
+                                <div><label>Postcode *</label><input type="text" id="quote-collection-postcode" placeholder="Postcode"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Delivery Address Section -->
+                        <div id="delivery-section" style="display: none; margin-bottom: 1rem; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem;">
+                            <h4 style="margin-top: 0; margin-bottom: 1rem;">🚚 Delivery Address</h4>
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: inline-flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" id="quote-same-address" onchange="window.copyCollectionToDelivery()" style="margin-right: 0.5rem;">
+                                    Same as collection address
+                                </label>
+                            </div>
+                            <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                                <div><label>Contact Name *</label><input type="text" id="quote-delivery-name" placeholder="Contact person"></div>
+                                <div><label>Phone</label><input type="tel" id="quote-delivery-phone" placeholder="Phone number"></div>
+                                <div><label>Email</label><input type="email" id="quote-delivery-email" placeholder="Email"></div>
+                                <div><label>Date</label><input type="date" id="quote-delivery-date"></div>
+                            </div>
+                            <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.75rem;">
+                                <div><label>Address Line 1 *</label><input type="text" id="quote-delivery-address1" placeholder="Street address"></div>
+                                <div><label>Address Line 2</label><input type="text" id="quote-delivery-address2" placeholder="Additional info"></div>
+                                <div><label>City *</label><input type="text" id="quote-delivery-city" placeholder="City"></div>
+                                <div><label>County</label><input type="text" id="quote-delivery-county" placeholder="County"></div>
+                                <div><label>Postcode *</label><input type="text" id="quote-delivery-postcode" placeholder="Postcode"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quoted Activities Section -->
+                        <div style="margin-bottom: 1rem;">
+                            <label>Quoted Activities (optional)</label>
+                            <div id="quote-activities-multiselect" style="border: 1px solid #ccc; padding: 0.75rem; border-radius: 0.375rem; max-height: 120px; overflow-y: auto; background: white;">
+                                <p style="margin: 0; color: #666; font-style: italic;">Loading activities for this PC...</p>
+                            </div>
+                            <p class="field-note">Select activities that are included in this quote pricing</p>
+                        </div>
+                    </div>
+                    
                     <!-- Additional Quote Fields -->
                     <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <label>Quote Status *</label>
+                            <select id="quote-status" onchange="window.onQuoteStatusChange()" required>
+                                <option value="DRAFT">DRAFT - Work in progress (editable)</option>
+                                <option value="ISSUED">ISSUED - Sent to client (not editable)</option>
+                                <option value="WON">WON - Quote accepted by client</option>
+                                <option value="LOST">LOST - Quote lost to competitor</option>
+                            </select>
+                            <p class="field-note">Note: Once ISSUED, quote cannot be edited. WON/LOST are final states.</p>
+                        </div>
                         <div style="margin-bottom: 1rem;">
                             <label>Valid Until *</label>
                             <input type="date" id="quote-valid-until" required>
@@ -987,6 +1071,7 @@ async function initializeWithDemoData() {
         res5: generateUUID(),
         pl1: generateUUID(),
         q1: generateUUID(),
+        q2: generateUUID(), // NEW Sprint 2: Second demo quote
         act1: generateUUID(),
         act2: generateUUID()
     };
@@ -1116,7 +1201,7 @@ async function initializeWithDemoData() {
             company_name: 'Acme Construction Ltd',
             title: 'Office Refurbishment - Electrical Works',
             description: 'Supply and installation of LED lighting system including downlights, emergency lighting and associated electrical work.',
-            status: 'pending',
+            status: 'ISSUED', // NEW Sprint 2: Updated status workflow
             valid_until: '2024-05-15',
             subtotal: 1750.00,
             vat_rate: 20.00,
@@ -1134,6 +1219,93 @@ async function initializeWithDemoData() {
                     notes: 'Cool white temperature specified by client'
                 }
             ],
+            
+            // NEW Sprint 2: Move Type & Address fields
+            move_type: 'Collection + Delivery',
+            
+            // Collection address
+            collection_contact_name: 'Sarah Williams',
+            collection_phone: '01216549870',
+            collection_email: 'sarah.w@acme.com',
+            collection_date: '2024-04-15',
+            collection_address_1: '123 High Street',
+            collection_address_2: 'Industrial Estate',
+            collection_city: 'Birmingham',
+            collection_county: 'West Midlands',
+            collection_postcode: 'B1 1AA',
+            
+            // Delivery address
+            delivery_contact_name: 'Mark Thompson',
+            delivery_phone: '01234567890',
+            delivery_email: 'mark.t@newsite.com',
+            delivery_date: '2024-04-20',
+            delivery_address_1: '456 New Road',
+            delivery_address_2: 'Business Park',
+            delivery_city: 'Manchester',
+            delivery_county: 'Greater Manchester',
+            delivery_postcode: 'M1 2BB',
+            
+            // Quoted Activities (linked to demo activities)
+            quoted_activities: [demoUUIDs.act1],
+            
+            created_at: now,
+            updated_at: now
+        },
+        {
+            id: demoUUIDs.q2,
+            quote_number: 'QT-000002',
+            pc_id: demoUUIDs.pc2,
+            pc_number: 'PC-000002',
+            company_name: 'Globex Industries Ltd',
+            title: 'Warehouse Lighting - Supply Only',
+            description: 'Supply of LED high bay lights for warehouse facility. Client to arrange own installation.',
+            status: 'DRAFT', // Different status for demonstration
+            valid_until: '2024-06-01',
+            subtotal: 850.00,
+            vat_rate: 20.00,
+            vat_amount: 170.00,
+            total_cost: 1020.00,
+            notes: 'Supply only quote. Client has their own electricians.',
+            terms_conditions: 'Payment terms: 30 days net. Collection from our warehouse.',
+            line_items: [
+                {
+                    resource_id: demoUUIDs.res2,
+                    resource_name: 'LED High Bay Light - 150W',
+                    quantity: 20,
+                    unit_price: 42.50,
+                    line_total: 850.00,
+                    notes: 'Industrial grade for warehouse use'
+                }
+            ],
+            
+            // NEW Sprint 2: Different move type example
+            move_type: 'Collection Only',
+            
+            // Collection address only (no delivery)
+            collection_contact_name: 'James Roberts',
+            collection_phone: '01619876543',
+            collection_email: 'james.r@globex.com',
+            collection_date: '2024-04-25',
+            collection_address_1: '789 Industrial Road',
+            collection_address_2: null,
+            collection_city: 'Manchester',
+            collection_county: 'Greater Manchester',
+            collection_postcode: 'M2 3CC',
+            
+            // No delivery address (Collection Only)
+            delivery_contact_name: null,
+            delivery_phone: null,
+            delivery_email: null,
+            delivery_date: null,
+            delivery_address_1: null,
+            delivery_address_2: null,
+            delivery_city: null,
+            delivery_county: null,
+            delivery_postcode: null,
+            
+            // Quoted Activities (linked to different activity)
+            quoted_activities: [demoUUIDs.act2],
+            
             created_at: now,
             updated_at: now
         }
@@ -1521,6 +1693,30 @@ function createQuote() {
     document.getElementById('quote-notes').value = '';
     document.getElementById('quote-terms').value = 'Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.';
 
+    // NEW Sprint 2: Initialize status, address and move type fields
+    document.getElementById('quote-status').value = 'DRAFT'; // Always start as DRAFT
+    document.getElementById('quote-move-type').value = '';
+    
+    // Clear all address fields
+    ['quote-collection-name', 'quote-collection-phone', 'quote-collection-email', 'quote-collection-date',
+     'quote-collection-address1', 'quote-collection-address2', 'quote-collection-city', 'quote-collection-county', 'quote-collection-postcode',
+     'quote-delivery-name', 'quote-delivery-phone', 'quote-delivery-email', 'quote-delivery-date',
+     'quote-delivery-address1', 'quote-delivery-address2', 'quote-delivery-city', 'quote-delivery-county', 'quote-delivery-postcode'
+    ].forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+    
+    // Uncheck same address checkbox
+    document.getElementById('quote-same-address').checked = false;
+    
+    // Hide address sections initially
+    document.getElementById('collection-section').style.display = 'none';
+    document.getElementById('delivery-section').style.display = 'none';
+    
+    // Populate quoted activities for current PC
+    populateQuotedActivities();
+
     document.getElementById('quote-items-section').style.display = 'none';
     document.getElementById('price-list-selector').style.display = 'block';
     showPage('quote-builder');
@@ -1644,6 +1840,126 @@ function calculateTotal() {
     document.getElementById('sum-total').textContent = '£' + total.toFixed(2);
 }
 
+// NEW Sprint 2 Functions: Address & Move Type handling
+function toggleAddressSections() {
+    const moveType = document.getElementById('quote-move-type').value;
+    const collectionSection = document.getElementById('collection-section');
+    const deliverySection = document.getElementById('delivery-section');
+    
+    // Hide both sections initially
+    collectionSection.style.display = 'none';
+    deliverySection.style.display = 'none';
+    
+    // Show sections based on move type
+    if (moveType === 'Collection Only' || moveType === 'Collection + Delivery') {
+        collectionSection.style.display = 'block';
+    }
+    
+    if (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') {
+        deliverySection.style.display = 'block';
+    }
+    
+    // Clear validation requirements when sections are hidden
+    updateAddressValidation();
+}
+
+function copyCollectionToDelivery() {
+    const checkbox = document.getElementById('quote-same-address');
+    if (checkbox.checked) {
+        // Copy collection data to delivery fields
+        document.getElementById('quote-delivery-name').value = document.getElementById('quote-collection-name').value;
+        document.getElementById('quote-delivery-phone').value = document.getElementById('quote-collection-phone').value;
+        document.getElementById('quote-delivery-email').value = document.getElementById('quote-collection-email').value;
+        document.getElementById('quote-delivery-date').value = document.getElementById('quote-collection-date').value;
+        document.getElementById('quote-delivery-address1').value = document.getElementById('quote-collection-address1').value;
+        document.getElementById('quote-delivery-address2').value = document.getElementById('quote-collection-address2').value;
+        document.getElementById('quote-delivery-city').value = document.getElementById('quote-collection-city').value;
+        document.getElementById('quote-delivery-county').value = document.getElementById('quote-collection-county').value;
+        document.getElementById('quote-delivery-postcode').value = document.getElementById('quote-collection-postcode').value;
+    }
+}
+
+function updateAddressValidation() {
+    const moveType = document.getElementById('quote-move-type').value;
+    const collectionFields = ['quote-collection-name', 'quote-collection-address1', 'quote-collection-city', 'quote-collection-postcode'];
+    const deliveryFields = ['quote-delivery-name', 'quote-delivery-address1', 'quote-delivery-city', 'quote-delivery-postcode'];
+    
+    // Clear all required attributes first
+    [...collectionFields, ...deliveryFields].forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.removeAttribute('required');
+    });
+    
+    // Set required based on move type
+    if (moveType === 'Collection Only' || moveType === 'Collection + Delivery') {
+        collectionFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.setAttribute('required', 'required');
+        });
+    }
+    
+    if (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') {
+        deliveryFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.setAttribute('required', 'required');
+        });
+    }
+}
+
+function populateQuotedActivities() {
+    const container = document.getElementById('quote-activities-multiselect');
+    if (!db.currentPC) {
+        container.innerHTML = '<p style="margin: 0; color: #666;">No PC selected</p>';
+        return;
+    }
+    
+    // Get activities for current PC
+    const pcActivities = db.activities.filter(activity => 
+        activity.pc_id === db.currentPC.id && activity.status !== 'cancelled'
+    );
+    
+    if (pcActivities.length === 0) {
+        container.innerHTML = '<p style="margin: 0; color: #666;">No activities found for this PC</p>';
+        return;
+    }
+    
+    // Create checkboxes for each activity
+    container.innerHTML = pcActivities.map(activity => `
+        <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
+            <input type="checkbox" value="${activity.id}" onchange="window.updateQuotedActivities()" style="margin-right: 0.5rem;">
+            <strong>${activity.title || activity.type}</strong> - ${activity.scheduled_date || 'No date'} 
+            <span style="color: #666;">(${activity.status})</span>
+        </label>
+    `).join('');
+}
+
+function updateQuotedActivities() {
+    // This function will be called when checkboxes change
+    // The selected activities will be collected in saveQuote()
+}
+
+function onQuoteStatusChange() {
+    const status = document.getElementById('quote-status').value;
+    const warningMessages = {
+        'ISSUED': 'WARNING: Once marked as ISSUED, this quote cannot be edited!',
+        'WON': 'FINAL STATE: Quote will be marked as WON and cannot be changed.',
+        'LOST': 'FINAL STATE: Quote will be marked as LOST and cannot be changed.'
+    };
+    
+    if (warningMessages[status]) {
+        // Show warning but don't prevent selection
+        setTimeout(() => alert(warningMessages[status]), 100);
+    }
+}
+
+function validateQuoteEditability(quote) {
+    // Check if quote can be edited based on status
+    if (!quote || !quote.status) return true; // Default to editable for new quotes
+    
+    const nonEditableStatuses = ['ISSUED', 'WON', 'LOST'];
+    return !nonEditableStatuses.includes(quote.status);
+}
+
 async function saveQuote() {
     if (!db.currentPC) return;
     
@@ -1651,8 +1967,39 @@ async function saveQuote() {
     const title = document.getElementById('quote-title').value.trim();
     const validUntil = document.getElementById('quote-valid-until').value;
     
-    if (!title || !validUntil) {
-        alert('Quote title and valid until date are required!');
+    // NEW Sprint 2: Enhanced validation for move type and addresses
+    const moveType = document.getElementById('quote-move-type').value;
+    if (!title || !validUntil || !moveType) {
+        alert('Quote title, valid until date, and move type are required!');
+        return;
+    }
+    
+    // Validate address fields based on move type
+    let addressValidationError = '';
+    if (moveType === 'Collection Only' || moveType === 'Collection + Delivery') {
+        const collectionName = document.getElementById('quote-collection-name').value.trim();
+        const collectionAddress1 = document.getElementById('quote-collection-address1').value.trim();
+        const collectionCity = document.getElementById('quote-collection-city').value.trim();
+        const collectionPostcode = document.getElementById('quote-collection-postcode').value.trim();
+        
+        if (!collectionName || !collectionAddress1 || !collectionCity || !collectionPostcode) {
+            addressValidationError = 'Collection address: Contact name, address line 1, city, and postcode are required!';
+        }
+    }
+    
+    if (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') {
+        const deliveryName = document.getElementById('quote-delivery-name').value.trim();
+        const deliveryAddress1 = document.getElementById('quote-delivery-address1').value.trim();
+        const deliveryCity = document.getElementById('quote-delivery-city').value.trim();
+        const deliveryPostcode = document.getElementById('quote-delivery-postcode').value.trim();
+        
+        if (!deliveryName || !deliveryAddress1 || !deliveryCity || !deliveryPostcode) {
+            addressValidationError = 'Delivery address: Contact name, address line 1, city, and postcode are required!';
+        }
+    }
+    
+    if (addressValidationError) {
+        alert(addressValidationError);
         return;
     }
     
@@ -1687,7 +2034,7 @@ async function saveQuote() {
         company_name: db.currentPC.company_name || db.currentPC.company,
         title: title,
         description: document.getElementById('quote-description').value.trim(),
-        status: 'draft',
+        status: document.getElementById('quote-status').value, // NEW Sprint 2: Use selected status
         valid_until: validUntil,
         subtotal: subtotal,
         vat_rate: vatRate,
@@ -1696,6 +2043,35 @@ async function saveQuote() {
         notes: document.getElementById('quote-notes').value.trim(),
         terms_conditions: document.getElementById('quote-terms').value.trim(),
         line_items: lineItems,
+        
+        // NEW Sprint 2: Move Type & Address fields
+        move_type: moveType,
+        
+        // Collection address (only if applicable)
+        collection_contact_name: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-name').value.trim() : null,
+        collection_phone: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-phone').value.trim() : null,
+        collection_email: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-email').value.trim() : null,
+        collection_date: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-date').value : null,
+        collection_address_1: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-address1').value.trim() : null,
+        collection_address_2: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-address2').value.trim() : null,
+        collection_city: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-city').value.trim() : null,
+        collection_county: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-county').value.trim() : null,
+        collection_postcode: (moveType === 'Collection Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-collection-postcode').value.trim() : null,
+        
+        // Delivery address (only if applicable)
+        delivery_contact_name: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-name').value.trim() : null,
+        delivery_phone: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-phone').value.trim() : null,
+        delivery_email: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-email').value.trim() : null,
+        delivery_date: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-date').value : null,
+        delivery_address_1: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-address1').value.trim() : null,
+        delivery_address_2: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-address2').value.trim() : null,
+        delivery_city: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-city').value.trim() : null,
+        delivery_county: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-county').value.trim() : null,
+        delivery_postcode: (moveType === 'Delivery Only' || moveType === 'Collection + Delivery') ? document.getElementById('quote-delivery-postcode').value.trim() : null,
+        
+        // Quoted Activities (selected activity IDs)
+        quoted_activities: Array.from(document.querySelectorAll('#quote-activities-multiselect input[type="checkbox"]:checked')).map(cb => cb.value),
+        
         created_at: now,
         updated_at: now
     };
@@ -2314,6 +2690,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.calculateMargin = calculateMargin;
     window.addResourceToPriceList = addResourceToPriceList;
     window.removeResourceFromPriceList = removeResourceFromPriceList;
+    // NEW Sprint 2: Address & Move Type functions
+    window.toggleAddressSections = toggleAddressSections;
+    window.copyCollectionToDelivery = copyCollectionToDelivery;
+    window.updateAddressValidation = updateAddressValidation;
+    window.populateQuotedActivities = populateQuotedActivities;
+    window.updateQuotedActivities = updateQuotedActivities;
+    window.onQuoteStatusChange = onQuoteStatusChange;
+    window.validateQuoteEditability = validateQuoteEditability;
     window.resetData = resetData;
     window.clearPCForm = clearPCForm;
     window.clearPriceListForm = clearPriceListForm;
