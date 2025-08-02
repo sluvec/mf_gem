@@ -5341,54 +5341,59 @@ async function savePC() {
     }
 
     try {
-        if (id) { // Edit
-        const index = db.pcs.findIndex(p => p.id === id);
-            if (index !== -1) {
-        db.pcs[index] = { ...db.pcs[index], ...pcData };
-                await saveToStore(STORES.PCS, db.pcs[index]);
-            }
-        } else { // New
-            pcData.id = generateUUID();
-            pcData.created_at = now;
-        db.pcs.push(pcData);
-            await saveToStore(STORES.PCS, pcData);
-    }
-    
-        console.log('✅ PC Number saved successfully');
-    showPage('pcnumbers');
+        // 🚀 NEW: Use Data Access Layer instead of manual db manipulation
+        const savedPC = id ? 
+            await CRM.DataAccess.update('pc', id, pcData) :
+            await CRM.DataAccess.save('pc', pcData);
+        
+        console.log('✅ PC Number saved successfully:', savedPC.pc_number);
+        showPage('pcnumbers');
     } catch (error) {
+        // 🚀 NEW: Enhanced error handling from DAL
         console.error('❌ Error saving PC Number:', error);
-        alert('Error saving PC Number. Please try again.');
+        alert(`Error saving PC Number: ${error.message}`);
     }
 }
 
-function editPC(id) {
-    const pc = db.pcs.find(p => p.id === id);
-    if (!pc) return;
-    db.editingPC = pc;
-    
-    document.getElementById('pc-form-title').textContent = 'Edit PC Number';
-    document.getElementById('pc-id').value = pc.id;
-    
-    // Main data fields
-    document.getElementById('pc-number').value = pc.pc_number || '';
-    document.getElementById('pc-company-name').value = pc.company_name || '';
-    document.getElementById('pc-project-name').value = pc.project_name || '';
-    document.getElementById('pc-project-description').value = pc.project_description || '';
-    document.getElementById('pc-account-manager').value = pc.account_manager || '';
-    // NEW FIELDS:
-    document.getElementById('pc-client-industry').value = pc.client_industry || '';
-    document.getElementById('pc-client-source').value = pc.client_source || '';
-    document.getElementById('pc-quote-limit').value = pc.quote_limit || CONFIG.BUSINESS.DEFAULT_QUOTE_LIMIT;
-    document.getElementById('pc-status').value = pc.status || 'active';
-    
-    // SIMPLIFIED CONTACT FIELDS:
-    document.getElementById('pc-contact-name').value = pc.contact_name || '';
-    document.getElementById('pc-contact-phone').value = pc.contact_phone || '';
-    document.getElementById('pc-contact-email').value = pc.contact_email || '';
-    document.getElementById('pc-postcode').value = pc.postcode || '';
-    
-    showPage('new-pc');
+async function editPC(id) {
+    // 🚀 NEW: Use Data Access Layer for data retrieval
+    try {
+        const pc = await CRM.DataAccess.findById('pc', id);
+        if (!pc) {
+            console.warn(`⚠️ PC with ID ${id} not found`);
+            alert('PC Number not found!');
+            return;
+        }
+        
+        db.editingPC = pc;
+        
+        document.getElementById('pc-form-title').textContent = 'Edit PC Number';
+        document.getElementById('pc-id').value = pc.id;
+        
+        // Main data fields
+        document.getElementById('pc-number').value = pc.pc_number || '';
+        document.getElementById('pc-company-name').value = pc.company_name || '';
+        document.getElementById('pc-project-name').value = pc.project_name || '';
+        document.getElementById('pc-project-description').value = pc.project_description || '';
+        document.getElementById('pc-account-manager').value = pc.account_manager || '';
+        // NEW FIELDS:
+        document.getElementById('pc-client-industry').value = pc.client_industry || '';
+        document.getElementById('pc-client-source').value = pc.client_source || '';
+        document.getElementById('pc-quote-limit').value = pc.quote_limit || CONFIG.BUSINESS.DEFAULT_QUOTE_LIMIT;
+        document.getElementById('pc-status').value = pc.status || 'active';
+        
+        // SIMPLIFIED CONTACT FIELDS:
+        document.getElementById('pc-contact-name').value = pc.contact_name || '';
+        document.getElementById('pc-contact-phone').value = pc.contact_phone || '';
+        document.getElementById('pc-contact-email').value = pc.contact_email || '';
+        document.getElementById('pc-postcode').value = pc.postcode || '';
+        
+        showPage('new-pc');
+    } catch (error) {
+        // 🚀 NEW: Enhanced error handling from DAL
+        console.error('❌ Error loading PC for edit:', error);
+        alert(`Error loading PC: ${error.message}`);
+    }
 }
 
 
@@ -11538,7 +11543,7 @@ const CRM = {
     
     /**
      * @namespace CRM.Database
-     * @description Database operations and IndexedDB management
+     * @description Low-level IndexedDB operations
      */
     Database: {
         generateUUID,
@@ -11552,6 +11557,218 @@ const CRM = {
         saveData: saveDataToIndexedDB,
         reset: resetData,
         initializeDemo: initializeWithDemoData
+    },
+
+    /**
+     * @namespace CRM.DataAccess
+     * @description Centralized Data Access Layer with validation, caching, and error handling
+     */
+    DataAccess: {
+        // Core CRUD Operations
+        async findById(entity, id) {
+            try {
+                if (!id) throw new Error('ID is required');
+                
+                // Try cache first
+                const cached = db[this.getEntityStore(entity)]?.find(item => item.id === id);
+                if (cached) return cached;
+                
+                // Load from IndexedDB if not in cache
+                const result = await loadFromStore(this.getStoreKey(entity), id);
+                if (result && db[this.getEntityStore(entity)]) {
+                    // Update cache
+                    const index = db[this.getEntityStore(entity)].findIndex(item => item.id === id);
+                    if (index === -1) {
+                        db[this.getEntityStore(entity)].push(result);
+                    }
+                }
+                return result;
+            } catch (error) {
+                console.error(`❌ Error finding ${entity} by ID:`, error);
+                throw new Error(`Failed to find ${entity}: ${error.message}`);
+            }
+        },
+
+        async findByField(entity, field, value) {
+            try {
+                if (!field || value === undefined) throw new Error('Field and value are required');
+                
+                // Search in cache
+                const entityStore = this.getEntityStore(entity);
+                if (db[entityStore]) {
+                    return db[entityStore].filter(item => item[field] === value);
+                }
+                
+                // If cache empty, load all and filter
+                await this.loadEntity(entity);
+                return db[entityStore]?.filter(item => item[field] === value) || [];
+            } catch (error) {
+                console.error(`❌ Error finding ${entity} by ${field}:`, error);
+                throw new Error(`Failed to find ${entity} by ${field}: ${error.message}`);
+            }
+        },
+
+        async save(entity, data, options = {}) {
+            try {
+                // Validate data
+                this.validateEntity(entity, data);
+                
+                // Add metadata
+                const now = new Date().toISOString();
+                const enrichedData = {
+                    ...data,
+                    id: data.id || generateUUID(),
+                    updated_at: now,
+                    created_at: data.created_at || now
+                };
+                
+                // Save to IndexedDB with retry
+                await saveWithRetry(this.getStoreKey(entity), enrichedData);
+                
+                // Update cache
+                const entityStore = this.getEntityStore(entity);
+                if (db[entityStore]) {
+                    const index = db[entityStore].findIndex(item => item.id === enrichedData.id);
+                    if (index !== -1) {
+                        db[entityStore][index] = enrichedData;
+                    } else {
+                        db[entityStore].push(enrichedData);
+                    }
+                }
+                
+                console.log(`✅ ${entity} saved successfully:`, enrichedData.id);
+                return enrichedData;
+            } catch (error) {
+                console.error(`❌ Error saving ${entity}:`, error);
+                throw new Error(`Failed to save ${entity}: ${error.message}`);
+            }
+        },
+
+        async update(entity, id, updates) {
+            try {
+                const existing = await this.findById(entity, id);
+                if (!existing) throw new Error(`${entity} with ID ${id} not found`);
+                
+                const updatedData = {
+                    ...existing,
+                    ...updates,
+                    id: existing.id, // Preserve ID
+                    created_at: existing.created_at, // Preserve creation date
+                    updated_at: new Date().toISOString()
+                };
+                
+                return await this.save(entity, updatedData);
+            } catch (error) {
+                console.error(`❌ Error updating ${entity}:`, error);
+                throw new Error(`Failed to update ${entity}: ${error.message}`);
+            }
+        },
+
+        async delete(entity, id) {
+            try {
+                if (!id) throw new Error('ID is required');
+                
+                // Delete from IndexedDB
+                await deleteFromStore(this.getStoreKey(entity), id);
+                
+                // Remove from cache
+                const entityStore = this.getEntityStore(entity);
+                if (db[entityStore]) {
+                    db[entityStore] = db[entityStore].filter(item => item.id !== id);
+                }
+                
+                console.log(`✅ ${entity} deleted successfully:`, id);
+                return true;
+            } catch (error) {
+                console.error(`❌ Error deleting ${entity}:`, error);
+                throw new Error(`Failed to delete ${entity}: ${error.message}`);
+            }
+        },
+
+        async loadEntity(entity) {
+            try {
+                const data = await loadAllFromStore(this.getStoreKey(entity));
+                const entityStore = this.getEntityStore(entity);
+                if (db[entityStore] !== undefined) {
+                    db[entityStore] = data || [];
+                }
+                return data || [];
+            } catch (error) {
+                console.error(`❌ Error loading ${entity}:`, error);
+                throw new Error(`Failed to load ${entity}: ${error.message}`);
+            }
+        },
+
+        // Utility methods
+        getStoreKey(entity) {
+            const storeMap = {
+                'pc': STORES.PCS,
+                'pcs': STORES.PCS,
+                'quote': STORES.QUOTES,
+                'quotes': STORES.QUOTES,
+                'activity': STORES.ACTIVITIES,
+                'activities': STORES.ACTIVITIES,
+                'resource': STORES.RESOURCES,
+                'resources': STORES.RESOURCES,
+                'priceList': STORES.PRICE_LISTS,
+                'priceLists': STORES.PRICE_LISTS,
+                'template': STORES.TEMPLATES,
+                'templates': STORES.TEMPLATES,
+                'activityTemplate': STORES.ACTIVITY_TEMPLATES,
+                'activityTemplates': STORES.ACTIVITY_TEMPLATES
+            };
+            return storeMap[entity] || entity;
+        },
+
+        getEntityStore(entity) {
+            const entityMap = {
+                'pc': 'pcs',
+                'pcs': 'pcs',
+                'quote': 'quotes',
+                'quotes': 'quotes',
+                'activity': 'activities',
+                'activities': 'activities',
+                'resource': 'resources',
+                'resources': 'resources',
+                'priceList': 'priceLists',
+                'priceLists': 'priceLists',
+                'template': 'templates',
+                'templates': 'templates',
+                'activityTemplate': 'activityTemplates',
+                'activityTemplates': 'activityTemplates'
+            };
+            return entityMap[entity] || entity;
+        },
+
+        validateEntity(entity, data) {
+            if (!data) throw new Error('Data is required');
+            
+            // Entity-specific validation
+            switch (entity) {
+                case 'pc':
+                case 'pcs':
+                    if (!data.pc_number?.trim()) throw new Error('PC number is required');
+                    if (!data.company_name?.trim()) throw new Error('Company name is required');
+                    break;
+                case 'quote':
+                case 'quotes':
+                    if (!data.pc_id) throw new Error('PC ID is required for quote');
+                    if (!data.quote_number?.trim()) throw new Error('Quote number is required');
+                    break;
+                case 'activity':
+                case 'activities':
+                    if (!data.title?.trim()) throw new Error('Activity title is required');
+                    if (!data.pc_id) throw new Error('PC ID is required for activity');
+                    break;
+                case 'resource':
+                case 'resources':
+                    if (!data.name?.trim()) throw new Error('Resource name is required');
+                    if (!data.category?.trim()) throw new Error('Resource category is required');
+                    break;
+            }
+            
+            return true;
+        }
     },
 
     /**
@@ -11735,6 +11952,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation & Core
     window.showPage = CRM.Navigation.showPage;
     window.resetData = CRM.Database.reset;
+    
+    // Data Access Layer - expose for easy access
+    window.DataAccess = CRM.DataAccess;
     
     // PC Numbers Module
     window.savePC = CRM.PCNumbers.save;
