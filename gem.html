@@ -196,6 +196,7 @@
             <button onclick="window.showPage('dashboard')" class="nav-btn active">Dashboard</button>
             <button onclick="window.showPage('pcnumbers')" class="nav-btn">PC Numbers</button>
             <button onclick="window.showPage('quotes')" class="nav-btn">Quotes</button>
+            <button onclick="window.showPage('templates')" class="nav-btn">📄 Templates</button>
             <button onclick="window.showPage('activities')" class="nav-btn">Activities</button>
             <button onclick="window.showPage('resources')" class="nav-btn">Resources</button>
             <button onclick="window.showPage('pricelists')" class="nav-btn">Price Lists</button>
@@ -389,25 +390,98 @@
             <div class="quote-builder" id="quote-items-section" style="display: none;">
                 <div class="card">
                     <h2>Step 2: Build Quote</h2>
+                    
+                    <!-- NEW Sprint 3: Enhanced Resource Lookup -->
+                    <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0;">🚀 Enhanced Resource Lookup</h4>
+                                <p style="margin: 0; color: #666; font-size: 0.875rem;">Search, filter, and add multiple resources quickly</p>
+                            </div>
+                            <button onclick="window.showEnhancedResourceModal()" style="background: #3b82f6; color: white; padding: 0.75rem 1.5rem; font-weight: bold;">
+                                🔍 Search & Add Resources
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW Sprint 3.2: Bulk Operations Panel -->
+                    <div id="bulk-operations-panel" style="display: none; margin-bottom: 1.5rem; padding: 1rem; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0; color: #92400e;">🔧 Bulk Operations</h4>
+                                <p style="margin: 0; color: #92400e; font-size: 0.875rem;">
+                                    <span id="bulk-selected-count">0</span> line items selected
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="window.bulkUpdateQuantity()" style="background: #3b82f6; color: white;">📊 Update Quantities</button>
+                                <button onclick="window.bulkApplyDiscount()" style="background: #10b981; color: white;">💰 Apply Discount</button>
+                                <button onclick="window.bulkDeleteItems()" style="background: #ef4444; color: white;">🗑️ Delete Selected</button>
+                                <button onclick="window.clearBulkSelection()" class="secondary">Clear Selection</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Existing Category Sections -->
                     <div class="category-section">
-                        <h3>Human Resources</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;">Human Resources</h3>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.875rem; color: #666;">
+                                    <input type="checkbox" onchange="window.toggleCategorySelection('human')" id="select-all-human"> Select All
+                                </label>
+                            </div>
+                        </div>
                         <div id="quote-human"></div>
-                        <button onclick="window.addLineItem('human')">+ Add resource</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="window.addLineItem('human')" class="secondary">+ Quick Add</button>
+                            <button onclick="window.showEnhancedResourceModal('human')" style="background: #6366f1; color: white;">🔍 Browse & Add</button>
+                        </div>
                     </div>
                     <div class="category-section">
-                        <h3>Vehicles</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;">Vehicles</h3>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.875rem; color: #666;">
+                                    <input type="checkbox" onchange="window.toggleCategorySelection('vehicles')" id="select-all-vehicles"> Select All
+                                </label>
+                            </div>
+                        </div>
                         <div id="quote-vehicles"></div>
-                        <button onclick="window.addLineItem('vehicles')">+ Add vehicle</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="window.addLineItem('vehicles')" class="secondary">+ Quick Add</button>
+                            <button onclick="window.showEnhancedResourceModal('vehicles')" style="background: #6366f1; color: white;">🔍 Browse & Add</button>
+                        </div>
                     </div>
                     <div class="category-section">
-                        <h3>Materials</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;">Materials</h3>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.875rem; color: #666;">
+                                    <input type="checkbox" onchange="window.toggleCategorySelection('materials')" id="select-all-materials"> Select All
+                                </label>
+                            </div>
+                        </div>
                         <div id="quote-materials"></div>
-                        <button onclick="window.addLineItem('materials')">+ Add material</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="window.addLineItem('materials')" class="secondary">+ Quick Add</button>
+                            <button onclick="window.showEnhancedResourceModal('materials')" style="background: #6366f1; color: white;">🔍 Browse & Add</button>
+                        </div>
                     </div>
                      <div class="category-section">
-                        <h3>Other</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0;">Other</h3>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <label style="font-size: 0.875rem; color: #666;">
+                                    <input type="checkbox" onchange="window.toggleCategorySelection('other')" id="select-all-other"> Select All
+                                </label>
+                            </div>
+                        </div>
                         <div id="quote-other"></div>
-                        <button onclick="window.addLineItem('other')">+ Add other</button>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="window.addLineItem('other')" class="secondary">+ Quick Add</button>
+                            <button onclick="window.showEnhancedResourceModal('other')" style="background: #6366f1; color: white;">🔍 Browse & Add</button>
+                        </div>
                     </div>
                 </div>
                 <div class="summary">
@@ -528,9 +602,75 @@
                     
                     <div class="form-actions" style="text-align: center;">
                         <button onclick="window.saveQuote()">Save Quote</button>
+                        <button onclick="window.saveQuoteAsTemplate()" style="background: #8b5cf6; color: white;">📄 Save as Template</button>
+                        <button onclick="window.duplicateCurrentQuote()" style="background: #06b6d4; color: white;">📋 Duplicate Quote</button>
                         <button onclick="window.cancelQuote()" class="secondary">Cancel</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- NEW Sprint 3.3: Templates Page -->
+        <div id="templates" class="page">
+            <h1>📄 Quote Templates</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <p style="margin: 0; color: #666;">Manage reusable quote templates to speed up quote creation</p>
+                </div>
+                <div>
+                    <button onclick="window.showCreateTemplateFromScratch()" style="background: #8b5cf6; color: white;">+ Create New Template</button>
+                </div>
+            </div>
+            
+            <!-- Templates Filter & Search -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center;">
+                    <div>
+                        <label>Search Templates</label>
+                        <input type="text" id="template-search" placeholder="Search by name or description..." 
+                               oninput="window.filterTemplates()" style="width: 100%; margin-top: 0.25rem;">
+                    </div>
+                    <div>
+                        <label>Category</label>
+                        <select id="template-category-filter" onchange="window.filterTemplates()" style="margin-top: 0.25rem;">
+                            <option value="">All Categories</option>
+                            <option value="electrical">Electrical</option>
+                            <option value="lighting">Lighting</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="installation">Installation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select id="template-status-filter" onchange="window.filterTemplates()" style="margin-top: 0.25rem;">
+                            <option value="">All</option>
+                            <option value="active">Active</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Templates List -->
+            <div class="card">
+                <h2>Templates Library</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Template Name</th>
+                            <th>Category</th>
+                            <th>Items Count</th>
+                            <th>Est. Value</th>
+                            <th>Last Updated</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templates-list">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -799,9 +939,210 @@
             <button onclick="window.saveResource()">Save Resource</button>
             <button onclick="window.closeResourceModal()" class="secondary">Cancel</button>
         </div>
-    </div></div>
+    </div>        </div>
 
-    <div id="add-resource-modal" class="modal"><div class="modal-content" style="max-width: 500px;">
+        <!-- NEW Sprint 3: Enhanced Resource Lookup Modal -->
+        <div id="enhanced-resource-lookup-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="window.closeEnhancedResourceModal()">&times;</span>
+                <h2>🔍 Add Resources to Quote</h2>
+                
+                <!-- Search & Filter Section -->
+                <div style="margin-bottom: 1.5rem; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center;">
+                        <div>
+                            <label>Search Resources</label>
+                            <input type="text" id="resource-search" placeholder="Search by name, SKU, or description..." 
+                                   oninput="window.filterResources()" style="width: 100%; margin-top: 0.25rem;">
+                        </div>
+                        <div>
+                            <label>Category</label>
+                            <select id="resource-category-filter" onchange="window.filterResources()" style="margin-top: 0.25rem;">
+                                <option value="">All Categories</option>
+                                <option value="human">Human Resources</option>
+                                <option value="vehicles">Vehicles</option>
+                                <option value="materials">Materials</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Status</label>
+                            <select id="resource-status-filter" onchange="window.filterResources()" style="margin-top: 0.25rem;">
+                                <option value="">All Status</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #666;">
+                        <span id="resource-count">0</span> resources found
+                    </p>
+                </div>
+                
+                <!-- Resources Grid -->
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: #f8fafc; position: sticky; top: 0;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Select</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Resource</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">SKU</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Category</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Price</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Qty</th>
+                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enhanced-resources-list">
+                            <!-- Dynamic content populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Bulk Actions -->
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span id="selected-count">0</span> resources selected
+                            <button onclick="window.selectAllFilteredResources()" style="margin-left: 1rem;" class="secondary">Select All Visible</button>
+                            <button onclick="window.clearResourceSelection()" style="margin-left: 0.5rem;" class="secondary">Clear Selection</button>
+                        </div>
+                        <div>
+                            <button onclick="window.addSelectedResourcesToQuote()" disabled id="add-selected-btn">Add Selected to Quote</button>
+                            <button onclick="window.closeEnhancedResourceModal()" class="secondary" style="margin-left: 0.5rem;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+        <!-- NEW Sprint 3.2: Bulk Operations Modals -->
+        <div id="bulk-quantity-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <span class="close" onclick="window.closeBulkQuantityModal()">&times;</span>
+                <h2>📊 Update Quantities</h2>
+                <p>Update quantities for <span id="bulk-qty-count">0</span> selected line items</p>
+                
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Operation:</label>
+                    <select id="bulk-qty-operation" style="width: 100%; margin-bottom: 1rem;">
+                        <option value="set">Set all to specific value</option>
+                        <option value="multiply">Multiply by factor</option>
+                        <option value="add">Add to current</option>
+                    </select>
+                    
+                    <label style="display: block; margin-bottom: 0.5rem;">Value:</label>
+                    <input type="number" id="bulk-qty-value" min="0" step="1" placeholder="Enter value" style="width: 100%;">
+                </div>
+                
+                <div style="text-align: right;">
+                    <button onclick="window.applyBulkQuantityUpdate()" style="background: #3b82f6; color: white;">Apply Changes</button>
+                    <button onclick="window.closeBulkQuantityModal()" class="secondary" style="margin-left: 0.5rem;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="bulk-discount-modal" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <span class="close" onclick="window.closeBulkDiscountModal()">&times;</span>
+                <h2>💰 Apply Discount</h2>
+                <p>Apply discount to <span id="bulk-discount-count">0</span> selected line items</p>
+                
+                <div style="margin: 1.5rem 0;">
+                    <label style="display: block; margin-bottom: 0.5rem;">Discount Type:</label>
+                    <select id="bulk-discount-type" style="width: 100%; margin-bottom: 1rem;">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (£)</option>
+                    </select>
+                    
+                    <label style="display: block; margin-bottom: 0.5rem;">Discount Value:</label>
+                    <input type="number" id="bulk-discount-value" min="0" step="0.01" placeholder="Enter discount" style="width: 100%;">
+                    
+                    <p style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+                        Note: Discount will be applied to unit prices
+                    </p>
+                </div>
+                
+                <div style="text-align: right;">
+                    <button onclick="window.applyBulkDiscount()" style="background: #10b981; color: white;">Apply Discount</button>
+                    <button onclick="window.closeBulkDiscountModal()" class="secondary" style="margin-left: 0.5rem;">Cancel</button>
+                </div>
+            </div>
+                </div>
+
+        <!-- NEW Sprint 3.3: Template Creation/Edit Modal -->
+        <div id="template-modal" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close" onclick="window.closeTemplateModal()">&times;</span>
+                <h2 id="template-modal-title">Create Quote Template</h2>
+                
+                <input type="hidden" id="template-id">
+                
+                <!-- Template Basic Info -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label>Template Name *</label>
+                            <input type="text" id="template-name" placeholder="e.g. Standard Office Lighting" required>
+                        </div>
+                        <div>
+                            <label>Category *</label>
+                            <select id="template-category" required>
+                                <option value="">Select category...</option>
+                                <option value="electrical">Electrical</option>
+                                <option value="lighting">Lighting</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="installation">Installation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <label>Description</label>
+                        <textarea id="template-description" rows="2" placeholder="Brief description of when to use this template..."></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <label>Status</label>
+                            <select id="template-status">
+                                <option value="active">Active</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Default VAT Rate (%)</label>
+                            <input type="number" id="template-vat-rate" value="20.00" step="0.01" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Template Default Terms -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Default Terms & Conditions</label>
+                    <textarea id="template-terms" rows="3" placeholder="Default terms for quotes created from this template...">Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.</textarea>
+                </div>
+                
+                <!-- Template Items Preview -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h4>Template Items</h4>
+                    <div id="template-items-preview" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem;">
+                        <p style="margin: 0; color: #666; text-align: center;">Create template from current quote items or add items manually</p>
+                    </div>
+                    <div style="margin-top: 0.5rem; text-align: center;">
+                        <button onclick="window.addItemsToTemplate()" class="secondary">+ Add Items to Template</button>
+                    </div>
+                </div>
+                
+                <div style="text-align: right;">
+                    <button onclick="window.saveTemplate()">Save Template</button>
+                    <button onclick="window.closeTemplateModal()" class="secondary" style="margin-left: 0.5rem;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="add-resource-modal" class="modal"><div class="modal-content" style="max-width: 500px;">
         <h2>Add item to Price List</h2>
         <label>Select Resource *</label><select id="modal-resource-item-select"></select>
         <div id="resource-info" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa;"></div>
@@ -824,7 +1165,7 @@ let db = {}; // In-memory cache for compatibility
 
 // IndexedDB configuration
 const DB_NAME = 'MF_CRM_Database';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // NEW Sprint 3.3: Incremented for templates store
 
 // Store names
 const STORES = {
@@ -832,7 +1173,8 @@ const STORES = {
     QUOTES: 'quotes', 
     ACTIVITIES: 'activities',
     RESOURCES: 'resources',
-    PRICE_LISTS: 'price_lists'
+    PRICE_LISTS: 'price_lists',
+    TEMPLATES: 'templates' // NEW Sprint 3.3: Quote templates
 };
 
 // ========================================
@@ -919,6 +1261,15 @@ async function initializeIndexedDB() {
                 priceListsStore.createIndex('effective_from', 'effective_from', { unique: false });
                 priceListsStore.createIndex('is_default', 'is_default', { unique: false });
             }
+            
+            // NEW Sprint 3.3: Create TEMPLATES store
+            if (!db.objectStoreNames.contains(STORES.TEMPLATES)) {
+                const templatesStore = db.createObjectStore(STORES.TEMPLATES, { keyPath: 'id' });
+                templatesStore.createIndex('name', 'name', { unique: false });
+                templatesStore.createIndex('category', 'category', { unique: false });
+                templatesStore.createIndex('status', 'status', { unique: false });
+                templatesStore.createIndex('created_at', 'created_at', { unique: false });
+            }
         };
     });
 }
@@ -929,7 +1280,7 @@ async function saveWithRetry(storeName, data, maxRetries = 3, delay = 1000) {
         try {
             await saveToStore(storeName, data);
             return; // Success - exit function
-        } catch (error) {
+    } catch (error) {
             console.warn(`❌ Save attempt ${attempt}/${maxRetries} failed:`, error.message);
             
             if (attempt === maxRetries) {
@@ -990,12 +1341,13 @@ async function deleteFromStore(storeName, id) {
 // Load all data into memory cache for UI compatibility
 async function loadDataFromIndexedDB() {
     try {
-        const [pcs, quotes, activities, resources, priceLists] = await Promise.all([
+        const [pcs, quotes, activities, resources, priceLists, templates] = await Promise.all([
             loadAllFromStore(STORES.PCS),
             loadAllFromStore(STORES.QUOTES),
             loadAllFromStore(STORES.ACTIVITIES), 
             loadAllFromStore(STORES.RESOURCES),
-            loadAllFromStore(STORES.PRICE_LISTS)
+            loadAllFromStore(STORES.PRICE_LISTS),
+            loadAllFromStore(STORES.TEMPLATES) // NEW Sprint 3.3: Load templates
         ]);
         
         db = {
@@ -1004,6 +1356,7 @@ async function loadDataFromIndexedDB() {
             activities: activities || [],
             resources: resources || [],
             priceLists: priceLists || [],
+            templates: templates || [], // NEW Sprint 3.3: Templates storage
             // Compatibility fields
             currentPC: null,
             currentQuote: null,
@@ -1023,7 +1376,8 @@ async function loadDataFromIndexedDB() {
             quotes: db.quotes.length,
             activities: db.activities.length,
             resources: db.resources.length,
-            priceLists: db.priceLists.length
+            priceLists: db.priceLists.length,
+            templates: db.templates.length // NEW Sprint 3.3: Include templates in logging
         });
         
         if (db.pcs.length === 0) {
@@ -1045,7 +1399,8 @@ async function saveDataToIndexedDB() {
             ...db.quotes.map(quote => saveToStore(STORES.QUOTES, quote)),
             ...db.activities.map(activity => saveToStore(STORES.ACTIVITIES, activity)),
             ...db.resources.map(resource => saveToStore(STORES.RESOURCES, resource)),
-            ...db.priceLists.map(priceList => saveToStore(STORES.PRICE_LISTS, priceList))
+            ...db.priceLists.map(priceList => saveToStore(STORES.PRICE_LISTS, priceList)),
+            ...db.templates.map(template => saveToStore(STORES.TEMPLATES, template)) // NEW Sprint 3.3: Save templates
         ];
         
         await Promise.all(savePromises);
@@ -1186,6 +1541,54 @@ async function initializeWithDemoData() {
                 [demoUUIDs.res2]: { price: 65.00, markup_percentage: 44.44, effective_price: 65.00, min_quantity: 1 }
             },
             terms: 'Prices valid for 30 days from quote date. Payment terms: 30 days net. Delivery charges may apply.',
+            created_at: now,
+            updated_at: now
+        }
+    ];
+    
+    // NEW Sprint 3.3: Demo Templates
+    const demoTemplates = [
+        {
+            id: generateUUID(),
+            name: 'Standard Office Lighting',
+            category: 'lighting',
+            description: 'Standard LED lighting package for office environments including downlights and emergency lighting',
+            status: 'active',
+            vat_rate: 20.00,
+            terms_conditions: 'Payment terms: 30 days net. All work carried out to BS 7671 standards. Materials warranty as per manufacturer specifications.',
+            items: [
+                {
+                    resource_id: demoUUIDs.res1,
+                    resource_name: 'LED Downlight - 10W Cool White',
+                    quantity: 25,
+                    unit_price: 35.00,
+                    line_total: 875.00,
+                    notes: 'Standard office application'
+                }
+            ],
+            estimated_value: 1050.00, // Including VAT
+            created_at: now,
+            updated_at: now
+        },
+        {
+            id: generateUUID(),
+            name: 'Warehouse High Bay Lighting',
+            category: 'lighting',
+            description: 'High bay LED lighting solution for warehouse and industrial applications',
+            status: 'active',
+            vat_rate: 20.00,
+            terms_conditions: 'Payment terms: 30 days net. Suitable for heights 6-12m. IP65 rated for harsh environments.',
+            items: [
+                {
+                    resource_id: demoUUIDs.res2,
+                    resource_name: 'LED High Bay Light - 150W',
+                    quantity: 10,
+                    unit_price: 42.50,
+                    line_total: 425.00,
+                    notes: 'Industrial grade for warehouse use'
+                }
+            ],
+            estimated_value: 510.00, // Including VAT
             created_at: now,
             updated_at: now
         }
@@ -1345,6 +1748,7 @@ async function initializeWithDemoData() {
         activities: demoActivities,
         resources: demoResources,
         priceLists: demoPriceLists,
+        templates: demoTemplates, // NEW Sprint 3.3: Templates demo data
         // Compatibility fields
         currentPC: null,
         currentQuote: null,
@@ -1428,6 +1832,7 @@ function showPage(pageId) {
         case 'activities': updateActivitiesList(); break;
         case 'resources': updateResourcesList(); break;
         case 'pricelists': updatePriceListsTable(); break;
+        case 'templates': updateTemplatesList(); break; // NEW Sprint 3.3: Templates page
     }
 }
 
@@ -1526,7 +1931,7 @@ async function savePC() {
         alert('Required fields: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, and Contact Name!');
         return;
     }
-    
+
     if (!pcData.contact_phone && !pcData.contact_email) {
         alert('Contact requirement: Please provide either Phone OR Email!');
         return;
@@ -1765,6 +2170,8 @@ function addLineItem(category) {
     });
 
     lineDiv.innerHTML = `
+        <input type="checkbox" class="line-item-checkbox" data-line-id="${lineId}" data-category="${category}" 
+               onchange="window.updateBulkSelection()" style="margin-right: 0.5rem; transform: scale(1.2);">
         <select onchange="window.updateLinePrice('${lineId}', '${category}')">${options}</select>
         <input type="number" value="1" min="1" onchange="window.updateLineQty('${lineId}', '${category}')">
         <input type="text" readonly value="£0.00">
@@ -2078,14 +2485,14 @@ async function saveQuote() {
 
         try {
         // Add quote to memory first
-        db.quotes.push(quote);
+    db.quotes.push(quote);
         
         // Save to IndexedDB with retry logic
         await saveWithRetry(STORES.QUOTES, quote, 3);
         
         console.log('✅ Quote saved successfully:', quote.quote_number);
         alert('Quote ' + quote.quote_number + ' has been saved!');
-        viewPC(db.currentPC.id);
+    viewPC(db.currentPC.id);
     } catch (error) {
         // Remove from memory if save failed
         db.quotes = db.quotes.filter(q => q.id !== quote.id);
@@ -2114,6 +2521,784 @@ function updateQuotesList() {
             <td><button class="secondary" onclick="alert('Feature under development')">Show</button></td>
         </tr>`;
     });
+}
+
+// ========================================
+// NEW Sprint 3: Enhanced Resource Lookup
+// ========================================
+
+// Global variable to track selected resources in modal
+let selectedResources = new Set();
+let filteredResourcesList = [];
+
+function showEnhancedResourceModal(category = '') {
+    // Initialize modal state
+    selectedResources.clear();
+    document.getElementById('resource-search').value = '';
+    document.getElementById('resource-category-filter').value = category;
+    document.getElementById('resource-status-filter').value = '';
+    
+    // Show modal
+    document.getElementById('enhanced-resource-lookup-modal').classList.add('active');
+    
+    // Load and filter resources
+    filterResources();
+    
+    // Focus on search box for better UX
+    setTimeout(() => document.getElementById('resource-search').focus(), 100);
+}
+
+function closeEnhancedResourceModal() {
+    document.getElementById('enhanced-resource-lookup-modal').classList.remove('active');
+    selectedResources.clear();
+}
+
+function filterResources() {
+    const priceList = db.priceLists.find(p => p.id === db.selectedPriceListId);
+    if (!priceList) {
+        document.getElementById('enhanced-resources-list').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #666;">Please select a price list first</td></tr>';
+        return;
+    }
+    
+    const searchTerm = document.getElementById('resource-search').value.toLowerCase();
+    const categoryFilter = document.getElementById('resource-category-filter').value;
+    const statusFilter = document.getElementById('resource-status-filter').value;
+    
+    // Get all resources with pricing from current price list
+    const resourcesWithPricing = priceList.items.map(item => {
+        const resource = db.resources.find(r => r.id === item.resourceId);
+        if (!resource) return null;
+        
+        return {
+            ...resource,
+            client_price: item.clientPrice,
+            price_list_item: item
+        };
+    }).filter(Boolean);
+    
+    // Apply filters
+    filteredResourcesList = resourcesWithPricing.filter(resource => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+            resource.name.toLowerCase().includes(searchTerm) ||
+            (resource.sku || '').toLowerCase().includes(searchTerm) ||
+            (resource.description || '').toLowerCase().includes(searchTerm);
+        
+        // Category filter  
+        const matchesCategory = !categoryFilter || resource.category === categoryFilter;
+        
+        // Status filter
+        const matchesStatus = !statusFilter || resource.is_active.toString() === statusFilter;
+        
+        return matchesSearch && matchesCategory && matchesStatus;
+    });
+    
+    // Update resource count
+    document.getElementById('resource-count').textContent = filteredResourcesList.length;
+    
+    // Render filtered resources
+    renderResourcesList();
+}
+
+function renderResourcesList() {
+    const tbody = document.getElementById('enhanced-resources-list');
+    
+    if (filteredResourcesList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #666;">No resources found matching your criteria</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filteredResourcesList.map(resource => {
+        const isSelected = selectedResources.has(resource.id);
+        const statusBadge = resource.is_active ? 
+            '<span style="background: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">ACTIVE</span>' :
+            '<span style="background: #fee2e2; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">INACTIVE</span>';
+        
+        return `
+            <tr style="background: ${isSelected ? '#f0f9ff' : 'white'};" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='${isSelected ? '#f0f9ff' : 'white'}'">
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                           onchange="window.toggleResourceSelection('${resource.id}')" 
+                           style="transform: scale(1.2);">
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <div style="font-weight: 500;">${resource.name}</div>
+                    ${resource.description ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${resource.description}</div>` : ''}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">${resource.sku || 'N/A'}</code>
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; text-transform: capitalize;">
+                    ${resource.category}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; font-weight: 500;">
+                    £${resource.client_price.toFixed(2)}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <input type="number" value="1" min="1" max="999" 
+                           style="width: 60px; padding: 0.25rem; border: 1px solid #ccc; border-radius: 0.25rem;"
+                           id="qty-${resource.id}" onchange="window.updateResourceTotal('${resource.id}')">
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; font-weight: 500;">
+                    <span id="total-${resource.id}">£${resource.client_price.toFixed(2)}</span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    updateSelectionCount();
+}
+
+function toggleResourceSelection(resourceId) {
+    if (selectedResources.has(resourceId)) {
+        selectedResources.delete(resourceId);
+    } else {
+        selectedResources.add(resourceId);
+    }
+    
+    renderResourcesList();
+}
+
+function updateResourceTotal(resourceId) {
+    const resource = filteredResourcesList.find(r => r.id === resourceId);
+    const qty = parseInt(document.getElementById(`qty-${resourceId}`).value) || 1;
+    const total = resource.client_price * qty;
+    
+    document.getElementById(`total-${resourceId}`).textContent = `£${total.toFixed(2)}`;
+}
+
+function selectAllFilteredResources() {
+    filteredResourcesList.forEach(resource => {
+        selectedResources.add(resource.id);
+    });
+    renderResourcesList();
+}
+
+function clearResourceSelection() {
+    selectedResources.clear();
+    renderResourcesList();
+}
+
+function updateSelectionCount() {
+    const count = selectedResources.size;
+    document.getElementById('selected-count').textContent = count;
+    
+    const addButton = document.getElementById('add-selected-btn');
+    addButton.disabled = count === 0;
+    addButton.textContent = count === 0 ? 'Add Selected to Quote' : `Add ${count} Selected to Quote`;
+}
+
+function addSelectedResourcesToQuote() {
+    if (selectedResources.size === 0) return;
+    
+    let addedCount = 0;
+    
+    selectedResources.forEach(resourceId => {
+        const resource = filteredResourcesList.find(r => r.id === resourceId);
+        if (!resource) return;
+        
+        const qty = parseInt(document.getElementById(`qty-${resourceId}`).value) || 1;
+        
+        // Add to appropriate category
+        addResourceToQuoteCategory(resource, qty);
+        addedCount++;
+    });
+    
+    // Update totals
+    calculateTotal();
+    
+    // Show success message
+    alert(`Successfully added ${addedCount} resource(s) to quote!`);
+    
+    // Close modal
+    closeEnhancedResourceModal();
+}
+
+function addResourceToQuoteCategory(resource, qty) {
+    const category = resource.category;
+    const lineId = 'line_' + Date.now() + '_' + resource.id;
+    const container = document.getElementById('quote-' + category);
+    
+    // Create line item element
+    const lineDiv = document.createElement('div');
+    lineDiv.className = 'line-item';
+    lineDiv.id = lineId;
+    
+    const total = resource.client_price * qty;
+    
+    lineDiv.innerHTML = `
+        <input type="checkbox" class="line-item-checkbox" data-line-id="${lineId}" data-category="${category}" 
+               onchange="window.updateBulkSelection()" style="margin-right: 0.5rem; transform: scale(1.2);">
+        <select disabled style="background: #f1f5f9;">
+            <option value="${resource.id}" data-price="${resource.client_price}">${resource.name}</option>
+        </select>
+        <input type="number" value="${qty}" min="1" onchange="window.updateLineQty('${lineId}', '${category}')" style="width: 80px;">
+        <input type="text" readonly value="£${resource.client_price.toFixed(2)}" style="background: #f1f5f9;">
+        <span class="line-item-total">£${total.toFixed(2)}</span>
+        <button class="remove-btn" onclick="window.removeLine('${lineId}', '${category}')">×</button>
+    `;
+    
+    container.appendChild(lineDiv);
+    
+    // Add to quote items
+    db.quoteItems[category].push({
+        id: lineId,
+        resourceId: resource.id,
+        name: resource.name,
+        qty: qty,
+        rate: resource.client_price,
+        total: total
+    });
+}
+
+// ========================================
+// NEW Sprint 3.2: Bulk Operations for Line Items
+// ========================================
+
+function updateBulkSelection() {
+    const checkboxes = document.querySelectorAll('.line-item-checkbox');
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    const count = selectedCheckboxes.length;
+    
+    // Update bulk selection count
+    document.getElementById('bulk-selected-count').textContent = count;
+    
+    // Show/hide bulk operations panel
+    const panel = document.getElementById('bulk-operations-panel');
+    panel.style.display = count > 0 ? 'block' : 'none';
+    
+    // Update category "Select All" checkboxes
+    ['human', 'vehicles', 'materials', 'other'].forEach(category => {
+        const categoryCheckboxes = document.querySelectorAll(`.line-item-checkbox[data-category="${category}"]`);
+        const categorySelected = document.querySelectorAll(`.line-item-checkbox[data-category="${category}"]:checked`);
+        const selectAllCheckbox = document.getElementById(`select-all-${category}`);
+        
+        if (selectAllCheckbox) {
+            selectAllCheckbox.indeterminate = categorySelected.length > 0 && categorySelected.length < categoryCheckboxes.length;
+            selectAllCheckbox.checked = categoryCheckboxes.length > 0 && categorySelected.length === categoryCheckboxes.length;
+        }
+    });
+}
+
+function toggleCategorySelection(category) {
+    const selectAllCheckbox = document.getElementById(`select-all-${category}`);
+    const categoryCheckboxes = document.querySelectorAll(`.line-item-checkbox[data-category="${category}"]`);
+    
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateBulkSelection();
+}
+
+function clearBulkSelection() {
+    document.querySelectorAll('.line-item-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateBulkSelection();
+}
+
+function bulkUpdateQuantity() {
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select line items first');
+        return;
+    }
+    
+    document.getElementById('bulk-qty-count').textContent = selectedCheckboxes.length;
+    document.getElementById('bulk-quantity-modal').classList.add('active');
+    document.getElementById('bulk-qty-value').focus();
+}
+
+function closeBulkQuantityModal() {
+    document.getElementById('bulk-quantity-modal').classList.remove('active');
+    document.getElementById('bulk-qty-value').value = '';
+    document.getElementById('bulk-qty-operation').value = 'set';
+}
+
+function applyBulkQuantityUpdate() {
+    const operation = document.getElementById('bulk-qty-operation').value;
+    const value = parseFloat(document.getElementById('bulk-qty-value').value);
+    
+    if (isNaN(value) || value < 0) {
+        alert('Please enter a valid positive number');
+        return;
+    }
+    
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    let updatedCount = 0;
+    
+    selectedCheckboxes.forEach(checkbox => {
+        const lineId = checkbox.getAttribute('data-line-id');
+        const category = checkbox.getAttribute('data-category');
+        const lineDiv = document.getElementById(lineId);
+        const qtyInput = lineDiv.querySelector('input[type="number"]');
+        const currentQty = parseFloat(qtyInput.value) || 1;
+        
+        let newQty;
+        switch (operation) {
+            case 'set':
+                newQty = value;
+                break;
+            case 'multiply':
+                newQty = currentQty * value;
+                break;
+            case 'add':
+                newQty = currentQty + value;
+                break;
+            default:
+                newQty = value;
+        }
+        
+        newQty = Math.max(1, Math.round(newQty)); // Minimum 1, round to integer
+        qtyInput.value = newQty;
+        
+        // Update the quote item data and trigger calculation
+        updateLineQty(lineId, category);
+        updatedCount++;
+    });
+    
+    alert(`Successfully updated quantities for ${updatedCount} line items!`);
+    closeBulkQuantityModal();
+    clearBulkSelection();
+}
+
+function bulkApplyDiscount() {
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select line items first');
+        return;
+    }
+    
+    document.getElementById('bulk-discount-count').textContent = selectedCheckboxes.length;
+    document.getElementById('bulk-discount-modal').classList.add('active');
+    document.getElementById('bulk-discount-value').focus();
+}
+
+function closeBulkDiscountModal() {
+    document.getElementById('bulk-discount-modal').classList.remove('active');
+    document.getElementById('bulk-discount-value').value = '';
+    document.getElementById('bulk-discount-type').value = 'percentage';
+}
+
+function applyBulkDiscount() {
+    const discountType = document.getElementById('bulk-discount-type').value;
+    const discountValue = parseFloat(document.getElementById('bulk-discount-value').value);
+    
+    if (isNaN(discountValue) || discountValue < 0) {
+        alert('Please enter a valid discount value');
+        return;
+    }
+    
+    if (discountType === 'percentage' && discountValue > 100) {
+        alert('Percentage discount cannot exceed 100%');
+        return;
+    }
+    
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    let updatedCount = 0;
+    
+    selectedCheckboxes.forEach(checkbox => {
+        const lineId = checkbox.getAttribute('data-line-id');
+        const category = checkbox.getAttribute('data-category');
+        const lineDiv = document.getElementById(lineId);
+        const priceInput = lineDiv.querySelectorAll('input[type="text"]')[0];
+        const currentPriceText = priceInput.value.replace('£', '');
+        const currentPrice = parseFloat(currentPriceText) || 0;
+        
+        let newPrice;
+        if (discountType === 'percentage') {
+            newPrice = currentPrice * (1 - (discountValue / 100));
+        } else {
+            newPrice = Math.max(0, currentPrice - discountValue);
+        }
+        
+        newPrice = Math.max(0, newPrice); // Minimum 0
+        priceInput.value = '£' + newPrice.toFixed(2);
+        
+        // Update the quote item data
+        const item = db.quoteItems[category].find(i => i.id === lineId);
+        if (item) {
+            item.rate = newPrice;
+            updateLineQty(lineId, category); // This will recalculate totals
+        }
+        
+        updatedCount++;
+    });
+    
+    alert(`Successfully applied discount to ${updatedCount} line items!`);
+    closeBulkDiscountModal();
+    clearBulkSelection();
+}
+
+function bulkDeleteItems() {
+    const selectedCheckboxes = document.querySelectorAll('.line-item-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        alert('Please select line items first');
+        return;
+    }
+    
+    const itemCount = selectedCheckboxes.length;
+    if (!confirm(`Are you sure you want to delete ${itemCount} selected line items?`)) {
+        return;
+    }
+    
+    selectedCheckboxes.forEach(checkbox => {
+        const lineId = checkbox.getAttribute('data-line-id');
+        const category = checkbox.getAttribute('data-category');
+        removeLine(lineId, category);
+    });
+    
+    alert(`Successfully deleted ${itemCount} line items!`);
+    updateBulkSelection(); // Update the UI
+}
+
+// ========================================
+// NEW Sprint 3.3: Template Management
+// ========================================
+
+function updateTemplatesList() {
+    const tbody = document.getElementById('templates-list');
+    if (!db.templates) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No templates available</td></tr>';
+        return;
+    }
+    
+    // Apply filters
+    const searchTerm = document.getElementById('template-search')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('template-category-filter')?.value || '';
+    const statusFilter = document.getElementById('template-status-filter')?.value || '';
+    
+    let filteredTemplates = db.templates.filter(template => {
+        const matchesSearch = !searchTerm || 
+            template.name.toLowerCase().includes(searchTerm) ||
+            (template.description || '').toLowerCase().includes(searchTerm);
+        
+        const matchesCategory = !categoryFilter || template.category === categoryFilter;
+        const matchesStatus = !statusFilter || template.status === statusFilter;
+        
+        return matchesSearch && matchesCategory && matchesStatus;
+    });
+    
+    if (filteredTemplates.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No templates found matching your criteria</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filteredTemplates.map(template => {
+        const itemCount = template.items ? template.items.length : 0;
+        const statusBadge = template.status === 'active' ? 
+            '<span style="background: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">ACTIVE</span>' :
+            '<span style="background: #fee2e2; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">ARCHIVED</span>';
+        
+        const lastUpdated = new Date(template.updated_at).toLocaleDateString();
+        
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 500;">${template.name}</div>
+                    ${template.description ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${template.description}</div>` : ''}
+                </td>
+                <td style="text-transform: capitalize;">${template.category}</td>
+                <td style="text-align: center;">${itemCount} items</td>
+                <td style="font-weight: 500;">£${template.estimated_value.toFixed(2)}</td>
+                <td>${lastUpdated}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div style="display: flex; gap: 0.25rem;">
+                        <button onclick="window.createQuoteFromTemplate('${template.id}')" style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Use Template</button>
+                        <button onclick="window.editTemplate('${template.id}')" style="background: #f59e0b; color: white; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
+                        <button onclick="window.deleteTemplate('${template.id}')" style="background: #ef4444; color: white; padding: 0.25rem 0.5rem; font-size: 0.75rem;">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterTemplates() {
+    updateTemplatesList();
+}
+
+function showCreateTemplateFromScratch() {
+    // Clear template modal
+    document.getElementById('template-modal-title').textContent = 'Create New Template';
+    document.getElementById('template-id').value = '';
+    document.getElementById('template-name').value = '';
+    document.getElementById('template-category').value = '';
+    document.getElementById('template-description').value = '';
+    document.getElementById('template-status').value = 'active';
+    document.getElementById('template-vat-rate').value = '20.00';
+    document.getElementById('template-terms').value = 'Payment terms: 30 days net. All work carried out to current industry standards. Materials warranty as per manufacturer specifications.';
+    
+    // Clear template items preview
+    document.getElementById('template-items-preview').innerHTML = '<p style="margin: 0; color: #666; text-align: center;">No items added yet. Click "Add Items to Template" to add resources.</p>';
+    
+    // Show modal
+    document.getElementById('template-modal').classList.add('active');
+    document.getElementById('template-name').focus();
+}
+
+function saveQuoteAsTemplate() {
+    // Collect current quote data
+    const title = document.getElementById('quote-title').value.trim();
+    const description = document.getElementById('quote-description').value.trim();
+    const terms = document.getElementById('quote-terms').value.trim();
+    const vatRate = parseFloat(document.getElementById('quote-vat-rate').value) || 20;
+    
+    if (!title) {
+        alert('Please enter a quote title first');
+        return;
+    }
+    
+    // Convert current quote items to template format
+    const templateItems = [];
+    let totalValue = 0;
+    
+    for (let category in db.quoteItems) {
+        db.quoteItems[category].forEach(item => {
+            if (item.resourceId) {
+                templateItems.push({
+                    resource_id: item.resourceId,
+                    resource_name: item.name,
+                    quantity: item.qty,
+                    unit_price: item.rate,
+                    line_total: item.total,
+                    notes: `Category: ${category}`
+                });
+                totalValue += item.total;
+            }
+        });
+    }
+    
+    if (templateItems.length === 0) {
+        alert('Please add some items to the quote first');
+        return;
+    }
+    
+    // Pre-fill template modal with quote data
+    document.getElementById('template-modal-title').textContent = 'Save Quote as Template';
+    document.getElementById('template-id').value = '';
+    document.getElementById('template-name').value = title + ' Template';
+    document.getElementById('template-category').value = '';
+    document.getElementById('template-description').value = description || 'Template created from quote: ' + title;
+    document.getElementById('template-status').value = 'active';
+    document.getElementById('template-vat-rate').value = vatRate.toString();
+    document.getElementById('template-terms').value = terms;
+    
+    // Show template items preview
+    const totalWithVat = totalValue * (1 + vatRate / 100);
+    document.getElementById('template-items-preview').innerHTML = `
+        <div style="margin-bottom: 1rem;">
+            <strong>${templateItems.length} items</strong> - Estimated value: <strong>£${totalWithVat.toFixed(2)}</strong> (inc VAT)
+        </div>
+        ${templateItems.slice(0, 3).map(item => `
+            <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 0.25rem;">
+                <span style="font-weight: 500;">${item.resource_name}</span> x${item.quantity} = £${item.line_total.toFixed(2)}
+            </div>
+        `).join('')}
+        ${templateItems.length > 3 ? `<div style="color: #666; font-style: italic;">... and ${templateItems.length - 3} more items</div>` : ''}
+    `;
+    
+    // Store items in a temporary variable for saving
+    window.tempTemplateItems = templateItems;
+    window.tempTemplateValue = totalWithVat;
+    
+    // Show modal
+    document.getElementById('template-modal').classList.add('active');
+    document.getElementById('template-name').focus();
+}
+
+function duplicateCurrentQuote() {
+    const title = document.getElementById('quote-title').value.trim();
+    
+    if (!title) {
+        alert('Please save this quote first before duplicating');
+        return;
+    }
+    
+    if (!confirm('This will create a new quote with the same items. Continue?')) {
+        return;
+    }
+    
+    // Create new quote with current items but clear other fields
+    const newTitle = title + ' (Copy)';
+    document.getElementById('quote-title').value = newTitle;
+    document.getElementById('quote-description').value = '';
+    document.getElementById('quote-notes').value = '';
+    
+    // Clear address fields
+    document.getElementById('quote-move-type').value = '';
+    toggleAddressSections();
+    
+    // Clear quoted activities
+    document.querySelectorAll('#quote-activities-multiselect input[type="checkbox"]').forEach(cb => cb.checked = false);
+    
+    alert('Quote duplicated! Please update the details and save.');
+}
+
+function closeTemplateModal() {
+    document.getElementById('template-modal').classList.remove('active');
+    window.tempTemplateItems = null;
+    window.tempTemplateValue = null;
+}
+
+function saveTemplate() {
+    const id = document.getElementById('template-id').value;
+    const name = document.getElementById('template-name').value.trim();
+    const category = document.getElementById('template-category').value;
+    const description = document.getElementById('template-description').value.trim();
+    const status = document.getElementById('template-status').value;
+    const vatRate = parseFloat(document.getElementById('template-vat-rate').value) || 20;
+    const terms = document.getElementById('template-terms').value.trim();
+    
+    if (!name || !category) {
+        alert('Template name and category are required!');
+        return;
+    }
+    
+    const items = window.tempTemplateItems || [];
+    const estimatedValue = window.tempTemplateValue || 0;
+    
+    if (items.length === 0) {
+        alert('Please add some items to the template');
+        return;
+    }
+    
+    const now = new Date().toISOString();
+    const template = {
+        id: id || generateUUID(),
+        name,
+        category,
+        description,
+        status,
+        vat_rate: vatRate,
+        terms_conditions: terms,
+        items,
+        estimated_value: estimatedValue,
+        created_at: id ? db.templates.find(t => t.id === id)?.created_at || now : now,
+        updated_at: now
+    };
+    
+    if (id) {
+        // Edit existing template
+        const index = db.templates.findIndex(t => t.id === id);
+        if (index !== -1) {
+            db.templates[index] = template;
+        }
+    } else {
+        // Create new template
+        db.templates.push(template);
+    }
+    
+    // Save to IndexedDB
+    saveDataToIndexedDB().then(() => {
+        alert(`Template "${name}" saved successfully!`);
+        closeTemplateModal();
+        updateTemplatesList();
+    }).catch(error => {
+        console.error('Error saving template:', error);
+        alert('Error saving template. Please try again.');
+    });
+}
+
+function editTemplate(templateId) {
+    const template = db.templates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    // Fill template modal with existing data
+    document.getElementById('template-modal-title').textContent = 'Edit Template';
+    document.getElementById('template-id').value = template.id;
+    document.getElementById('template-name').value = template.name;
+    document.getElementById('template-category').value = template.category;
+    document.getElementById('template-description').value = template.description || '';
+    document.getElementById('template-status').value = template.status;
+    document.getElementById('template-vat-rate').value = template.vat_rate.toString();
+    document.getElementById('template-terms').value = template.terms_conditions || '';
+    
+    // Show template items
+    const items = template.items || [];
+    document.getElementById('template-items-preview').innerHTML = `
+        <div style="margin-bottom: 1rem;">
+            <strong>${items.length} items</strong> - Estimated value: <strong>£${template.estimated_value.toFixed(2)}</strong> (inc VAT)
+        </div>
+        ${items.slice(0, 5).map(item => `
+            <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 0.25rem;">
+                <span style="font-weight: 500;">${item.resource_name}</span> x${item.quantity} = £${item.line_total.toFixed(2)}
+            </div>
+        `).join('')}
+        ${items.length > 5 ? `<div style="color: #666; font-style: italic;">... and ${items.length - 5} more items</div>` : ''}
+    `;
+    
+    // Store items for editing
+    window.tempTemplateItems = items;
+    window.tempTemplateValue = template.estimated_value;
+    
+    // Show modal
+    document.getElementById('template-modal').classList.add('active');
+    document.getElementById('template-name').focus();
+}
+
+function deleteTemplate(templateId) {
+    const template = db.templates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    if (!confirm(`Are you sure you want to delete template "${template.name}"?`)) {
+        return;
+    }
+    
+    db.templates = db.templates.filter(t => t.id !== templateId);
+    
+    saveDataToIndexedDB().then(() => {
+        alert('Template deleted successfully!');
+        updateTemplatesList();
+    }).catch(error => {
+        console.error('Error deleting template:', error);
+        alert('Error deleting template. Please try again.');
+    });
+}
+
+function createQuoteFromTemplate(templateId) {
+    const template = db.templates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    if (!db.currentPC) {
+        alert('Please select a PC Number first');
+        return;
+    }
+    
+    if (!confirm(`Create a new quote using template "${template.name}"?`)) {
+        return;
+    }
+    
+    // Start fresh quote creation
+    createQuote();
+    
+    // Wait for quote builder to initialize, then populate with template data
+    setTimeout(() => {
+        // Set quote metadata
+        document.getElementById('quote-title').value = template.name;
+        document.getElementById('quote-description').value = template.description || '';
+        document.getElementById('quote-terms').value = template.terms_conditions || '';
+        document.getElementById('quote-vat-rate').value = template.vat_rate.toString();
+        
+        // Add template items to quote
+        template.items.forEach(templateItem => {
+            const resource = db.resources.find(r => r.id === templateItem.resource_id);
+            if (resource) {
+                addResourceToQuoteCategory(resource, templateItem.quantity);
+            }
+        });
+        
+        // Recalculate totals
+        calculateTotal();
+        
+        alert(`Quote created from template "${template.name}"! Please review and modify as needed.`);
+    }, 500);
+}
+
+function addItemsToTemplate() {
+    alert('Feature under development: Manual item addition to templates will be available in a future update. For now, create templates from existing quotes.');
 }
 
 // ========================================
@@ -2231,8 +3416,8 @@ async function saveActivity() {
             alert('Activity updated successfully!');
         } else {
             // For new activities, close modal and refresh list
-            closeActivityModal();
-            updateActivitiesList();
+    closeActivityModal();
+    updateActivitiesList();
         }
     } catch (error) {
         console.error('❌ Error saving activity:', error);
@@ -2698,6 +3883,41 @@ document.addEventListener('DOMContentLoaded', () => {
     window.updateQuotedActivities = updateQuotedActivities;
     window.onQuoteStatusChange = onQuoteStatusChange;
     window.validateQuoteEditability = validateQuoteEditability;
+    // NEW Sprint 3: Enhanced Resource Lookup functions
+    window.showEnhancedResourceModal = showEnhancedResourceModal;
+    window.closeEnhancedResourceModal = closeEnhancedResourceModal;
+    window.filterResources = filterResources;
+    window.renderResourcesList = renderResourcesList;
+    window.toggleResourceSelection = toggleResourceSelection;
+    window.updateResourceTotal = updateResourceTotal;
+    window.selectAllFilteredResources = selectAllFilteredResources;
+    window.clearResourceSelection = clearResourceSelection;
+    window.updateSelectionCount = updateSelectionCount;
+    window.addSelectedResourcesToQuote = addSelectedResourcesToQuote;
+    window.addResourceToQuoteCategory = addResourceToQuoteCategory;
+    // NEW Sprint 3.2: Bulk Operations functions
+    window.updateBulkSelection = updateBulkSelection;
+    window.toggleCategorySelection = toggleCategorySelection;
+    window.clearBulkSelection = clearBulkSelection;
+    window.bulkUpdateQuantity = bulkUpdateQuantity;
+    window.closeBulkQuantityModal = closeBulkQuantityModal;
+    window.applyBulkQuantityUpdate = applyBulkQuantityUpdate;
+    window.bulkApplyDiscount = bulkApplyDiscount;
+    window.closeBulkDiscountModal = closeBulkDiscountModal;
+    window.applyBulkDiscount = applyBulkDiscount;
+    window.bulkDeleteItems = bulkDeleteItems;
+    // NEW Sprint 3.3: Template Management functions
+    window.updateTemplatesList = updateTemplatesList;
+    window.filterTemplates = filterTemplates;
+    window.showCreateTemplateFromScratch = showCreateTemplateFromScratch;
+    window.saveQuoteAsTemplate = saveQuoteAsTemplate;
+    window.duplicateCurrentQuote = duplicateCurrentQuote;
+    window.closeTemplateModal = closeTemplateModal;
+    window.saveTemplate = saveTemplate;
+    window.editTemplate = editTemplate;
+    window.deleteTemplate = deleteTemplate;
+    window.createQuoteFromTemplate = createQuoteFromTemplate;
+    window.addItemsToTemplate = addItemsToTemplate;
     window.resetData = resetData;
     window.clearPCForm = clearPCForm;
     window.clearPriceListForm = clearPriceListForm;
