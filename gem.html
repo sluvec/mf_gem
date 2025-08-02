@@ -279,6 +279,10 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
         
+        /* ========================================
+           HIERARCHICAL NAVIGATION STYLES
+           ======================================== */
+        
         /* Navigation Menu Styles */
         .nav-menu {
             display: flex;
@@ -286,10 +290,229 @@
             margin: 0;
             padding: 0;
             gap: var(--space-xs);
+            align-items: center;
         }
         
         .nav-menu li {
             display: flex;
+            position: relative;
+        }
+        
+        /* Navigation Button Base Styles */
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-4);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Icon Styles */
+        .nav-icon {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        
+        /* Dropdown Toggle Styles */
+        .dropdown-toggle {
+            position: relative;
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.75rem;
+            transition: transform 0.2s ease;
+            margin-left: var(--space-1);
+        }
+        
+        .dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-toggle[aria-expanded="true"] {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 280px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--neutral-200);
+            list-style: none;
+            margin: 0;
+            padding: var(--space-2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-menu[aria-hidden="false"] {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu li {
+            width: 100%;
+        }
+        
+        /* Dropdown Item Styles */
+        .dropdown-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            width: 100%;
+            padding: var(--space-3);
+            background: none;
+            border: none;
+            color: var(--neutral-700);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            min-height: auto;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--primary-50);
+            color: var(--primary-700);
+            transform: translateX(2px);
+        }
+        
+        .dropdown-item:focus {
+            background: var(--primary-100);
+            color: var(--primary-800);
+            outline: 2px solid var(--primary-500);
+            outline-offset: -2px;
+        }
+        
+        .item-icon {
+            flex-shrink: 0;
+            font-size: 1.125rem;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        
+        .dropdown-item .item-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .dropdown-item .item-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: var(--space-1);
+            color: inherit;
+        }
+        
+        .item-description {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--neutral-500);
+            margin-top: var(--space-1);
+            line-height: 1.3;
+        }
+        
+        .dropdown-item:hover .item-description {
+            color: var(--primary-600);
+        }
+        
+        /* Dropdown Menu Positioning */
+        .nav-dropdown:nth-last-child(-n+2) .dropdown-menu {
+            left: auto;
+            right: 0;
+        }
+        
+        /* Mobile Navigation Dropdown Adjustments */
+        @media (max-width: 767px) {
+            .nav-menu.active .dropdown-menu {
+                position: static;
+                box-shadow: none;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: var(--radius-md);
+                margin: var(--space-2) 0;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+            }
+            
+            .nav-menu.active .dropdown-item {
+                color: rgba(255, 255, 255, 0.9);
+                padding: var(--space-2) var(--space-4);
+            }
+            
+            .nav-menu.active .dropdown-item:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                transform: none;
+            }
+            
+            .nav-menu.active .item-description {
+                color: rgba(255, 255, 255, 0.7);
+            }
+            
+            .nav-menu.active .dropdown-item:hover .item-description {
+                color: rgba(255, 255, 255, 0.9);
+            }
+        }
+        
+        /* Active Page Highlighting */
+        .dropdown-item.active {
+            background: var(--primary-100);
+            color: var(--primary-800);
+        }
+        
+        .dropdown-item.active .item-description {
+            color: var(--primary-600);
+        }
+        
+        /* Keyboard Navigation Enhancements */
+        .dropdown-menu[aria-hidden="false"] .dropdown-item:first-child {
+            background: var(--primary-50);
+        }
+        
+        /* Animation for Mobile Menu Dropdowns */
+        @media (max-width: 767px) {
+            .nav-menu.active .dropdown-menu {
+                animation: mobile-dropdown-slide 0.3s ease-out;
+            }
+        }
+        
+        @keyframes mobile-dropdown-slide {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
         }
         
         /* Touch-Friendly Button Sizes */
@@ -2875,6 +3098,7 @@
                 </button>
                 
                 <ul id="main-navigation" class="nav-menu" role="menubar" aria-label="Main menu">
+                    <!-- Dashboard - always visible -->
                     <li role="none">
                         <button 
                             onclick="window.showPage('dashboard')" 
@@ -2882,88 +3106,176 @@
                             role="menuitem"
                             aria-pressed="true"
                             aria-describedby="dashboard-desc">
+                            <span class="nav-icon">🏠</span>
                             Dashboard
                         </button>
                     </li>
-                    <li role="none">
+                    
+                    <!-- Projects Dropdown -->
+                    <li class="nav-dropdown" role="none">
                         <button 
-                            onclick="window.showPage('pcnumbers')" 
-                            class="nav-btn"
+                            class="nav-btn dropdown-toggle"
                             role="menuitem"
-                            aria-describedby="pc-numbers-desc">
-                            PC Numbers
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-controls="projects-menu"
+                            onclick="toggleDropdown('projects')">
+                            <span class="nav-icon">📁</span>
+                            Projects
+                            <span class="dropdown-arrow" aria-hidden="true">▼</span>
                         </button>
+                        <ul id="projects-menu" class="dropdown-menu" role="menu" aria-label="Projects menu" hidden>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('pcnumbers')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="pc-numbers-desc">
+                                    <span class="item-icon">📋</span>
+                                    PC Numbers
+                                    <span class="item-description">Manage project codes</span>
+                                </button>
+                            </li>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('activities')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="activities-desc">
+                                    <span class="item-icon">📅</span>
+                                    Activities
+                                    <span class="item-description">Schedule and track tasks</span>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
-                    <li role="none">
+                    
+                    <!-- Sales Dropdown -->
+                    <li class="nav-dropdown" role="none">
                         <button 
-                            onclick="window.showPage('quotes')" 
-                            class="nav-btn"
+                            class="nav-btn dropdown-toggle"
                             role="menuitem"
-                            aria-describedby="quotes-desc">
-                            Quotes
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-controls="sales-menu"
+                            onclick="toggleDropdown('sales')">
+                            <span class="nav-icon">💰</span>
+                            Sales
+                            <span class="dropdown-arrow" aria-hidden="true">▼</span>
                         </button>
+                        <ul id="sales-menu" class="dropdown-menu" role="menu" aria-label="Sales menu" hidden>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('quotes')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="quotes-desc">
+                                    <span class="item-icon">📝</span>
+                                    Quotes
+                                    <span class="item-description">Create and manage quotes</span>
+                                </button>
+                            </li>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('pricelists')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="pricelists-desc">
+                                    <span class="item-icon">💷</span>
+                                    Price Lists
+                                    <span class="item-description">Manage pricing and rates</span>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
-                    <li role="none">
+                    
+                    <!-- Resources Dropdown -->
+                    <li class="nav-dropdown" role="none">
                         <button 
-                            onclick="window.showPage('templates')" 
-                            class="nav-btn"
+                            class="nav-btn dropdown-toggle"
                             role="menuitem"
-                            aria-describedby="templates-desc">
-                            Quote Templates
-                        </button>
-                    </li>
-                    <li role="none">
-                        <button 
-                            onclick="window.showPage('activities')" 
-                            class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="activities-desc">
-                            Activities
-                        </button>
-                    </li>
-                    <li role="none">
-                        <button 
-                            onclick="window.showPage('activity-templates')" 
-                            class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="activity-templates-desc">
-                            Activity Templates
-                        </button>
-                    </li>
-                    <li role="none">
-                        <button 
-                            onclick="window.showPage('resources')" 
-                            class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="resources-desc">
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-controls="resources-menu"
+                            onclick="toggleDropdown('resources')">
+                            <span class="nav-icon">🔧</span>
                             Resources
+                            <span class="dropdown-arrow" aria-hidden="true">▼</span>
                         </button>
+                        <ul id="resources-menu" class="dropdown-menu" role="menu" aria-label="Resources menu" hidden>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('resources')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="resources-desc">
+                                    <span class="item-icon">🛠️</span>
+                                    Manage Resources
+                                    <span class="item-description">Equipment, materials, labor</span>
+                                </button>
+                            </li>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('resource-allocation')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="resource-allocation-desc">
+                                    <span class="item-icon">📊</span>
+                                    Resource Allocation
+                                    <span class="item-description">Track allocation and availability</span>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
-                    <li role="none">
+                    
+                    <!-- Templates Dropdown -->
+                    <li class="nav-dropdown" role="none">
                         <button 
-                            onclick="window.showPage('resource-allocation')" 
-                            class="nav-btn"
+                            class="nav-btn dropdown-toggle"
                             role="menuitem"
-                            aria-describedby="resource-allocation-desc">
-                            Resource Allocation
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-controls="templates-menu"
+                            onclick="toggleDropdown('templates')">
+                            <span class="nav-icon">📄</span>
+                            Templates
+                            <span class="dropdown-arrow" aria-hidden="true">▼</span>
                         </button>
+                        <ul id="templates-menu" class="dropdown-menu" role="menu" aria-label="Templates menu" hidden>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('templates')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="templates-desc">
+                                    <span class="item-icon">📋</span>
+                                    Quote Templates
+                                    <span class="item-description">Reusable quote templates</span>
+                                </button>
+                            </li>
+                            <li role="none">
+                                <button 
+                                    onclick="window.showPage('activity-templates')" 
+                                    class="dropdown-item"
+                                    role="menuitem"
+                                    aria-describedby="activity-templates-desc">
+                                    <span class="item-icon">📅</span>
+                                    Activity Templates
+                                    <span class="item-description">Reusable activity templates</span>
+                                </button>
+                            </li>
+                        </ul>
                     </li>
+                    
+                    <!-- Analytics - standalone -->
                     <li role="none">
                         <button 
                             onclick="window.showPage('analytics')" 
                             class="nav-btn"
                             role="menuitem"
                             aria-describedby="analytics-desc">
+                            <span class="nav-icon">📈</span>
                             Analytics
-                        </button>
-                    </li>
-                    <li role="none">
-                        <button 
-                            onclick="window.showPage('pricelists')" 
-                            class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="pricelists-desc">
-                            Price Lists
                         </button>
                     </li>
                 </ul>
@@ -15455,6 +15767,221 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Loading states and enhanced error handling initialized');
     
     // ========================================
+    // HIERARCHICAL DROPDOWN NAVIGATION
+    // ========================================
+    
+    // Dropdown Navigation Manager
+    class DropdownNavigationManager {
+        constructor() {
+            this.activeDropdown = null;
+            this.dropdowns = new Map();
+            this.initializeDropdowns();
+            this.bindEventListeners();
+        }
+        
+        initializeDropdowns() {
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdownToggles.forEach(toggle => {
+                const dropdownId = toggle.getAttribute('aria-controls');
+                const menu = document.getElementById(dropdownId);
+                
+                if (menu) {
+                    this.dropdowns.set(dropdownId, {
+                        toggle,
+                        menu,
+                        isOpen: false
+                    });
+                }
+            });
+        }
+        
+        bindEventListeners() {
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.nav-dropdown')) {
+                    this.closeAllDropdowns();
+                }
+            });
+            
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.activeDropdown) {
+                    this.closeDropdown(this.activeDropdown);
+                    this.dropdowns.get(this.activeDropdown).toggle.focus();
+                }
+                
+                // Arrow key navigation within dropdowns
+                if (this.activeDropdown && ['ArrowDown', 'ArrowUp'].includes(e.key)) {
+                    e.preventDefault();
+                    this.handleArrowNavigation(e.key);
+                }
+            });
+        }
+        
+        toggleDropdown(dropdownId) {
+            const dropdown = this.dropdowns.get(dropdownId);
+            if (!dropdown) return;
+            
+            if (dropdown.isOpen) {
+                this.closeDropdown(dropdownId);
+            } else {
+                this.closeAllDropdowns();
+                this.openDropdown(dropdownId);
+            }
+        }
+        
+        openDropdown(dropdownId) {
+            const dropdown = this.dropdowns.get(dropdownId);
+            if (!dropdown) return;
+            
+            // Update states
+            dropdown.isOpen = true;
+            this.activeDropdown = dropdownId;
+            
+            // Update ARIA attributes
+            dropdown.toggle.setAttribute('aria-expanded', 'true');
+            dropdown.menu.setAttribute('aria-hidden', 'false');
+            dropdown.menu.hidden = false;
+            
+            // Focus first item
+            const firstItem = dropdown.menu.querySelector('.dropdown-item');
+            if (firstItem) {
+                setTimeout(() => firstItem.focus(), 100);
+            }
+            
+            // Announce to screen readers
+            this.announceDropdownState(dropdownId, true);
+        }
+        
+        closeDropdown(dropdownId) {
+            const dropdown = this.dropdowns.get(dropdownId);
+            if (!dropdown) return;
+            
+            // Update states
+            dropdown.isOpen = false;
+            if (this.activeDropdown === dropdownId) {
+                this.activeDropdown = null;
+            }
+            
+            // Update ARIA attributes
+            dropdown.toggle.setAttribute('aria-expanded', 'false');
+            dropdown.menu.setAttribute('aria-hidden', 'true');
+            dropdown.menu.hidden = true;
+            
+            // Announce to screen readers
+            this.announceDropdownState(dropdownId, false);
+        }
+        
+        closeAllDropdowns() {
+            this.dropdowns.forEach((dropdown, id) => {
+                if (dropdown.isOpen) {
+                    this.closeDropdown(id);
+                }
+            });
+        }
+        
+        handleArrowNavigation(direction) {
+            if (!this.activeDropdown) return;
+            
+            const dropdown = this.dropdowns.get(this.activeDropdown);
+            const items = Array.from(dropdown.menu.querySelectorAll('.dropdown-item'));
+            const currentIndex = items.findIndex(item => item === document.activeElement);
+            
+            let nextIndex;
+            if (direction === 'ArrowDown') {
+                nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+            } else {
+                nextIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+            }
+            
+            items[nextIndex].focus();
+        }
+        
+        announceDropdownState(dropdownId, isOpen) {
+            const dropdown = this.dropdowns.get(dropdownId);
+            if (!dropdown) return;
+            
+            const announcement = document.createElement('div');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.className = 'sr-only';
+            
+            const menuLabel = dropdown.menu.getAttribute('aria-label') || 'menu';
+            announcement.textContent = isOpen ? 
+                `${menuLabel} opened` : 
+                `${menuLabel} closed`;
+            
+            document.body.appendChild(announcement);
+            
+            setTimeout(() => {
+                if (announcement.parentNode) {
+                    announcement.parentNode.removeChild(announcement);
+                }
+            }, 1000);
+        }
+        
+        // Update active page highlighting
+        updateActivePageHighlighting(pageId) {
+            // Clear all active states
+            document.querySelectorAll('.nav-btn, .dropdown-item').forEach(btn => {
+                btn.classList.remove('active');
+                btn.removeAttribute('aria-current');
+            });
+            
+            // Set active state for current page
+            const pageToDropdownItem = {
+                'dashboard': null,
+                'pcnumbers': 'projects-menu .dropdown-item[onclick*="pcnumbers"]',
+                'activities': 'projects-menu .dropdown-item[onclick*="activities"]',
+                'quotes': 'sales-menu .dropdown-item[onclick*="quotes"]',
+                'pricelists': 'sales-menu .dropdown-item[onclick*="pricelists"]',
+                'resources': 'resources-menu .dropdown-item[onclick*="resources"][onclick*="\'resources\'"]',
+                'resource-allocation': 'resources-menu .dropdown-item[onclick*="resource-allocation"]',
+                'templates': 'templates-menu .dropdown-item[onclick*="templates"][onclick*="\'templates\'"]',
+                'activity-templates': 'templates-menu .dropdown-item[onclick*="activity-templates"]',
+                'analytics': '.nav-btn[onclick*="analytics"]'
+            };
+            
+            if (pageId === 'dashboard') {
+                const dashboardBtn = document.querySelector('.nav-btn[onclick*="dashboard"]');
+                if (dashboardBtn) {
+                    dashboardBtn.classList.add('active');
+                    dashboardBtn.setAttribute('aria-current', 'page');
+                }
+            } else {
+                const selector = pageToDropdownItem[pageId];
+                if (selector) {
+                    const element = document.querySelector(`#${selector}`);
+                    if (element) {
+                        element.classList.add('active');
+                        element.setAttribute('aria-current', 'page');
+                    }
+                }
+            }
+        }
+    }
+    
+    // Global dropdown navigation instance
+    const dropdownNavigation = new DropdownNavigationManager();
+    
+    // Global function for dropdown toggles
+    window.toggleDropdown = function(dropdownId) {
+        dropdownNavigation.toggleDropdown(dropdownId);
+    };
+    
+    // Enhanced navigation state management
+    function updateHierarchicalNavigationState(activePageId) {
+        // Update traditional navigation states
+        updateNavigationState(activePageId);
+        
+        // Update hierarchical dropdown highlighting
+        dropdownNavigation.updateActivePageHighlighting(activePageId);
+    }
+    
+    console.log('✅ Hierarchical dropdown navigation initialized');
+    console.log('📁 Navigation organized into logical groups: Projects, Sales, Resources, Templates');
+    
+    // ========================================
     // ACCESSIBILITY & MOBILE UX ENHANCEMENTS
     // ========================================
     
@@ -15527,8 +16054,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Call original function
         originalShowPage(pageId);
         
-        // Update ARIA states
-        updateNavigationState(pageId);
+        // Update ARIA states (hierarchical navigation)
+        updateHierarchicalNavigationState(pageId);
         
         // Update document title for screen readers
         const pageTitles = {
