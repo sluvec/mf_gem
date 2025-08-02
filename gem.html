@@ -170,6 +170,7 @@
         .form-actions { margin-top: 1.5rem; text-align: right; }
         .action-btn-group { display: flex; gap: 0.5rem; align-items: center; }
         .action-btn-group button { margin-right: 0; }
+        .field-note { font-size: 0.875rem; color: var(--neutral-600); margin-top: 0.5rem; font-style: italic; }
         
         /* Responsive Table */
         @media (max-width: 768px) {
@@ -254,10 +255,28 @@
                     <div class="form-grid">
                         <div><label>PC Number *</label><input type="text" id="pc-number" placeholder="e.g. PC-000001" required></div>
                         <div><label>Company Name *</label><input type="text" id="pc-company-name" placeholder="Company name" required></div>
-                        <div><label>Crown Branch</label><input type="text" id="pc-crown-branch" placeholder="e.g. Birmingham Crown Court"></div>
                         <div><label>Project Name *</label><input type="text" id="pc-project-name" placeholder="Project name" required></div>
                         <div><label>Account Manager *</label><input type="text" id="pc-account-manager" placeholder="Account manager name" required></div>
-                        <div><label>Surveyor</label><input type="text" id="pc-surveyor" placeholder="Surveyor name"></div>
+                        <div><label>Client Industry *</label><select id="pc-client-industry" required>
+                            <option value="">Select industry...</option>
+                            <option value="Media">Media</option>
+                            <option value="Education">Education</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Government">Government</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Other">Other</option>
+                        </select></div>
+                        <div><label>Client Source *</label><select id="pc-client-source" required>
+                            <option value="">Select source...</option>
+                            <option value="Web Enquiry">Web Enquiry</option>
+                            <option value="Business Development">Business Development</option>
+                            <option value="Existing Customer">Existing Customer</option>
+                            <option value="Cross Referral">Cross Referral</option>
+                            <option value="Internal (CWS/Crown)">Internal (CWS/Crown)</option>
+                        </select></div>
+                        <div><label>Quote Limit</label><input type="number" id="pc-quote-limit" min="1" max="20" placeholder="5" value="5"></div>
                         <div><label>Status</label><select id="pc-status">
                             <option value="active">Active</option>
                             <option value="completed">Completed</option>
@@ -266,51 +285,17 @@
                     </div>
                     <div><label>Project Description</label><textarea id="pc-project-description" rows="3" placeholder="Detailed project description..."></textarea></div>
                 </div>
-                
-                <!-- Collection Address Section -->
+                                
+                <!-- Simplified Contact Section -->
                 <div class="form-section">
-                    <h3>Collection Address & Contact</h3>
+                    <h3>Primary Contact</h3>
                     <div class="form-grid">
-                        <div><label>First Name</label><input type="text" id="pc-collection-first-name" placeholder="First name"></div>
-                        <div><label>Surname</label><input type="text" id="pc-collection-surname" placeholder="Surname"></div>
-                        <div><label>Email</label><input type="email" id="pc-collection-email" placeholder="email@address.com"></div>
-                        <div><label>Phone</label><input type="tel" id="pc-collection-phone" placeholder="Phone number"></div>
-                        <div><label>Mobile</label><input type="tel" id="pc-collection-mobile" placeholder="Mobile number"></div>
-                        <div><label>Collection Date</label><input type="date" id="pc-collection-date"></div>
+                        <div><label>Contact Name *</label><input type="text" id="pc-contact-name" placeholder="Primary contact person" required></div>
+                        <div><label>Phone</label><input type="tel" id="pc-contact-phone" placeholder="Phone number"></div>
+                        <div><label>Email</label><input type="email" id="pc-contact-email" placeholder="email@address.com"></div>
+                        <div><label>Postcode (optional)</label><input type="text" id="pc-postcode" placeholder="e.g. SW1A 1AA"></div>
                     </div>
-                    <div class="form-grid">
-                        <div><label>Address Line 1</label><input type="text" id="pc-collection-address-1" placeholder="Street address"></div>
-                        <div><label>Address Line 2</label><input type="text" id="pc-collection-address-2" placeholder="Additional address info"></div>
-                        <div><label>City</label><input type="text" id="pc-collection-city" placeholder="City"></div>
-                        <div><label>County</label><input type="text" id="pc-collection-county" placeholder="County"></div>
-                        <div><label>Postcode</label><input type="text" id="pc-collection-postcode" placeholder="Postcode"></div>
-                </div>
-                </div>
-                
-                <!-- Delivery Address Section -->
-                <div class="form-section">
-                    <h3>Delivery Address & Contact</h3>
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: inline-flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" id="pc-same-as-collection" onchange="window.copyCollectionToDelivery()" style="margin-right: 0.5rem;">
-                            Same as collection address
-                        </label>
-                    </div>
-                    <div class="form-grid">
-                        <div><label>First Name</label><input type="text" id="pc-delivery-first-name" placeholder="First name"></div>
-                        <div><label>Surname</label><input type="text" id="pc-delivery-surname" placeholder="Surname"></div>
-                        <div><label>Email</label><input type="email" id="pc-delivery-email" placeholder="email@address.com"></div>
-                        <div><label>Phone</label><input type="tel" id="pc-delivery-phone" placeholder="Phone number"></div>
-                        <div><label>Mobile</label><input type="tel" id="pc-delivery-mobile" placeholder="Mobile number"></div>
-                        <div><label>Delivery Date</label><input type="date" id="pc-delivery-date"></div>
-                    </div>
-                    <div class="form-grid">
-                        <div><label>Address Line 1</label><input type="text" id="pc-delivery-address-1" placeholder="Street address"></div>
-                        <div><label>Address Line 2</label><input type="text" id="pc-delivery-address-2" placeholder="Additional address info"></div>
-                        <div><label>City</label><input type="text" id="pc-delivery-city" placeholder="City"></div>
-                        <div><label>County</label><input type="text" id="pc-delivery-county" placeholder="County"></div>
-                        <div><label>Postcode</label><input type="text" id="pc-delivery-postcode" placeholder="Postcode"></div>
-                    </div>
+                    <p class="field-note">* Minimum requirement: Contact name + (Phone OR Email)</p>
                 </div>
                 
                 <div class="form-actions">
@@ -329,10 +314,11 @@
                 <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
                     <div><strong>PC Number:</strong> <span id="pc-detail-number"></span></div>
                     <div><strong>Company Name:</strong> <span id="pc-detail-company-name"></span></div>
-                    <div><strong>Crown Branch:</strong> <span id="pc-detail-crown-branch"></span></div>
                     <div><strong>Project Name:</strong> <span id="pc-detail-project-name"></span></div>
                     <div><strong>Account Manager:</strong> <span id="pc-detail-account-manager"></span></div>
-                    <div><strong>Surveyor:</strong> <span id="pc-detail-surveyor"></span></div>
+                    <div><strong>Client Industry:</strong> <span id="pc-detail-client-industry"></span></div>
+                    <div><strong>Client Source:</strong> <span id="pc-detail-client-source"></span></div>
+                    <div><strong>Quote Limit:</strong> <span id="pc-detail-quote-limit"></span></div>
                     <div><strong>Status:</strong> <span id="pc-detail-status"></span></div>
                 </div>
                 <div style="margin-top: 1rem;">
@@ -347,36 +333,16 @@
                 </div>
             </div>
             
-            <!-- Collection Address -->
+            <!-- Contact Information -->
             <div class="card">
-                <h2>Collection Address & Contact</h2>
+                <h2>Primary Contact</h2>
                 <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    <div><strong>Contact Name:</strong> <span id="pc-detail-collection-name"></span></div>
-                    <div><strong>Email:</strong> <span id="pc-detail-collection-email"></span></div>
-                    <div><strong>Phone:</strong> <span id="pc-detail-collection-phone"></span></div>
-                    <div><strong>Mobile:</strong> <span id="pc-detail-collection-mobile"></span></div>
-                    <div><strong>Collection Date:</strong> <span id="pc-detail-collection-date"></span></div>
+                    <div><strong>Contact Name:</strong> <span id="pc-detail-contact-name"></span></div>
+                    <div><strong>Phone:</strong> <span id="pc-detail-contact-phone"></span></div>
+                    <div><strong>Email:</strong> <span id="pc-detail-contact-email"></span></div>
+                    <div><strong>Postcode:</strong> <span id="pc-detail-postcode"></span></div>
                 </div>
-                <div style="margin-top: 1rem;">
-                    <strong>Address:</strong><br>
-                    <span id="pc-detail-collection-address"></span>
-                </div>
-            </div>
-            
-            <!-- Delivery Address -->
-            <div class="card">
-                <h2>Delivery Address & Contact</h2>
-                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    <div><strong>Contact Name:</strong> <span id="pc-detail-delivery-name"></span></div>
-                    <div><strong>Email:</strong> <span id="pc-detail-delivery-email"></span></div>
-                    <div><strong>Phone:</strong> <span id="pc-detail-delivery-phone"></span></div>
-                    <div><strong>Mobile:</strong> <span id="pc-detail-delivery-mobile"></span></div>
-                    <div><strong>Delivery Date:</strong> <span id="pc-detail-delivery-date"></span></div>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <strong>Address:</strong><br>
-                    <span id="pc-detail-delivery-address"></span>
-                </div>
+                <p class="field-note">Note: Detailed addresses are now managed in individual quotes.</p>
             </div>
             <div class="card">
                 <h2>Related Quotes</h2>
@@ -873,6 +839,25 @@ async function initializeIndexedDB() {
     });
 }
 
+// Enhanced error handling with retry logic
+async function saveWithRetry(storeName, data, maxRetries = 3, delay = 1000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            await saveToStore(storeName, data);
+            return; // Success - exit function
+        } catch (error) {
+            console.warn(`❌ Save attempt ${attempt}/${maxRetries} failed:`, error.message);
+            
+            if (attempt === maxRetries) {
+                throw new Error(`Failed to save after ${maxRetries} attempts: ${error.message}`);
+            }
+            
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, delay * attempt));
+        }
+    }
+}
+
 // Generic CRUD operations
 async function saveToStore(storeName, data) {
     return new Promise((resolve, reject) => {
@@ -1012,33 +997,20 @@ async function initializeWithDemoData() {
             id: demoUUIDs.pc1,
             pc_number: 'PC-000001',
             company_name: 'Acme Construction Ltd',
-            crown_branch: 'Birmingham Crown Court',
             project_name: 'Office Refurbishment Phase 2',
             project_description: 'Complete electrical rewiring and lighting upgrade for main office building including installation of modern LED systems and emergency lighting.',
             account_manager: 'John Smith',
-            surveyor: 'Mike Johnson',
-            collection_first_name: 'Sarah',
-            collection_surname: 'Williams',
-            collection_email: 'sarah.w@acme.com',
-            collection_phone: '01216549870',
-            collection_mobile: '07123456789',
-            collection_address_1: '123 High Street',
-            collection_address_2: 'Industrial Estate',
-            collection_city: 'Birmingham',
-            collection_county: 'West Midlands',
-            collection_postcode: 'B1 1AA',
-            collection_date: '2024-04-15',
-            delivery_first_name: 'Mark',
-            delivery_surname: 'Thompson',
-            delivery_email: 'mark.t@newsite.com',
-            delivery_phone: '01234567890',
-            delivery_mobile: '07111222333',
-            delivery_address_1: '456 New Road',
-            delivery_address_2: 'Business Park',
-            delivery_city: 'Manchester',
-            delivery_county: 'Greater Manchester',
-            delivery_postcode: 'M1 2BB',
-            delivery_date: '2024-04-20',
+            // NEW FIELDS according to system_improvements.md:
+            client_industry: 'Education', // single-select: Media, Education, Healthcare, etc.
+            client_source: 'Business Development', // merged: Web Enquiry, Business Development, Existing Customer, Cross Referral, Internal (CWS/Crown)
+            quote_limit: 5, // default quote limit control
+            // SIMPLIFIED CONTACT (minimum: phone OR email + contact name):
+            contact_name: 'Sarah Williams',
+            contact_phone: '01216549870', 
+            contact_email: 'sarah.w@acme.com',
+            // OPTIONAL POSTCODE (if address needed):
+            postcode: 'B1 1AA',
+            // NOTE: collection/delivery addresses REMOVED - will be moved to Quote section
             status: 'active',
             created_at: now,
             updated_at: now
@@ -1047,33 +1019,20 @@ async function initializeWithDemoData() {
             id: demoUUIDs.pc2,
             pc_number: 'PC-000002',
             company_name: 'Globex Industries Ltd',
-            crown_branch: 'Manchester Crown Court',
             project_name: 'Warehouse Lighting Upgrade',
             project_description: 'Replacement of old fluorescent lighting with energy-efficient LED lighting throughout the main warehouse facility.',
             account_manager: 'Anna Brown',
-            surveyor: 'David Wilson',
-            collection_first_name: 'James',
-            collection_surname: 'Roberts',
-            collection_email: 'james.r@globex.com',
-            collection_phone: '01619876543',
-            collection_mobile: '07987654321',
-            collection_address_1: '789 Industrial Road',
-            collection_address_2: null,
-            collection_city: 'Manchester',
-            collection_county: 'Greater Manchester',
-            collection_postcode: 'M2 3CC',
-            collection_date: '2024-04-25',
-            delivery_first_name: 'Emma',
-            delivery_surname: 'Davis',
-            delivery_email: 'emma.d@globex.com',
-            delivery_phone: '01619876543',
-            delivery_mobile: '07444555666',
-            delivery_address_1: '789 Industrial Road',
-            delivery_address_2: 'Warehouse Complex',
-            delivery_city: 'Manchester',
-            delivery_county: 'Greater Manchester',
-            delivery_postcode: 'M2 3CC',
-            delivery_date: '2024-04-25',
+            // NEW FIELDS according to system_improvements.md:
+            client_industry: 'Healthcare', // single-select: Media, Education, Healthcare, etc.
+            client_source: 'Existing Customer', // merged field
+            quote_limit: 3, // different limit for this client
+            // SIMPLIFIED CONTACT (minimum: phone OR email + contact name):
+            contact_name: 'James Roberts',
+            contact_phone: '01619876543',
+            contact_email: 'james.r@globex.com',
+            // OPTIONAL POSTCODE:
+            postcode: 'M2 3CC',
+            // NOTE: collection/delivery addresses REMOVED - will be moved to Quote section
             status: 'active',
             created_at: now,
             updated_at: now
@@ -1307,41 +1266,20 @@ function clearPCForm() {
     // Main data fields
     document.getElementById('pc-number').value = '';
     document.getElementById('pc-company-name').value = '';
-    document.getElementById('pc-crown-branch').value = '';
     document.getElementById('pc-project-name').value = '';
     document.getElementById('pc-project-description').value = '';
     document.getElementById('pc-account-manager').value = '';
-    document.getElementById('pc-surveyor').value = '';
+    // NEW FIELDS:
+    document.getElementById('pc-client-industry').value = '';
+    document.getElementById('pc-client-source').value = '';
+    document.getElementById('pc-quote-limit').value = '5';
     document.getElementById('pc-status').value = 'active';
     
-    // Collection address fields
-    document.getElementById('pc-collection-first-name').value = '';
-    document.getElementById('pc-collection-surname').value = '';
-    document.getElementById('pc-collection-email').value = '';
-    document.getElementById('pc-collection-phone').value = '';
-    document.getElementById('pc-collection-mobile').value = '';
-    document.getElementById('pc-collection-address-1').value = '';
-    document.getElementById('pc-collection-address-2').value = '';
-    document.getElementById('pc-collection-city').value = '';
-    document.getElementById('pc-collection-county').value = '';
-    document.getElementById('pc-collection-postcode').value = '';
-    document.getElementById('pc-collection-date').value = '';
-    
-    // Delivery address fields
-    document.getElementById('pc-delivery-first-name').value = '';
-    document.getElementById('pc-delivery-surname').value = '';
-    document.getElementById('pc-delivery-email').value = '';
-    document.getElementById('pc-delivery-phone').value = '';
-    document.getElementById('pc-delivery-mobile').value = '';
-    document.getElementById('pc-delivery-address-1').value = '';
-    document.getElementById('pc-delivery-address-2').value = '';
-    document.getElementById('pc-delivery-city').value = '';
-    document.getElementById('pc-delivery-county').value = '';
-    document.getElementById('pc-delivery-postcode').value = '';
-    document.getElementById('pc-delivery-date').value = '';
-    
-    // Uncheck the same address checkbox
-    document.getElementById('pc-same-as-collection').checked = false;
+    // SIMPLIFIED CONTACT FIELDS:
+    document.getElementById('pc-contact-name').value = '';
+    document.getElementById('pc-contact-phone').value = '';
+    document.getElementById('pc-contact-email').value = '';
+    document.getElementById('pc-postcode').value = '';
 }
 
 // ========================================
@@ -1391,45 +1329,41 @@ async function savePC() {
     const pcData = {
         pc_number: document.getElementById('pc-number').value.trim(),
         company_name: document.getElementById('pc-company-name').value.trim(),
-        crown_branch: document.getElementById('pc-crown-branch').value.trim(),
         project_name: document.getElementById('pc-project-name').value.trim(),
         project_description: document.getElementById('pc-project-description').value.trim(),
         account_manager: document.getElementById('pc-account-manager').value.trim(),
-        surveyor: document.getElementById('pc-surveyor').value.trim(),
+        // NEW FIELDS according to system_improvements.md:
+        client_industry: document.getElementById('pc-client-industry').value,
+        client_source: document.getElementById('pc-client-source').value,
+        quote_limit: parseInt(document.getElementById('pc-quote-limit').value) || 5,
         status: document.getElementById('pc-status').value,
         
-        // Collection address fields
-        collection_first_name: document.getElementById('pc-collection-first-name').value.trim(),
-        collection_surname: document.getElementById('pc-collection-surname').value.trim(),
-        collection_email: document.getElementById('pc-collection-email').value.trim(),
-        collection_phone: document.getElementById('pc-collection-phone').value.trim(),
-        collection_mobile: document.getElementById('pc-collection-mobile').value.trim(),
-        collection_address_1: document.getElementById('pc-collection-address-1').value.trim(),
-        collection_address_2: document.getElementById('pc-collection-address-2').value.trim(),
-        collection_city: document.getElementById('pc-collection-city').value.trim(),
-        collection_county: document.getElementById('pc-collection-county').value.trim(),
-        collection_postcode: document.getElementById('pc-collection-postcode').value.trim(),
-        collection_date: document.getElementById('pc-collection-date').value,
-        
-        // Delivery address fields
-        delivery_first_name: document.getElementById('pc-delivery-first-name').value.trim(),
-        delivery_surname: document.getElementById('pc-delivery-surname').value.trim(),
-        delivery_email: document.getElementById('pc-delivery-email').value.trim(),
-        delivery_phone: document.getElementById('pc-delivery-phone').value.trim(),
-        delivery_mobile: document.getElementById('pc-delivery-mobile').value.trim(),
-        delivery_address_1: document.getElementById('pc-delivery-address-1').value.trim(),
-        delivery_address_2: document.getElementById('pc-delivery-address-2').value.trim(),
-        delivery_city: document.getElementById('pc-delivery-city').value.trim(),
-        delivery_county: document.getElementById('pc-delivery-county').value.trim(),
-        delivery_postcode: document.getElementById('pc-delivery-postcode').value.trim(),
-        delivery_date: document.getElementById('pc-delivery-date').value,
+        // SIMPLIFIED CONTACT FIELDS:
+        contact_name: document.getElementById('pc-contact-name').value.trim(),
+        contact_phone: document.getElementById('pc-contact-phone').value.trim(),
+        contact_email: document.getElementById('pc-contact-email').value.trim(),
+        postcode: document.getElementById('pc-postcode').value.trim(),
         
         updated_at: now
     };
 
-    // Validation - only PC Number, Company Name, Project Name, and Account Manager are required
-    if (!pcData.pc_number || !pcData.company_name || !pcData.project_name || !pcData.account_manager) {
-        alert('PC Number, Company Name, Project Name, and Account Manager are required!');
+    // Enhanced validation according to system_improvements.md:
+    // Required: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, Contact Name
+    // Contact: minimum phone OR email
+    if (!pcData.pc_number || !pcData.company_name || !pcData.project_name || !pcData.account_manager || !pcData.client_industry || !pcData.client_source || !pcData.contact_name) {
+        alert('Required fields: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, and Contact Name!');
+        return;
+    }
+    
+    if (!pcData.contact_phone && !pcData.contact_email) {
+        alert('Contact requirement: Please provide either Phone OR Email!');
+        return;
+    }
+    
+    // Quote limit validation
+    const existingQuotes = db.quotes.filter(q => q.pc_id === (id || 'new')).length;
+    if (existingQuotes >= pcData.quote_limit && !id) {
+        alert(`Quote limit (${pcData.quote_limit}) would be exceeded for this PC Number!`);
         return;
     }
 
@@ -1466,59 +1400,25 @@ function editPC(id) {
     // Main data fields
     document.getElementById('pc-number').value = pc.pc_number || '';
     document.getElementById('pc-company-name').value = pc.company_name || '';
-    document.getElementById('pc-crown-branch').value = pc.crown_branch || '';
     document.getElementById('pc-project-name').value = pc.project_name || '';
     document.getElementById('pc-project-description').value = pc.project_description || '';
     document.getElementById('pc-account-manager').value = pc.account_manager || '';
-    document.getElementById('pc-surveyor').value = pc.surveyor || '';
+    // NEW FIELDS:
+    document.getElementById('pc-client-industry').value = pc.client_industry || '';
+    document.getElementById('pc-client-source').value = pc.client_source || '';
+    document.getElementById('pc-quote-limit').value = pc.quote_limit || 5;
     document.getElementById('pc-status').value = pc.status || 'active';
     
-    // Collection address fields
-    document.getElementById('pc-collection-first-name').value = pc.collection_first_name || '';
-    document.getElementById('pc-collection-surname').value = pc.collection_surname || '';
-    document.getElementById('pc-collection-email').value = pc.collection_email || '';
-    document.getElementById('pc-collection-phone').value = pc.collection_phone || '';
-    document.getElementById('pc-collection-mobile').value = pc.collection_mobile || '';
-    document.getElementById('pc-collection-address-1').value = pc.collection_address_1 || '';
-    document.getElementById('pc-collection-address-2').value = pc.collection_address_2 || '';
-    document.getElementById('pc-collection-city').value = pc.collection_city || '';
-    document.getElementById('pc-collection-county').value = pc.collection_county || '';
-    document.getElementById('pc-collection-postcode').value = pc.collection_postcode || '';
-    document.getElementById('pc-collection-date').value = pc.collection_date || '';
-    
-    // Delivery address fields
-    document.getElementById('pc-delivery-first-name').value = pc.delivery_first_name || '';
-    document.getElementById('pc-delivery-surname').value = pc.delivery_surname || '';
-    document.getElementById('pc-delivery-email').value = pc.delivery_email || '';
-    document.getElementById('pc-delivery-phone').value = pc.delivery_phone || '';
-    document.getElementById('pc-delivery-mobile').value = pc.delivery_mobile || '';
-    document.getElementById('pc-delivery-address-1').value = pc.delivery_address_1 || '';
-    document.getElementById('pc-delivery-address-2').value = pc.delivery_address_2 || '';
-    document.getElementById('pc-delivery-city').value = pc.delivery_city || '';
-    document.getElementById('pc-delivery-county').value = pc.delivery_county || '';
-    document.getElementById('pc-delivery-postcode').value = pc.delivery_postcode || '';
-    document.getElementById('pc-delivery-date').value = pc.delivery_date || '';
+    // SIMPLIFIED CONTACT FIELDS:
+    document.getElementById('pc-contact-name').value = pc.contact_name || '';
+    document.getElementById('pc-contact-phone').value = pc.contact_phone || '';
+    document.getElementById('pc-contact-email').value = pc.contact_email || '';
+    document.getElementById('pc-postcode').value = pc.postcode || '';
     
     showPage('new-pc');
 }
 
-function copyCollectionToDelivery() {
-    const checkbox = document.getElementById('pc-same-as-collection');
-    if (checkbox.checked) {
-        // Copy collection data to delivery fields
-        document.getElementById('pc-delivery-first-name').value = document.getElementById('pc-collection-first-name').value;
-        document.getElementById('pc-delivery-surname').value = document.getElementById('pc-collection-surname').value;
-        document.getElementById('pc-delivery-email').value = document.getElementById('pc-collection-email').value;
-        document.getElementById('pc-delivery-phone').value = document.getElementById('pc-collection-phone').value;
-        document.getElementById('pc-delivery-mobile').value = document.getElementById('pc-collection-mobile').value;
-        document.getElementById('pc-delivery-address-1').value = document.getElementById('pc-collection-address-1').value;
-        document.getElementById('pc-delivery-address-2').value = document.getElementById('pc-collection-address-2').value;
-        document.getElementById('pc-delivery-city').value = document.getElementById('pc-collection-city').value;
-        document.getElementById('pc-delivery-county').value = document.getElementById('pc-collection-county').value;
-        document.getElementById('pc-delivery-postcode').value = document.getElementById('pc-collection-postcode').value;
-        document.getElementById('pc-delivery-date').value = document.getElementById('pc-collection-date').value;
-    }
-}
+
 
 function viewPC(id) {
     const pc = db.pcs.find(p => p.id === id);
@@ -1530,46 +1430,20 @@ function viewPC(id) {
     // Main data
     document.getElementById('pc-detail-number').textContent = pc.pc_number || pc.number || '-';
     document.getElementById('pc-detail-company-name').textContent = pc.company_name || pc.company || '-';
-    document.getElementById('pc-detail-crown-branch').textContent = pc.crown_branch || '-';
     document.getElementById('pc-detail-project-name').textContent = pc.project_name || pc.reference || '-';
     document.getElementById('pc-detail-account-manager').textContent = pc.account_manager || '-';
-    document.getElementById('pc-detail-surveyor').textContent = pc.surveyor || '-';
+    // NEW FIELDS:
+    document.getElementById('pc-detail-client-industry').textContent = pc.client_industry || '-';
+    document.getElementById('pc-detail-client-source').textContent = pc.client_source || '-';
+    document.getElementById('pc-detail-quote-limit').textContent = pc.quote_limit || '5';
     document.getElementById('pc-detail-status').textContent = pc.status || 'active';
     document.getElementById('pc-detail-project-description').textContent = pc.project_description || '-';
     
-    // Collection address
-    const collectionName = [pc.collection_first_name, pc.collection_surname].filter(Boolean).join(' ') || pc.contactPerson || '-';
-    document.getElementById('pc-detail-collection-name').textContent = collectionName;
-    document.getElementById('pc-detail-collection-email').textContent = pc.collection_email || pc.email || '-';
-    document.getElementById('pc-detail-collection-phone').textContent = pc.collection_phone || '-';
-    document.getElementById('pc-detail-collection-mobile').textContent = pc.collection_mobile || pc.mobilePhone || '-';
-    document.getElementById('pc-detail-collection-date').textContent = pc.collection_date ? new Date(pc.collection_date).toLocaleDateString() : '-';
-    
-    const collectionAddress = [
-        pc.collection_address_1,
-        pc.collection_address_2,
-        pc.collection_city,
-        pc.collection_county,
-        pc.collection_postcode
-    ].filter(Boolean).join(', ') || pc.address || '-';
-    document.getElementById('pc-detail-collection-address').textContent = collectionAddress;
-    
-    // Delivery address
-    const deliveryName = [pc.delivery_first_name, pc.delivery_surname].filter(Boolean).join(' ') || '-';
-    document.getElementById('pc-detail-delivery-name').textContent = deliveryName;
-    document.getElementById('pc-detail-delivery-email').textContent = pc.delivery_email || '-';
-    document.getElementById('pc-detail-delivery-phone').textContent = pc.delivery_phone || '-';
-    document.getElementById('pc-detail-delivery-mobile').textContent = pc.delivery_mobile || '-';
-    document.getElementById('pc-detail-delivery-date').textContent = pc.delivery_date ? new Date(pc.delivery_date).toLocaleDateString() : '-';
-    
-    const deliveryAddress = [
-        pc.delivery_address_1,
-        pc.delivery_address_2,
-        pc.delivery_city,
-        pc.delivery_county,
-        pc.delivery_postcode
-    ].filter(Boolean).join(', ') || '-';
-    document.getElementById('pc-detail-delivery-address').textContent = deliveryAddress;
+    // SIMPLIFIED CONTACT:
+    document.getElementById('pc-detail-contact-name').textContent = pc.contact_name || pc.contactPerson || '-';
+    document.getElementById('pc-detail-contact-phone').textContent = pc.contact_phone || pc.mobilePhone || '-';
+    document.getElementById('pc-detail-contact-email').textContent = pc.contact_email || pc.email || '-';
+    document.getElementById('pc-detail-postcode').textContent = pc.postcode || '-';
 
     const quotesTbody = document.getElementById('pc-quotes');
     quotesTbody.innerHTML = '';
@@ -1826,15 +1700,21 @@ async function saveQuote() {
         updated_at: now
     };
 
-    try {
-    db.quotes.push(quote);
-        await saveToStore(STORES.QUOTES, quote);
-        console.log('✅ Quote saved successfully');
+        try {
+        // Add quote to memory first
+        db.quotes.push(quote);
+        
+        // Save to IndexedDB with retry logic
+        await saveWithRetry(STORES.QUOTES, quote, 3);
+        
+        console.log('✅ Quote saved successfully:', quote.quote_number);
         alert('Quote ' + quote.quote_number + ' has been saved!');
-    viewPC(db.currentPC.id);
+        viewPC(db.currentPC.id);
     } catch (error) {
-        console.error('❌ Error saving quote:', error);
-        alert('Error saving quote. Please try again.');
+        // Remove from memory if save failed
+        db.quotes = db.quotes.filter(q => q.id !== quote.id);
+        console.error('❌ Error saving quote after retries:', error);
+        alert('Failed to save quote after multiple attempts. Please check your connection and try again.');
     }
 }
 
@@ -1968,9 +1848,16 @@ async function saveActivity() {
             await saveToStore(STORES.ACTIVITIES, activityData);
         }
     
-        console.log('✅ Activity saved successfully');
-    closeActivityModal();
-    updateActivitiesList();
+                console.log('✅ Activity saved successfully');
+        // Fix: Keep activity open after saving instead of closing
+        if (id) {
+            // For edits, stay on the activity (re-populate form)
+            alert('Activity updated successfully!');
+        } else {
+            // For new activities, close modal and refresh list
+            closeActivityModal();
+            updateActivitiesList();
+        }
     } catch (error) {
         console.error('❌ Error saving activity:', error);
         alert('Error saving activity. Please try again.');
@@ -2428,7 +2315,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addResourceToPriceList = addResourceToPriceList;
     window.removeResourceFromPriceList = removeResourceFromPriceList;
     window.resetData = resetData;
-    window.copyCollectionToDelivery = copyCollectionToDelivery;
     window.clearPCForm = clearPCForm;
     window.clearPriceListForm = clearPriceListForm;
     window.editPriceList = editPriceList;
