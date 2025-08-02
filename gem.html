@@ -4271,6 +4271,13 @@ const CONFIG = {
         RETRY_DELAY_MS: 1000,
         MAX_FILE_SIZE_MB: 10,
         MAX_DESCRIPTION_LENGTH: 1000
+    },
+    
+    // Debug & Development Settings
+    DEBUG: {
+        EVENTS: false,  // Set to true to enable detailed event logging
+        DATABASE: false, // Set to true to enable database operation logging
+        UI: false       // Set to true to enable UI interaction logging
     }
 };
 
@@ -4568,6 +4575,19 @@ async function loadDataFromIndexedDB() {
         if (db.pcs.length === 0) {
             console.log('🌱 No data found, initializing with demo data.');
             await initializeWithDemoData();
+        }
+        
+        // 🚀 NEW: Emit data:loaded event for automatic UI updates
+        if (typeof CRM !== 'undefined' && CRM.EventBus) {
+            await CRM.EventBus.emit('data:loaded', {
+                pcs: db.pcs.length,
+                quotes: db.quotes.length,
+                activities: db.activities.length,
+                resources: db.resources.length,
+                priceLists: db.priceLists.length,
+                templates: db.templates.length,
+                activityTemplates: db.activityTemplates.length
+            }, { continueOnError: true });
         }
     } catch (error) {
         console.error('❌ Error loading from IndexedDB:', error);
@@ -11637,6 +11657,11 @@ const CRM = {
                 }
                 
                 console.log(`✅ ${entity} saved successfully:`, enrichedData.id);
+                
+                // 🚀 NEW: Emit event for loose coupling
+                const eventName = `${entity}:${data.id ? 'updated' : 'created'}`;
+                await CRM.EventBus.emit(eventName, enrichedData, { continueOnError: true });
+                
                 return enrichedData;
             } catch (error) {
                 console.error(`❌ Error saving ${entity}:`, error);
@@ -11657,7 +11682,9 @@ const CRM = {
                     updated_at: new Date().toISOString()
                 };
                 
-                return await this.save(entity, updatedData);
+                const result = await this.save(entity, updatedData);
+                // Note: save() already emits the 'updated' event
+                return result;
             } catch (error) {
                 console.error(`❌ Error updating ${entity}:`, error);
                 throw new Error(`Failed to update ${entity}: ${error.message}`);
@@ -11678,6 +11705,10 @@ const CRM = {
                 }
                 
                 console.log(`✅ ${entity} deleted successfully:`, id);
+                
+                // 🚀 NEW: Emit event for loose coupling
+                await CRM.EventBus.emit(`${entity}:deleted`, { id, entity }, { continueOnError: true });
+                
                 return true;
             } catch (error) {
                 console.error(`❌ Error deleting ${entity}:`, error);
@@ -11768,6 +11799,171 @@ const CRM = {
             }
             
             return true;
+        }
+    },
+
+    /**
+     * @namespace CRM.EventBus
+     * @description Event-driven communication system for loose coupling between modules
+     * @example
+     * // Subscribe to events
+     * CRM.EventBus.on('pc:created', updateDashboard);
+     * CRM.EventBus.on('pc:created', refreshDropdowns);
+     * 
+     * // Emit events
+     * CRM.EventBus.emit('pc:created', pcData);
+     * 
+     * // One-time subscription
+     * CRM.EventBus.once('data:loaded', initializeUI);
+     */
+    EventBus: {
+        // Internal event storage
+        _events: {},
+
+        /**
+         * Subscribe to an event
+         * @param {string} event - Event name (e.g., 'pc:created', 'quote:updated')
+         * @param {Function} callback - Function to call when event is emitted
+         * @param {Object} options - Optional configuration
+         * @returns {Function} Unsubscribe function
+         */
+        on(event, callback, options = {}) {
+            if (typeof callback !== 'function') {
+                console.error('❌ EventBus.on: Callback must be a function');
+                return () => {};
+            }
+
+            if (!this._events[event]) {
+                this._events[event] = [];
+            }
+
+            const listener = {
+                callback,
+                once: options.once || false,
+                priority: options.priority || 0
+            };
+
+            this._events[event].push(listener);
+
+            // Sort by priority (higher first)
+            this._events[event].sort((a, b) => b.priority - a.priority);
+
+            console.log(`📡 EventBus: Subscribed to '${event}'`);
+
+            // Return unsubscribe function
+            return () => this.off(event, callback);
+        },
+
+        /**
+         * Subscribe to an event only once
+         * @param {string} event - Event name
+         * @param {Function} callback - Function to call when event is emitted
+         * @returns {Function} Unsubscribe function
+         */
+        once(event, callback) {
+            return this.on(event, callback, { once: true });
+        },
+
+        /**
+         * Unsubscribe from an event
+         * @param {string} event - Event name
+         * @param {Function} callback - Callback function to remove
+         */
+        off(event, callback) {
+            if (!this._events[event]) return;
+
+            this._events[event] = this._events[event].filter(
+                listener => listener.callback !== callback
+            );
+
+            if (this._events[event].length === 0) {
+                delete this._events[event];
+            }
+
+            console.log(`📡 EventBus: Unsubscribed from '${event}'`);
+        },
+
+        /**
+         * Emit an event to all subscribers
+         * @param {string} event - Event name
+         * @param {*} data - Data to pass to event handlers
+         * @param {Object} options - Optional configuration
+         */
+        async emit(event, data = null, options = {}) {
+            if (!this._events[event] || this._events[event].length === 0) {
+                console.log(`📡 EventBus: No listeners for '${event}'`);
+                return;
+            }
+
+            console.log(`📡 EventBus: Emitting '${event}' to ${this._events[event].length} listeners`);
+
+            const listeners = [...this._events[event]]; // Copy to avoid modification during iteration
+            const results = [];
+
+            for (const listener of listeners) {
+                try {
+                    // Execute callback
+                    const result = await listener.callback(data, event);
+                    results.push({ success: true, result });
+
+                    // Remove one-time listeners
+                    if (listener.once) {
+                        this.off(event, listener.callback);
+                    }
+                } catch (error) {
+                    console.error(`❌ EventBus: Error in '${event}' listener:`, error);
+                    results.push({ success: false, error });
+                    
+                    if (!options.continueOnError) {
+                        throw error;
+                    }
+                }
+            }
+
+            return results;
+        },
+
+        /**
+         * Remove all listeners for an event or all events
+         * @param {string} [event] - Specific event to clear, or omit to clear all
+         */
+        clear(event = null) {
+            if (event) {
+                delete this._events[event];
+                console.log(`📡 EventBus: Cleared all listeners for '${event}'`);
+            } else {
+                this._events = {};
+                console.log('📡 EventBus: Cleared all event listeners');
+            }
+        },
+
+        /**
+         * Get information about current subscriptions
+         * @returns {Object} Event subscription statistics
+         */
+        getStats() {
+            const stats = {
+                totalEvents: Object.keys(this._events).length,
+                totalListeners: 0,
+                events: {}
+            };
+
+            for (const [event, listeners] of Object.entries(this._events)) {
+                stats.events[event] = listeners.length;
+                stats.totalListeners += listeners.length;
+            }
+
+            return stats;
+        },
+
+        /**
+         * Debug: Log all current subscriptions
+         */
+        debug() {
+            console.log('📡 EventBus Debug:', this.getStats());
+            for (const [event, listeners] of Object.entries(this._events)) {
+                console.log(`  ${event}: ${listeners.length} listeners`);
+            }
         }
     },
 
@@ -11956,6 +12152,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data Access Layer - expose for easy access
     window.DataAccess = CRM.DataAccess;
     
+    // Event System - expose for cross-module communication
+    window.EventBus = CRM.EventBus;
+    
     // PC Numbers Module
     window.savePC = CRM.PCNumbers.save;
     window.editPC = CRM.PCNumbers.edit;
@@ -12099,6 +12298,135 @@ document.addEventListener('DOMContentLoaded', () => {
     window.updateResourceTotal = updateResourceTotal;
     window.updateSelectionCount = updateSelectionCount;
     window.addResourceToQuoteCategory = addResourceToQuoteCategory;
+
+    // ========================================
+    // EVENT SYSTEM SETUP - AUTOMATIC LISTENERS
+    // ========================================
+    console.log('🎯 Setting up Event System listeners...');
+    
+    // PC Number Events - when PC is created/updated/deleted
+    CRM.EventBus.on('pc:created', (pcData) => {
+        console.log('📡 Event: PC created, updating dashboard and lists...', pcData.pc_number);
+        updateDashboard();
+        renderPCList();
+    }, { priority: 10 });
+    
+    CRM.EventBus.on('pc:updated', (pcData) => {
+        console.log('📡 Event: PC updated, refreshing UI...', pcData.pc_number);
+        updateDashboard();
+        renderPCList();
+        // Update any open quote dropdowns that might reference this PC
+        const pcSelect = document.getElementById('quote-pc-id');
+        if (pcSelect) {
+            const selectedId = pcSelect.value;
+            showNewQuoteModal(); // This refreshes the PC dropdown
+            pcSelect.value = selectedId; // Restore selection
+        }
+    }, { priority: 10 });
+    
+    CRM.EventBus.on('pc:deleted', (data) => {
+        console.log('📡 Event: PC deleted, updating lists...', data.id);
+        updateDashboard();
+        renderPCList();
+    }, { priority: 10 });
+    
+    // Quote Events - when quote is created/updated/deleted  
+    CRM.EventBus.on('quote:created', (quoteData) => {
+        console.log('📡 Event: Quote created, updating dashboard...', quoteData.quote_number);
+        updateDashboard();
+        renderQuotesList();
+    });
+    
+    CRM.EventBus.on('quote:updated', (quoteData) => {
+        console.log('📡 Event: Quote updated, refreshing UI...', quoteData.quote_number);
+        updateDashboard();
+        renderQuotesList();
+    });
+    
+    CRM.EventBus.on('quote:deleted', (data) => {
+        console.log('📡 Event: Quote deleted, updating lists...', data.id);
+        updateDashboard();
+        renderQuotesList();
+    });
+    
+    // Activity Events - when activity is created/updated/deleted
+    CRM.EventBus.on('activity:created', (activityData) => {
+        console.log('📡 Event: Activity created, updating dashboard and calendar...', activityData.title);
+        updateDashboard();
+        updateActivitiesList();
+        // Refresh calendar if visible
+        if (currentActivitiesView === 'calendar') {
+            renderCalendar();
+        }
+        // Update notifications for new activities
+        updateNotificationSystem();
+    });
+    
+    CRM.EventBus.on('activity:updated', (activityData) => {
+        console.log('📡 Event: Activity updated, refreshing views...', activityData.title);
+        updateDashboard();
+        updateActivitiesList();
+        if (currentActivitiesView === 'calendar') {
+            renderCalendar();
+        }
+        updateNotificationSystem();
+    });
+    
+    CRM.EventBus.on('activity:deleted', (data) => {
+        console.log('📡 Event: Activity deleted, updating views...', data.id);
+        updateDashboard();
+        updateActivitiesList();
+        if (currentActivitiesView === 'calendar') {
+            renderCalendar();
+        }
+        updateNotificationSystem();
+    });
+    
+    // Resource Events - when resource is created/updated/deleted
+    CRM.EventBus.on('resource:created', (resourceData) => {
+        console.log('📡 Event: Resource created, updating lists...', resourceData.name);
+        renderResourcesList();
+        // Refresh resource allocation if visible
+        if (document.getElementById('resource-allocation').style.display !== 'none') {
+            refreshResourceAllocation();
+        }
+    });
+    
+    CRM.EventBus.on('resource:updated', (resourceData) => {
+        console.log('📡 Event: Resource updated, refreshing views...', resourceData.name);
+        renderResourcesList();
+        if (document.getElementById('resource-allocation').style.display !== 'none') {
+            refreshResourceAllocation();
+        }
+    });
+    
+    CRM.EventBus.on('resource:deleted', (data) => {
+        console.log('📡 Event: Resource deleted, updating lists...', data.id);
+        renderResourcesList();
+        if (document.getElementById('resource-allocation').style.display !== 'none') {
+            refreshResourceAllocation();
+        }
+    });
+    
+    // Global Events - system-wide events
+    CRM.EventBus.on('data:loaded', () => {
+        console.log('📡 Event: Data loaded, updating all UI components...');
+        updateDashboard();
+        renderPCList();
+        renderQuotesList();
+        updateActivitiesList();
+        renderResourcesList();
+        updateNotificationSystem();
+    }, { priority: 5 });
+    
+    // Debug event for monitoring
+    CRM.EventBus.on('*', (data, eventName) => {
+        if (CONFIG.DEBUG?.EVENTS) {
+            console.log(`🔍 Event Debug: ${eventName}`, data);
+        }
+    }, { priority: -10 }); // Low priority, runs last
+    
+    console.log('✅ Event System listeners configured:', CRM.EventBus.getStats());
 
     // Initialize IndexedDB and load data
     console.log('🚀 Starting application initialization...');
