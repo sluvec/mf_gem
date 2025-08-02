@@ -5340,38 +5340,62 @@ async function savePC() {
         updated_at: now
     };
 
-    // Enhanced validation according to system_improvements.md:
+    // 🚀 NEW: Enhanced validation with ErrorHandler
     // Required: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, Contact Name
-    // Contact: minimum phone OR email
     if (!pcData.pc_number || !pcData.company_name || !pcData.project_name || !pcData.account_manager || !pcData.client_industry || !pcData.client_source || !pcData.contact_name) {
-        alert('Required fields: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, and Contact Name!');
+        CRM.ErrorHandler.showUserMessage('validation', 
+            'Required fields: PC Number, Company Name, Project Name, Account Manager, Client Industry, Client Source, and Contact Name',
+            { context: 'PC Creation' }
+        );
         return;
     }
 
+    // Contact validation
     if (!pcData.contact_phone && !pcData.contact_email) {
-        alert('Contact requirement: Please provide either Phone OR Email!');
+        CRM.ErrorHandler.showUserMessage('validation',
+            'Please provide either Phone OR Email for contact information',
+            { context: 'PC Creation' }
+        );
         return;
     }
     
-    // Quote limit validation
+    // Quote limit validation - business rule
     const existingQuotes = db.quotes.filter(q => q.pc_id === (id || 'new')).length;
     if (existingQuotes >= pcData.quote_limit && !id) {
-        alert(`Quote limit (${pcData.quote_limit}) would be exceeded for this PC Number!`);
+        CRM.ErrorHandler.showUserMessage('business',
+            `Quote limit (${pcData.quote_limit}) would be exceeded for this PC Number`,
+            { context: 'PC Creation' }
+        );
         return;
     }
 
-    try {
+        try {
         // 🚀 NEW: Use Data Access Layer instead of manual db manipulation
         const savedPC = id ? 
             await CRM.DataAccess.update('pc', id, pcData) :
             await CRM.DataAccess.save('pc', pcData);
         
-        console.log('✅ PC Number saved successfully:', savedPC.pc_number);
+        // 🚀 NEW: Use ErrorHandler for success messages
+        CRM.ErrorHandler.showSuccess(
+            `PC Number ${savedPC.pc_number} saved successfully!`,
+            'PC Management'
+        );
+        
         showPage('pcnumbers');
     } catch (error) {
-        // 🚀 NEW: Enhanced error handling from DAL
-        console.error('❌ Error saving PC Number:', error);
-        alert(`Error saving PC Number: ${error.message}`);
+        // 🚀 NEW: Enhanced error handling with ErrorHandler
+        // Note: DAL already handles the error, but we can add context-specific handling
+        if (error.message?.includes('required')) {
+            CRM.ErrorHandler.showUserMessage('validation', 
+                'Please fill in all required fields before saving.',
+                { context: 'PC Creation' }
+            );
+        } else {
+            CRM.ErrorHandler.showUserMessage('database',
+                'Unable to save PC Number. Please try again.',
+                { context: 'PC Creation' }
+            );
+        }
     }
 }
 
@@ -5385,10 +5409,10 @@ async function editPC(id) {
             return;
         }
         
-        db.editingPC = pc;
+    db.editingPC = pc;
         
         document.getElementById('pc-form-title').textContent = 'Edit PC Number';
-        document.getElementById('pc-id').value = pc.id;
+    document.getElementById('pc-id').value = pc.id;
         
         // Main data fields
         document.getElementById('pc-number').value = pc.pc_number || '';
@@ -5408,7 +5432,7 @@ async function editPC(id) {
         document.getElementById('pc-contact-email').value = pc.contact_email || '';
         document.getElementById('pc-postcode').value = pc.postcode || '';
         
-        showPage('new-pc');
+    showPage('new-pc');
     } catch (error) {
         // 🚀 NEW: Enhanced error handling from DAL
         console.error('❌ Error loading PC for edit:', error);
@@ -11604,8 +11628,12 @@ const CRM = {
                 }
                 return result;
             } catch (error) {
-                console.error(`❌ Error finding ${entity} by ID:`, error);
-                throw new Error(`Failed to find ${entity}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling
+                await CRM.ErrorHandler.handle(error, `Finding ${entity} by ID`, {
+                    showUser: false, // Don't show user message for data retrieval
+                    category: 'database'
+                });
+                throw error; // Re-throw for caller handling
             }
         },
 
@@ -11623,8 +11651,12 @@ const CRM = {
                 await this.loadEntity(entity);
                 return db[entityStore]?.filter(item => item[field] === value) || [];
             } catch (error) {
-                console.error(`❌ Error finding ${entity} by ${field}:`, error);
-                throw new Error(`Failed to find ${entity} by ${field}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling
+                await CRM.ErrorHandler.handle(error, `Finding ${entity} by ${field}`, {
+                    showUser: false,
+                    category: 'database'
+                });
+                throw error;
             }
         },
 
@@ -11664,8 +11696,14 @@ const CRM = {
                 
                 return enrichedData;
             } catch (error) {
-                console.error(`❌ Error saving ${entity}:`, error);
-                throw new Error(`Failed to save ${entity}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling with user notification
+                await CRM.ErrorHandler.handle(error, `Saving ${entity}`, {
+                    showUser: true, // Show user message for save operations
+                    category: error.message?.includes('required') ? 'validation' : 'database',
+                    retry: true,
+                    retryOperation: () => saveWithRetry(this.getStoreKey(entity), enrichedData || data)
+                });
+                throw error;
             }
         },
 
@@ -11686,8 +11724,12 @@ const CRM = {
                 // Note: save() already emits the 'updated' event
                 return result;
             } catch (error) {
-                console.error(`❌ Error updating ${entity}:`, error);
-                throw new Error(`Failed to update ${entity}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling
+                await CRM.ErrorHandler.handle(error, `Updating ${entity}`, {
+                    showUser: true,
+                    category: 'database'
+                });
+                throw error;
             }
         },
 
@@ -11711,8 +11753,12 @@ const CRM = {
                 
                 return true;
             } catch (error) {
-                console.error(`❌ Error deleting ${entity}:`, error);
-                throw new Error(`Failed to delete ${entity}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling
+                await CRM.ErrorHandler.handle(error, `Deleting ${entity}`, {
+                    showUser: true,
+                    category: 'database'
+                });
+                throw error;
             }
         },
 
@@ -11725,8 +11771,12 @@ const CRM = {
                 }
                 return data || [];
             } catch (error) {
-                console.error(`❌ Error loading ${entity}:`, error);
-                throw new Error(`Failed to load ${entity}: ${error.message}`);
+                // 🚀 NEW: Use centralized error handling
+                await CRM.ErrorHandler.handle(error, `Loading ${entity} data`, {
+                    showUser: false, // Silent for background loading
+                    category: 'database'
+                });
+                throw error;
             }
         },
 
@@ -11968,6 +12018,378 @@ const CRM = {
     },
 
     /**
+     * @namespace CRM.ErrorHandler
+     * @description Centralized error handling system with user-friendly messages and recovery strategies
+     * @example
+     * // Handle errors with context
+     * await CRM.ErrorHandler.handle(error, 'PC Creation', { showUser: true, retry: true });
+     * 
+     * // Show user-friendly messages
+     * CRM.ErrorHandler.showUserMessage('validation', 'PC number is required');
+     * CRM.ErrorHandler.showToast('Data saved successfully!', 'success');
+     * 
+     * // Retry operations with backoff
+     * const result = await CRM.ErrorHandler.retry(() => saveToStore(store, data), 3);
+     */
+    ErrorHandler: {
+        // Error categories with user-friendly messages
+        ERROR_CATEGORIES: {
+            VALIDATION: {
+                type: 'validation',
+                userTitle: 'Input Error',
+                defaultMessage: 'Please check your input and try again.',
+                icon: '⚠️',
+                level: 'warn'
+            },
+            DATABASE: {
+                type: 'database',
+                userTitle: 'Data Error',
+                defaultMessage: 'Unable to save or load data. Please try again.',
+                icon: '💾',
+                level: 'error'
+            },
+            NETWORK: {
+                type: 'network',
+                userTitle: 'Connection Error',
+                defaultMessage: 'Please check your internet connection and try again.',
+                icon: '🌐',
+                level: 'error'
+            },
+            UI: {
+                type: 'ui',
+                userTitle: 'Display Error',
+                defaultMessage: 'Something went wrong with the display. Please refresh the page.',
+                icon: '🖥️',
+                level: 'warn'
+            },
+            BUSINESS: {
+                type: 'business',
+                userTitle: 'Operation Error',
+                defaultMessage: 'This operation cannot be completed due to business rules.',
+                icon: '📋',
+                level: 'info'
+            },
+            SYSTEM: {
+                type: 'system',
+                userTitle: 'System Error',
+                defaultMessage: 'An unexpected error occurred. Please contact support if this continues.',
+                icon: '⚡',
+                level: 'error'
+            }
+        },
+
+        // Toast notification queue
+        _toastQueue: [],
+        _toastContainer: null,
+
+        /**
+         * Main error handling method
+         * @param {Error|string} error - Error object or message
+         * @param {string} context - Context where error occurred (e.g., 'PC Creation', 'Data Loading')
+         * @param {Object} options - Handling options
+         * @param {boolean} options.showUser - Show user-friendly message (default: true)
+         * @param {boolean} options.logError - Log to console (default: true)
+         * @param {string} options.category - Error category override
+         * @param {boolean} options.retry - Enable automatic retry (default: false)
+         * @param {Function} options.retryOperation - Operation to retry
+         * @param {number} options.maxRetries - Maximum retry attempts (default: 3)
+         * @param {boolean} options.emitEvent - Emit error event (default: true)
+         * @returns {Promise<boolean>} Success status after handling
+         */
+        async handle(error, context = 'Unknown Operation', options = {}) {
+            const {
+                showUser = true,
+                logError = true,
+                category = null,
+                retry = false,
+                retryOperation = null,
+                maxRetries = CONFIG.LIMITS.MAX_RETRY_ATTEMPTS,
+                emitEvent = true
+            } = options;
+
+            try {
+                // Categorize error
+                const errorCategory = category ? this.ERROR_CATEGORIES[category.toUpperCase()] : this.categorize(error);
+                
+                // Create standardized error object
+                const standardError = {
+                    originalError: error,
+                    message: error?.message || error?.toString() || 'Unknown error',
+                    context,
+                    category: errorCategory,
+                    timestamp: new Date().toISOString(),
+                    stack: error?.stack
+                };
+
+                // Log error if requested
+                if (logError) {
+                    this.logError(standardError);
+                }
+
+                // Show user message if requested
+                if (showUser) {
+                    this.showUserMessage(errorCategory.type, standardError.message, {
+                        title: `${errorCategory.userTitle} in ${context}`,
+                        context: context
+                    });
+                }
+
+                // Emit error event for monitoring
+                if (emitEvent && typeof CRM.EventBus !== 'undefined') {
+                    await CRM.EventBus.emit('error:occurred', standardError, { continueOnError: true });
+                }
+
+                // Handle retry if requested
+                if (retry && retryOperation && typeof retryOperation === 'function') {
+                    try {
+                        console.log(`🔄 Retrying operation: ${context}`);
+                        const result = await this.retry(retryOperation, maxRetries);
+                        this.showToast(`${context} completed after retry`, 'success');
+                        return true;
+                    } catch (retryError) {
+                        console.error(`❌ Retry failed for ${context}:`, retryError);
+                        this.showUserMessage('system', `${context} failed after ${maxRetries} attempts`, {
+                            title: 'Operation Failed'
+                        });
+                        return false;
+                    }
+                }
+
+                return false;
+            } catch (handlingError) {
+                // Fallback error handling to prevent infinite loops
+                console.error('❌ Error in error handler:', handlingError);
+                console.error('❌ Original error:', error);
+                alert(`System Error: Unable to handle error properly. Context: ${context}`);
+                return false;
+            }
+        },
+
+        /**
+         * Categorize an error based on its properties
+         * @param {Error|string} error - Error to categorize
+         * @returns {Object} Error category configuration
+         */
+        categorize(error) {
+            if (!error) return this.ERROR_CATEGORIES.SYSTEM;
+
+            const errorMsg = (error.message || error.toString()).toLowerCase();
+            
+            // Validation errors
+            if (errorMsg.includes('required') || errorMsg.includes('invalid') || 
+                errorMsg.includes('validation') || errorMsg.includes('format')) {
+                return this.ERROR_CATEGORIES.VALIDATION;
+            }
+            
+            // Database errors
+            if (errorMsg.includes('database') || errorMsg.includes('indexeddb') || 
+                errorMsg.includes('store') || errorMsg.includes('transaction')) {
+                return this.ERROR_CATEGORIES.DATABASE;
+            }
+            
+            // Network errors
+            if (errorMsg.includes('network') || errorMsg.includes('fetch') || 
+                errorMsg.includes('connection') || errorMsg.includes('timeout')) {
+                return this.ERROR_CATEGORIES.NETWORK;
+            }
+            
+            // UI errors
+            if (errorMsg.includes('element') || errorMsg.includes('dom') || 
+                errorMsg.includes('render') || errorMsg.includes('display')) {
+                return this.ERROR_CATEGORIES.UI;
+            }
+            
+            // Business logic errors
+            if (errorMsg.includes('limit') || errorMsg.includes('rule') || 
+                errorMsg.includes('permission') || errorMsg.includes('policy')) {
+                return this.ERROR_CATEGORIES.BUSINESS;
+            }
+            
+            // Default to system error
+            return this.ERROR_CATEGORIES.SYSTEM;
+        },
+
+        /**
+         * Log error with standardized format
+         * @param {Object} errorObj - Standardized error object
+         */
+        logError(errorObj) {
+            const { category, context, message, timestamp } = errorObj;
+            const logMethod = category.level === 'error' ? 'error' : 
+                            category.level === 'warn' ? 'warn' : 'log';
+            
+            console[logMethod](
+                `${category.icon} [${category.type.toUpperCase()}] ${context}: ${message}`,
+                `\n📅 ${timestamp}`,
+                errorObj.originalError
+            );
+            
+            // Enhanced logging for database operations
+            if (CONFIG.DEBUG.DATABASE && category.type === 'database') {
+                console.group(`💾 Database Error Details`);
+                console.log('Context:', context);
+                console.log('Message:', message);
+                console.log('Stack:', errorObj.stack);
+                console.groupEnd();
+            }
+        },
+
+        /**
+         * Show user-friendly message
+         * @param {string} categoryType - Error category type
+         * @param {string} message - Specific message
+         * @param {Object} options - Display options
+         */
+        showUserMessage(categoryType, message = null, options = {}) {
+            const category = this.ERROR_CATEGORIES[categoryType.toUpperCase()] || this.ERROR_CATEGORIES.SYSTEM;
+            const { title = category.userTitle, context = null } = options;
+            
+            const userMessage = message || category.defaultMessage;
+            const fullTitle = context ? `${title} in ${context}` : title;
+            
+            // Use toast for better UX instead of alert
+            this.showToast(`${category.icon} ${fullTitle}: ${userMessage}`, 'error', 5000);
+        },
+
+        /**
+         * Display toast notification
+         * @param {string} message - Message to display
+         * @param {string} type - Toast type: success, error, warning, info
+         * @param {number} duration - Duration in milliseconds (default: 3000)
+         */
+        showToast(message, type = 'info', duration = 3000) {
+            // Create toast container if it doesn't exist
+            if (!this._toastContainer) {
+                this._toastContainer = document.createElement('div');
+                this._toastContainer.id = 'error-toast-container';
+                this._toastContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 10000;
+                    max-width: 400px;
+                `;
+                document.body.appendChild(this._toastContainer);
+            }
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                background: ${this.getToastColor(type)};
+                color: white;
+                padding: 12px 16px;
+                margin-bottom: 8px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease-out;
+                font-size: 14px;
+                line-height: 1.4;
+                max-width: 100%;
+                word-wrap: break-word;
+            `;
+            toast.textContent = message;
+
+            // Add to container
+            this._toastContainer.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            });
+
+            // Auto-remove after duration
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, duration);
+
+            // Add click to dismiss
+            toast.addEventListener('click', () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            });
+        },
+
+        /**
+         * Get color for toast type
+         * @param {string} type - Toast type
+         * @returns {string} CSS color
+         */
+        getToastColor(type) {
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545', 
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+            return colors[type] || colors.info;
+        },
+
+        /**
+         * Retry an operation with exponential backoff
+         * @param {Function} operation - Function to retry
+         * @param {number} maxAttempts - Maximum retry attempts
+         * @param {number} baseDelay - Base delay in milliseconds
+         * @returns {Promise} Result of successful operation
+         */
+        async retry(operation, maxAttempts = CONFIG.LIMITS.MAX_RETRY_ATTEMPTS, baseDelay = CONFIG.LIMITS.RETRY_DELAY_MS) {
+            let lastError;
+            
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    console.log(`🔄 Attempt ${attempt}/${maxAttempts}`);
+                    return await operation();
+                } catch (error) {
+                    lastError = error;
+                    console.warn(`⚠️ Attempt ${attempt} failed:`, error.message);
+                    
+                    if (attempt < maxAttempts) {
+                        const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+                        console.log(`⏳ Waiting ${delay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            
+            throw new Error(`Operation failed after ${maxAttempts} attempts. Last error: ${lastError.message}`);
+        },
+
+        /**
+         * Show success message
+         * @param {string} message - Success message
+         * @param {string} context - Operation context
+         */
+        showSuccess(message, context = null) {
+            const fullMessage = context ? `${context}: ${message}` : message;
+            this.showToast(`✅ ${fullMessage}`, 'success');
+        },
+
+        /**
+         * Show warning message
+         * @param {string} message - Warning message
+         * @param {string} context - Operation context
+         */
+        showWarning(message, context = null) {
+            const fullMessage = context ? `${context}: ${message}` : message;
+            this.showToast(`⚠️ ${fullMessage}`, 'warning');
+        }
+    },
+
+    /**
      * @namespace CRM.Navigation
      * @description Page navigation and UI routing
      */
@@ -12154,6 +12576,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Event System - expose for cross-module communication
     window.EventBus = CRM.EventBus;
+    
+    // Error Handler - expose for centralized error management
+    window.ErrorHandler = CRM.ErrorHandler;
     
     // PC Numbers Module
     window.savePC = CRM.PCNumbers.save;
@@ -12418,6 +12843,21 @@ document.addEventListener('DOMContentLoaded', () => {
         renderResourcesList();
         updateNotificationSystem();
     }, { priority: 5 });
+    
+    // Error Events - centralized error monitoring and reporting
+    CRM.EventBus.on('error:occurred', (errorData) => {
+        console.log('📡 Event: Error occurred, logging to error tracking...', {
+            context: errorData.context,
+            category: errorData.category.type,
+            message: errorData.message
+        });
+        
+        // Future: Send to error tracking service
+        // analytics.trackError(errorData);
+        
+        // Update error dashboard (if exists)
+        // updateErrorDashboard(errorData);
+    });
     
     // Debug event for monitoring
     CRM.EventBus.on('*', (data, eventName) => {
