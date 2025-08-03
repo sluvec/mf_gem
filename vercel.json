@@ -1,20 +1,12 @@
 {
-  "version": 2,
-  "name": "mf-gem-crm",
-  "builds": [
+  "rewrites": [
     {
-      "src": "gem.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/gem.html"
+      "source": "/app",
+      "destination": "/gem.html"
     },
     {
-      "src": "/(css|js|audits_md)/(.*)",
-      "dest": "/$1/$2"
+      "source": "/crm",
+      "destination": "/gem.html"
     }
   ],
   "headers": [

@@ -3,6 +3,14 @@ node_modules/
 .env
 .env.local
 .env.production
+.env.development.local
+.env.test.local
+.env.production.local
 .vercel/
+.vercel
 dist/
 build/
+coverage/
+.nyc_output/
+*.log
+.cache/
