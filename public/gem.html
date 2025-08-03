@@ -114,8 +114,7 @@
                                 </button>
                     </li>
                     
-                    <!-- Row 2: Secondary Navigation -->
-                    <li role="none" class="nav-row-2">
+                    <li role="none" class="nav-row-1">
                         <button 
                             data-show-page="resources" 
                             class="nav-btn"
@@ -123,50 +122,6 @@
                             aria-describedby="resources-desc">
                             <span class="nav-icon">🛠️</span>
                             Resources
-                        </button>
-                    </li>
-                    
-                    <li role="none" class="nav-row-2">
-                                <button 
-                            data-show-page="templates" 
-                            class="nav-btn"
-                                    role="menuitem"
-                            aria-describedby="templates-desc">
-                            <span class="nav-icon">📋</span>
-                            Templates
-                                </button>
-                            </li>
-                    
-                    <li role="none" class="nav-row-2">
-                                <button 
-                            data-show-page="resource-allocation" 
-                            class="nav-btn"
-                                    role="menuitem"
-                                    aria-describedby="resource-allocation-desc">
-                            <span class="nav-icon">📊</span>
-                            Allocation
-                                </button>
-                    </li>
-                    
-                    <li role="none" class="nav-row-2">
-                        <button 
-                            data-show-page="activity-templates" 
-                            class="nav-btn"
-                                    role="menuitem"
-                                    aria-describedby="activity-templates-desc">
-                            <span class="nav-icon">📝</span>
-                                    Activity Templates
-                                </button>
-                    </li>
-                    
-                    <li role="none" class="nav-row-2">
-                        <button 
-                            data-show-page="analytics" 
-                            class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="analytics-desc">
-                            <span class="nav-icon">📈</span>
-                            Analytics
                         </button>
                     </li>
                 </ul>
@@ -255,12 +210,8 @@
         <div id="dashboard-desc">Overview of key metrics and recent activity</div>
         <div id="pc-numbers-desc">Manage project codes and client information</div>
         <div id="quotes-desc">Create and manage quotes for projects</div>
-        <div id="templates-desc">Reusable quote templates</div>
         <div id="activities-desc">Schedule and track project activities</div>
-        <div id="activity-templates-desc">Reusable activity templates</div>
         <div id="resources-desc">Manage equipment, materials and labor resources</div>
-        <div id="resource-allocation-desc">Track resource allocation and availability</div>
-        <div id="analytics-desc">View reports and analytics dashboard</div>
         <div id="pricelists-desc">Manage pricing and rate cards</div>
     </div>
 
@@ -962,134 +913,9 @@
             </div>
         </div>
 
-        <!-- NEW Sprint 3.3: Templates Page -->
-        <div id="templates" class="page">
-            <h1>📄 Quote Templates</h1>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div>
-                    <p style="margin: 0; color: #666;">Manage reusable quote templates to speed up quote creation</p>
-                </div>
-                <div>
-                    <button onclick="window.showCreateTemplateFromScratch()" style="background: #8b5cf6; color: white;">+ Create New Template</button>
-                </div>
-            </div>
-            
-            <!-- Templates Filter & Search -->
-            <div class="card" style="margin-bottom: 1.5rem;">
-                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center;">
-                    <div>
-                        <label>Search Templates</label>
-                        <input type="text" id="template-search" placeholder="Search by name or description..." 
-                               oninput="window.filterTemplates()" style="width: 100%; margin-top: 0.25rem;">
-                    </div>
-                    <div>
-                        <label>Category</label>
-                        <select id="template-category-filter" onchange="window.filterTemplates()" style="margin-top: 0.25rem;">
-                            <option value="">All Categories</option>
-                            <option value="electrical">Electrical</option>
-                            <option value="lighting">Lighting</option>
-                            <option value="maintenance">Maintenance</option>
-                            <option value="installation">Installation</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Status</label>
-                        <select id="template-status-filter" onchange="window.filterTemplates()" style="margin-top: 0.25rem;">
-                            <option value="">All</option>
-                            <option value="active">Active</option>
-                            <option value="archived">Archived</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Templates List -->
-            <div class="card">
-                <h2>Templates Library</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Template Name</th>
-                            <th>Category</th>
-                            <th>Items Count</th>
-                            <th>Est. Value</th>
-                            <th>Last Updated</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="templates-list">
-                        <!-- Dynamic content -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <!-- NEW Sprint 4.1: Activity Templates Page -->
-        <div id="activity-templates" class="page">
-            <h1>📋 Activity Templates</h1>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div>
-                    <p style="margin: 0; color: #666;">Create reusable activity templates to streamline workflow and ensure consistency</p>
-                </div>
-                <div>
-                    <button onclick="window.showCreateActivityTemplate()" style="background: #8b5cf6; color: white;">+ Create Activity Template</button>
-                </div>
-            </div>
-            
-            <!-- Activity Templates Filter & Search -->
-            <div class="card" style="margin-bottom: 1.5rem;">
-                <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; align-items: center;">
-                    <div>
-                        <label>Search Templates</label>
-                        <input type="text" id="activity-template-search" placeholder="Search by name or description..." 
-                               oninput="window.filterActivityTemplates()" style="width: 100%; margin-top: 0.25rem;">
-                    </div>
-                    <div>
-                        <label>Category</label>
-                        <select id="activity-template-category-filter" onchange="window.filterActivityTemplates()" style="margin-top: 0.25rem;">
-                            <option value="">All Categories</option>
-                            <option value="survey">Survey</option>
-                            <option value="installation">Installation</option>
-                            <option value="maintenance">Maintenance</option>
-                            <option value="testing">Testing</option>
-                            <option value="documentation">Documentation</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Status</label>
-                        <select id="activity-template-status-filter" onchange="window.filterActivityTemplates()" style="margin-top: 0.25rem;">
-                            <option value="">All</option>
-                            <option value="active">Active</option>
-                            <option value="archived">Archived</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Activity Templates List -->
-            <div class="card">
-                <h2>Activity Templates Library</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Template Name</th>
-                            <th>Category</th>
-                            <th>Duration</th>
-                            <th>Priority</th>
-                            <th>Last Updated</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activity-templates-list">
-                        <!-- Dynamic content -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+
+
 
         <div id="activities" class="page">
             <h1>📋 Activities</h1>
@@ -1634,260 +1460,13 @@
             </div>
         </div>
 
-        <!-- NEW Sprint 4.3: Resource Allocation Tracking Page -->
-        <div id="resource-allocation" class="page">
-            <h1>🔧 Resource Allocation Tracking</h1>
-            <p>Track and manage allocation of equipment, vehicles, materials, and tools across activities.</p>
-            
-            <!-- Resource Filter Bar -->
-            <div class="resource-filter-bar">
-                <div class="resource-filter-group">
-                    <span class="filter-label">Type:</span>
-                    <button class="resource-type-filter active" onclick="window.filterResourcesByType('all')">All</button>
-                    <button class="resource-type-filter" onclick="window.filterResourcesByType('equipment')">Equipment</button>
-                    <button class="resource-type-filter" onclick="window.filterResourcesByType('vehicle')">Vehicles</button>
-                    <button class="resource-type-filter" onclick="window.filterResourcesByType('material')">Materials</button>
-                    <button class="resource-type-filter" onclick="window.filterResourcesByType('tool')">Tools</button>
-                </div>
-                <div class="resource-filter-group">
-                    <span class="filter-label">Status:</span>
-                    <button class="resource-status-filter active" onclick="window.filterResourcesByStatus('all')">All</button>
-                    <button class="resource-status-filter" onclick="window.filterResourcesByStatus('available')">Available</button>
-                    <button class="resource-status-filter" onclick="window.filterResourcesByStatus('in-use')">In Use</button>
-                    <button class="resource-status-filter" onclick="window.filterResourcesByStatus('maintenance')">Maintenance</button>
-                </div>
-                <div style="flex: 1;"></div>
-                <button onclick="window.showResourceCalendarView()" class="resource-action-btn primary">
-                    📅 Calendar View
-                </button>
-            </div>
 
-            <!-- Resource Allocation Cards -->
-            <div class="resource-allocation-panel">
-                <div class="resource-allocation-header">
-                    <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600;">📋 Resource Overview</h2>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <span id="resource-count" style="font-size: 0.875rem; color: #6b7280;">0 resources</span>
-                        <button onclick="window.refreshResourceAllocation()" class="resource-action-btn">🔄 Refresh</button>
-                    </div>
-                </div>
-                <div id="resource-allocation-grid" class="resource-grid">
-                    <!-- Resource cards will be populated here -->
-                </div>
-            </div>
 
-            <!-- Resource Calendar Timeline View -->
-            <div id="resource-calendar-view" class="resource-calendar-view" style="display: none;">
-                <div class="resource-calendar-header">
-                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600;">📅 Resource Schedule Timeline</h3>
-                    <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <button onclick="window.navigateResourceWeek(-1)" class="resource-action-btn">← Previous</button>
-                        <span id="resource-week-display" style="font-weight: 500;">Current Week</span>
-                        <button onclick="window.navigateResourceWeek(1)" class="resource-action-btn">Next →</button>
-                        <button onclick="window.hideResourceCalendarView()" class="resource-action-btn">✕ Close</button>
-                    </div>
-                </div>
-                <div id="resource-timeline" class="resource-timeline">
-                    <!-- Timeline rows will be populated here -->
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="analytics" class="page">
-        <h1>📊 Analytics & Reporting</h1>
-        
-        <!-- Analytics Summary Card -->
-        <div class="analytics-summary-card">
-            <div class="analytics-summary-title">Project Performance Overview</div>
-            <div class="analytics-summary-subtitle">Real-time insights into your team's performance and project metrics</div>
-            <div class="analytics-summary-stats">
-                <div class="analytics-summary-stat">
-                    <div class="analytics-summary-stat-value" id="summary-total-activities">0</div>
-                    <div class="analytics-summary-stat-label">Total Activities</div>
-                </div>
-                <div class="analytics-summary-stat">
-                    <div class="analytics-summary-stat-value" id="summary-completion-rate">0%</div>
-                    <div class="analytics-summary-stat-label">Completion Rate</div>
-                </div>
-                <div class="analytics-summary-stat">
-                    <div class="analytics-summary-stat-value" id="summary-avg-duration">0h</div>
-                    <div class="analytics-summary-stat-label">Avg Duration</div>
-                </div>
-                <div class="analytics-summary-stat">
-                    <div class="analytics-summary-stat-value" id="summary-team-utilization">0%</div>
-                    <div class="analytics-summary-stat-label">Team Utilization</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Analytics Filters -->
-        <div class="analytics-filters">
-            <div class="analytics-filter-group">
-                <label class="analytics-filter-label">Time Period</label>
-                <select id="analytics-period-filter" class="analytics-filter-select" onchange="window.updateAnalytics()">
-                    <option value="7">Last 7 Days</option>
-                    <option value="30" selected>Last 30 Days</option>
-                    <option value="90">Last 3 Months</option>
-                    <option value="365">Last Year</option>
-                </select>
-            </div>
-            <div class="analytics-filter-group">
-                <label class="analytics-filter-label">Team Member</label>
-                <select id="analytics-team-filter" class="analytics-filter-select" onchange="window.updateAnalytics()">
-                    <option value="">All Team Members</option>
-                    <!-- Options populated by JavaScript -->
-                </select>
-            </div>
-            <div class="analytics-filter-group">
-                <label class="analytics-filter-label">Activity Type</label>
-                <select id="analytics-type-filter" class="analytics-filter-select" onchange="window.updateAnalytics()">
-                    <option value="">All Types</option>
-                    <option value="installation">Installation</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="inspection">Inspection</option>
-                    <option value="consultation">Consultation</option>
-                    <option value="training">Training</option>
-                </select>
-            </div>
-            <div style="margin-left: auto;">
-                <button class="analytics-export-btn" onclick="window.exportAnalyticsReport()">📊 Export Report</button>
-            </div>
-        </div>
 
-        <!-- Analytics Dashboard -->
-        <div class="analytics-dashboard">
-            <!-- Activity Performance Chart -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">📈 Activity Performance</h3>
-                    <div class="analytics-period-selector">
-                        <button class="analytics-period-btn active" onclick="window.setChartPeriod('week', this)">Week</button>
-                        <button class="analytics-period-btn" onclick="window.setChartPeriod('month', this)">Month</button>
-                        <button class="analytics-period-btn" onclick="window.setChartPeriod('quarter', this)">Quarter</button>
-                    </div>
-                </div>
-                <div class="analytics-chart-container">
-                    <div id="activity-performance-chart" class="analytics-chart">
-                        <!-- Chart bars will be generated here -->
-                    </div>
-                </div>
-            </div>
 
-            <!-- Team Performance -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">👥 Team Performance</h3>
-                </div>
-                <div id="team-performance-metrics" class="analytics-metrics-grid">
-                    <!-- Team metrics will be populated here -->
-                </div>
-                <table class="analytics-table">
-                    <thead>
-                        <tr>
-                            <th>Team Member</th>
-                            <th>Activities</th>
-                            <th>Completion Rate</th>
-                            <th>Avg Duration</th>
-                            <th>Performance</th>
-                        </tr>
-                    </thead>
-                    <tbody id="team-performance-table">
-                        <!-- Table rows will be populated here -->
-                    </tbody>
-                </table>
-            </div>
 
-            <!-- Activity Status Distribution -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">📊 Activity Status Distribution</h3>
-                </div>
-                <div class="analytics-donut-chart">
-                    <svg width="200" height="200" class="analytics-donut-svg">
-                        <circle cx="100" cy="100" r="80" stroke="#e5e7eb" stroke-width="20" fill="transparent"/>
-                        <circle id="donut-pending" cx="100" cy="100" r="80" stroke="#6b7280" stroke-width="20" fill="transparent"/>
-                        <circle id="donut-in-progress" cx="100" cy="100" r="80" stroke="#3b82f6" stroke-width="20" fill="transparent"/>
-                        <circle id="donut-completed" cx="100" cy="100" r="80" stroke="#22c55e" stroke-width="20" fill="transparent"/>
-                    </svg>
-                    <div class="analytics-donut-center">
-                        <div class="analytics-donut-center-value" id="donut-total">0</div>
-                        <div class="analytics-donut-center-label">Total</div>
-                    </div>
-                </div>
-                <div class="analytics-legend">
-                    <div class="analytics-legend-item">
-                        <div class="analytics-legend-color" style="background: #6b7280;"></div>
-                        <span id="legend-pending">Pending (0)</span>
-                    </div>
-                    <div class="analytics-legend-item">
-                        <div class="analytics-legend-color" style="background: #3b82f6;"></div>
-                        <span id="legend-in-progress">In Progress (0)</span>
-                    </div>
-                    <div class="analytics-legend-item">
-                        <div class="analytics-legend-color" style="background: #22c55e;"></div>
-                        <span id="legend-completed">Completed (0)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Time Tracking Analytics -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">⏱️ Time Tracking Analytics</h3>
-                </div>
-                <div class="analytics-metrics-grid">
-                    <div class="analytics-metric-card">
-                        <div class="analytics-metric-value" id="total-hours-logged">0</div>
-                        <div class="analytics-metric-label">Hours Logged</div>
-                        <div class="analytics-metric-change neutral" id="hours-change">No change</div>
-                    </div>
-                    <div class="analytics-metric-card">
-                        <div class="analytics-metric-value" id="avg-activity-duration">0h</div>
-                        <div class="analytics-metric-label">Avg Duration</div>
-                        <div class="analytics-metric-change neutral" id="duration-change">No change</div>
-                    </div>
-                    <div class="analytics-metric-card">
-                        <div class="analytics-metric-value" id="overdue-activities">0</div>
-                        <div class="analytics-metric-label">Overdue</div>
-                        <div class="analytics-metric-change negative" id="overdue-change">0 overdue</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Resource Utilization -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">🔧 Resource Utilization</h3>
-                </div>
-                <div id="resource-utilization-list">
-                    <!-- Resource utilization items will be populated here -->
-                </div>
-            </div>
-
-            <!-- Activity Heatmap -->
-            <div class="analytics-card">
-                <div class="analytics-card-header">
-                    <h3 class="analytics-card-title">🗓️ Activity Heatmap (Last 30 Days)</h3>
-                </div>
-                <div id="activity-heatmap" class="analytics-heatmap">
-                    <!-- Heatmap cells will be generated here -->
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">
-                    <span>Less</span>
-                    <div style="display: flex; gap: 2px;">
-                        <div class="analytics-heatmap-cell"></div>
-                        <div class="analytics-heatmap-cell low"></div>
-                        <div class="analytics-heatmap-cell medium"></div>
-                        <div class="analytics-heatmap-cell high"></div>
-                        <div class="analytics-heatmap-cell very-high"></div>
-                    </div>
-                    <span>More</span>
-                </div>
-            </div>
-        </div>
-                </div>
-        </div>
     </main>
 
     <div id="quote-modal" class="modal"><div class="modal-content">

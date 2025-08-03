@@ -229,9 +229,7 @@ class CRMApplication {
                 case 'pricelists':
                     await this.loadPriceListsData();
                     break;
-                case 'analytics':
-                    await this.loadAnalyticsData();
-                    break;
+
                 default:
                     logDebug('No specific loader for page:', pageName);
             }
@@ -924,15 +922,7 @@ class CRMApplication {
         }
     }
     
-    async loadAnalyticsData() { 
-        try {
-            logDebug('Loading analytics data...');
-            // Analytics will be computed from existing data
-            this.renderAnalytics();
-        } catch (error) {
-            logError('Failed to load analytics data:', error);
-        }
-    }
+
     
     /**
      * @description Render resources list

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Resources management module
- * @description Handles resources CRUD operations, allocation tracking, and availability management
+ * @description Handles resources CRUD operations and management
  */
 
 import { db } from './database.js';

@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 3; // Increased to force database upgrade
+        this.version = 4; // Increased after removing templates functionality
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -80,11 +80,7 @@ export class Database {
                     priceListsStore.createIndex('name', 'name', { unique: false });
                 }
 
-                // Templates store
-                if (!db.objectStoreNames.contains('templates')) {
-                    const templatesStore = db.createObjectStore('templates', { keyPath: 'id' });
-                    templatesStore.createIndex('type', 'type', { unique: false });
-                }
+
             };
         });
     }
@@ -276,7 +272,7 @@ export class Database {
         }
 
         const stats = {};
-        const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists', 'templates'];
+        const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists'];
 
         for (const storeName of storeNames) {
             try {
@@ -297,7 +293,7 @@ export class Database {
      */
     async clearAllStores() {
         try {
-            const storeNames = ['pcNumbers', 'activities', 'resources', 'quotes', 'priceLists', 'templates'];
+            const storeNames = ['pcNumbers', 'activities', 'resources', 'quotes', 'priceLists'];
             for (const storeName of storeNames) {
                 await this.clearStore(storeName);
             }
