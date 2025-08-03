@@ -451,6 +451,12 @@ class CRMApplication {
                 quoteForm.addEventListener('submit', this.handleQuoteSubmit.bind(this));
             }
 
+            // Price List form
+            const priceListForm = document.getElementById('pricelist-form');
+            if (priceListForm) {
+                priceListForm.addEventListener('submit', this.handlePriceListSubmit.bind(this));
+            }
+
             // Activity status change listener (show/hide completion section)
             const activityStatus = document.getElementById('activity-status');
             if (activityStatus) {
@@ -1800,6 +1806,73 @@ class CRMApplication {
         event.preventDefault();
         logDebug('Quote form submitted'); 
     }
+    
+    /**
+     * @description Handle price list form submission (edit only)
+     * @param {Event} event - Form submit event
+     */
+    async handlePriceListSubmit(event) {
+        event.preventDefault();
+        
+        try {
+            const priceListId = document.getElementById('pricelist-id').value;
+            if (!priceListId) {
+                uiModals.showToast('No price list ID found', 'error');
+                return;
+            }
+            
+            // Get existing data first
+            const existingData = await db.load('priceLists', priceListId);
+            if (!existingData) {
+                uiModals.showToast('Price list not found', 'error');
+                return;
+            }
+            
+            // Collect updated data from form fields
+            const updatedData = {
+                ...existingData, // Keep existing data including items
+                id: priceListId,
+                name: document.getElementById('pricelist-name').value,
+                category: document.getElementById('pricelist-category').value,
+                region: document.getElementById('pricelist-region').value,
+                currency: document.getElementById('pricelist-currency').value,
+                description: document.getElementById('pricelist-description').value,
+                status: document.getElementById('pricelist-status').value,
+                updatedAt: new Date()
+            };
+            
+            // Handle date fields
+            const validFromInput = document.getElementById('pricelist-valid-from').value;
+            const validUntilInput = document.getElementById('pricelist-valid-until').value;
+            
+            if (validFromInput) {
+                updatedData.validFrom = new Date(validFromInput);
+            }
+            if (validUntilInput) {
+                updatedData.validUntil = new Date(validUntilInput);
+            }
+            
+            // Save to database
+            await db.save('priceLists', updatedData);
+            
+            uiModals.showToast('Price list updated successfully', 'success');
+            uiModals.closeModal('pricelist-modal');
+            
+            // Refresh page data
+            if (this.currentPage === 'pricelists') {
+                await this.loadPriceListsData();
+            }
+            
+            // Also refresh dashboard if that's current page
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
+            }
+
+        } catch (error) {
+            logError('Failed to update price list:', error);
+            uiModals.showToast('Failed to update price list', 'error');
+        }
+    }
 }
 
 // Initialize application when DOM is ready
@@ -1872,6 +1945,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
     window.closeResourceModal = () => uiModals.closeModal('resource-modal');
+    window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
     window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
     
     window.proceedToQuoteBuilder = () => {
@@ -2003,7 +2077,63 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.editQuote = (id) => console.log('Edit quote:', id);
     window.viewQuote = (id) => console.log('View quote:', id);
     window.createPriceList = () => console.log('Create price list');
-    window.editPriceList = (id) => console.log('Edit price list:', id);
+    window.editPriceList = async (id) => {
+        try {
+            logDebug('Opening Price List edit modal for ID:', id);
+            const priceListData = await db.load('priceLists', id);
+            if (!priceListData) {
+                uiModals.showToast('Price List not found', 'error');
+                return;
+            }
+            
+            // Change modal title to Edit mode
+            document.getElementById('pricelist-modal-title').textContent = 'Edit Price List';
+            
+            // Populate modal fields
+            document.getElementById('pricelist-id').value = priceListData.id;
+            document.getElementById('pricelist-name').value = priceListData.name || '';
+            document.getElementById('pricelist-category').value = priceListData.category || '';
+            document.getElementById('pricelist-region').value = priceListData.region || '';
+            document.getElementById('pricelist-currency').value = priceListData.currency || 'GBP';
+            document.getElementById('pricelist-description').value = priceListData.description || '';
+            document.getElementById('pricelist-status').value = priceListData.status || 'active';
+            
+            // Format dates for input fields
+            if (priceListData.validFrom) {
+                const validFromDate = new Date(priceListData.validFrom);
+                document.getElementById('pricelist-valid-from').value = validFromDate.toISOString().split('T')[0];
+            }
+            if (priceListData.validUntil) {
+                const validUntilDate = new Date(priceListData.validUntil);
+                document.getElementById('pricelist-valid-until').value = validUntilDate.toISOString().split('T')[0];
+            }
+            
+            // Display items preview
+            const itemsPreview = document.getElementById('pricelist-items-preview');
+            if (priceListData.items && priceListData.items.length > 0) {
+                itemsPreview.innerHTML = `
+                    <strong>${priceListData.items.length} items in this price list:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem; max-height: 150px; overflow-y: auto;">
+                        ${priceListData.items.map(item => 
+                            `<li style="margin: 0.25rem 0;">
+                                <strong>${item.description}</strong> - £${item.price} ${item.unit}
+                                <span style="color: #6b7280;">(${item.category})</span>
+                            </li>`
+                        ).join('')}
+                    </ul>
+                `;
+            } else {
+                itemsPreview.innerHTML = '<em style="color: #6b7280;">No items in this price list</em>';
+            }
+            
+            // Open modal
+            uiModals.openModal('pricelist-modal');
+            
+        } catch (error) {
+            logError('Failed to open Price List edit modal:', error);
+            uiModals.showToast('Failed to load Price List data', 'error');
+        }
+    };
     window.viewPriceList = (id) => console.log('View price list:', id);
     window.editActivity = async (id) => {
         try {
