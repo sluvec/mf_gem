@@ -8382,12 +8382,18 @@ function renderQuotesList() {
     tbody.innerHTML = '';
     db.quotes.forEach(q => {
         const pc = db.pcs.find(p => p.id === (q.pc_id || q.pcId));
-        const quoteNumber = q.quote_number || q.number;
-        const pcNumber = pc ? (pc.pc_number || pc.number) : q.pc_number || '-';
-        const companyName = pc ? (pc.company_name || pc.company) : q.company_name || '-';
-        const totalCost = q.total_cost || q.total || 0;
+        const quoteNumber  = sanitizeHTML(q.quote_number || q.number);
+        const pcNumber     = sanitizeHTML(pc ? (pc.pc_number || pc.number) : (q.pc_number || '-'));
+        const companyName  = sanitizeHTML(pc ? (pc.company_name || pc.company) : (q.company_name || '-'));
+        const totalCost    = q.total_cost || q.total || 0;
+        const status       = sanitizeHTML(q.status || '-');
+
         tbody.innerHTML += `<tr>
-            <td>${quoteNumber}</td><td>${pcNumber}</td><td>${companyName}</td><td>£${totalCost.toFixed(2)}</td><td>${q.status}</td>
+            <td>${quoteNumber}</td>
+            <td>${pcNumber}</td>
+            <td>${companyName}</td>
+            <td>£${totalCost.toFixed(2)}</td>
+            <td>${status}</td>
             <td><button class="secondary" onclick="alert('Feature under development')">Show</button></td>
         </tr>`;
     });
