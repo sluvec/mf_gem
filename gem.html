@@ -6429,9 +6429,12 @@ async function loadDataFromIndexedDB() {
             activityTemplates: db.activityTemplates.length // NEW Sprint 4.1: Include activity templates in logging
         });
         
+        console.log('🔍 Debug: Checking if demo data initialization needed...');
+        console.log('🔍 Debug: db.pcs.length =', db.pcs.length);
         if (db.pcs.length === 0) {
             console.log('🌱 No data found, initializing with demo data.');
             await initializeWithDemoData();
+            console.log('🔍 Debug: After initializeWithDemoData, db.pcs.length =', db.pcs.length);
         }
         
         // 🚀 NEW: Emit data:loaded event for automatic UI updates
