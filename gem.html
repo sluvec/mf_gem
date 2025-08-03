@@ -13651,15 +13651,20 @@ function updateResourcesList() {
     const tbody = document.getElementById('resources-list');
     tbody.innerHTML = '';
     db.resources.forEach(res => {
-        const netCost = res.net_cost || res.netCost || 0;
-        const status = res.is_active !== false ? 'Active' : 'Inactive';
+        const name        = sanitizeHTML(res.name);
+        const sku         = sanitizeHTML(res.sku || '-');
+        const category    = sanitizeHTML(res.category);
+        const supplier    = sanitizeHTML(res.supplier || '-');
+        const netCost     = res.net_cost || res.netCost || 0;
+        const status      = res.is_active !== false ? 'Active' : 'Inactive';
         const statusClass = res.is_active !== false ? 'success' : 'secondary';
+
         tbody.innerHTML += `<tr>
-            <td>${res.name}</td>
-            <td>${res.sku || '-'}</td>
-            <td>${res.category}</td>
+            <td>${name}</td>
+            <td>${sku}</td>
+            <td>${category}</td>
             <td>£${netCost.toFixed(2)}</td>
-            <td>${res.supplier || '-'}</td>
+            <td>${supplier}</td>
             <td><span class="${statusClass}">${status}</span></td>
             <td><div class="action-btn-group">
                 <button onclick="window.editResource('${res.id}')" class="warning">Edit</button>
