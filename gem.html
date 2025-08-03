@@ -4215,7 +4215,7 @@
             <div id="upcoming-activities-widget" class="upcoming-activities" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600;">📅 Upcoming Activities</h3>
-                    <button onclick="app.showPage('activities')" 
+                    <button data-show-page="activities" 
                             style="background: #3b82f6; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer;">
                         View All
                     </button>
@@ -4226,15 +4226,15 @@
             </div>
             
             <div class="stats">
-                <div class="stat-card clickable" onclick="app.showPage('pcnumbers')">
+                <div class="stat-card clickable" data-show-page="pcnumbers">
                     <h3>PC Numbers</h3>
                     <div class="value" id="stat-pc">0</div>
                 </div>
-                <div class="stat-card clickable" onclick="app.showPage('quotes')">
+                <div class="stat-card clickable" data-show-page="quotes">
                     <h3>Quotes</h3>
                     <div class="value" id="stat-quotes">0</div>
                 </div>
-                <div class="stat-card clickable" onclick="app.showPage('activities')">
+                <div class="stat-card clickable" data-show-page="activities">
                     <h3>Activities</h3>
                     <div class="value" id="stat-activities">0</div>
                 </div>
@@ -4257,7 +4257,7 @@
 
         <div id="pcnumbers" class="page">
             <h1>🔢 PC Numbers</h1>
-            <button onclick="app.showPage('new-pc')">+ New PC Number</button>
+            <button data-show-page="new-pc">+ New PC Number</button>
             <div class="card">
                 <h2>PC Numbers List</h2>
                 <table>
@@ -18581,6 +18581,18 @@ document.addEventListener('DOMContentLoaded', () => {
         saveResource:     window.saveResource,
         saveActivity:     window.saveActivity
     };
+
+    // Delegated click handler: elements with data-show-page
+    document.addEventListener('click', (evt) => {
+        const el = evt.target.closest('[data-show-page]');
+        if (el) {
+            evt.preventDefault();
+            const pageId = el.dataset.showPage;
+            if (pageId) {
+                window.app.showPage(pageId);
+            }
+        }
+    });
 })();
             
         } catch (error) {
