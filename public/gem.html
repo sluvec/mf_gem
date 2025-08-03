@@ -1634,11 +1634,7 @@
                 <!-- Search & Filter Section -->
                 <div style="margin-bottom: 1.5rem; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem;">
                     <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 0.75rem; align-items: center;">
-                        <div>
-                            <label>Search Resources</label>
-                            <input type="text" id="resource-search" placeholder="Search by name, SKU, or description..." 
-                                   oninput="window.filterResources()" style="width: 100%; margin-top: 0.25rem;">
-                        </div>
+
                         <div>
                             <label>Category</label>
                             <select id="resource-category-filter" onchange="window.filterResources()" style="margin-top: 0.25rem;">
@@ -1954,9 +1950,7 @@ Next steps:
         <!-- Resource Search and Filter -->
         <div style="margin-bottom: 1rem;">
             <div style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem;">
-                <input type="text" id="resource-selector-search" placeholder="Search resources..." 
-                       style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
-                       oninput="window.filterActivityResourceSelector()">
+
                 <select id="resource-selector-type-filter" onchange="window.filterActivityResourceSelector()"
                         style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
                     <option value="">All Types</option>
@@ -2000,9 +1994,7 @@ Next steps:
         <!-- Activity Search and Filter -->
         <div style="margin-bottom: 1rem;">
             <div style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem;">
-                <input type="text" id="dependency-selector-search" placeholder="Search activities..." 
-                       style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
-                       oninput="window.filterDependencySelector()">
+
                 <select id="dependency-selector-status-filter" onchange="window.filterDependencySelector()"
                         style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
                     <option value="">All Statuses</option>

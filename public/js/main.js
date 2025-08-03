@@ -1203,6 +1203,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.editActivity = (id) => console.log('Edit activity:', id);
     window.deleteActivity = (id) => console.log('Delete activity:', id);
     
+    // PHASE 2: Search-related placeholder functions (for modal compatibility)
+    window.filterResources = () => logDebug('filterResources: Search functionality removed');
+    window.filterActivityResourceSelector = () => logDebug('filterActivityResourceSelector: Search functionality removed');
+    window.filterDependencySelector = () => logDebug('filterDependencySelector: Search functionality removed');
+    
     // Start the application
     await app.initialize();
 });
