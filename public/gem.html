@@ -127,72 +127,7 @@
                 </ul>
             </div>
                             <div class="nav-right">
-                    <!-- Global Search -->
-                    <div class="global-search-container">
-                        <div class="global-search" id="global-search">
-                            <div class="search-input-wrapper">
-                                <input 
-                                    type="search" 
-                                    id="global-search-input"
-                                    class="global-search-input"
-                                    placeholder="Search PC Numbers, Quotes, Activities..."
-                                    aria-expanded="false"
-                                    aria-controls="search-results"
-                                    aria-label="Search across all CRM data"
-                                    autocomplete="off"
-                                    spellcheck="false">
-                                <button class="search-btn" aria-label="Search" onclick="performGlobalSearch()">
-                                    <span class="search-icon" aria-hidden="true">🔍</span>
-                                </button>
-                                <button class="search-clear" id="search-clear" aria-label="Clear search" onclick="clearGlobalSearch()" hidden>
-                                    <span aria-hidden="true">✕</span>
-                                </button>
-                            </div>
-                            
-                            <div id="search-results" class="search-results" hidden role="listbox" aria-label="Search results">
-                                <div class="search-content">
-                                    <!-- Recent Searches (shown when empty) -->
-                                    <div class="search-section" id="recent-section">
-                                        <h4 class="search-section-title">Recent Searches</h4>
-                                        <ul class="recent-searches" id="recent-searches-list">
-                                            <!-- Populated dynamically -->
-                                        </ul>
-                                    </div>
-                                    
-                                    <!-- Quick Tips (shown when empty) -->
-                                    <div class="search-section" id="tips-section">
-                                        <h4 class="search-section-title">Search Tips</h4>
-                                        <ul class="search-tips">
-                                            <li>💼 <strong>PC Numbers:</strong> "PC-000123" or company name</li>
-                                            <li>💰 <strong>Quotes:</strong> Search by amount, client, or status</li>
-                                            <li>📅 <strong>Activities:</strong> Search by type, date, or description</li>
-                                            <li>🛠️ <strong>Resources:</strong> Search by name, type, or category</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <!-- Search Results (shown during search) -->
-                                    <div class="search-results-container" id="search-results-container" hidden>
-                                        <!-- Results grouped by category -->
-                                    </div>
-                                    
-                                    <!-- No Results -->
-                                    <div class="search-empty" id="search-empty" hidden>
-                                        <div class="empty-icon">🔍</div>
-                                        <h4>No results found</h4>
-                                        <p id="empty-message">Try different keywords or check your spelling</p>
-                                        <div class="search-suggestions">
-                                            <p><strong>Suggestions:</strong></p>
-                                            <ul>
-                                                <li>Use fewer words</li>
-                                                <li>Try broader terms</li>
-                                                <li>Check spelling</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                     
 
                     <button 
