@@ -18563,6 +18563,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             console.log('🎉 Application initialization complete with enhanced UX!');
+
+// ========================================
+// PHASE 2 STEP 1: Minimal global namespace wrapper
+// Creates window.app as single entry-point without removing existing globals yet.
+// This allows future migration away from scattered window.* references.
+(function() {
+    'use strict';
+    window.app = {
+        showPage:         window.showPage,
+        toggleDropdown:   window.toggleDropdown,
+        addLineItem:      window.addLineItem,
+        updateLineQty:    window.updateLineQty,
+        removeLine:       window.removeLine,
+        savePC:           window.savePC,
+        saveQuote:        window.saveQuote,
+        saveResource:     window.saveResource,
+        saveActivity:     window.saveActivity
+    };
+})();
             
         } catch (error) {
             loadingManager.hide('app-init');
