@@ -481,44 +481,57 @@ class CRMApplication {
         event.preventDefault();
         
         try {
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-
-            // Validation rules
-            const rules = {
-                pcNumber: { required: true, minLength: 3 },
-                projectTitle: { required: true, minLength: 5 },
-                projectDescription: { required: true, minLength: 10 }
+            // Collect data directly from form elements using IDs
+            const pcNumberData = {
+                pcNumber: document.getElementById('pc-number').value,
+                projectTitle: document.getElementById('pc-project-name').value,
+                projectDescription: document.getElementById('pc-project-description').value,
+                clientName: document.getElementById('pc-company-name').value,
+                contactName: document.getElementById('pc-contact-name').value,
+                contactEmail: document.getElementById('pc-contact-email').value,
+                contactPhone: document.getElementById('pc-contact-phone').value,
+                accountManager: document.getElementById('pc-account-manager').value,
+                industry: document.getElementById('pc-client-industry').value,
+                source: document.getElementById('pc-client-source').value,
+                budgetRange: document.getElementById('pc-quote-limit').value,
+                postcode: document.getElementById('pc-postcode').value,
+                status: document.getElementById('pc-status').value || 'draft',
+                createdAt: new Date(),
+                updatedAt: new Date()
             };
 
-            const validation = validateFormData(data, rules);
-            if (!validation.isValid) {
-                this.showValidationErrors(event.target, validation.errors);
+            // Basic validation
+            if (!pcNumberData.pcNumber || !pcNumberData.projectTitle || !pcNumberData.clientName || !pcNumberData.contactName || !pcNumberData.accountManager) {
+                uiModals.showToast('Please fill in all required fields', 'error');
                 return;
             }
 
-            // Save PC Number
-            const pcNumberData = {
-                pcNumber: data.pcNumber,
-                projectTitle: data.projectTitle,
-                projectDescription: data.projectDescription,
-                clientName: data.clientName || '',
-                clientEmail: data.clientEmail || '',
-                clientPhone: data.clientPhone || '',
-                address: data.address || '',
-                estimatedValue: parseFloat(data.estimatedValue) || 0,
-                status: 'draft',
-                createdAt: new Date()
-            };
+            // Validate PC Number format
+            const pcNumberPattern = /^PC-\d{6}$/;
+            if (!pcNumberPattern.test(pcNumberData.pcNumber)) {
+                uiModals.showToast('PC Number must be in format PC-000001', 'error');
+                return;
+            }
 
-            const id = await db.save('pcNumbers', pcNumberData);
+            // Validate contact information (at least phone or email)
+            if (!pcNumberData.contactPhone && !pcNumberData.contactEmail) {
+                uiModals.showToast('Please provide at least phone or email for contact', 'error');
+                return;
+            }
+
+            const savedPcNumber = await db.save('pcNumbers', { ...pcNumberData, id: generateId() });
             
-            uiModals.closeModal(MODAL_TYPES.PC_NUMBER);
             uiModals.showToast('PC Number created successfully', 'success');
             
+            // Navigate back to PC Numbers list
+            this.navigateToPage('pc-numbers');
+            
             // Refresh page data
-            if (this.currentPage === 'pcnumbers') {
-                await this.loadPcNumbersData();
+            await this.loadPcNumbersData();
+            
+            // Also refresh dashboard if needed
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
             }
 
         } catch (error) {

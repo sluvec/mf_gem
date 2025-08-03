@@ -207,347 +207,148 @@
         <div id="new-pc" class="page">
             <h1 id="pc-form-title">New PC Number</h1>
             
-            <!-- Progressive Form Wizard -->
-            <div class="form-wizard" id="pc-wizard">
-                <input type="hidden" id="pc-id">
-                
-                <!-- Progress Header -->
-                <div class="wizard-progress">
-                    <h2>Create PC Number</h2>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-track">
-                            <div class="progress-bar-fill" id="wizard-progress-bar" style="width: 33%"></div>
-                        </div>
-                    </div>
-                    <ol class="wizard-steps">
-                        <li class="wizard-step active" id="step-1-indicator">
-                            <div class="step-indicator">1</div>
-                            <span class="step-label">Basic Info</span>
-                        </li>
-                        <li class="wizard-step" id="step-2-indicator">
-                            <div class="step-indicator">2</div>
-                            <span class="step-label">Client Details</span>
-                        </li>
-                        <li class="wizard-step" id="step-3-indicator">
-                            <div class="step-indicator">3</div>
-                            <span class="step-label">Contact Info</span>
-                        </li>
-                    </ol>
-                </div>
-                
-                <!-- Wizard Content -->
-                <div class="wizard-content">
-                    <!-- Step 1: Basic Information -->
-                    <div class="step-panel active" id="step-1" data-step="1">
-                        <div class="step-header">
-                            <h3 class="step-title">Let's start with basic project information</h3>
-                            <p class="step-description">
-                                This information helps us organize and track your project effectively.
-                            </p>
-                        </div>
-                        
-                        <div class="wizard-form-grid">
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-number">
-                                    PC Number 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-number" 
-                                    class="wizard-field-input"
-                                    placeholder="PC-000001"
-                                    pattern="^PC-\d{6}$"
-                                    required
-                                    data-validate="pc-number">
-                                <div class="field-help">Format: PC- followed by 6 digits (e.g., PC-000001)</div>
-                                <div class="field-error" id="pc-number-error" hidden></div>
-                                <div class="field-success" id="pc-number-success" hidden>✓ Valid PC Number format</div>
+            <!-- Simple Single-Page Form -->
+            <div style="max-width: 800px; margin: 0 auto;">
+                <form id="pc-form">
+                    <input type="hidden" id="pc-id">
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3>Basic Information</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label>PC Number *</label>
+                                <input type="text" id="pc-number" required placeholder="PC-000001" pattern="^PC-\d{6}$">
+                                <small>Format: PC- followed by 6 digits (e.g., PC-000001)</small>
                             </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-company-name">
-                                    Company Name 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-company-name" 
-                                    class="wizard-field-input"
-                                    placeholder="Enter company name"
-                                    required
-                                    data-validate="required">
-                                <div class="field-help">The official company name for this project</div>
-                                <div class="field-error" id="pc-company-name-error" hidden></div>
-                                <div class="field-success" id="pc-company-name-success" hidden>✓ Company name entered</div>
-                            </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-project-name">
-                                    Project Name 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-project-name" 
-                                    class="wizard-field-input"
-                                    placeholder="Enter project name"
-                                    required
-                                    data-validate="required">
-                                <div class="field-help">A descriptive name for the project</div>
-                                <div class="field-error" id="pc-project-name-error" hidden></div>
-                                <div class="field-success" id="pc-project-name-success" hidden>✓ Project name entered</div>
+                            <div>
+                                <label>Status *</label>
+                                <select id="pc-status" required>
+                                    <option value="">Select status...</option>
+                                    <option value="draft" selected>Draft</option>
+                                    <option value="active">Active</option>
+                                    <option value="quoted">Quoted</option>
+                                    <option value="won">Won</option>
+                                    <option value="lost">Lost</option>
+                                    <option value="on-hold">On Hold</option>
+                                </select>
                             </div>
                         </div>
                         
-                        <div class="wizard-actions">
-                            <div class="wizard-actions-left">
-                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
-                                    💾 Save Draft
-                                </button>
-                                <div class="draft-indicator" id="draft-status" hidden>
-                                    ⏳ Saving draft...
-                                </div>
+                        <div class="form-grid">
+                            <div>
+                                <label>Company Name *</label>
+                                <input type="text" id="pc-company-name" required placeholder="Enter company name">
                             </div>
-                            <div class="wizard-actions-right">
-                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="cancelWizard()">
-                                    Cancel
-                                </button>
-                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-1-next" onclick="nextWizardStep()" disabled>
-                                    Next: Client Details →
-                                </button>
+                            <div>
+                                <label>Project Name *</label>
+                                <input type="text" id="pc-project-name" required placeholder="Enter project name">
                             </div>
+                        </div>
+
+                        <div>
+                            <label>Project Description</label>
+                            <textarea id="pc-project-description" rows="3" placeholder="Describe the project requirements, scope, and any special considerations..."></textarea>
                         </div>
                     </div>
                     
-                    <!-- Step 2: Client Details -->
-                    <div class="step-panel" id="step-2" data-step="2">
-                        <div class="step-header">
-                            <h3 class="step-title">Tell us about your client</h3>
-                            <p class="step-description">
-                                Client information helps us provide better service and track project sources.
-                            </p>
-                        </div>
-                        
-                        <div class="wizard-form-grid">
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-account-manager">
-                                    Account Manager 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-account-manager" 
-                                    class="wizard-field-input"
-                                    placeholder="Account manager name"
-                                    required
-                                    data-validate="required">
-                                <div class="field-help">Person responsible for this account</div>
-                                <div class="field-error" id="pc-account-manager-error" hidden></div>
-                                <div class="field-success" id="pc-account-manager-success" hidden>✓ Account manager assigned</div>
+                    <!-- Client Details -->
+                    <div class="form-section">
+                        <h3>Client Details</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label>Account Manager *</label>
+                                <input type="text" id="pc-account-manager" required placeholder="Account manager name">
                             </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-client-industry">
-                                    Client Industry 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <select 
-                                    id="pc-client-industry" 
-                                    class="wizard-field-input"
-                                    required
-                                    data-validate="required">
+                            <div>
+                                <label>Industry/Sector</label>
+                                <select id="pc-client-industry">
                                     <option value="">Select industry...</option>
-                                    <option value="Media">Media</option>
-                                    <option value="Education">Education</option>
-                                    <option value="Healthcare">Healthcare</option>
-                                    <option value="Finance">Finance</option>
-                                    <option value="Government">Government</option>
                                     <option value="Technology">Technology</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Financial Services">Financial Services</option>
                                     <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Professional Services">Professional Services</option>
+                                    <option value="Construction">Construction</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Media & Creative">Media & Creative</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Government">Government</option>
+                                    <option value="Non-profit">Non-profit</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                <div class="field-help">Primary industry sector of the client</div>
-                                <div class="field-error" id="pc-client-industry-error" hidden></div>
-                                <div class="field-success" id="pc-client-industry-success" hidden>✓ Industry selected</div>
                             </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-client-source">
-                                    Client Source 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <select 
-                                    id="pc-client-source" 
-                                    class="wizard-field-input"
-                                    required
-                                    data-validate="required">
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div>
+                                <label>How did they find us?</label>
+                                <select id="pc-client-source">
                                     <option value="">Select source...</option>
-                                    <option value="Web Enquiry">Web Enquiry</option>
-                                    <option value="Business Development">Business Development</option>
-                                    <option value="Existing Customer">Existing Customer</option>
-                                    <option value="Cross Referral">Cross Referral</option>
-                                    <option value="Internal (CWS/Crown)">Internal (CWS/Crown)</option>
+                                    <option value="Existing client referral">Existing client referral</option>
+                                    <option value="Personal network">Personal network</option>
+                                    <option value="Website/Online">Website/Online</option>
+                                    <option value="Trade directory">Trade directory</option>
+                                    <option value="Cold outreach">Cold outreach</option>
+                                    <option value="Trade show/Event">Trade show/Event</option>
+                                    <option value="Repeat business">Repeat business</option>
+                                    <option value="Google/Search">Google/Search</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Other">Other</option>
                                 </select>
-                                <div class="field-help">How did this client find us?</div>
-                                <div class="field-error" id="pc-client-source-error" hidden></div>
-                                <div class="field-success" id="pc-client-source-success" hidden>✓ Source recorded</div>
                             </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-quote-limit">
-                                    Quote Limit
-                                </label>
-                                <input 
-                                    type="number" 
-                                    id="pc-quote-limit" 
-                                    class="wizard-field-input"
-                                    min="1" 
-                                    max="20" 
-                                    value="5"
-                                    placeholder="5"
-                                    data-validate="number">
-                                <div class="field-help">Maximum number of quotes for this project (1-20)</div>
-                                <div class="field-error" id="pc-quote-limit-error" hidden></div>
-                            </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-status">
-                                    Project Status
-                                </label>
-                                <select id="pc-status" class="wizard-field-input">
-                                    <option value="active">Active</option>
-                                    <option value="completed">Completed</option>
-                                    <option value="cancelled">Cancelled</option>
+                            <div>
+                                <label>Budget Range (£)</label>
+                                <select id="pc-quote-limit">
+                                    <option value="">Select budget range...</option>
+                                    <option value="Under £5,000">Under £5,000</option>
+                                    <option value="£5,000 - £15,000">£5,000 - £15,000</option>
+                                    <option value="£15,000 - £30,000">£15,000 - £30,000</option>
+                                    <option value="£30,000 - £50,000">£30,000 - £50,000</option>
+                                    <option value="£50,000 - £100,000">£50,000 - £100,000</option>
+                                    <option value="Over £100,000">Over £100,000</option>
+                                    <option value="To be determined">To be determined</option>
                                 </select>
-                                <div class="field-help">Current status of the project</div>
-                            </div>
-                        </div>
-                        
-                        <div class="wizard-field-group">
-                            <label class="wizard-field-label" for="pc-project-description">
-                                Project Description
-                            </label>
-                            <textarea 
-                                id="pc-project-description" 
-                                class="wizard-field-input"
-                                rows="4" 
-                                placeholder="Detailed project description..."
-                                style="resize: vertical; min-height: 120px;"></textarea>
-                            <div class="field-help">Detailed description of the project requirements and scope</div>
-                        </div>
-                        
-                        <div class="wizard-actions">
-                            <div class="wizard-actions-left">
-                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
-                                    💾 Save Draft
-                                </button>
-                            </div>
-                            <div class="wizard-actions-right">
-                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="prevWizardStep()">
-                                    ← Back
-                                </button>
-                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-2-next" onclick="nextWizardStep()" disabled>
-                                    Next: Contact Info →
-                                </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Step 3: Contact Information -->
-                    <div class="step-panel" id="step-3" data-step="3">
-                        <div class="step-header">
-                            <h3 class="step-title">Primary contact information</h3>
-                            <p class="step-description">
-                                We need at least a contact name and either phone or email to reach your client.
-                            </p>
-                        </div>
-                        
-                        <div class="wizard-form-grid">
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-contact-name">
-                                    Contact Name 
-                                    <span class="field-required">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-contact-name" 
-                                    class="wizard-field-input"
-                                    placeholder="Primary contact person"
-                                    required
-                                    data-validate="required">
-                                <div class="field-help">Name of the main contact person for this project</div>
-                                <div class="field-error" id="pc-contact-name-error" hidden></div>
-                                <div class="field-success" id="pc-contact-name-success" hidden>✓ Contact name entered</div>
+                    <!-- Contact Information -->
+                    <div class="form-section">
+                        <h3>Contact Information</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label>Contact Name *</label>
+                                <input type="text" id="pc-contact-name" required placeholder="Primary contact person">
                             </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-contact-phone">
-                                    Phone Number
-                                </label>
-                                <input 
-                                    type="tel" 
-                                    id="pc-contact-phone" 
-                                    class="wizard-field-input"
-                                    placeholder="Phone number"
-                                    data-validate="phone">
-                                <div class="field-help">Contact phone number (mobile or landline)</div>
-                                <div class="field-error" id="pc-contact-phone-error" hidden></div>
-                                <div class="field-success" id="pc-contact-phone-success" hidden>✓ Valid phone number</div>
-                            </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-contact-email">
-                                    Email Address
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="pc-contact-email" 
-                                    class="wizard-field-input"
-                                    placeholder="email@address.com"
-                                    data-validate="email">
-                                <div class="field-help">Contact email address</div>
-                                <div class="field-error" id="pc-contact-email-error" hidden></div>
-                                <div class="field-success" id="pc-contact-email-success" hidden>✓ Valid email address</div>
-                            </div>
-                            
-                            <div class="wizard-field-group">
-                                <label class="wizard-field-label" for="pc-postcode">
-                                    Postcode
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="pc-postcode" 
-                                    class="wizard-field-input"
-                                    placeholder="e.g. SW1A 1AA"
-                                    data-validate="postcode">
-                                <div class="field-help">UK postcode (optional)</div>
-                                <div class="field-error" id="pc-postcode-error" hidden></div>
-                                <div class="field-success" id="pc-postcode-success" hidden>✓ Valid postcode</div>
+                            <div>
+                                <label>Phone Number</label>
+                                <input type="tel" id="pc-contact-phone" placeholder="+44 20 7123 4567">
                             </div>
                         </div>
                         
-                        <div class="field-note" style="margin-top: var(--space-4); padding: var(--space-3); background: var(--warning-50); border: 1px solid var(--warning-200); border-radius: var(--radius-md);">
-                            📞 <strong>Contact Requirement:</strong> Please provide at least phone OR email for the contact person.
+                        <div class="form-grid">
+                            <div>
+                                <label>Email Address</label>
+                                <input type="email" id="pc-contact-email" placeholder="email@address.com">
+                            </div>
+                            <div>
+                                <label>Postcode</label>
+                                <input type="text" id="pc-postcode" placeholder="e.g. SW1A 1AA">
+                            </div>
                         </div>
                         
-                        <div class="wizard-actions">
-                            <div class="wizard-actions-left">
-                                <button type="button" class="wizard-btn wizard-btn-ghost" onclick="saveDraft()">
-                                    💾 Save Draft
-                                </button>
-                            </div>
-                            <div class="wizard-actions-right">
-                                <button type="button" class="wizard-btn wizard-btn-secondary" onclick="prevWizardStep()">
-                                    ← Back
-                                </button>
-                                <button type="button" class="wizard-btn wizard-btn-primary" id="step-3-save" onclick="saveWizardPC()" disabled>
-                                    ✓ Create PC Number
-                                </button>
-                            </div>
+                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
+                            📞 <strong>Note:</strong> Please provide at least phone OR email for the contact person.
                         </div>
                     </div>
-                </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions" style="margin-top: 2rem;">
+                        <button type="submit">✓ Create PC Number</button>
+                        <button type="button" onclick="window.showPage('pc-numbers')" class="secondary">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
 
