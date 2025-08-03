@@ -4638,7 +4638,7 @@
                     <button onclick="window.editPC(db.currentPC.id)" class="warning">Edit</button>
                     <button onclick="window.createQuote()">Create Quote</button>
                     <button onclick="window.showActivityModal()">Add Activity</button>
-                    <button onclick="app.showPage('pcnumbers')" class="secondary">Back to list</button>
+                    <button data-show-page="pcnumbers" class="secondary">Back to list</button>
                 </div>
             </div>
             
@@ -5497,7 +5497,7 @@
 
         <div id="pricelists" class="page">
              <h1>🏷️ Price Lists</h1>
-            <button onclick="app.showPage('new-pricelist')">+ New Price List</button>
+            <button data-show-page="new-pricelist">+ New Price List</button>
             <div class="card">
                 <h2>Available Price Lists</h2>
                 <table>
@@ -5563,7 +5563,7 @@
                 
                 <div class="form-actions">
                     <button onclick="window.createPriceList()">Create Price List</button>
-                    <button onclick="app.showPage('pricelists')" class="secondary">Cancel</button>
+                    <button data-show-page="pricelists" class="secondary">Cancel</button>
                 </div>
             </div>
         </div>
@@ -5572,7 +5572,7 @@
             <h1 id="pricelist-title">Price List Details</h1>
              <div class="card">
                 <button onclick="window.showAddResourceToPriceList()">+ Add Item to Price List</button>
-                <button onclick="app.showPage('pricelists')" class="secondary">Back to list</button>
+                <button data-show-page="pricelists" class="secondary">Back to list</button>
             </div>
             <div class="card">
                 <h2>Price List Items</h2>
