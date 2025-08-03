@@ -8993,11 +8993,16 @@ function saveQuoteAsTemplate() {
         <div style="margin-bottom: 1rem;">
             <strong>${templateItems.length} items</strong> - Estimated value: <strong>£${totalWithVat.toFixed(2)}</strong> (inc VAT)
         </div>
-        ${templateItems.slice(0, 3).map(item => `
+        ${templateItems.slice(0, 3).map(item => {
+            const safeResourceName = sanitizeHTML(item.resource_name);
+            const safeQuantity = sanitizeHTML(String(item.quantity));
+            const safeLineTotal = (item.line_total || 0).toFixed(2);
+            return `
             <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 0.25rem;">
-                <span style="font-weight: 500;">${item.resource_name}</span> x${item.quantity} = £${item.line_total.toFixed(2)}
+                <span style="font-weight: 500;">${safeResourceName}</span> x${safeQuantity} = £${safeLineTotal}
             </div>
-        `).join('')}
+            `;
+        }).join('')}
         ${templateItems.length > 3 ? `<div style="color: #666; font-style: italic;">... and ${templateItems.length - 3} more items</div>` : ''}
     `;
     
@@ -9123,11 +9128,16 @@ function editTemplate(templateId) {
         <div style="margin-bottom: 1rem;">
             <strong>${items.length} items</strong> - Estimated value: <strong>£${template.estimated_value.toFixed(2)}</strong> (inc VAT)
         </div>
-        ${items.slice(0, 5).map(item => `
+        ${items.slice(0, 5).map(item => {
+            const safeResourceName = sanitizeHTML(item.resource_name);
+            const safeQuantity = sanitizeHTML(String(item.quantity));
+            const safeLineTotal = (item.line_total || 0).toFixed(2);
+            return `
             <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 0.25rem;">
-                <span style="font-weight: 500;">${item.resource_name}</span> x${item.quantity} = £${item.line_total.toFixed(2)}
+                <span style="font-weight: 500;">${safeResourceName}</span> x${safeQuantity} = £${safeLineTotal}
             </div>
-        `).join('')}
+            `;
+        }).join('')}
         ${items.length > 5 ? `<div style="color: #666; font-style: italic;">... and ${items.length - 5} more items</div>` : ''}
     `;
     
@@ -11999,24 +12009,31 @@ function renderResourceTimeline() {
             </div>
         </div>
         
-        ${resources.map(resource => `
+        ${resources.map(resource => {
+            const safeResourceName = sanitizeHTML(resource.name);
+            const safeResourceId = sanitizeHTML(String(resource.id));
+            return `
             <div class="timeline-row">
-                <div class="timeline-resource">${resource.name}</div>
+                <div class="timeline-resource">${safeResourceName}</div>
                 <div class="timeline-slots">
                     ${days.map(day => {
                         const dayStr = day.toISOString().split('T')[0];
                         const availability = getResourceAvailabilityForDay(resource, dayStr);
+                        const safeTooltip = sanitizeHTML(availability.tooltip);
+                        const safeLabel = sanitizeHTML(availability.label);
+                        const safeStatus = sanitizeHTML(availability.status);
                         return `
-                            <div class="timeline-day ${availability.status}" 
-                                 onclick="window.viewResourceDayDetails('${resource.id}', '${dayStr}')"
-                                 title="${availability.tooltip}">
-                                ${availability.label}
+                            <div class="timeline-day ${safeStatus}" 
+                                 onclick="window.viewResourceDayDetails('${safeResourceId}', '${dayStr}')"
+                                 title="${safeTooltip}">
+                                ${safeLabel}
                             </div>
                         `;
                     }).join('')}
                 </div>
             </div>
-        `).join('')}
+            `;
+        }).join('')}
     `;
 }
 
