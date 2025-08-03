@@ -7826,7 +7826,7 @@ async function editPC(id) {
     } catch (error) {
         // 🚀 NEW: Enhanced error handling from DAL
         console.error('❌ Error loading PC for edit:', error);
-        alert(`Error loading PC: ${error.message}`);
+        alert(`Error loading PC: ${sanitizeHTML(error.message || 'Unknown error')}`);
     }
 }
 
@@ -9099,7 +9099,7 @@ function saveTemplate() {
     
     // Save to IndexedDB
     saveDataToIndexedDB().then(() => {
-        alert(`Template "${name}" saved successfully!`);
+        alert(`Template "${sanitizeHTML(name)}" saved successfully!`);
         closeTemplateModal();
         updateTemplatesList();
     }).catch(error => {
@@ -9154,7 +9154,7 @@ function deleteTemplate(templateId) {
     const template = db.templates.find(t => t.id === templateId);
     if (!template) return;
     
-    if (!confirm(`Are you sure you want to delete template "${template.name}"?`)) {
+    if (!confirm(`Are you sure you want to delete template "${sanitizeHTML(template.name)}"?`)) {
         return;
     }
     
@@ -9178,7 +9178,7 @@ function createQuoteFromTemplate(templateId) {
         return;
     }
     
-    if (!confirm(`Create a new quote using template "${template.name}"?`)) {
+    if (!confirm(`Create a new quote using template "${sanitizeHTML(template.name)}"?`)) {
         return;
     }
     
@@ -9204,7 +9204,7 @@ function createQuoteFromTemplate(templateId) {
         // Recalculate totals
         calculateTotal();
         
-        alert(`Quote created from template "${template.name}"! Please review and modify as needed.`);
+        alert(`Quote created from template "${sanitizeHTML(template.name)}"! Please review and modify as needed.`);
     }, 500);
 }
 
@@ -9358,7 +9358,7 @@ function saveActivityTemplate() {
     
     // Save to IndexedDB
     saveDataToIndexedDB().then(() => {
-        alert(`Activity template "${name}" saved successfully!`);
+        alert(`Activity template "${sanitizeHTML(name)}" saved successfully!`);
         closeActivityTemplateModal();
         updateActivityTemplatesList();
     }).catch(error => {
@@ -9394,7 +9394,7 @@ function deleteActivityTemplate(templateId) {
     const template = db.activityTemplates.find(t => t.id === templateId);
     if (!template) return;
     
-    if (!confirm(`Are you sure you want to delete activity template "${template.name}"?`)) {
+    if (!confirm(`Are you sure you want to delete activity template "${sanitizeHTML(template.name)}"?`)) {
         return;
     }
     
@@ -9418,7 +9418,7 @@ function createActivityFromTemplate(templateId) {
         return;
     }
     
-    if (!confirm(`Create a new activity using template "${template.name}"?`)) {
+    if (!confirm(`Create a new activity using template "${sanitizeHTML(template.name)}"?`)) {
         return;
     }
     
@@ -9452,7 +9452,7 @@ function createActivityFromTemplate(templateId) {
             document.getElementById('activity-description').value = newDesc;
         }
         
-        alert(`Activity created from template "${template.name}"! Please review and save.`);
+        alert(`Activity created from template "${sanitizeHTML(template.name)}"! Please review and save.`);
     }, 500);
 }
 
@@ -12074,8 +12074,10 @@ function viewResourceDayDetails(resourceId, dateStr) {
     ) || [];
     
     if (resource && dayActivities.length > 0) {
-        const activityList = dayActivities.map(a => `• ${a.title} (${a.pc_number})`).join('\n');
-        alert(`${resource.name} - ${new Date(dateStr).toLocaleDateString()}\n\nScheduled activities:\n${activityList}`);
+        const activityList = dayActivities.map(a => `• ${sanitizeHTML(a.title)} (${sanitizeHTML(a.pc_number)})`).join('\n');
+        const safeResourceName = sanitizeHTML(resource.name);
+        const safeDate = sanitizeHTML(new Date(dateStr).toLocaleDateString());
+        alert(`${safeResourceName} - ${safeDate}\n\nScheduled activities:\n${activityList}`);
     }
 }
 
@@ -12992,7 +12994,10 @@ function editDependency(dependencyId) {
     // For now, just show info about the dependency
     const dependency = activityDependencies.find(dep => dep.id === dependencyId);
     if (dependency) {
-        alert(`Dependency: ${dependency.activity_title}\nType: ${dependency.type}\nRelationship: ${dependency.relationship}`);
+        const safeTitle = sanitizeHTML(dependency.activity_title);
+        const safeType = sanitizeHTML(dependency.type);
+        const safeRelationship = sanitizeHTML(dependency.relationship);
+        alert(`Dependency: ${safeTitle}\nType: ${safeType}\nRelationship: ${safeRelationship}`);
     }
 }
 
