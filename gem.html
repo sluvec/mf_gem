@@ -294,12 +294,13 @@
         
         /* Grid Navigation Layout */
         .nav-grid {
-            display: grid;
+            display: grid !important;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: auto auto;
             gap: var(--space-xs);
             width: 100%;
             max-width: 800px;
+            align-items: stretch;
         }
         
         .nav-grid .nav-row-1 {
@@ -308,6 +309,16 @@
         
         .nav-grid .nav-row-2 {
             grid-row: 2;
+        }
+        
+        .nav-grid li {
+            width: 100%;
+            display: flex;
+        }
+        
+        .nav-grid .nav-btn {
+            width: 100%;
+            justify-content: center;
         }
         
         /* Mobile Grid Navigation */
