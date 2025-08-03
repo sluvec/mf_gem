@@ -62,7 +62,9 @@ class CRMApplication {
             this.updateProgress(100, 'Complete!');
             
             // Small delay to show 100% before hiding
+            logDebug('Setting timeout to hide loading overlay in 500ms...');
             setTimeout(() => {
+                logDebug('Timeout triggered, hiding loading overlay now');
                 this.hideLoadingOverlay();
             }, 500);
             
@@ -580,8 +582,14 @@ class CRMApplication {
      */
     hideLoadingOverlay() {
         try {
-            if (this.loadingOverlay) {
-                this.loadingOverlay.classList.remove('active');
+            logDebug('Attempting to hide loading overlay...');
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                logDebug('Loading overlay found, removing active class');
+                overlay.classList.remove('active');
+                logDebug('Loading overlay hidden successfully');
+            } else {
+                logError('Loading overlay element not found');
             }
         } catch (error) {
             logError('Failed to hide loading overlay:', error);
