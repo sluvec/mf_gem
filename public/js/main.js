@@ -761,31 +761,103 @@ class CRMApplication {
         try {
             logInfo('Loading sample data...');
             
-            // Sample PC Numbers
+            // Sample PC Numbers - UK Office Relocations
             const samplePCNumbers = [
                 {
                     pcNumber: 'PC-2024-001',
-                    company: 'Acme Corporation',
-                    reference: 'Office LED Upgrade',
-                    projectTitle: 'Office LED Lighting Upgrade',
-                    projectDescription: 'Complete LED lighting upgrade for main office building',
-                    clientName: 'Acme Corporation',
-                    contactName: 'John Smith',
-                    estimatedValue: 15000,
+                    company: 'Fintech Innovations Ltd',
+                    reference: 'City to Canary Wharf Move',
+                    projectTitle: 'Complete Office Relocation - City to Canary Wharf',
+                    projectDescription: 'Full office relocation for 85 staff from City of London to new Canary Wharf headquarters including IT infrastructure and secure document handling',
+                    clientName: 'Fintech Innovations Ltd',
+                    contactName: 'James Morrison',
+                    estimatedValue: 45000,
                     status: 'active',
-                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+                    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000) // 12 days ago
                 },
                 {
                     pcNumber: 'PC-2024-002', 
-                    company: 'Warehouse Solutions Ltd',
-                    reference: 'Warehouse Lighting',
-                    projectTitle: 'Warehouse Lighting Installation',
-                    projectDescription: 'New LED lighting installation for warehouse facility',
-                    clientName: 'Warehouse Solutions Ltd',
-                    contactName: 'Sarah Johnson',
-                    estimatedValue: 25000,
+                    company: 'Chambers & Associates',
+                    reference: 'Law Firm Expansion Move',
+                    projectTitle: 'Barrister Chambers Relocation',
+                    projectDescription: 'Prestigious law chambers moving from Lincoln\'s Inn to larger premises in Temple with specialist library and archive handling',
+                    clientName: 'Chambers & Associates',
+                    contactName: 'Patricia Whitfield QC',
+                    estimatedValue: 32000,
                     status: 'active',
-                    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+                    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) // 8 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-003',
+                    company: 'TechStart Solutions',
+                    reference: 'Emergency Relocation',
+                    projectTitle: 'Emergency Office Move - Lease Termination',
+                    projectDescription: 'Urgent relocation of startup office due to unexpected lease termination, 25 staff, minimal downtime required',
+                    clientName: 'TechStart Solutions',
+                    contactName: 'David Chen',
+                    estimatedValue: 18500,
+                    status: 'urgent',
+                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-004',
+                    company: 'Industrial Manufacturing UK',
+                    reference: 'Head Office Consolidation',
+                    projectTitle: 'Manufacturing HQ Office Consolidation',
+                    projectDescription: 'Consolidating three satellite offices into new Birmingham headquarters, heavy equipment and machinery documentation',
+                    clientName: 'Industrial Manufacturing UK',
+                    contactName: 'Robert Stevens',
+                    estimatedValue: 67500,
+                    status: 'active',
+                    date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) // 20 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-005',
+                    company: 'Creative Media Agency',
+                    reference: 'Studio Relocation',
+                    projectTitle: 'Creative Studio & Office Move',
+                    projectDescription: 'Moving creative agency with production studios, expensive AV equipment, and client presentation suites from Shoreditch to King\'s Cross',
+                    clientName: 'Creative Media Agency',
+                    contactName: 'Sophie Martinez',
+                    estimatedValue: 28750,
+                    status: 'completed',
+                    date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000) // 45 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-006',
+                    company: 'Global Consulting Partners',
+                    reference: 'Multi-Floor Corporate Move',
+                    projectTitle: 'Large Corporate Office Relocation',
+                    projectDescription: 'Major consulting firm relocating 200+ staff across 4 floors, executive suites, multiple conference rooms, and data centre',
+                    clientName: 'Global Consulting Partners',
+                    contactName: 'Michael Thompson',
+                    estimatedValue: 125000,
+                    status: 'active',
+                    date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000) // 35 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-007',
+                    company: 'Boutique Investments Ltd',
+                    reference: 'Mayfair Office Setup',
+                    projectTitle: 'Premium Investment Office Fitout',
+                    projectDescription: 'High-end investment firm establishing prestigious Mayfair office, white-glove service required for antique furniture and artwork',
+                    clientName: 'Boutique Investments Ltd',
+                    contactName: 'Lady Catherine Worthington',
+                    estimatedValue: 85000,
+                    status: 'draft',
+                    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                },
+                {
+                    pcNumber: 'PC-2024-008',
+                    company: 'NHS Trust Admin',
+                    reference: 'Healthcare Admin Relocation',
+                    projectTitle: 'NHS Administrative Office Move',
+                    projectDescription: 'NHS Trust relocating administrative offices with strict security requirements for patient data and medical records',
+                    clientName: 'NHS Trust Admin',
+                    contactName: 'Dr. Sarah Williams',
+                    estimatedValue: 22500,
+                    status: 'active',
+                    date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) // 15 days ago
                 }
             ];
 
@@ -818,16 +890,120 @@ class CRMApplication {
                     assigneeId: 'EMP002',
                     notes: 'Requires scissor lift access.'
                 },
+                // PC-2024-001 - Fintech Move
                 {
-                    title: 'Electrical Inspection',
-                    description: 'Regular electrical testing and inspection as per BS 7671 requirements',
-                    type: 'Inspection',
-                    startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // In a week
-                    duration: 60,
+                    title: 'Site Survey - Canary Wharf Office',
+                    description: 'Comprehensive site assessment of new Canary Wharf headquarters, measuring rooms, elevator access, and IT infrastructure requirements',
+                    type: 'Survey',
+                    pcNumber: 'PC-2024-001',
+                    scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Day after tomorrow
+                    scheduledTime: '09:00',
+                    duration: 180,
                     status: 'pending',
-                    priority: 'low',
-                    assigneeId: 'EMP001',
-                    notes: 'Follow-up required for fire alarm system.'
+                    priority: 'high',
+                    assignedTo: 'Marcus Thompson',
+                    location: '25 Canada Square, Canary Wharf, London E14 5LQ',
+                    contactName: 'James Morrison',
+                    contactPhone: '020 7946 0958'
+                },
+                {
+                    title: 'IT Infrastructure Disconnection',
+                    description: 'Safely disconnect and pack server equipment, workstations, and telecom systems at City office',
+                    type: 'IT Services',
+                    pcNumber: 'PC-2024-001',
+                    scheduledDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
+                    scheduledTime: '07:00',
+                    duration: 360,
+                    status: 'pending',
+                    priority: 'high',
+                    assignedTo: 'IT Specialist Team',
+                    location: '14 Old Broad Street, City of London, EC2N 1DL'
+                },
+                
+                // PC-2024-002 - Law Chambers
+                {
+                    title: 'Legal Archive Boxing',
+                    description: 'Specialist packing of confidential legal documents, case files, and law library books with chain of custody documentation',
+                    type: 'Packing',
+                    pcNumber: 'PC-2024-002',
+                    scheduledDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                    scheduledTime: '08:30',
+                    duration: 480,
+                    status: 'pending',
+                    priority: 'high',
+                    assignedTo: 'Secure Packing Team',
+                    location: 'Lincoln\'s Inn, London WC2A 3TL',
+                    contactName: 'Patricia Whitfield QC',
+                    contactPhone: '020 7405 1234'
+                },
+                
+                // PC-2024-003 - Emergency Move
+                {
+                    title: 'Emergency Packing Service',
+                    description: 'Rapid response packing of startup office, priority on IT equipment and essential documents',
+                    type: 'Emergency',
+                    pcNumber: 'PC-2024-003',
+                    scheduledDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
+                    scheduledTime: '06:00',
+                    duration: 240,
+                    status: 'in_progress',
+                    priority: 'urgent',
+                    assignedTo: 'Emergency Response Team',
+                    location: 'Tech Hub, 42 Shoreditch High Street, London E1 6JJ',
+                    contactName: 'David Chen',
+                    contactPhone: '07789 123456'
+                },
+                
+                // PC-2024-005 - Creative Agency (Completed)
+                {
+                    title: 'AV Equipment Setup - Completed',
+                    description: 'Successfully installed expensive audio-visual equipment and production studio setup at new King\'s Cross location',
+                    type: 'Installation',
+                    pcNumber: 'PC-2024-005',
+                    scheduledDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+                    scheduledTime: '09:00',
+                    duration: 420,
+                    status: 'completed',
+                    priority: 'high',
+                    assignedTo: 'AV Specialists',
+                    location: 'King\'s Cross Creative Quarter, London N1C 4QP',
+                    contactName: 'Sophie Martinez',
+                    contactPhone: '020 3987 6543',
+                    completionNotes: 'All AV equipment successfully installed and tested. Client signed off on setup. Some minor cable management adjustments made post-installation.'
+                },
+                
+                // PC-2024-006 - Large Corporate
+                {
+                    title: 'Executive Floor Planning',
+                    description: 'Detailed planning for executive suite relocation including boardrooms, private offices, and secure areas',
+                    type: 'Planning',
+                    pcNumber: 'PC-2024-006',
+                    scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    scheduledTime: '14:00',
+                    duration: 240,
+                    status: 'pending',
+                    priority: 'high',
+                    assignedTo: 'Senior Project Manager',
+                    location: '1 Canary Wharf, London E14 5AB',
+                    contactName: 'Michael Thompson',
+                    contactPhone: '020 7715 8888'
+                },
+                
+                // PC-2024-008 - NHS Trust
+                {
+                    title: 'Secure Data Transport Planning',
+                    description: 'Security compliance planning for NHS patient data and medical records transport with GDPR requirements',
+                    type: 'Compliance',
+                    pcNumber: 'PC-2024-008',
+                    scheduledDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+                    scheduledTime: '13:30',
+                    duration: 120,
+                    status: 'pending',
+                    priority: 'high',
+                    assignedTo: 'Security Compliance Officer',
+                    location: 'NHS Administrative Centre, London SE1 7EH',
+                    contactName: 'Dr. Sarah Williams',
+                    contactPhone: '020 3317 8000'
                 }
             ];
 
@@ -1350,7 +1526,78 @@ class CRMApplication {
     
     async handleResourceSubmit(event) { 
         event.preventDefault();
-        logDebug('Resource form submitted'); 
+        
+        try {
+            // Check if we're editing (resource-id has value) or creating new
+            const resourceId = document.getElementById('resource-id').value;
+            const isEdit = Boolean(resourceId);
+            
+            // Collect data from form fields directly
+            const resourceData = {
+                name: document.getElementById('resource-name').value,
+                sku: document.getElementById('resource-sku').value,
+                category: document.getElementById('resource-category').value,
+                subcategory: document.getElementById('resource-subcategory').value,
+                description: document.getElementById('resource-description').value,
+                cost: parseFloat(document.getElementById('resource-cost').value) || 0,
+                unit: document.getElementById('resource-unit').value,
+                minQuantity: parseInt(document.getElementById('resource-min-quantity').value) || 1,
+                leadTime: parseInt(document.getElementById('resource-lead-time').value) || 0,
+                supplier: document.getElementById('resource-supplier').value,
+                supplierCode: document.getElementById('resource-supplier-code').value,
+                warranty: parseInt(document.getElementById('resource-warranty').value) || 0,
+                status: document.getElementById('resource-status').value === 'true' ? 'available' : 'inactive',
+                weight: parseFloat(document.getElementById('resource-weight').value) || 0,
+                dimensions: document.getElementById('resource-dimensions').value
+            };
+
+            let id;
+            if (isEdit) {
+                // Update existing resource
+                resourceData.id = resourceId;
+                resourceData.updatedAt = new Date();
+                await db.save('resources', resourceData);
+                id = resourceId;
+                
+                uiModals.showToast('Resource updated successfully', 'success');
+            } else {
+                // Create new resource - map to Resources class format
+                const newResourceData = {
+                    name: resourceData.name,
+                    description: resourceData.description,
+                    type: resourceData.category, // map category to type
+                    sku: resourceData.sku,
+                    costPerUnit: resourceData.cost,
+                    unit: resourceData.unit,
+                    supplier: resourceData.supplier,
+                    status: resourceData.status,
+                    quantity: resourceData.minQuantity,
+                    availableQuantity: resourceData.minQuantity
+                };
+                
+                id = await resources.createResource(newResourceData);
+                uiModals.showToast('Resource created successfully', 'success');
+            }
+            
+            // Reset modal title back to "New Resource" for next use
+            document.getElementById('resource-modal-title').textContent = 'New Resource';
+            
+            uiModals.closeModal('resource-modal');
+            
+            // Refresh page data
+            if (this.currentPage === 'resources') {
+                await this.loadResourcesData();
+            }
+            
+            // Also refresh dashboard if that's current page
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
+            }
+
+        } catch (error) {
+            logError('Failed to save resource:', error);
+            uiModals.showToast('Failed to save resource', 'error');
+        }
     }
     
     async handleQuoteSubmit(event) { 
@@ -1398,7 +1645,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         uiModals.openModal('activity-modal');
     };
-    window.showResourceModal = () => uiModals.openModal('resource-modal');
+    window.showResourceModal = () => {
+        // Reset form for new resource
+        document.getElementById('resource-modal-title').textContent = 'New Resource';
+        document.getElementById('resource-id').value = '';
+        
+        // Clear all form fields
+        document.getElementById('resource-name').value = '';
+        document.getElementById('resource-sku').value = '';
+        document.getElementById('resource-category').value = '';
+        document.getElementById('resource-subcategory').value = '';
+        document.getElementById('resource-description').value = '';
+        document.getElementById('resource-cost').value = '';
+        document.getElementById('resource-unit').value = '';
+        document.getElementById('resource-min-quantity').value = '';
+        document.getElementById('resource-lead-time').value = '';
+        document.getElementById('resource-supplier').value = '';
+        document.getElementById('resource-supplier-code').value = '';
+        document.getElementById('resource-warranty').value = '';
+        document.getElementById('resource-status').value = 'true'; // default to active
+        document.getElementById('resource-weight').value = '';
+        document.getElementById('resource-dimensions').value = '';
+        
+        uiModals.openModal('resource-modal');
+    };
     window.showNewQuoteModal = async () => {
         // Load PC Numbers dropdown for quote selection
         await window.crmApp.loadPcNumbersForSelect('quote-modal-pc');
@@ -1456,7 +1726,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     // Additional placeholder functions for missing onclick handlers
-    window.editResource = (id) => console.log('Edit resource:', id);
+    window.editResource = async (id) => {
+        try {
+            logDebug('Opening Resource edit modal for ID:', id);
+            const resourceData = await db.load('resources', id);
+            if (!resourceData) {
+                uiModals.showToast('Resource not found', 'error');
+                return;
+            }
+            
+            // Change modal title to Edit mode
+            document.getElementById('resource-modal-title').textContent = 'Edit Resource';
+            
+            // Populate modal fields
+            document.getElementById('resource-id').value = resourceData.id;
+            document.getElementById('resource-name').value = resourceData.name || '';
+            document.getElementById('resource-sku').value = resourceData.sku || '';
+            document.getElementById('resource-category').value = resourceData.category || resourceData.type || '';
+            document.getElementById('resource-subcategory').value = resourceData.subcategory || '';
+            document.getElementById('resource-description').value = resourceData.description || '';
+            
+            // Pricing & Units
+            document.getElementById('resource-cost').value = resourceData.costPerUnit || resourceData.cost || '';
+            document.getElementById('resource-unit').value = resourceData.unit || '';
+            document.getElementById('resource-min-quantity').value = resourceData.minQuantity || '';
+            document.getElementById('resource-lead-time').value = resourceData.leadTime || '';
+            
+            // Supplier Information
+            document.getElementById('resource-supplier').value = resourceData.supplier || '';
+            document.getElementById('resource-supplier-code').value = resourceData.supplierCode || '';
+            document.getElementById('resource-warranty').value = resourceData.warranty || '';
+            document.getElementById('resource-status').value = resourceData.status === 'available' ? 'true' : 'false';
+            
+            // Physical Properties
+            document.getElementById('resource-weight').value = resourceData.weight || '';
+            document.getElementById('resource-dimensions').value = resourceData.dimensions || '';
+            
+            // Open modal
+            uiModals.openModal('resource-modal');
+            
+        } catch (error) {
+            logError('Failed to open Resource edit modal:', error);
+            uiModals.showToast('Failed to load Resource data', 'error');
+        }
+    };
     window.deleteResource = (id) => console.log('Delete resource:', id);
     window.editPC = async (id) => {
         try {

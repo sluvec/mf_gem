@@ -1628,7 +1628,8 @@
 
     <div id="resource-modal" class="modal"><div class="modal-content" style="max-width: 800px;">
         <h2 id="resource-modal-title">New Resource</h2>
-        <input type="hidden" id="resource-id">
+        <form id="resource-form">
+            <input type="hidden" id="resource-id">
         
         <!-- Basic Information -->
         <div class="form-section">
@@ -1696,9 +1697,10 @@
         </div>
         
         <div class="form-actions">
-            <button onclick="window.saveResource()">Save Resource</button>
-            <button onclick="window.closeResourceModal()" class="secondary">Cancel</button>
+            <button type="submit">Save Resource</button>
+            <button type="button" onclick="window.closeResourceModal()" class="secondary">Cancel</button>
         </div>
+        </form>
     </div>        </div>
 
         <!-- NEW Sprint 3: Enhanced Resource Lookup Modal -->
