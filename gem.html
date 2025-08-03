@@ -18653,6 +18653,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // CRITICAL FIX: Initialize dropdown navigation after DOM is loaded
     const dropdownNavigation = new DropdownNavigationManager();
+
+    // Delegated handler for dropdown toggles (data-dropdown)
+    document.addEventListener('click', (evt) => {
+        const toggleEl = evt.target.closest('[data-dropdown]');
+        if (toggleEl) {
+            evt.preventDefault();
+            const dropdownId = toggleEl.dataset.dropdown;
+            if (dropdownId) {
+                dropdownNavigation.toggleDropdown(dropdownId);
+            }
+        }
+    });
     
     // Global function for dropdown toggles
     window.toggleDropdown = function(dropdownId) {
