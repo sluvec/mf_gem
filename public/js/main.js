@@ -919,6 +919,129 @@ class CRMApplication {
                 logInfo('Saved Quote:', savedQuote.quoteNumber);
             }
 
+            // Sample Price Lists for Office Relocations UK
+            const samplePriceLists = [
+                {
+                    name: 'Office Relocation - Small (1-20 employees)',
+                    description: 'Complete office relocation package for small businesses up to 20 employees',
+                    category: 'Office Relocation',
+                    region: 'London & M25',
+                    currency: 'GBP',
+                    validFrom: new Date(),
+                    validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+                    status: 'active',
+                    items: [
+                        { description: 'Pre-move consultation & planning', unit: 'per consultation', price: 150.00, category: 'Consultation' },
+                        { description: 'Professional packing service', unit: 'per hour/person', price: 35.00, category: 'Labour' },
+                        { description: 'Office furniture disassembly', unit: 'per hour/person', price: 40.00, category: 'Labour' },
+                        { description: 'IT equipment disconnection & packing', unit: 'per workstation', price: 75.00, category: 'IT Services' },
+                        { description: 'Document archive boxing', unit: 'per archive box', price: 8.50, category: 'Materials' },
+                        { description: 'Standard moving van (3.5t)', unit: 'per day', price: 180.00, category: 'Vehicle' },
+                        { description: 'Moving crew (2 people)', unit: 'per hour', price: 80.00, category: 'Labour' },
+                        { description: 'Office furniture reassembly', unit: 'per hour/person', price: 45.00, category: 'Labour' },
+                        { description: 'IT equipment reconnection & setup', unit: 'per workstation', price: 85.00, category: 'IT Services' }
+                    ],
+                    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+                    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                },
+                {
+                    name: 'Office Relocation - Medium (21-100 employees)',
+                    description: 'Comprehensive office relocation for medium-sized businesses with specialist equipment handling',
+                    category: 'Office Relocation',
+                    region: 'UK National',
+                    currency: 'GBP',
+                    validFrom: new Date(),
+                    validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                    status: 'active',
+                    items: [
+                        { description: 'Detailed site survey & project planning', unit: 'per project', price: 450.00, category: 'Consultation' },
+                        { description: 'Professional packing team', unit: 'per hour/person', price: 38.00, category: 'Labour' },
+                        { description: 'Specialist furniture handling', unit: 'per hour/person', price: 50.00, category: 'Labour' },
+                        { description: 'Server room relocation', unit: 'per server rack', price: 350.00, category: 'IT Services' },
+                        { description: 'Heavy duty moving boxes', unit: 'per box', price: 12.00, category: 'Materials' },
+                        { description: 'Luton van with tail lift', unit: 'per day', price: 220.00, category: 'Vehicle' },
+                        { description: '7.5t truck with hydraulic lift', unit: 'per day', price: 380.00, category: 'Vehicle' },
+                        { description: 'Moving crew (4 people)', unit: 'per hour', price: 160.00, category: 'Labour' },
+                        { description: 'Specialist IT technician', unit: 'per hour', price: 65.00, category: 'IT Services' },
+                        { description: 'Weekend/evening premium', unit: 'percentage', price: 25.00, category: 'Premium' }
+                    ],
+                    createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+                    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    name: 'Office Relocation - Large Enterprise (100+ employees)',
+                    description: 'Full-scale enterprise office relocation with project management and phased moves',
+                    category: 'Office Relocation',
+                    region: 'UK & Europe',
+                    currency: 'GBP',
+                    validFrom: new Date(),
+                    validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                    status: 'active',
+                    items: [
+                        { description: 'Dedicated project manager', unit: 'per week', price: 1200.00, category: 'Management' },
+                        { description: 'Comprehensive site survey', unit: 'per site', price: 850.00, category: 'Consultation' },
+                        { description: 'Executive furniture white-glove service', unit: 'per hour/person', price: 65.00, category: 'Labour' },
+                        { description: 'Data centre migration', unit: 'per rack unit', price: 450.00, category: 'IT Services' },
+                        { description: 'Climate-controlled storage', unit: 'per week/m³', price: 25.00, category: 'Storage' },
+                        { description: 'Articulated lorry (18t+)', unit: 'per day', price: 650.00, category: 'Vehicle' },
+                        { description: 'Specialist moving crew (6 people)', unit: 'per hour', price: 280.00, category: 'Labour' },
+                        { description: 'Out-of-hours security escort', unit: 'per hour', price: 95.00, category: 'Security' },
+                        { description: 'International shipping', unit: 'per m³', price: 180.00, category: 'Shipping' },
+                        { description: 'Insurance (comprehensive cover)', unit: 'percentage of value', price: 0.5, category: 'Insurance' }
+                    ],
+                    createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+                    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    name: 'Specialist Equipment & Materials',
+                    description: 'Additional equipment and materials for complex office relocations',
+                    category: 'Equipment & Materials',
+                    region: 'UK National',
+                    currency: 'GBP',
+                    validFrom: new Date(),
+                    validUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000), // 6 months
+                    status: 'active',
+                    items: [
+                        { description: 'Piano/safe moving equipment', unit: 'per day', price: 150.00, category: 'Equipment' },
+                        { description: 'Stair climbing trolley', unit: 'per day', price: 45.00, category: 'Equipment' },
+                        { description: 'Furniture protection covers', unit: 'per item', price: 15.00, category: 'Materials' },
+                        { description: 'Bubble wrap (industrial)', unit: 'per roll (750mm x 100m)', price: 28.00, category: 'Materials' },
+                        { description: 'Wooden crates (custom)', unit: 'per m³', price: 120.00, category: 'Materials' },
+                        { description: 'Floor protection sheets', unit: 'per m²', price: 3.50, category: 'Materials' },
+                        { description: 'Hydraulic platform trolley', unit: 'per day', price: 65.00, category: 'Equipment' },
+                        { description: 'Vacuum lifting equipment', unit: 'per day', price: 95.00, category: 'Equipment' }
+                    ],
+                    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+                    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    name: 'Emergency & Rush Services',
+                    description: 'Premium emergency relocation services with same-day response',
+                    category: 'Emergency Services', 
+                    region: 'London & Home Counties',
+                    currency: 'GBP',
+                    validFrom: new Date(),
+                    validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 3 months
+                    status: 'active',
+                    items: [
+                        { description: 'Emergency call-out (same day)', unit: 'per call-out', price: 250.00, category: 'Emergency' },
+                        { description: 'Weekend emergency service', unit: 'percentage premium', price: 50.00, category: 'Premium' },
+                        { description: 'Bank holiday service', unit: 'percentage premium', price: 100.00, category: 'Premium' },
+                        { description: 'Express packing service', unit: 'per hour/person', price: 55.00, category: 'Labour' },
+                        { description: '24-hour security storage', unit: 'per day/m³', price: 15.00, category: 'Storage' },
+                        { description: 'Emergency vehicle hire', unit: 'per hour', price: 85.00, category: 'Vehicle' },
+                        { description: 'Temporary office setup', unit: 'per workstation', price: 125.00, category: 'Setup' }
+                    ],
+                    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+                    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                }
+            ];
+
+            for (const priceListData of samplePriceLists) {
+                const savedPriceList = await db.save('priceLists', { ...priceListData, id: generateId() });
+                logInfo('Saved Price List:', savedPriceList.name);
+            }
+
             logInfo('Sample data loaded successfully');
         } catch (error) {
             logError('Failed to load sample data:', error);
