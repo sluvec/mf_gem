@@ -1276,7 +1276,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         uiModals.openModal('activity-modal');
     };
     window.showResourceModal = () => uiModals.openModal('resource-modal');
-    window.showNewQuoteModal = () => uiModals.openModal('quote-modal');
+    window.showNewQuoteModal = async () => {
+        // Load PC Numbers dropdown for quote selection
+        await window.crmApp.loadPcNumbersForSelect('quote-modal-pc');
+        uiModals.openModal('quote-modal');
+    };
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
     window.closeResourceModal = () => uiModals.closeModal('resource-modal');
     window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
