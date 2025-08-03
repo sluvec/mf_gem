@@ -61,12 +61,26 @@ class CRMApplication {
 
             this.updateProgress(100, 'Complete!');
             
-            // Small delay to show 100% before hiding
-            logDebug('Setting timeout to hide loading overlay in 500ms...');
+            // Try immediate hiding first
+            logDebug('Attempting immediate overlay hiding...');
+            this.hideLoadingOverlay();
+            
+            // Also set timeout as backup
+            logDebug('Setting timeout to hide loading overlay in 500ms as backup...');
             setTimeout(() => {
-                logDebug('Timeout triggered, hiding loading overlay now');
+                logDebug('Timeout triggered, hiding loading overlay again');
                 this.hideLoadingOverlay();
             }, 500);
+            
+            // Force hide with direct DOM manipulation as final backup
+            setTimeout(() => {
+                logDebug('Final backup: forcing overlay hide with DOM manipulation');
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.remove(); // Completely remove the element
+                    logDebug('Loading overlay completely removed from DOM');
+                }
+            }, 1000);
             
             this.isInitialized = true;
             logInfo('CRM Application initialized successfully');
@@ -585,9 +599,21 @@ class CRMApplication {
             logDebug('Attempting to hide loading overlay...');
             const overlay = document.getElementById('loading-overlay');
             if (overlay) {
-                logDebug('Loading overlay found, removing active class');
+                logDebug('Loading overlay found, using multiple hiding methods');
+                
+                // Method 1: Remove active class
                 overlay.classList.remove('active');
-                logDebug('Loading overlay hidden successfully');
+                
+                // Method 2: Force display none with inline style (highest priority)
+                overlay.style.display = 'none';
+                
+                // Method 3: Hide with visibility
+                overlay.style.visibility = 'hidden';
+                
+                // Method 4: Move off screen
+                overlay.style.left = '-9999px';
+                
+                logDebug('Loading overlay hidden using multiple methods');
             } else {
                 logError('Loading overlay element not found');
             }
