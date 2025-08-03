@@ -3874,7 +3874,7 @@
             <div class="nav-left">
                 <h1>
                     <button 
-                        onclick="window.showPage('dashboard')" 
+                        onclick="app.showPage('dashboard')" 
                         aria-label="Go to dashboard - CRM Demo homepage"
                         class="logo-btn">
                         🏢 CRM Demo
@@ -3897,7 +3897,7 @@
                     <!-- Dashboard - always visible -->
                     <li role="none">
                         <button 
-                            onclick="window.showPage('dashboard')" 
+                            onclick="app.showPage('dashboard')" 
                             class="nav-btn active"
                             role="menuitem"
                             aria-pressed="true"
@@ -3923,7 +3923,7 @@
                         <ul id="projects-menu" class="dropdown-menu" role="menu" aria-label="Projects menu" hidden>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('pcnumbers')" 
+                                    onclick="app.showPage('pcnumbers')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="pc-numbers-desc">
@@ -3934,7 +3934,7 @@
                             </li>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('activities')" 
+                                    onclick="app.showPage('activities')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="activities-desc">
@@ -3962,7 +3962,7 @@
                         <ul id="sales-menu" class="dropdown-menu" role="menu" aria-label="Sales menu" hidden>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('quotes')" 
+                                    onclick="app.showPage('quotes')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="quotes-desc">
@@ -3973,7 +3973,7 @@
                             </li>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('pricelists')" 
+                                    onclick="app.showPage('pricelists')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="pricelists-desc">
@@ -4001,7 +4001,7 @@
                         <ul id="resources-menu" class="dropdown-menu" role="menu" aria-label="Resources menu" hidden>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('resources')" 
+                                    onclick="app.showPage('resources')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="resources-desc">
@@ -4012,7 +4012,7 @@
                             </li>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('resource-allocation')" 
+                                    onclick="app.showPage('resource-allocation')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="resource-allocation-desc">
@@ -4040,7 +4040,7 @@
                         <ul id="templates-menu" class="dropdown-menu" role="menu" aria-label="Templates menu" hidden>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('templates')" 
+                                    onclick="app.showPage('templates')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="templates-desc">
@@ -4051,7 +4051,7 @@
                             </li>
                             <li role="none">
                                 <button 
-                                    onclick="window.showPage('activity-templates')" 
+                                    onclick="app.showPage('activity-templates')" 
                                     class="dropdown-item"
                                     role="menuitem"
                                     aria-describedby="activity-templates-desc">
@@ -4066,7 +4066,7 @@
                     <!-- Analytics - standalone -->
                     <li role="none">
                         <button 
-                            onclick="window.showPage('analytics')" 
+                            onclick="app.showPage('analytics')" 
                             class="nav-btn"
                             role="menuitem"
                             aria-describedby="analytics-desc">
@@ -4215,7 +4215,7 @@
             <div id="upcoming-activities-widget" class="upcoming-activities" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600;">📅 Upcoming Activities</h3>
-                    <button onclick="window.showPage('activities')" 
+                    <button onclick="app.showPage('activities')" 
                             style="background: #3b82f6; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer;">
                         View All
                     </button>
@@ -4226,15 +4226,15 @@
             </div>
             
             <div class="stats">
-                <div class="stat-card clickable" onclick="window.showPage('pcnumbers')">
+                <div class="stat-card clickable" onclick="app.showPage('pcnumbers')">
                     <h3>PC Numbers</h3>
                     <div class="value" id="stat-pc">0</div>
                 </div>
-                <div class="stat-card clickable" onclick="window.showPage('quotes')">
+                <div class="stat-card clickable" onclick="app.showPage('quotes')">
                     <h3>Quotes</h3>
                     <div class="value" id="stat-quotes">0</div>
                 </div>
-                <div class="stat-card clickable" onclick="window.showPage('activities')">
+                <div class="stat-card clickable" onclick="app.showPage('activities')">
                     <h3>Activities</h3>
                     <div class="value" id="stat-activities">0</div>
                 </div>
@@ -4257,7 +4257,7 @@
 
         <div id="pcnumbers" class="page">
             <h1>🔢 PC Numbers</h1>
-            <button onclick="window.showPage('new-pc')">+ New PC Number</button>
+            <button onclick="app.showPage('new-pc')">+ New PC Number</button>
             <div class="card">
                 <h2>PC Numbers List</h2>
                 <table>
@@ -4638,7 +4638,7 @@
                     <button onclick="window.editPC(db.currentPC.id)" class="warning">Edit</button>
                     <button onclick="window.createQuote()">Create Quote</button>
                     <button onclick="window.showActivityModal()">Add Activity</button>
-                    <button onclick="window.showPage('pcnumbers')" class="secondary">Back to list</button>
+                    <button onclick="app.showPage('pcnumbers')" class="secondary">Back to list</button>
                 </div>
             </div>
             
@@ -5497,7 +5497,7 @@
 
         <div id="pricelists" class="page">
              <h1>🏷️ Price Lists</h1>
-            <button onclick="window.showPage('new-pricelist')">+ New Price List</button>
+            <button onclick="app.showPage('new-pricelist')">+ New Price List</button>
             <div class="card">
                 <h2>Available Price Lists</h2>
                 <table>
@@ -5563,7 +5563,7 @@
                 
                 <div class="form-actions">
                     <button onclick="window.createPriceList()">Create Price List</button>
-                    <button onclick="window.showPage('pricelists')" class="secondary">Cancel</button>
+                    <button onclick="app.showPage('pricelists')" class="secondary">Cancel</button>
                 </div>
             </div>
         </div>
@@ -5572,7 +5572,7 @@
             <h1 id="pricelist-title">Price List Details</h1>
              <div class="card">
                 <button onclick="window.showAddResourceToPriceList()">+ Add Item to Price List</button>
-                <button onclick="window.showPage('pricelists')" class="secondary">Back to list</button>
+                <button onclick="app.showPage('pricelists')" class="secondary">Back to list</button>
             </div>
             <div class="card">
                 <h2>Price List Items</h2>
@@ -7579,7 +7579,7 @@ function showPage(pageId) {
         'quotes': 'quotes', 'quote-builder': 'quotes', 'activities': 'activities', 'resources': 'resources',
         'resource-allocation': 'resource-allocation', 'analytics': 'analytics', 'pricelists': 'pricelists', 'new-pricelist': 'pricelists', 'pricelist-detail': 'pricelists'
     };
-    const navButton = document.querySelector(`.nav-btn[onclick="window.showPage('${pageToNavMap[pageId]}')"]`);
+    const navButton = document.querySelector(`.nav-btn[onclick=\"app.showPage('${pageToNavMap[pageId]}')\"], .nav-btn[onclick=\"window.showPage('${pageToNavMap[pageId]}')\"]`);
     if (navButton) navButton.classList.add('active');
 
     // Reset stanów edycji przy zmianie strony (chyba, że idziemy do formularza)
