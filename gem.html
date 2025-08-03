@@ -7100,7 +7100,7 @@ function showPage(pageId) {
         'quotes': 'quotes', 'quote-builder': 'quotes', 'activities': 'activities', 'resources': 'resources',
         'resource-allocation': 'resource-allocation', 'analytics': 'analytics', 'pricelists': 'pricelists', 'new-pricelist': 'pricelists', 'pricelist-detail': 'pricelists'
     };
-    const navButton = document.querySelector(`.nav-btn[onclick=\"app.showPage('${pageToNavMap[pageId]}')\"], .nav-btn[onclick=\"window.showPage('${pageToNavMap[pageId]}')\"]`);
+    const navButton = document.querySelector(`.nav-btn[data-show-page=\"${pageToNavMap[pageId]}\"]`);
     if (navButton) navButton.classList.add('active');
 
     // Reset stanów edycji przy zmianie strony (chyba, że idziemy do formularza)
@@ -17434,7 +17434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Small delay to show completion
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            showPage('dashboard');
+            window.showPage('dashboard');
             loadingManager.hide('app-init');
             
             // Show welcome notification
