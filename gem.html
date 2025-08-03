@@ -7691,7 +7691,7 @@ function renderPCList() {
             <td>${contact}</td>
             <td><div class="action-btn-group">
                 <button onclick="window.viewPC('${pc.id}')" class="secondary">Show</button>
-                <button onclick="window.editPC('${pc.id}')" class="warning">Edit</button>
+                <button data-edit-pc="${pc.id}" class="warning">Edit</button>
             </div></td>
         </tr>`;
     });
@@ -13670,8 +13670,8 @@ function updateResourcesList() {
             <td>${supplier}</td>
             <td><span class="${statusClass}">${status}</span></td>
             <td><div class="action-btn-group">
-                <button onclick="window.editResource('${res.id}')" class="warning">Edit</button>
-                <button onclick="window.deleteResource('${res.id}')" class="danger">Remove</button>
+                <button data-edit-resource="${res.id}" class="warning">Edit</button>
+                <button data-delete-resource="${res.id}" class="danger">Remove</button>
             </div></td>
         </tr>`;
     });
@@ -18663,6 +18663,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dropdownId) {
                 dropdownNavigation.toggleDropdown(dropdownId);
             }
+        }
+    });
+
+    // Delegated handlers for edit/delete actions
+    document.addEventListener('click', (evt) => {
+        const editPcBtn = evt.target.closest('[data-edit-pc]');
+        const editResourceBtn = evt.target.closest('[data-edit-resource]');
+        const deleteResourceBtn = evt.target.closest('[data-delete-resource]');
+
+        if (editPcBtn) {
+            evt.preventDefault();
+            const pcId = editPcBtn.dataset.editPc;
+            if (pcId && window.editPC) window.editPC(pcId);
+        }
+        
+        if (editResourceBtn) {
+            evt.preventDefault();
+            const resourceId = editResourceBtn.dataset.editResource;
+            if (resourceId && window.editResource) window.editResource(resourceId);
+        }
+        
+        if (deleteResourceBtn) {
+            evt.preventDefault();
+            const resourceId = deleteResourceBtn.dataset.deleteResource;
+            if (resourceId && window.deleteResource) window.deleteResource(resourceId);
         }
     });
     
