@@ -46,14 +46,26 @@ class CRMApplication {
             this.showLoadingOverlay('Initializing application...');
 
             // Initialize core systems
+            this.updateProgress(20, 'Connecting to database...');
             await this.initializeDatabase();
+            
+            this.updateProgress(50, 'Setting up user interface...');
             await this.initializeUI();
+            
+            this.updateProgress(75, 'Loading data...');
             await this.setupEventListeners();
 
+            this.updateProgress(90, 'Almost ready...');
             // Set initial page
             this.navigateToPage(this.currentPage);
 
-            this.hideLoadingOverlay();
+            this.updateProgress(100, 'Complete!');
+            
+            // Small delay to show 100% before hiding
+            setTimeout(() => {
+                this.hideLoadingOverlay();
+            }, 500);
+            
             this.isInitialized = true;
             logInfo('CRM Application initialized successfully');
 
@@ -534,9 +546,32 @@ class CRMApplication {
                     messageElement.textContent = message;
                 }
                 this.loadingOverlay.classList.add('active');
+                this.updateProgress(0);
             }
         } catch (error) {
             logError('Failed to show loading overlay:', error);
+        }
+    }
+
+    /**
+     * @description Update progress bar
+     * @param {number} percentage - Progress percentage (0-100)
+     * @param {string} text - Optional progress text
+     */
+    updateProgress(percentage, text = null) {
+        try {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (progressBar) {
+                progressBar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = text || `${Math.round(percentage)}%`;
+            }
+        } catch (error) {
+            logError('Failed to update progress:', error);
         }
     }
 
