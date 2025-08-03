@@ -7998,7 +7998,8 @@ function addLineItem(category) {
     const priceList = db.priceLists.find(p => p.id === db.selectedPriceListId);
     if (!priceList) return;
 
-    const categoryItems = priceList.items.filter(item => {
+    const priceListItems = Array.isArray(priceList.items) ? priceList.items : [];
+    const categoryItems = priceListItems.filter(item => {
         const resource = db.resources.find(r => r.id === item.resourceId);
         return resource && resource.category === category;
     });
@@ -8441,7 +8442,8 @@ function filterResources() {
     const statusFilter = document.getElementById('resource-status-filter').value;
     
     // Get all resources with pricing from current price list
-    const resourcesWithPricing = priceList.items.map(item => {
+    const priceListItems = Array.isArray(priceList.items) ? priceList.items : [];
+    const resourcesWithPricing = priceListItems.map(item => {
         const resource = db.resources.find(r => r.id === item.resourceId);
         if (!resource) return null;
         
