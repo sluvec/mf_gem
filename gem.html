@@ -1103,249 +1103,11 @@
             line-height: 1.4;
         }
 
-        /* NEW Sprint 4.2.5: Notifications & Reminders */
-        .notification-center {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            width: 350px;
-            max-height: 600px;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-        }
 
-        .notification-header {
-            padding: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f8fafc;
-            border-radius: 0.75rem 0.75rem 0 0;
-        }
 
-        .notification-list {
-            max-height: 500px;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
 
-        .notification-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
 
-        .notification-item:hover {
-            background: #f9fafb;
-        }
 
-        .notification-item.unread {
-            background: #fef7ff;
-            border-left-color: #a855f7;
-        }
-
-        .notification-item.urgent {
-            background: #fef2f2;
-            border-left-color: #ef4444;
-        }
-
-        .notification-item.warning {
-            background: #fffbeb;
-            border-left-color: #f59e0b;
-        }
-
-        .notification-item.success {
-            background: #f0fdf4;
-            border-left-color: #22c55e;
-        }
-
-        .notification-icon {
-            flex-shrink: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 0.75rem;
-            font-size: 0.875rem;
-        }
-
-        .notification-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .notification-title {
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-            color: #111827;
-        }
-
-        .notification-message {
-            font-size: 0.8rem;
-            color: #6b7280;
-            line-height: 1.4;
-            margin-bottom: 0.25rem;
-        }
-
-        .notification-time {
-            font-size: 0.75rem;
-            color: #9ca3af;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        .notification-bell {
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.5rem;
-            cursor: pointer;
-            border-radius: var(--radius-md);
-            transition: all 0.2s ease-in-out;
-            font-size: 1.125rem;
-        }
-
-        .notification-bell:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .notification-bell.has-notifications {
-            animation: pulse 2s infinite;
-        }
-
-        .dashboard-alert {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 1px solid #f59e0b;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
-
-        .dashboard-alert.urgent {
-            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
-            border-color: #ef4444;
-        }
-
-        .dashboard-alert.success {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border-color: #22c55e;
-        }
-
-        .dashboard-alert-icon {
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.1);
-            font-size: 0.875rem;
-        }
-
-        .dashboard-alert-content {
-            flex: 1;
-        }
-
-        .dashboard-alert-title {
-            font-weight: 600;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-            color: #92400e;
-        }
-
-        .dashboard-alert.urgent .dashboard-alert-title {
-            color: #991b1b;
-        }
-
-        .dashboard-alert.success .dashboard-alert-title {
-            color: #166534;
-        }
-
-        .dashboard-alert-message {
-            font-size: 0.8rem;
-            color: #78350f;
-            line-height: 1.4;
-        }
-
-        .dashboard-alert.urgent .dashboard-alert-message {
-            color: #7f1d1d;
-        }
-
-        .dashboard-alert.success .dashboard-alert-message {
-            color: #14532d;
-        }
-
-        .upcoming-activities {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
-        }
-
-        .upcoming-activity-item {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-left: 3px solid #e5e7eb;
-            transition: all 0.2s ease;
-        }
-
-        .upcoming-activity-item:hover {
-            background: #f9fafb;
-            border-left-color: #3b82f6;
-        }
-
-        .upcoming-activity-item.overdue {
-            background: #fef2f2;
-            border-left-color: #ef4444;
-        }
-
-        .upcoming-activity-item.today {
-            background: #eff6ff;
-            border-left-color: #3b82f6;
-        }
-
-        .upcoming-activity-item.tomorrow {
-            background: #f0fdf4;
-            border-left-color: #22c55e;
-        }
 
         /* NEW Sprint 4.3: Resource Allocation Tracking */
         .resource-allocation-panel {
@@ -3782,44 +3544,44 @@
                         <button 
                             data-show-page="pcnumbers" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="pc-numbers-desc">
+                                    role="menuitem"
+                                    aria-describedby="pc-numbers-desc">
                             <span class="nav-icon">📋</span>
-                            PC Numbers
-                        </button>
-                    </li>
+                                    PC Numbers
+                                </button>
+                            </li>
                     
                     <li role="none" class="nav-row-1">
-                        <button 
+                                <button 
                             data-show-page="activities" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="activities-desc">
+                                    role="menuitem"
+                                    aria-describedby="activities-desc">
                             <span class="nav-icon">📅</span>
-                            Activities
-                        </button>
+                                    Activities
+                                </button>
                     </li>
                     
                     <li role="none" class="nav-row-1">
                         <button 
                             data-show-page="quotes" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="quotes-desc">
+                                    role="menuitem"
+                                    aria-describedby="quotes-desc">
                             <span class="nav-icon">📝</span>
-                            Quotes
-                        </button>
-                    </li>
+                                    Quotes
+                                </button>
+                            </li>
                     
                     <li role="none" class="nav-row-1">
-                        <button 
+                                <button 
                             data-show-page="pricelists" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="pricelists-desc">
+                                    role="menuitem"
+                                    aria-describedby="pricelists-desc">
                             <span class="nav-icon">💷</span>
-                            Price Lists
-                        </button>
+                                    Price Lists
+                                </button>
                     </li>
                     
                     <!-- Row 2: Secondary Navigation -->
@@ -3835,36 +3597,36 @@
                     </li>
                     
                     <li role="none" class="nav-row-2">
-                        <button 
+                                <button 
                             data-show-page="templates" 
                             class="nav-btn"
-                            role="menuitem"
+                                    role="menuitem"
                             aria-describedby="templates-desc">
                             <span class="nav-icon">📋</span>
                             Templates
-                        </button>
-                    </li>
+                                </button>
+                            </li>
                     
                     <li role="none" class="nav-row-2">
-                        <button 
+                                <button 
                             data-show-page="resource-allocation" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="resource-allocation-desc">
+                                    role="menuitem"
+                                    aria-describedby="resource-allocation-desc">
                             <span class="nav-icon">📊</span>
                             Allocation
-                        </button>
+                                </button>
                     </li>
                     
                     <li role="none" class="nav-row-2">
                         <button 
                             data-show-page="activity-templates" 
                             class="nav-btn"
-                            role="menuitem"
-                            aria-describedby="activity-templates-desc">
+                                    role="menuitem"
+                                    aria-describedby="activity-templates-desc">
                             <span class="nav-icon">📝</span>
-                            Activity Templates
-                        </button>
+                                    Activity Templates
+                                </button>
                     </li>
                     
                     <li role="none" class="nav-row-2">
@@ -3947,18 +3709,7 @@
                         </div>
                     </div>
                     
-                    <!-- NEW Sprint 4.2.5: Notification Bell -->
-                    <div style="position: relative; margin-right: 1rem;">
-                        <button 
-                            id="notification-bell" 
-                            class="notification-bell" 
-                            onclick="window.toggleNotificationCenter()"
-                            aria-label="Notifications"
-                            aria-describedby="notification-count">
-                            🔔
-                            <div id="notification-badge" class="notification-badge" style="display: none;" aria-live="polite">0</div>
-                        </button>
-                    </div>
+
                     <button 
                         onclick="window.resetData()" 
                         class="nav-btn danger"
@@ -3983,25 +3734,7 @@
         <div id="pricelists-desc">Manage pricing and rate cards</div>
     </div>
 
-    <!-- NEW Sprint 4.2.5: Notification Center -->
-    <div id="notification-center" class="notification-center">
-        <div class="notification-header">
-            <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">🔔 Notifications</h3>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <button onclick="window.markAllNotificationsRead()" 
-                        style="background: none; border: none; color: #6b7280; font-size: 0.75rem; cursor: pointer;">
-                    Mark all read
-                </button>
-                <button onclick="window.toggleNotificationCenter()" 
-                        style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #6b7280;">
-                    ×
-                </button>
-            </div>
-        </div>
-        <div id="notification-list" class="notification-list">
-            <!-- Notifications will be populated here -->
-        </div>
-    </div>
+
 
     <main id="main-content" role="main" tabindex="-1">
         <div class="container">
@@ -4009,24 +3742,9 @@
             <h1>📊 Dashboard</h1>
             <p>Overview of key metrics in the demonstration system.</p>
             
-            <!-- NEW Sprint 4.2.5: Dashboard Alerts -->
-            <div id="dashboard-alerts">
-                <!-- Dynamic alerts will be populated here -->
-            </div>
+
             
-            <!-- NEW Sprint 4.2.5: Upcoming Activities Widget -->
-            <div id="upcoming-activities-widget" class="upcoming-activities" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600;">📅 Upcoming Activities</h3>
-                    <button data-show-page="activities" 
-                            style="background: #3b82f6; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer;">
-                        View All
-                    </button>
-                </div>
-                <div id="upcoming-activities-list">
-                    <!-- Upcoming activities will be populated here -->
-                </div>
-            </div>
+
             
             <div class="stats">
                 <div class="stat-card clickable" data-show-page="pcnumbers">
@@ -8002,11 +7720,11 @@ function populateQuotedActivities() {
         const activityStatus = sanitizeHTML(activity.status);
         
         return `
-            <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
+        <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
                 <input type="checkbox" value="${activityId}" onchange="window.updateQuotedActivities()" style="margin-right: 0.5rem;">
                 <strong>${activityTitle}</strong> - ${activityDate} 
                 <span style="color: #666;">(${activityStatus})</span>
-            </label>
+        </label>
         `;
     }).join('');
 }
@@ -9920,8 +9638,7 @@ function moveActivityToTimeSlot(activityId, targetSlot) {
                 updateWorkloadPanel();
             }
             
-            // NEW Sprint 4.2.5: Update notifications after moving activities
-            setTimeout(checkForNotifications, 1000);
+            
             
             // Show success message
             showNotification('Activity moved successfully!', 'success');
@@ -10062,8 +9779,7 @@ function submitQuickCreate(event) {
                 updateWorkloadPanel();
             }
             
-            // NEW Sprint 4.2.5: Update notifications after creating activities
-            setTimeout(checkForNotifications, 1000);
+            
             
             const message = isRecurring 
                 ? `Created ${activitiesToCreate.length} recurring activities successfully!`
@@ -10170,8 +9886,7 @@ function moveActivityToMonthDay(activityId, dayElement) {
                 updateWorkloadPanel();
             }
             
-            // NEW Sprint 4.2.5: Update notifications after moving activities
-            setTimeout(checkForNotifications, 1000);
+            
             
             // Show success message
             showNotification('Activity moved successfully!', 'success');
@@ -10913,529 +10628,17 @@ function editActivityFromCalendarRecurring(activityId) {
     }
 }
 
-// ========================================
-// NEW Sprint 4.2.5: Notifications & Reminders System
-// ========================================
 
-let notifications = [];
-let notificationCenter_visible = false;
 
-function initializeNotificationSystem() {
-    console.log('🔔 Initializing notification system...');
-    
-    // Load notifications from localStorage
-    loadNotificationsFromStorage();
-    
-    // Start notification checking interval
-    setInterval(checkForNotifications, 60000); // Check every minute
-    
-    // Initial check
-    checkForNotifications();
-    
-    // Initialize dashboard alerts
-    updateDashboardAlerts();
-    updateUpcomingActivitiesWidget();
-}
 
-function checkForNotifications() {
-    console.log('🔍 Checking for new notifications...');
-    
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
-    if (!db.activities) return;
-    
-    // Check for overdue activities
-    checkOverdueActivities(today);
-    
-    // Check for activities due today
-    checkActivitiesToday(today);
-    
-    // Check for activities due tomorrow
-    checkActivitiesTomorrow(tomorrow);
-    
-    // Check for team workload issues
-    checkWorkloadIssues();
-    
-    // Check for unassigned urgent activities
-    checkUnassignedUrgentActivities();
-    
-    // Update UI
-    updateNotificationBadge();
-    updateNotificationList();
-    updateDashboardAlerts();
-    updateUpcomingActivitiesWidget();
-}
 
-// Alias function for event handlers
-function updateNotificationSystem() {
-    console.log('🔔 Updating notification system...');
-    if (typeof checkForNotifications === 'function') {
-        checkForNotifications();
-    }
-}
 
-function checkOverdueActivities(today) {
-    const overdueActivities = db.activities.filter(activity => 
-        activity.scheduled_date && 
-        activity.scheduled_date < today && 
-        activity.status !== 'completed' && 
-        activity.status !== 'cancelled'
-    );
-    
-    overdueActivities.forEach(activity => {
-        const existingNotification = notifications.find(n => 
-            n.type === 'overdue' && n.activityId === activity.id
-        );
-        
-        if (!existingNotification) {
-            addNotification({
-                id: generateUUID(),
-                type: 'overdue',
-                priority: 'urgent',
-                activityId: activity.id,
-                title: 'Overdue Activity',
-                message: `"${activity.title}" was due on ${new Date(activity.scheduled_date).toLocaleDateString()}`,
-                timestamp: new Date(),
-                read: false,
-                action: 'view_activity'
-            });
-        }
-    });
-}
 
-function checkActivitiesToday(today) {
-    const todayActivities = db.activities.filter(activity => 
-        activity.scheduled_date === today && 
-        activity.status === 'scheduled'
-    );
-    
-    todayActivities.forEach(activity => {
-        const existingNotification = notifications.find(n => 
-            n.type === 'due_today' && n.activityId === activity.id
-        );
-        
-        if (!existingNotification) {
-            addNotification({
-                id: generateUUID(),
-                type: 'due_today',
-                priority: 'warning',
-                activityId: activity.id,
-                title: 'Activity Due Today',
-                message: `"${activity.title}" is scheduled for today`,
-                timestamp: new Date(),
-                read: false,
-                action: 'view_activity'
-            });
-        }
-    });
-}
 
-function checkActivitiesTomorrow(tomorrow) {
-    const tomorrowActivities = db.activities.filter(activity => 
-        activity.scheduled_date === tomorrow && 
-        activity.status === 'scheduled'
-    );
-    
-    tomorrowActivities.forEach(activity => {
-        const existingNotification = notifications.find(n => 
-            n.type === 'due_tomorrow' && n.activityId === activity.id
-        );
-        
-        if (!existingNotification) {
-            addNotification({
-                id: generateUUID(),
-                type: 'due_tomorrow',
-                priority: 'normal',
-                activityId: activity.id,
-                title: 'Activity Due Tomorrow',
-                message: `"${activity.title}" is scheduled for tomorrow`,
-                timestamp: new Date(),
-                read: false,
-                action: 'view_activity'
-            });
-        }
-    });
-}
 
-function checkWorkloadIssues() {
-    if (!teamMembers || teamMembers.length === 0) return;
-    
-    const startOfWeek = getStartOfWeek(new Date());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    
-    const workload = calculateTeamWorkload(startOfWeek, endOfWeek);
-    
-    teamMembers.forEach(member => {
-        const memberWorkload = workload[member.id] || { hours: 0 };
-        const utilizationPercent = (memberWorkload.hours / member.max_hours) * 100;
-        
-        if (utilizationPercent > 100) {
-            const existingNotification = notifications.find(n => 
-                n.type === 'overloaded' && n.memberId === member.id
-            );
-            
-            if (!existingNotification) {
-                addNotification({
-                    id: generateUUID(),
-                    type: 'overloaded',
-                    priority: 'urgent',
-                    memberId: member.id,
-                    title: 'Team Member Overloaded',
-                    message: `${member.name} is overloaded this week (${Math.round(utilizationPercent)}% capacity)`,
-                    timestamp: new Date(),
-                    read: false,
-                    action: 'view_workload'
-                });
-            }
-        }
-    });
-}
 
-function checkUnassignedUrgentActivities() {
-    const unassignedUrgent = db.activities.filter(activity => 
-        (!activity.assigned_to || activity.assigned_to === '') &&
-        activity.priority === 'urgent' &&
-        activity.status === 'scheduled'
-    );
-    
-    unassignedUrgent.forEach(activity => {
-        const existingNotification = notifications.find(n => 
-            n.type === 'unassigned_urgent' && n.activityId === activity.id
-        );
-        
-        if (!existingNotification) {
-            addNotification({
-                id: generateUUID(),
-                type: 'unassigned_urgent',
-                priority: 'urgent',
-                activityId: activity.id,
-                title: 'Urgent Activity Unassigned',
-                message: `"${activity.title}" is urgent but not assigned to anyone`,
-                timestamp: new Date(),
-                read: false,
-                action: 'assign_activity'
-            });
-        }
-    });
-}
 
-function addNotification(notification) {
-    notifications.unshift(notification); // Add to beginning
-    
-    // Keep only last 50 notifications
-    if (notifications.length > 50) {
-        notifications = notifications.slice(0, 50);
-    }
-    
-    saveNotificationsToStorage();
-    console.log('🔔 New notification:', notification.title);
-}
 
-function toggleNotificationCenter() {
-    const center = document.getElementById('notification-center');
-    notificationCenter_visible = !notificationCenter_visible;
-    
-    if (notificationCenter_visible) {
-        center.style.display = 'flex';
-        updateNotificationList();
-    } else {
-        center.style.display = 'none';
-    }
-}
-
-function updateNotificationBadge() {
-    const badge = document.getElementById('notification-badge');
-    const bell = document.getElementById('notification-bell');
-    const unreadCount = notifications.filter(n => !n.read).length;
-    
-    if (unreadCount > 0) {
-        badge.textContent = unreadCount > 99 ? '99+' : unreadCount.toString();
-        badge.style.display = 'flex';
-        bell.classList.add('has-notifications');
-    } else {
-        badge.style.display = 'none';
-        bell.classList.remove('has-notifications');
-    }
-}
-
-function updateNotificationList() {
-    const list = document.getElementById('notification-list');
-    
-    if (notifications.length === 0) {
-        list.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔔</div>
-                <div>No notifications</div>
-            </div>
-        `;
-        return;
-    }
-    
-    list.innerHTML = notifications.map(notification => {
-        const timeAgo = sanitizeHTML(getTimeAgo(notification.timestamp));
-        const icon = sanitizeHTML(getNotificationIcon(notification.type));
-        
-        // Critical: Sanitize data used in attributes and content
-        const notificationId = sanitizeHTML(String(notification.id));
-        const readStatus = notification.read ? '' : 'unread';
-        const priority = sanitizeHTML(notification.priority);
-        const priorityBg = sanitizeHTML(getIconBackground(notification.priority));
-        const title = sanitizeHTML(notification.title);
-        const message = sanitizeHTML(notification.message);
-        
-        return `
-            <div class="notification-item ${readStatus} ${priority}" 
-                 onclick="window.handleNotificationClick('${notificationId}')">
-                <div class="notification-icon" style="background: ${priorityBg};">
-                    ${icon}
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                    <div class="notification-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-/**
- * @description Get notification icon for given type
- * @param {string} type - Notification type
- * @returns {string} Emoji icon
- */
-function getNotificationIcon(type) {
-    return CONFIG.UI.NOTIFICATION.ICONS[type] || CONFIG.UI.NOTIFICATION.DEFAULT_ICON;
-}
-
-function getIconBackground(priority) {
-    const backgrounds = {
-        'urgent': '#ef4444',
-        'warning': '#f59e0b',
-        'normal': '#3b82f6',
-        'success': '#22c55e'
-    };
-    return backgrounds[priority] || backgrounds.normal;
-}
-
-function getTimeAgo(timestamp) {
-    const now = new Date();
-    const diffInMinutes = Math.floor((now - new Date(timestamp)) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-}
-
-function handleNotificationClick(notificationId) {
-    const notification = notifications.find(n => n.id === notificationId);
-    if (!notification) return;
-    
-    // Mark as read
-    notification.read = true;
-    saveNotificationsToStorage();
-    updateNotificationBadge();
-    updateNotificationList();
-    
-    // Handle action
-    switch (notification.action) {
-        case 'view_activity':
-            if (notification.activityId) {
-                toggleNotificationCenter();
-                showPage('activities');
-                // Could highlight the specific activity
-            }
-            break;
-        case 'view_workload':
-            toggleNotificationCenter();
-            showPage('activities');
-            switchActivitiesView('calendar');
-            toggleWorkloadPanel();
-            break;
-        case 'assign_activity':
-            if (notification.activityId) {
-                toggleNotificationCenter();
-                editActivity(notification.activityId);
-            }
-            break;
-    }
-}
-
-function markAllNotificationsRead() {
-    notifications.forEach(n => n.read = true);
-    saveNotificationsToStorage();
-    updateNotificationBadge();
-    updateNotificationList();
-}
-
-function updateDashboardAlerts() {
-    const alertsContainer = document.getElementById('dashboard-alerts');
-    const alerts = generateDashboardAlerts();
-    
-    alertsContainer.innerHTML = alerts.map(alert => {
-        const alertType = sanitizeHTML(alert.type);
-        const alertIcon = sanitizeHTML(alert.icon);
-        const alertTitle = sanitizeHTML(alert.title);
-        const alertMessage = sanitizeHTML(alert.message);
-        
-        return `
-            <div class="dashboard-alert ${alertType}">
-                <div class="dashboard-alert-icon">${alertIcon}</div>
-                <div class="dashboard-alert-content">
-                    <div class="dashboard-alert-title">${alertTitle}</div>
-                    <div class="dashboard-alert-message">${alertMessage}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function generateDashboardAlerts() {
-    const alerts = [];
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (!db.activities) return alerts;
-    
-    // Overdue activities alert
-    const overdueCount = db.activities.filter(a => 
-        a.scheduled_date && a.scheduled_date < today && 
-        a.status !== 'completed' && a.status !== 'cancelled'
-    ).length;
-    
-    if (overdueCount > 0) {
-        alerts.push({
-            type: 'urgent',
-            icon: '⏰',
-            title: `${overdueCount} Overdue Activities`,
-            message: `You have ${overdueCount} activities that are past their scheduled date. Please review and reschedule as needed.`
-        });
-    }
-    
-    // Today's activities alert
-    const todayCount = db.activities.filter(a => 
-        a.scheduled_date === today && a.status === 'scheduled'
-    ).length;
-    
-    if (todayCount > 0) {
-        alerts.push({
-            type: 'warning',
-            icon: '📅',
-            title: `${todayCount} Activities Today`,
-            message: `You have ${todayCount} activities scheduled for today. Make sure your team is prepared.`
-        });
-    }
-    
-    // Unassigned urgent activities
-    const unassignedUrgentCount = db.activities.filter(a => 
-        (!a.assigned_to || a.assigned_to === '') && 
-        a.priority === 'urgent' && 
-        a.status === 'scheduled'
-    ).length;
-    
-    if (unassignedUrgentCount > 0) {
-        alerts.push({
-            type: 'urgent',
-            icon: '🚨',
-            title: `${unassignedUrgentCount} Urgent Activities Unassigned`,
-            message: `You have ${unassignedUrgentCount} urgent activities that haven't been assigned to team members yet.`
-        });
-    }
-    
-    return alerts;
-}
-
-function updateUpcomingActivitiesWidget() {
-    const widget = document.getElementById('upcoming-activities-widget');
-    const listContainer = document.getElementById('upcoming-activities-list');
-    
-    const upcomingActivities = getUpcomingActivities();
-    
-    if (upcomingActivities.length === 0) {
-        widget.style.display = 'none';
-        return;
-    }
-    
-    widget.style.display = 'block';
-    
-    listContainer.innerHTML = upcomingActivities.map(activity => {
-        const member = teamMembers.find(m => m.id === activity.assigned_to);
-        const dateClass = getActivityDateClass(activity.scheduled_date);
-        
-        return `
-            <div class="upcoming-activity-item ${dateClass}" onclick="window.editActivity('${activity.id}')">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 0.25rem;">${activity.title}</div>
-                    <div style="font-size: 0.875rem; color: #6b7280;">
-                        📅 ${new Date(activity.scheduled_date).toLocaleDateString()} • 
-                        ⏱️ ${activity.estimated_hours}h • 
-                        👤 ${member ? member.name : 'Unassigned'}
-                    </div>
-                </div>
-                <div style="flex-shrink: 0;">
-                    <span class="priority-${activity.priority}" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500;">
-                        ${activity.priority.toUpperCase()}
-                    </span>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function getUpcomingActivities() {
-    const today = new Date();
-    const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    
-    if (!db.activities) return [];
-    
-    return db.activities
-        .filter(activity => {
-            if (!activity.scheduled_date || activity.status !== 'scheduled') return false;
-            const activityDate = new Date(activity.scheduled_date);
-            return activityDate >= today && activityDate <= nextWeek;
-        })
-        .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
-        .slice(0, 5); // Show max 5
-}
-
-function getActivityDateClass(scheduledDate) {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
-    if (scheduledDate < today) return 'overdue';
-    if (scheduledDate === today) return 'today';
-    if (scheduledDate === tomorrow) return 'tomorrow';
-    return '';
-}
-
-function saveNotificationsToStorage() {
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-}
-
-function loadNotificationsFromStorage() {
-    const stored = localStorage.getItem('notifications');
-    if (stored) {
-        try {
-            notifications = JSON.parse(stored);
-            // Convert timestamp strings back to Date objects
-            notifications.forEach(n => {
-                if (typeof n.timestamp === 'string') {
-                    n.timestamp = new Date(n.timestamp);
-                }
-            });
-        } catch (e) {
-            console.error('Failed to load notifications from storage:', e);
-            notifications = [];
-        }
-    }
-}
 
 // ========================================
 // NEW Sprint 4.3: Resource Allocation Tracking System
@@ -16264,9 +15467,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.editRecurringActivity = editRecurringActivity;
     window.deleteRecurringSeries = deleteRecurringSeries;
     window.editActivityFromCalendarRecurring = editActivityFromCalendarRecurring;
-    window.toggleNotificationCenter = toggleNotificationCenter;
-    window.markAllNotificationsRead = markAllNotificationsRead;
-    window.handleNotificationClick = handleNotificationClick;
+
     window.filterResourcesByType = filterResourcesByType;
     window.filterResourcesByStatus = filterResourcesByStatus;
     window.refreshResourceAllocation = refreshResourceAllocation;
@@ -16368,8 +15569,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentActivitiesView === 'calendar') {
             renderCalendar();
         }
-        // Update notifications for new activities
-        updateNotificationSystem();
+        
     });
     
     CRM.EventBus.on('activity:updated', (activityData) => {
@@ -16379,7 +15579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentActivitiesView === 'calendar') {
             renderCalendar();
         }
-        updateNotificationSystem();
+    
     });
     
     CRM.EventBus.on('activity:deleted', (data) => {
@@ -16389,7 +15589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentActivitiesView === 'calendar') {
             renderCalendar();
         }
-        updateNotificationSystem();
+    
     });
     
     // Resource Events - when resource is created/updated/deleted
@@ -16426,7 +15626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderQuotesList();
         updateActivitiesList();
         renderResourcesList();
-        updateNotificationSystem();
+    
     }, { priority: 5 });
     
     // Error Events - centralized error monitoring and reporting
@@ -18206,9 +17406,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingManager.updateProgress('app-init', 45, 'Initializing team management...');
             
             initializeTeamManagement();
-            loadingManager.updateProgress('app-init', 55, 'Setting up notifications...');
-            
-            initializeNotificationSystem();
+
             loadingManager.updateProgress('app-init', 65, 'Configuring resource allocation...');
             
             initializeResourceAllocationSystem();
