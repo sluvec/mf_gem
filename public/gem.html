@@ -1490,7 +1490,8 @@
 
     <div id="activity-modal" class="modal"><div class="modal-content">
         <h2 id="activity-modal-title">New Activity</h2>
-        <input type="hidden" id="activity-id">
+        <form id="activity-form">
+            <input type="hidden" id="activity-id">
         
         <!-- Basic Info Section -->
         <div class="form-section">
@@ -1618,10 +1619,11 @@
         </div>
         
         <div class="form-actions">
-            <button onclick="window.saveActivity()">Save Activity</button>
-            <button onclick="window.saveActivityAsTemplate()" style="background: #8b5cf6; color: white;">📋 Save as Template</button>
-            <button onclick="window.closeActivityModal()" class="secondary">Cancel</button>
+            <button type="submit">Save Activity</button>
+            <button type="button" onclick="window.saveActivityAsTemplate()" style="background: #8b5cf6; color: white;">📋 Save as Template</button>
+            <button type="button" onclick="window.closeActivityModal()" class="secondary">Cancel</button>
         </div>
+        </form>
     </div></div>
 
     <div id="resource-modal" class="modal"><div class="modal-content" style="max-width: 800px;">

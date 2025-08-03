@@ -451,6 +451,17 @@ class CRMApplication {
                 quoteForm.addEventListener('submit', this.handleQuoteSubmit.bind(this));
             }
 
+            // Activity status change listener (show/hide completion section)
+            const activityStatus = document.getElementById('activity-status');
+            if (activityStatus) {
+                activityStatus.addEventListener('change', (event) => {
+                    const completionSection = document.getElementById('activity-completion-section');
+                    if (completionSection) {
+                        completionSection.style.display = event.target.value === 'completed' ? 'block' : 'none';
+                    }
+                });
+            }
+
         } catch (error) {
             logError('Failed to setup form handlers:', error);
         }
@@ -571,37 +582,67 @@ class CRMApplication {
     }
 
     /**
-     * @description Handle activity form submission
+     * @description Handle activity form submission (create or edit)
      * @param {Event} event - Form submit event
      */
     async handleActivitySubmit(event) {
         event.preventDefault();
         
         try {
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-
+            // Check if we're editing (activity-id has value) or creating new
+            const activityId = document.getElementById('activity-id').value;
+            const isEdit = Boolean(activityId);
+            
+            // Collect data from form fields directly
             const activityData = {
-                title: data.title,
-                description: data.description,
-                type: data.type,
-                pcId: data.pcId,
-                scheduledDate: data.scheduledDate,
-                scheduledTime: data.scheduledTime,
-                duration: parseInt(data.duration),
-                priority: data.priority,
-                assignedTo: data.assignedTo,
-                resourcesRequired: data.resourcesRequired ? data.resourcesRequired.split(',') : []
+                title: document.getElementById('activity-title').value,
+                description: document.getElementById('activity-description').value,
+                type: document.getElementById('activity-type').value,
+                pcId: document.getElementById('activity-pc-select').value,
+                scheduledDate: document.getElementById('activity-scheduled-date').value,
+                scheduledTime: document.getElementById('activity-scheduled-time').value,
+                duration: parseInt(document.getElementById('activity-duration').value) || 60,
+                priority: document.getElementById('activity-priority').value,
+                status: document.getElementById('activity-status').value,
+                assignedTo: document.getElementById('activity-assigned-to-name').value,
+                location: document.getElementById('activity-location').value,
+                contactName: document.getElementById('activity-contact-name').value,
+                contactPhone: document.getElementById('activity-contact-phone').value
             };
 
-            const id = await activities.createActivity(activityData);
+            // Add completion notes if activity is completed
+            if (activityData.status === 'completed') {
+                activityData.completionNotes = document.getElementById('activity-completion-notes').value;
+            }
+
+            let id;
+            if (isEdit) {
+                // Update existing activity
+                activityData.id = activityId;
+                activityData.updatedAt = new Date();
+                await db.save('activities', activityData);
+                id = activityId;
+                
+                uiModals.showToast('Activity updated successfully', 'success');
+            } else {
+                // Create new activity
+                id = await activities.createActivity(activityData);
+                uiModals.showToast('Activity created successfully', 'success');
+            }
             
-            uiModals.closeModal(MODAL_TYPES.ACTIVITY);
-            uiModals.showToast('Activity created successfully', 'success');
+            // Reset modal title back to "New Activity" for next use
+            document.getElementById('activity-modal-title').textContent = 'New Activity';
+            
+            uiModals.closeModal('activity-modal');
             
             // Refresh page data
             if (this.currentPage === 'activities') {
                 await this.loadActivitiesData();
+            }
+            
+            // Also refresh dashboard if that's current page
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
             }
 
         } catch (error) {
@@ -978,6 +1019,38 @@ class CRMApplication {
         }
     }
     
+    /**
+     * @description Load PC Numbers into a select dropdown
+     * @param {string} selectId - ID of the select element
+     * @param {string} selectedId - ID of PC Number to pre-select
+     */
+    async loadPcNumbersForSelect(selectId, selectedId = null) {
+        try {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            const allPcNumbers = await db.loadAll('pcNumbers');
+            
+            // Clear existing options
+            select.innerHTML = '<option value="">Select PC Number...</option>';
+            
+            // Add PC Numbers as options
+            allPcNumbers.forEach(pc => {
+                const option = document.createElement('option');
+                option.value = pc.id;
+                option.textContent = `${pc.pcNumber} - ${pc.company || pc.clientName || 'Unknown Company'}`;
+                if (selectedId && pc.id === selectedId) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            logDebug('PC Numbers loaded for select:', selectId);
+        } catch (error) {
+            logError('Failed to load PC Numbers for select:', error);
+        }
+    }
+    
     async loadPcNumbersData() { 
         try {
             logDebug('Loading PC numbers data...');
@@ -1174,7 +1247,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.showPage = (pageId) => app.navigateToPage(pageId);
     
     // Expose other essential functions for HTML onclick handlers
-    window.showActivityModal = () => uiModals.openModal('activity-modal');
+    window.showActivityModal = async () => {
+        // Reset form for new activity
+        document.getElementById('activity-modal-title').textContent = 'New Activity';
+        document.getElementById('activity-id').value = '';
+        
+        // Clear all form fields
+        document.getElementById('activity-title').value = '';
+        document.getElementById('activity-description').value = '';
+        document.getElementById('activity-type').value = '';
+        document.getElementById('activity-priority').value = 'medium';
+        document.getElementById('activity-status').value = 'pending';
+        document.getElementById('activity-scheduled-date').value = '';
+        document.getElementById('activity-scheduled-time').value = '';
+        document.getElementById('activity-duration').value = '';
+        document.getElementById('activity-assigned-to-name').value = '';
+        document.getElementById('activity-location').value = '';
+        document.getElementById('activity-contact-name').value = '';
+        document.getElementById('activity-contact-phone').value = '';
+        
+        // Hide completion section
+        document.getElementById('activity-completion-section').style.display = 'none';
+        document.getElementById('activity-completion-notes').value = '';
+        
+        // Load PC Numbers dropdown
+        await window.crmApp.loadPcNumbersForSelect('activity-pc-select');
+        
+        uiModals.openModal('activity-modal');
+    };
     window.showResourceModal = () => uiModals.openModal('resource-modal');
     window.showNewQuoteModal = () => uiModals.openModal('quote-modal');
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
@@ -1245,7 +1345,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.createPriceList = () => console.log('Create price list');
     window.editPriceList = (id) => console.log('Edit price list:', id);
     window.viewPriceList = (id) => console.log('View price list:', id);
-    window.editActivity = (id) => console.log('Edit activity:', id);
+    window.editActivity = async (id) => {
+        try {
+            logDebug('Opening Activity edit modal for ID:', id);
+            const activityData = await db.load('activities', id);
+            if (!activityData) {
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            // Change modal title to Edit mode
+            document.getElementById('activity-modal-title').textContent = 'Edit Activity';
+            
+            // Populate modal fields
+            document.getElementById('activity-id').value = activityData.id;
+            document.getElementById('activity-title').value = activityData.title || '';
+            document.getElementById('activity-description').value = activityData.description || '';
+            document.getElementById('activity-type').value = activityData.type || '';
+            document.getElementById('activity-priority').value = activityData.priority || 'medium';
+            document.getElementById('activity-status').value = activityData.status || 'pending';
+            
+            // Scheduling fields
+            if (activityData.scheduledDate) {
+                const date = new Date(activityData.scheduledDate);
+                document.getElementById('activity-scheduled-date').value = date.toISOString().split('T')[0];
+            }
+            document.getElementById('activity-scheduled-time').value = activityData.scheduledTime || '';
+            document.getElementById('activity-duration').value = activityData.duration || '';
+            document.getElementById('activity-assigned-to-name').value = activityData.assignedTo || '';
+            
+            // Location & Contact fields
+            document.getElementById('activity-location').value = activityData.location || '';
+            document.getElementById('activity-contact-name').value = activityData.contactName || '';
+            document.getElementById('activity-contact-phone').value = activityData.contactPhone || '';
+            
+            // Completion notes if completed
+            if (activityData.status === 'completed') {
+                document.getElementById('activity-completion-section').style.display = 'block';
+                document.getElementById('activity-completion-notes').value = activityData.completionNotes || '';
+            }
+            
+            // Load PC Number dropdown
+            await window.crmApp.loadPcNumbersForSelect('activity-pc-select', activityData.pcId);
+            
+            // Open modal
+            uiModals.openModal('activity-modal');
+            
+        } catch (error) {
+            logError('Failed to open Activity edit modal:', error);
+            uiModals.showToast('Failed to load Activity data', 'error');
+        }
+    };
     window.deleteActivity = (id) => console.log('Delete activity:', id);
     
     // PHASE 2: Search-related placeholder functions (for modal compatibility)
