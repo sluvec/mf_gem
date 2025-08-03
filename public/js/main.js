@@ -27,13 +27,11 @@ class CRMApplication {
         this.currentPage = 'dashboard';
         this.isInitialized = false;
         this.loadingOverlay = null;
-        this.searchInstance = null;
         this.config = {
             DB_NAME: 'CRM_Database',
             VERSION: '1.0.0',
             MAX_DESCRIPTION_LENGTH: 1000,
-            DEFAULT_ACTIVITY_DURATION: 60,
-            SEARCH_DEBOUNCE_MS: 300
+            DEFAULT_ACTIVITY_DURATION: 60
         };
     }
 
@@ -120,9 +118,6 @@ class CRMApplication {
 
             // Setup mobile menu
             this.setupMobileMenu();
-
-            // Setup search functionality
-            this.setupGlobalSearch();
 
             // Initialize page-specific components
             this.initializePageComponents();
@@ -650,44 +645,7 @@ class CRMApplication {
         }
     }
 
-    /**
-     * @description Setup global search functionality
-     */
-    setupGlobalSearch() {
-        try {
-            const searchInput = document.getElementById('global-search-input');
-            if (searchInput) {
-                const debouncedSearch = debounce(this.performGlobalSearch.bind(this), this.config.SEARCH_DEBOUNCE_MS);
-                searchInput.addEventListener('input', debouncedSearch);
-            }
-        } catch (error) {
-            logError('Failed to setup global search:', error);
-        }
-    }
 
-    /**
-     * @description Perform global search
-     * @param {Event} event - Input event
-     */
-    async performGlobalSearch(event) {
-        try {
-            const query = event.target.value.trim();
-            if (query.length < 2) return;
-
-            const [activitiesResults, resourcesResults] = await Promise.all([
-                activities.searchActivities(query),
-                resources.searchResources(query)
-            ]);
-
-            this.displaySearchResults({
-                activities: activitiesResults,
-                resources: resourcesResults
-            });
-
-        } catch (error) {
-            logError('Global search failed:', error);
-        }
-    }
 
     /**
      * @description Load sample data for demo purposes
@@ -892,13 +850,6 @@ class CRMApplication {
      */
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (event) => {
-            // Ctrl+K for global search
-            if (event.ctrlKey && event.key === 'k') {
-                event.preventDefault();
-                const searchInput = document.getElementById('global-search-input');
-                if (searchInput) searchInput.focus();
-            }
-            
             // Escape to close modals
             if (event.key === 'Escape') {
                 uiModals.closeAllModals();
@@ -1130,7 +1081,6 @@ class CRMApplication {
     }
 
     renderActivitiesCalendar(activitiesList) { logDebug('Rendering activities calendar...'); }
-    displaySearchResults(results) { logDebug('Displaying search results...'); }
     showValidationErrors(form, errors) { 
         logDebug('Showing validation errors:', errors);
         uiModals.showToast(`Validation failed: ${errors.join(', ')}`, 'error');
@@ -1178,8 +1128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     };
-    window.performGlobalSearch = () => console.log('Global search function placeholder');
-    window.clearGlobalSearch = () => console.log('Clear search function placeholder');
     window.loadSampleData = async () => {
         try {
             await app.loadSampleData();

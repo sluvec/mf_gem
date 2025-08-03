@@ -387,31 +387,7 @@ export class Activities {
         }
     }
 
-    /**
-     * @description Search activities by query
-     * @param {string} query - Search query
-     * @returns {Promise<Array>} Array of matching activities
-     */
-    async searchActivities(query) {
-        try {
-            const activities = await this.getAllActivities();
-            const searchTerm = query.toLowerCase().trim();
-            
-            if (!searchTerm) return activities;
-            
-            return activities.filter(activity => {
-                return (
-                    activity.title.toLowerCase().includes(searchTerm) ||
-                    activity.description.toLowerCase().includes(searchTerm) ||
-                    activity.type.toLowerCase().includes(searchTerm) ||
-                    activity.notes.toLowerCase().includes(searchTerm)
-                );
-            });
-        } catch (error) {
-            logError('Failed to search activities:', error);
-            throw error;
-        }
-    }
+
 }
 
 // Create global activities instance

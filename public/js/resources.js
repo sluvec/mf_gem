@@ -187,33 +187,7 @@ export class Resources {
         }
     }
 
-    /**
-     * @description Search resources by query
-     * @param {string} query - Search query
-     * @returns {Promise<Array>} Array of matching resources
-     */
-    async searchResources(query) {
-        try {
-            const resources = await this.getAllResources();
-            const searchTerm = query.toLowerCase().trim();
-            
-            if (!searchTerm) return resources;
-            
-            return resources.filter(resource => {
-                return (
-                    resource.name.toLowerCase().includes(searchTerm) ||
-                    resource.description.toLowerCase().includes(searchTerm) ||
-                    resource.sku.toLowerCase().includes(searchTerm) ||
-                    resource.type.toLowerCase().includes(searchTerm) ||
-                    resource.location.toLowerCase().includes(searchTerm) ||
-                    resource.supplier.toLowerCase().includes(searchTerm)
-                );
-            });
-        } catch (error) {
-            logError('Failed to search resources:', error);
-            throw error;
-        }
-    }
+
 
     /**
      * @description Assign a resource to an activity
