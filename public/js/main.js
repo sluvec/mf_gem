@@ -1012,39 +1012,168 @@ class CRMApplication {
                 logInfo('Saved Activity:', savedActivity.title);
             }
 
-            // Sample Resources
+            // Sample Resources - Office Relocation Equipment & Materials
             const sampleResources = [
+                // Vehicles
                 {
-                    name: 'Scissor Lift JLG 1930ES',
+                    name: 'Mercedes Luton Van with Tail Lift',
+                    type: 'Vehicle',
+                    sku: 'VEH-001',
+                    status: 'available',
+                    costPerUnit: 220.00,
+                    unit: 'day',
+                    supplier: 'Commercial Vehicle Hire Ltd',
+                    description: 'Long-wheelbase Luton van with hydraulic tail lift, perfect for office furniture and equipment.'
+                },
+                {
+                    name: 'Articulated Lorry 18t',
+                    type: 'Vehicle', 
+                    sku: 'VEH-002',
+                    status: 'available',
+                    costPerUnit: 650.00,
+                    unit: 'day',
+                    supplier: 'Heavy Transport Solutions',
+                    description: 'Large articulated lorry for major corporate relocations and long-distance moves.'
+                },
+                {
+                    name: 'Ford Transit Van LWB',
+                    type: 'Vehicle',
+                    sku: 'VEH-003',
+                    status: 'in-use',
+                    costPerUnit: 180.00,
+                    unit: 'day',
+                    supplier: 'Transit Hire Network',
+                    description: 'Standard long-wheelbase transit van for crew, tools and smaller office items.'
+                },
+                
+                // Specialist Equipment
+                {
+                    name: 'Piano Moving Dolly & Straps',
                     type: 'Equipment',
                     sku: 'EQP-001',
                     status: 'available',
-                    costPerHour: 35.00,
-                    description: 'Compact electric scissor lift for indoor use.'
+                    costPerUnit: 45.00,
+                    unit: 'day',
+                    supplier: 'Specialist Moving Equipment Ltd',
+                    description: 'Heavy-duty dolly system for moving safes, servers, and heavy office equipment.'
                 },
                 {
-                    name: 'Ford Transit Van',
-                    type: 'Vehicle',
-                    sku: 'VEH-005',
-                    status: 'in-use',
-                    costPerHour: 0.50,
-                    description: 'Standard long-wheelbase transit van for crew and tools.'
-                },
-                {
-                    name: 'CAT 320 Excavator',
+                    name: 'Stair Climbing Hand Truck',
                     type: 'Equipment',
-                    sku: 'EQP-010',
-                    status: 'maintenance',
-                    costPerHour: 85.00,
-                    description: 'Heavy excavator for trenching and groundworks.'
+                    sku: 'EQP-002',
+                    status: 'available',
+                    costPerUnit: 35.00,
+                    unit: 'day',
+                    supplier: 'Mobility Solutions UK',
+                    description: 'Electric stair-climbing trolley for heavy items in buildings without lift access.'
                 },
                 {
-                    name: 'Safety Harness Kit',
-                    type: 'Tool',
-                    sku: 'TOOL-015',
+                    name: 'Furniture Protection Blankets (Set of 50)',
+                    type: 'Materials',
+                    sku: 'MAT-001',
                     status: 'available',
-                    costPerHour: 0,
-                    description: 'Full body safety harness with lanyard and anchor.'
+                    costPerUnit: 75.00,
+                    unit: 'set',
+                    supplier: 'Protection Supplies Direct',
+                    description: 'Professional quilted moving blankets for furniture protection during transport.'
+                },
+                
+                // IT & Electronics
+                {
+                    name: 'Anti-Static Bubble Wrap (Industrial)',
+                    type: 'Materials',
+                    sku: 'MAT-002',
+                    status: 'available',
+                    costPerUnit: 28.00,
+                    unit: 'roll',
+                    supplier: 'Electronic Packaging Solutions',
+                    description: 'Anti-static bubble wrap roll (750mm x 100m) for IT equipment protection.'
+                },
+                {
+                    name: 'Server Rack Moving Kit',
+                    type: 'Equipment',
+                    sku: 'EQP-003',
+                    status: 'available',
+                    costPerUnit: 95.00,
+                    unit: 'day',
+                    supplier: 'IT Infrastructure Movers',
+                    description: 'Specialized equipment for safely moving server racks and data centre equipment.'
+                },
+                
+                // Storage & Containers
+                {
+                    name: 'Archive Boxes (Heavy Duty)',
+                    type: 'Materials',
+                    sku: 'MAT-003',
+                    status: 'available',
+                    costPerUnit: 8.50,
+                    unit: 'each',
+                    supplier: 'Document Storage Solutions',
+                    description: 'Heavy-duty archive boxes suitable for legal documents and confidential files.'
+                },
+                {
+                    name: 'Climate-Controlled Storage Unit',
+                    type: 'Storage',
+                    sku: 'STO-001',
+                    status: 'available',
+                    costPerUnit: 25.00,
+                    unit: 'week/m³',
+                    supplier: 'Secure Storage London',
+                    description: 'Temperature and humidity controlled storage for sensitive documents and artwork.'
+                },
+                
+                // Specialized Services
+                {
+                    name: 'IT Technician (Certified)',
+                    type: 'Labour',
+                    sku: 'LAB-001',
+                    status: 'available',
+                    costPerUnit: 65.00,
+                    unit: 'hour',
+                    supplier: 'IT Support Specialists',
+                    description: 'Certified IT technician for server disconnection, transport setup and configuration.'
+                },
+                {
+                    name: 'Security Guard (CRB Checked)',
+                    type: 'Labour',
+                    sku: 'LAB-002',
+                    status: 'available',
+                    costPerUnit: 25.00,
+                    unit: 'hour',
+                    supplier: 'Professional Security Services',
+                    description: 'CRB checked security personnel for sensitive document and equipment transport.'
+                },
+                
+                // Tools & Accessories
+                {
+                    name: 'Floor Protection Sheets',
+                    type: 'Materials',
+                    sku: 'MAT-004',
+                    status: 'available',
+                    costPerUnit: 3.50,
+                    unit: 'm²',
+                    supplier: 'Site Protection Supplies',
+                    description: 'Heavy-duty floor protection sheets for carpets and flooring during moves.'
+                },
+                {
+                    name: 'Vacuum Lifting System',
+                    type: 'Equipment',
+                    sku: 'EQP-004',
+                    status: 'maintenance',
+                    costPerUnit: 125.00,
+                    unit: 'day',
+                    supplier: 'Advanced Lifting Solutions',
+                    description: 'Vacuum lifting system for glass panels, mirrors and delicate artwork.'
+                },
+                {
+                    name: 'Professional Packing Team (4 people)',
+                    type: 'Labour',
+                    sku: 'LAB-003',
+                    status: 'available',
+                    costPerUnit: 160.00,
+                    unit: 'hour',
+                    supplier: 'Expert Packing Services',
+                    description: 'Experienced 4-person packing team for efficient office content preparation.'
                 }
             ];
 
@@ -1053,40 +1182,107 @@ class CRMApplication {
                 logInfo('Saved Resource:', savedResource.name);
             }
 
-            // Sample Quotes
+            // Sample Quotes - Connected to Office Relocation PC Numbers
             const sampleQuotes = [
                 {
                     quoteNumber: 'QT-2024-001',
                     pcNumber: 'PC-2024-001',
-                    clientName: 'Acme Corporation',
-                    projectTitle: 'Office LED Lighting Upgrade',
-                    value: 15500.00,
+                    clientName: 'Fintech Innovations Ltd',
+                    projectTitle: 'Complete Office Relocation - City to Canary Wharf',
+                    value: 47500.00,
                     status: 'pending',
-                    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-                    description: 'Complete LED lighting upgrade including materials and labor',
-                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+                    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Full office relocation for 85 staff including IT infrastructure, secure document handling, and executive furniture',
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
                 },
                 {
                     quoteNumber: 'QT-2024-002',
                     pcNumber: 'PC-2024-002',
-                    clientName: 'Warehouse Solutions Ltd',
-                    projectTitle: 'Warehouse Lighting Installation',
-                    value: 28750.00,
+                    clientName: 'Chambers & Associates',
+                    projectTitle: 'Barrister Chambers Relocation',
+                    value: 34200.00,
                     status: 'approved',
-                    validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days from now
-                    description: 'New LED lighting installation for warehouse facility including control systems',
-                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                    validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Prestigious law chambers with specialist library and archive handling, white-glove service for antique furniture',
+                    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
                 },
                 {
                     quoteNumber: 'QT-2024-003',
-                    pcNumber: 'PC-2024-001',
-                    clientName: 'Tech Startup Hub',
-                    projectTitle: 'Smart Office Lighting System',
-                    value: 42300.00,
+                    pcNumber: 'PC-2024-003',
+                    clientName: 'TechStart Solutions',
+                    projectTitle: 'Emergency Office Move - Lease Termination',
+                    value: 19750.00,
+                    status: 'approved',
+                    validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Urgent relocation with emergency premiums, 25 staff, minimal downtime weekend service',
+                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    quoteNumber: 'QT-2024-004',
+                    pcNumber: 'PC-2024-004',
+                    clientName: 'Industrial Manufacturing UK',
+                    projectTitle: 'Manufacturing HQ Office Consolidation',
+                    value: 72800.00,
+                    status: 'pending',
+                    validUntil: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Consolidating three satellite offices with heavy machinery documentation and compliance records',
+                    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    quoteNumber: 'QT-2024-005',
+                    pcNumber: 'PC-2024-005',
+                    clientName: 'Creative Media Agency',
+                    projectTitle: 'Creative Studio & Office Move',
+                    value: 31250.00,
+                    status: 'completed',
+                    validUntil: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Successfully completed: Creative agency with production studios and expensive AV equipment',
+                    createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    quoteNumber: 'QT-2024-006',
+                    pcNumber: 'PC-2024-006',
+                    clientName: 'Global Consulting Partners',
+                    projectTitle: 'Large Corporate Office Relocation',
+                    value: 132500.00,
                     status: 'draft',
-                    validUntil: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 days from now
-                    description: 'Advanced smart lighting system with IoT integration and automated controls',
-                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+                    validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Major consulting firm 200+ staff across 4 floors with executive suites and data centre',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    quoteNumber: 'QT-2024-007',
+                    pcNumber: 'PC-2024-007',
+                    clientName: 'Boutique Investments Ltd',
+                    projectTitle: 'Premium Investment Office Fitout',
+                    value: 92700.00,
+                    status: 'pending',
+                    validUntil: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'High-end Mayfair office with white-glove service for antique furniture and artwork collection',
+                    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    quoteNumber: 'QT-2024-008',
+                    pcNumber: 'PC-2024-008',
+                    clientName: 'NHS Trust Admin',
+                    projectTitle: 'NHS Administrative Office Move',
+                    value: 24800.00,
+                    status: 'pending',
+                    validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'NHS Trust with strict security requirements for patient data and medical records compliance',
+                    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                },
+                // Additional quotes for some projects (multiple quotes per project)
+                {
+                    quoteNumber: 'QT-2024-009',
+                    pcNumber: 'PC-2024-001',
+                    clientName: 'Fintech Innovations Ltd',
+                    projectTitle: 'Canary Wharf Move - IT Only Package',
+                    value: 15750.00,
+                    status: 'declined',
+                    validUntil: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Alternative quote for IT infrastructure only (client chose full service)',
+                    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000)
                 }
             ];
 
