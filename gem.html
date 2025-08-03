@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3916,7 +3915,7 @@
                             aria-expanded="false"
                             aria-haspopup="true"
                             aria-controls="projects-menu"
-                            onclick="toggleDropdown('projects')">
+                            onclick="toggleDropdown('projects-menu')">
                             <span class="nav-icon">📁</span>
                             Projects
                             <span class="dropdown-arrow" aria-hidden="true">▼</span>
@@ -3955,7 +3954,7 @@
                             aria-expanded="false"
                             aria-haspopup="true"
                             aria-controls="sales-menu"
-                            onclick="toggleDropdown('sales')">
+                            onclick="toggleDropdown('sales-menu')">
                             <span class="nav-icon">💰</span>
                             Sales
                             <span class="dropdown-arrow" aria-hidden="true">▼</span>
@@ -3994,7 +3993,7 @@
                             aria-expanded="false"
                             aria-haspopup="true"
                             aria-controls="resources-menu"
-                            onclick="toggleDropdown('resources')">
+                            onclick="toggleDropdown('resources-menu')">
                             <span class="nav-icon">🔧</span>
                             Resources
                             <span class="dropdown-arrow" aria-hidden="true">▼</span>
@@ -4033,7 +4032,7 @@
                             aria-expanded="false"
                             aria-haspopup="true"
                             aria-controls="templates-menu"
-                            onclick="toggleDropdown('templates')">
+                            onclick="toggleDropdown('templates-menu')">
                             <span class="nav-icon">📄</span>
                             Templates
                             <span class="dropdown-arrow" aria-hidden="true">▼</span>
@@ -5995,7 +5994,7 @@
             <h3>Basic Information</h3>
             <div class="form-grid">
                 <div><label>Resource Name *</label><input type="text" id="resource-name" placeholder="e.g. LED Downlight - 10W Cool White" required></div>
-                <div><label>SKU</label><input type="text" id="resource-sku" placeholder="e.g. LED-DL-10W-CW"></div>
+                <div><label>SKU</label><input type="text" id="resource-sku" placeholder="e.g. LED-DL-10W-CW" pattern="[A-Z0-9-]+" title="SKU should contain only uppercase letters, numbers, and hyphens"></div>
                 <div><label>Category *</label><select id="resource-category" required>
                     <option value="">Select...</option>
                     <option value="lighting">Lighting</option>
@@ -7513,6 +7512,53 @@ async function resetData() {
 }
 
 // ========================================
+// SECURITY & SANITIZATION
+// ========================================
+
+/**
+ * @description Escape HTML characters to prevent XSS attacks
+ * @param {string} str - Raw string that may contain HTML
+ * @returns {string} - HTML-escaped safe string
+ * @example
+ * sanitizeHTML('<script>alert("xss")<\/script>') // Returns: '&lt;script&gt;alert("xss")&lt;/script&gt;'
+ */
+function sanitizeHTML(str) {
+    if (typeof str !== 'string') return '';
+    
+    return str
+        .replace(/&/g, '&amp;')     // Must be first - escape ampersands
+        .replace(/</g, '&lt;')      // Escape less-than signs
+        .replace(/>/g, '&gt;')      // Escape greater-than signs
+        .replace(/"/g, '&quot;')    // Escape double quotes
+        .replace(/'/g, '&#x27;')    // Escape single quotes
+        .replace(/\//g, '&#x2F;');  // Escape forward slashes
+}
+
+/**
+ * @description Safe wrapper for setting innerHTML with HTML escaping
+ * @param {HTMLElement} element - Target DOM element
+ * @param {string} content - Content to set (will be HTML-escaped)
+ */
+function setSafeHTML(element, content) {
+    if (!element) return;
+    element.innerHTML = sanitizeHTML(content);
+}
+
+/**
+ * @description Safe wrapper for building HTML templates with escaped content
+ * @param {TemplateStringsArray} strings - Template literal strings
+ * @param {...any} values - Values to be safely inserted
+ * @returns {string} - Safe HTML string with escaped values
+ */
+function safeHTML(strings, ...values) {
+    return strings.reduce((result, string, i) => {
+        const value = values[i];
+        const safeValue = value !== undefined ? sanitizeHTML(String(value)) : '';
+        return result + string + safeValue;
+    }, '');
+}
+
+// ========================================
 // Nawigacja i UI
 // ========================================
 
@@ -7612,7 +7658,10 @@ function updateDashboard() {
     const recentPCBody = document.getElementById('recent-pc');
     recentPCBody.innerHTML = '';
     db.pcs.slice(-5).reverse().forEach(pc => {
-        recentPCBody.innerHTML += `<tr><td>${pc.pc_number || pc.number}</td><td>${pc.company_name || pc.company}</td><td>${pc.project_name || pc.reference || '-'}</td></tr>`;
+        const pcNumber = sanitizeHTML(pc.pc_number || pc.number);
+        const companyName = sanitizeHTML(pc.company_name || pc.company);
+        const projectName = sanitizeHTML(pc.project_name || pc.reference || '-');
+        recentPCBody.innerHTML += `<tr><td>${pcNumber}</td><td>${companyName}</td><td>${projectName}</td></tr>`;
     });
 }
 
@@ -7807,14 +7856,17 @@ function viewPC(id) {
     const quotesTbody = document.getElementById('pc-quotes');
     quotesTbody.innerHTML = '';
     db.quotes.filter(q => (q.pc_id === id || q.pcId === id)).forEach(q => {
-        const quoteNumber = q.quote_number || q.number;
+        const quoteNumber = sanitizeHTML(q.quote_number || q.number);
         const totalCost = q.total_cost || q.total || 0;
-        const validUntil = q.valid_until ? ` (Valid until: ${new Date(q.valid_until).toLocaleDateString()})` : '';
+        const quoteTitle = sanitizeHTML(q.title || 'v' + (q.version || 1));
+        const quoteStatus = sanitizeHTML(q.status);
+        const validUntil = q.valid_until ? sanitizeHTML(` (Valid until: ${new Date(q.valid_until).toLocaleDateString()})`) : '';
+        
         quotesTbody.innerHTML += `<tr>
             <td>${quoteNumber}</td>
-            <td>${q.title || 'v' + (q.version || 1)}</td>
+            <td>${quoteTitle}</td>
             <td>£${totalCost.toFixed(2)}</td>
-            <td>${q.status}${validUntil}</td>
+            <td>${quoteStatus}${validUntil}</td>
             <td><button onclick="alert('Feature under development')">Show</button></td>
         </tr>`;
     });
@@ -7822,7 +7874,12 @@ function viewPC(id) {
     const activitiesTbody = document.getElementById('pc-activities');
     activitiesTbody.innerHTML = '';
     db.activities.filter(a => a.pcId === id).forEach(a => {
-        activitiesTbody.innerHTML += `<tr><td>${a.crmId}</td><td>${a.type}</td><td>${new Date(a.date).toLocaleDateString()}</td><td>${a.status}</td>
+        const crmId = sanitizeHTML(String(a.crmId));
+        const activityType = sanitizeHTML(a.type);
+        const activityDate = sanitizeHTML(new Date(a.date).toLocaleDateString());
+        const activityStatus = sanitizeHTML(a.status);
+        
+        activitiesTbody.innerHTML += `<tr><td>${crmId}</td><td>${activityType}</td><td>${activityDate}</td><td>${activityStatus}</td>
         <td><button onclick="alert('Feature under development')">Show</button></td></tr>`;
     });
 
@@ -7842,7 +7899,10 @@ function showNewQuoteModal() {
     const pcSelect = document.getElementById('quote-modal-pc');
     pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
     db.pcs.forEach(pc => {
-        pcSelect.innerHTML += `<option value="${pc.id}">${pc.pc_number || pc.number} - ${pc.company_name || pc.company}</option>`;
+        const pcId = sanitizeHTML(String(pc.id));
+        const pcNumber = sanitizeHTML(pc.pc_number || pc.number);
+        const companyName = sanitizeHTML(pc.company_name || pc.company);
+        pcSelect.innerHTML += `<option value="${pcId}">${pcNumber} - ${companyName}</option>`;
     });
     document.getElementById('quote-modal').classList.add('active');
 }
@@ -8124,13 +8184,20 @@ function populateQuotedActivities() {
     }
     
     // Create checkboxes for each activity
-    container.innerHTML = pcActivities.map(activity => `
-        <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
-            <input type="checkbox" value="${activity.id}" onchange="window.updateQuotedActivities()" style="margin-right: 0.5rem;">
-            <strong>${activity.title || activity.type}</strong> - ${activity.scheduled_date || 'No date'} 
-            <span style="color: #666;">(${activity.status})</span>
-        </label>
-    `).join('');
+    container.innerHTML = pcActivities.map(activity => {
+        const activityId = sanitizeHTML(String(activity.id));
+        const activityTitle = sanitizeHTML(activity.title || activity.type);
+        const activityDate = sanitizeHTML(activity.scheduled_date || 'No date');
+        const activityStatus = sanitizeHTML(activity.status);
+        
+        return `
+            <label style="display: block; margin-bottom: 0.5rem; cursor: pointer;">
+                <input type="checkbox" value="${activityId}" onchange="window.updateQuotedActivities()" style="margin-right: 0.5rem;">
+                <strong>${activityTitle}</strong> - ${activityDate} 
+                <span style="color: #666;">(${activityStatus})</span>
+            </label>
+        `;
+    }).join('');
 }
 
 function updateQuotedActivities() {
@@ -8413,22 +8480,33 @@ function renderResourcesList() {
             '<span style="background: #dcfce7; color: #166534; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">ACTIVE</span>' :
             '<span style="background: #fee2e2; color: #991b1b; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">INACTIVE</span>';
         
+        // Critical: Sanitize all resource data
+        const resourceId = sanitizeHTML(String(resource.id));
+        const resourceName = sanitizeHTML(resource.name);
+        const resourceDescription = resource.description ? sanitizeHTML(resource.description) : '';
+        const resourceSku = sanitizeHTML(resource.sku || 'N/A');
+        const resourceCategory = sanitizeHTML(resource.category);
+        
+        // Fix CSS styling for template literals
+        const bgColor = isSelected ? '#f0f9ff' : 'white';
+        const hoverOutColor = isSelected ? '#f0f9ff' : 'white';
+        
         return `
-            <tr style="background: ${isSelected ? '#f0f9ff' : 'white'};" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='${isSelected ? '#f0f9ff' : 'white'}'">
+            <tr style="background: ${bgColor};" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='${hoverOutColor}'">
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
                     <input type="checkbox" ${isSelected ? 'checked' : ''} 
-                           onchange="window.toggleResourceSelection('${resource.id}')" 
+                           onchange="window.toggleResourceSelection('${resourceId}')" 
                            style="transform: scale(1.2);">
                 </td>
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
-                    <div style="font-weight: 500;">${resource.name}</div>
-                    ${resource.description ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${resource.description}</div>` : ''}
+                    <div style="font-weight: 500;">${resourceName}</div>
+                    ${resourceDescription ? `<div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">${resourceDescription}</div>` : ''}
                 </td>
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
-                    <code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">${resource.sku || 'N/A'}</code>
+                    <code style="background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">${resourceSku}</code>
                 </td>
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; text-transform: capitalize;">
-                    ${resource.category}
+                    ${resourceCategory}
                 </td>
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; font-weight: 500;">
                     £${resource.client_price.toFixed(2)}
@@ -8436,10 +8514,10 @@ function renderResourcesList() {
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
                     <input type="number" value="1" min="1" max="999" 
                            style="width: 60px; padding: 0.25rem; border: 1px solid #ccc; border-radius: 0.25rem;"
-                           id="qty-${resource.id}" onchange="window.updateResourceTotal('${resource.id}')">
+                           id="qty-${resourceId}" onchange="window.updateResourceTotal('${resourceId}')">
                 </td>
                 <td style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0; font-weight: 500;">
-                    <span id="total-${resource.id}">£${resource.client_price.toFixed(2)}</span>
+                    <span id="total-${resourceId}">£${resource.client_price.toFixed(2)}</span>
                 </td>
             </tr>
         `;
@@ -8525,16 +8603,23 @@ function addResourceToQuoteCategory(resource, qty) {
     
     const total = resource.client_price * qty;
     
+    // Sanitize all values for safe HTML injection
+    const safeLineId = sanitizeHTML(lineId);
+    const safeCategory = sanitizeHTML(category);
+    const safeResourceId = sanitizeHTML(String(resource.id));
+    const safeResourceName = sanitizeHTML(resource.name);
+    const safeQty = sanitizeHTML(String(qty));
+    
     lineDiv.innerHTML = `
-        <input type="checkbox" class="line-item-checkbox" data-line-id="${lineId}" data-category="${category}" 
+        <input type="checkbox" class="line-item-checkbox" data-line-id="${safeLineId}" data-category="${safeCategory}" 
                onchange="window.updateBulkSelection()" style="margin-right: 0.5rem; transform: scale(1.2);">
         <select disabled style="background: #f1f5f9;">
-            <option value="${resource.id}" data-price="${resource.client_price}">${resource.name}</option>
+            <option value="${safeResourceId}" data-price="${resource.client_price}">${safeResourceName}</option>
         </select>
-        <input type="number" value="${qty}" min="1" onchange="window.updateLineQty('${lineId}', '${category}')" style="width: 80px;">
+        <input type="number" value="${qty}" min="1" onchange="window.updateLineQty('${safeLineId}', '${safeCategory}')" style="width: 80px;">
         <input type="text" readonly value="£${resource.client_price.toFixed(2)}" style="background: #f1f5f9;">
         <span class="line-item-total">£${total.toFixed(2)}</span>
-        <button class="remove-btn" onclick="window.removeLine('${lineId}', '${category}')">×</button>
+        <button class="remove-btn" onclick="window.removeLine('${safeLineId}', '${safeCategory}')">×</button>
     `;
     
     container.appendChild(lineDiv);
@@ -10325,7 +10410,8 @@ function renderTeamFilterChips() {
     // Add team member chips
     teamMembers.forEach(member => {
         const chip = document.createElement('div');
-        chip.className = `team-member-chip ${currentTeamFilter === member.id ? 'active' : ''}`;
+        const chipClass = currentTeamFilter === member.id ? 'active' : '';
+        chip.className = `team-member-chip ${chipClass}`;
         chip.style.background = member.color;
         chip.style.color = 'white';
         chip.innerHTML = `
@@ -11230,18 +11316,26 @@ function updateNotificationList() {
     }
     
     list.innerHTML = notifications.map(notification => {
-        const timeAgo = getTimeAgo(notification.timestamp);
-        const icon = getNotificationIcon(notification.type);
+        const timeAgo = sanitizeHTML(getTimeAgo(notification.timestamp));
+        const icon = sanitizeHTML(getNotificationIcon(notification.type));
+        
+        // Critical: Sanitize data used in attributes and content
+        const notificationId = sanitizeHTML(String(notification.id));
+        const readStatus = notification.read ? '' : 'unread';
+        const priority = sanitizeHTML(notification.priority);
+        const priorityBg = sanitizeHTML(getIconBackground(notification.priority));
+        const title = sanitizeHTML(notification.title);
+        const message = sanitizeHTML(notification.message);
         
         return `
-            <div class="notification-item ${notification.read ? '' : 'unread'} ${notification.priority}" 
-                 onclick="window.handleNotificationClick('${notification.id}')">
-                <div class="notification-icon" style="background: ${getIconBackground(notification.priority)};">
+            <div class="notification-item ${readStatus} ${priority}" 
+                 onclick="window.handleNotificationClick('${notificationId}')">
+                <div class="notification-icon" style="background: ${priorityBg};">
                     ${icon}
                 </div>
                 <div class="notification-content">
-                    <div class="notification-title">${notification.title}</div>
-                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
                     <div class="notification-time">${timeAgo}</div>
                 </div>
             </div>
@@ -11327,15 +11421,22 @@ function updateDashboardAlerts() {
     const alertsContainer = document.getElementById('dashboard-alerts');
     const alerts = generateDashboardAlerts();
     
-    alertsContainer.innerHTML = alerts.map(alert => `
-        <div class="dashboard-alert ${alert.type}">
-            <div class="dashboard-alert-icon">${alert.icon}</div>
-            <div class="dashboard-alert-content">
-                <div class="dashboard-alert-title">${alert.title}</div>
-                <div class="dashboard-alert-message">${alert.message}</div>
+    alertsContainer.innerHTML = alerts.map(alert => {
+        const alertType = sanitizeHTML(alert.type);
+        const alertIcon = sanitizeHTML(alert.icon);
+        const alertTitle = sanitizeHTML(alert.title);
+        const alertMessage = sanitizeHTML(alert.message);
+        
+        return `
+            <div class="dashboard-alert ${alertType}">
+                <div class="dashboard-alert-icon">${alertIcon}</div>
+                <div class="dashboard-alert-content">
+                    <div class="dashboard-alert-title">${alertTitle}</div>
+                    <div class="dashboard-alert-message">${alertMessage}</div>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function generateDashboardAlerts() {
@@ -16155,7 +16256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.CRM = CRM;
     
     // Navigation & Core
-    window.showPage = CRM.Navigation.showPage;
+    window.showPage = showPage;
     window.resetData = CRM.Database.reset;
     
     // Data Access Layer - expose for easy access
@@ -17119,13 +17220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Global dropdown navigation instance
-    const dropdownNavigation = new DropdownNavigationManager();
-    
-    // Global function for dropdown toggles
-    window.toggleDropdown = function(dropdownId) {
-        dropdownNavigation.toggleDropdown(dropdownId);
-    };
+    // MOVED TO DOMContentLoaded - will be defined there
     
     // Enhanced navigation state management
     function updateHierarchicalNavigationState(activePageId) {
@@ -18147,14 +18242,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Initialize navigation accessibility state
         if (navMenu) {
-            // For desktop, navigation should always be visible
-            navMenu.setAttribute('aria-hidden', 'false');
+            // For desktop, navigation should always be accessible
+            navMenu.removeAttribute('inert');
+            
+            // Force remove inert if we're currently on desktop
+            if (window.innerWidth >= 768) {
+                navMenu.removeAttribute('inert');
+            }
             
             // Reset navigation state on window resize
             window.addEventListener('resize', () => {
                 if (window.innerWidth >= 768) {
                     // Desktop mode - ensure navigation is accessible
-                    navMenu.setAttribute('aria-hidden', 'false');
+                    navMenu.removeAttribute('inert');
                     navMenu.classList.remove('active');
                     if (mobileToggle) {
                         mobileToggle.setAttribute('aria-expanded', 'false');
@@ -18172,48 +18272,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (newState) {
                     navMenu.classList.add('active');
-                    navMenu.setAttribute('aria-hidden', 'false');
+                    navMenu.removeAttribute('inert');
                     // Focus first menu item
                     const firstMenuItem = navMenu.querySelector('.nav-btn');
                     if (firstMenuItem) {
                         setTimeout(() => firstMenuItem.focus(), 100);
                     }
                 } else {
-                    // Remove focus from any focused element inside menu before hiding
-                    const focusedElement = navMenu.querySelector(':focus');
-                    if (focusedElement) {
-                        focusedElement.blur();
-                    }
                     navMenu.classList.remove('active');
-                    navMenu.setAttribute('aria-hidden', 'true');
+                    // Only set inert on mobile devices
+                    if (window.innerWidth < 768) {
+                        navMenu.setAttribute('inert', '');
+                    }
                 }
             });
             
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
                 if (!mobileToggle.contains(e.target) && !navMenu.contains(e.target)) {
-                    // Remove focus from any focused element inside menu before hiding
-                    const focusedElement = navMenu.querySelector(':focus');
-                    if (focusedElement) {
-                        focusedElement.blur();
-                    }
                     mobileToggle.setAttribute('aria-expanded', 'false');
                     navMenu.classList.remove('active');
-                    navMenu.setAttribute('aria-hidden', 'true');
+                    // Only set inert on mobile devices
+                    if (window.innerWidth < 768) {
+                        navMenu.setAttribute('inert', '');
+                    }
                 }
             });
             
             // Handle escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-                    // Remove focus from any focused element inside menu before hiding
-                    const focusedElement = navMenu.querySelector(':focus');
-                    if (focusedElement) {
-                        focusedElement.blur();
-                    }
                     mobileToggle.setAttribute('aria-expanded', 'false');
                     navMenu.classList.remove('active');
-                    navMenu.setAttribute('aria-hidden', 'true');
+                    // Only set inert on mobile devices
+                    if (window.innerWidth < 768) {
+                        navMenu.setAttribute('inert', '');
+                    }
                     mobileToggle.focus();
                 }
             });
@@ -18286,14 +18380,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobileToggle = document.getElementById('mobile-menu-toggle');
         const navMenu = document.getElementById('main-navigation');
         if (mobileToggle && navMenu && navMenu.classList.contains('active')) {
-            // Remove focus from any focused element inside menu before hiding
-            const focusedElement = navMenu.querySelector(':focus');
-            if (focusedElement) {
-                focusedElement.blur();
-            }
             mobileToggle.setAttribute('aria-expanded', 'false');
             navMenu.classList.remove('active');
-            navMenu.setAttribute('aria-hidden', 'true');
+            // Only set inert on mobile devices
+            if (window.innerWidth < 768) {
+                navMenu.setAttribute('inert', '');
+            }
         }
     };
     
@@ -18439,7 +18531,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Small delay to show completion
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            await showPage('dashboard');
+            showPage('dashboard');
             loadingManager.hide('app-init');
             
             // Show welcome notification
@@ -18508,6 +18600,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize enhanced operations
     enhanceSaveOperations();
     
+    // CRITICAL FIX: Initialize dropdown navigation after DOM is loaded
+    const dropdownNavigation = new DropdownNavigationManager();
+    
+    // Global function for dropdown toggles
+    window.toggleDropdown = function(dropdownId) {
+        dropdownNavigation.toggleDropdown(dropdownId);
+    };
+    
+    console.log('✅ Dropdown navigation initialized');
+    
     // Start application initialization with progress
     console.log('🚀 Starting enhanced application initialization...');
     initializeApplicationWithProgress();
@@ -18517,4 +18619,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-```
