@@ -4819,17 +4819,17 @@
                         <div id="collection-section" style="display: none; margin-bottom: 1rem; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.5rem;">
                             <h4 style="margin-top: 0; margin-bottom: 1rem;">📍 Collection Address</h4>
                             <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
-                                <div><label>Contact Name *</label><input type="text" id="quote-collection-name" placeholder="Contact person"></div>
-                                <div><label>Phone</label><input type="tel" id="quote-collection-phone" placeholder="Phone number"></div>
+                                <div><label>Contact Name *</label><input type="text" id="quote-collection-name" placeholder="Contact person" required></div>
+                                <div><label>Phone</label><input type="tel" id="quote-collection-phone" placeholder="Phone number" pattern="[0-9\s\+\-\(\)\.]+" title="Please enter a valid phone number"></div>
                                 <div><label>Email</label><input type="email" id="quote-collection-email" placeholder="Email"></div>
                                 <div><label>Date</label><input type="date" id="quote-collection-date"></div>
                             </div>
                             <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.75rem;">
-                                <div><label>Address Line 1 *</label><input type="text" id="quote-collection-address1" placeholder="Street address"></div>
+                                <div><label>Address Line 1 *</label><input type="text" id="quote-collection-address1" placeholder="Street address" required></div>
                                 <div><label>Address Line 2</label><input type="text" id="quote-collection-address2" placeholder="Additional info"></div>
-                                <div><label>City *</label><input type="text" id="quote-collection-city" placeholder="City"></div>
+                                <div><label>City *</label><input type="text" id="quote-collection-city" placeholder="City" required></div>
                                 <div><label>County</label><input type="text" id="quote-collection-county" placeholder="County"></div>
-                                <div><label>Postcode *</label><input type="text" id="quote-collection-postcode" placeholder="Postcode"></div>
+                                <div><label>Postcode *</label><input type="text" id="quote-collection-postcode" placeholder="Postcode" required pattern="[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}" title="Please enter a valid UK postcode (e.g., SW1A 1AA)"></div>
                             </div>
                         </div>
                         
@@ -4843,17 +4843,17 @@
                                 </label>
                             </div>
                             <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
-                                <div><label>Contact Name *</label><input type="text" id="quote-delivery-name" placeholder="Contact person"></div>
-                                <div><label>Phone</label><input type="tel" id="quote-delivery-phone" placeholder="Phone number"></div>
+                                <div><label>Contact Name *</label><input type="text" id="quote-delivery-name" placeholder="Contact person" required></div>
+                                <div><label>Phone</label><input type="tel" id="quote-delivery-phone" placeholder="Phone number" pattern="[0-9\s\+\-\(\)\.]+" title="Please enter a valid phone number"></div>
                                 <div><label>Email</label><input type="email" id="quote-delivery-email" placeholder="Email"></div>
                                 <div><label>Date</label><input type="date" id="quote-delivery-date"></div>
                             </div>
                             <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-top: 0.75rem;">
-                                <div><label>Address Line 1 *</label><input type="text" id="quote-delivery-address1" placeholder="Street address"></div>
+                                <div><label>Address Line 1 *</label><input type="text" id="quote-delivery-address1" placeholder="Street address" required></div>
                                 <div><label>Address Line 2</label><input type="text" id="quote-delivery-address2" placeholder="Additional info"></div>
-                                <div><label>City *</label><input type="text" id="quote-delivery-city" placeholder="City"></div>
+                                <div><label>City *</label><input type="text" id="quote-delivery-city" placeholder="City" required></div>
                                 <div><label>County</label><input type="text" id="quote-delivery-county" placeholder="County"></div>
-                                <div><label>Postcode *</label><input type="text" id="quote-delivery-postcode" placeholder="Postcode"></div>
+                                <div><label>Postcode *</label><input type="text" id="quote-delivery-postcode" placeholder="Postcode" required pattern="[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}" title="Please enter a valid UK postcode (e.g., SW1A 1AA)"></div>
                             </div>
                         </div>
                         
@@ -5858,7 +5858,7 @@
             <h3>Basic Information</h3>
         <div class="form-grid">
                 <div><label>PC Number *</label><select id="activity-pc-select"></select></div>
-                <div><label>Activity Type *</label><input type="text" id="activity-type" placeholder="e.g. Survey, Delivery, Installation"></div>
+                <div><label>Activity Type *</label><input type="text" id="activity-type" placeholder="e.g. Survey, Delivery, Installation" required></div>
                 <div><label>Priority</label><select id="activity-priority">
                     <option value="low">Low</option>
                     <option value="medium" selected>Medium</option>
@@ -5899,7 +5899,7 @@
             <div class="form-grid">
                 <div><label>Location</label><input type="text" id="activity-location" placeholder="e.g. Client Site - Birmingham"></div>
                 <div><label>Contact Name</label><input type="text" id="activity-contact-name" placeholder="Site contact person"></div>
-                <div><label>Contact Phone</label><input type="tel" id="activity-contact-phone" placeholder="Contact phone number"></div>
+                <div><label>Contact Phone</label><input type="tel" id="activity-contact-phone" placeholder="Contact phone number" pattern="[0-9\s\+\-\(\)\.]+" title="Please enter a valid phone number"></div>
             </div>
         </div>
         
