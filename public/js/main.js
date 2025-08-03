@@ -252,7 +252,7 @@ class CRMApplication {
                 db.getStats()
             ]);
 
-            this.updateDashboardStats({
+            await this.updateDashboardStats({
                 activities: activityStats,
                 resources: resourceStats,
                 database: dbStats
@@ -267,15 +267,13 @@ class CRMApplication {
      * @description Update dashboard statistics display
      * @param {Object} stats - Statistics data
      */
-    updateDashboardStats(stats) {
+    async updateDashboardStats(stats) {
         try {
-            // Update stat cards
+            // Update stat cards with correct HTML IDs
             const statCards = {
-                'total-pcnumbers': stats.database.pcNumbers || 0,
-                'total-activities': stats.activities.total || 0,
-                'pending-activities': stats.activities.pending || 0,
-                'total-quotes': stats.database.quotes || 0,
-                'total-resources': stats.resources.total || 0
+                'stat-pc': stats.database.pcNumbers || 0,
+                'stat-activities': stats.activities.total || 0,
+                'stat-quotes': stats.database.quotes || 0
             };
 
             Object.entries(statCards).forEach(([id, value]) => {
@@ -285,9 +283,68 @@ class CRMApplication {
                 }
             });
 
+            // Calculate and update quote value
+            await this.updateQuoteValue();
+
+            // Load recent PC numbers table
+            await this.loadRecentPCNumbers();
+
             logDebug('Dashboard stats updated');
         } catch (error) {
             logError('Failed to update dashboard stats:', error);
+        }
+    }
+
+    /**
+     * @description Update quote value on dashboard
+     */
+    async updateQuoteValue() {
+        try {
+            const quotes = await db.loadAll('quotes');
+            const totalValue = quotes.reduce((sum, quote) => {
+                return sum + (parseFloat(quote.value) || 0);
+            }, 0);
+
+            const statValue = document.getElementById('stat-value');
+            if (statValue) {
+                statValue.textContent = `£${totalValue.toLocaleString()}`;
+            }
+        } catch (error) {
+            logError('Failed to update quote value:', error);
+        }
+    }
+
+    /**
+     * @description Load recent PC numbers for dashboard table
+     */
+    async loadRecentPCNumbers() {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            // Sort by creation date and take last 5
+            const recentPCs = pcNumbers
+                .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0))
+                .slice(0, 5);
+
+            const container = document.getElementById('recent-pc');
+            if (!container) return;
+
+            if (recentPCs.length === 0) {
+                container.innerHTML = '<tr><td colspan="3">No PC Numbers found</td></tr>';
+                return;
+            }
+
+            const rows = recentPCs.map(pc => `
+                <tr>
+                    <td>${pc.pcNumber || ''}</td>
+                    <td>${pc.company || ''}</td>
+                    <td>${pc.reference || ''}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rows;
+            logDebug(`Loaded ${recentPCs.length} recent PC numbers`);
+        } catch (error) {
+            logError('Failed to load recent PC numbers:', error);
         }
     }
 
@@ -576,21 +633,27 @@ class CRMApplication {
             const samplePCNumbers = [
                 {
                     pcNumber: 'PC-2024-001',
+                    company: 'Acme Corporation',
+                    reference: 'Office LED Upgrade',
                     projectTitle: 'Office LED Lighting Upgrade',
                     projectDescription: 'Complete LED lighting upgrade for main office building',
                     clientName: 'Acme Corporation',
                     contactName: 'John Smith',
                     estimatedValue: 15000,
-                    status: 'active'
+                    status: 'active',
+                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
                 },
                 {
                     pcNumber: 'PC-2024-002', 
+                    company: 'Warehouse Solutions Ltd',
+                    reference: 'Warehouse Lighting',
                     projectTitle: 'Warehouse Lighting Installation',
                     projectDescription: 'New LED lighting installation for warehouse facility',
                     clientName: 'Warehouse Solutions Ltd',
                     contactName: 'Sarah Johnson',
                     estimatedValue: 25000,
-                    status: 'active'
+                    status: 'active',
+                    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
                 }
             ];
 
@@ -680,6 +743,48 @@ class CRMApplication {
             for (const resourceData of sampleResources) {
                 const savedResource = await db.save('resources', { ...resourceData, id: generateId(), createdAt: new Date() });
                 logInfo('Saved Resource:', savedResource.name);
+            }
+
+            // Sample Quotes
+            const sampleQuotes = [
+                {
+                    quoteNumber: 'QT-2024-001',
+                    pcNumber: 'PC-2024-001',
+                    clientName: 'Acme Corporation',
+                    projectTitle: 'Office LED Lighting Upgrade',
+                    value: 15500.00,
+                    status: 'pending',
+                    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+                    description: 'Complete LED lighting upgrade including materials and labor',
+                    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+                },
+                {
+                    quoteNumber: 'QT-2024-002',
+                    pcNumber: 'PC-2024-002',
+                    clientName: 'Warehouse Solutions Ltd',
+                    projectTitle: 'Warehouse Lighting Installation',
+                    value: 28750.00,
+                    status: 'approved',
+                    validUntil: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(), // 45 days from now
+                    description: 'New LED lighting installation for warehouse facility including control systems',
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                },
+                {
+                    quoteNumber: 'QT-2024-003',
+                    pcNumber: 'PC-2024-001',
+                    clientName: 'Tech Startup Hub',
+                    projectTitle: 'Smart Office Lighting System',
+                    value: 42300.00,
+                    status: 'draft',
+                    validUntil: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(), // 21 days from now
+                    description: 'Advanced smart lighting system with IoT integration and automated controls',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+                }
+            ];
+
+            for (const quoteData of sampleQuotes) {
+                const savedQuote = await db.save('quotes', { ...quoteData, id: generateId() });
+                logInfo('Saved Quote:', savedQuote.quoteNumber);
             }
 
             logInfo('Sample data loaded successfully');
