@@ -1,0 +1,33 @@
+{
+  "name": "mf-gem-crm",
+  "version": "1.0.0",
+  "description": "CRM Demo Application - Modern ES6 architecture with IndexedDB",
+  "main": "gem.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8000",
+    "build": "echo 'Static build - no build process needed'",
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "crm",
+    "javascript",
+    "es6",
+    "indexeddb",
+    "vanilla-js",
+    "demo"
+  ],
+  "author": "Slav",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sluvec/mf_gem.git"
+  },
+  "homepage": "https://github.com/sluvec/mf_gem#readme",
+  "bugs": {
+    "url": "https://github.com/sluvec/mf_gem/issues"
+  }
+}
