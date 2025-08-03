@@ -8018,7 +8018,10 @@ function addLineItem(category) {
     let options = '<option value="">Select...</option>';
     categoryItems.forEach(item => {
         const resource = db.resources.find(r => r.id === item.resourceId);
-        options += `<option value="${resource.id}" data-price="${item.clientPrice}">${resource.name}</option>`;
+        const safeResourceId = sanitizeHTML(String(resource.id));
+        const safeClientPrice = sanitizeHTML(String(item.clientPrice));
+        const safeResourceName = sanitizeHTML(resource.name);
+        options += `<option value="${safeResourceId}" data-price="${safeClientPrice}">${safeResourceName}</option>`;
     });
 
     lineDiv.innerHTML = `
@@ -8621,16 +8624,18 @@ function addResourceToQuoteCategory(resource, qty) {
     const safeResourceId = sanitizeHTML(String(resource.id));
     const safeResourceName = sanitizeHTML(resource.name);
     const safeQty = sanitizeHTML(String(qty));
+    const safeClientPrice = sanitizeHTML(String(resource.client_price));
+    const safeTotal = sanitizeHTML(String(total));
     
     lineDiv.innerHTML = `
         <input type="checkbox" class="line-item-checkbox" data-line-id="${safeLineId}" data-category="${safeCategory}" 
                data-bulk="selection" style="margin-right: 0.5rem; transform: scale(1.2);">
         <select disabled style="background: #f1f5f9;">
-            <option value="${safeResourceId}" data-price="${resource.client_price}">${safeResourceName}</option>
+            <option value="${safeResourceId}" data-price="${safeClientPrice}">${safeResourceName}</option>
         </select>
-        <input type="number" value="${qty}" min="1" data-update-qty="${safeLineId}" data-category="${safeCategory}" style="width: 80px;">
-        <input type="text" readonly value="£${resource.client_price.toFixed(2)}" style="background: #f1f5f9;">
-        <span class="line-item-total">£${total.toFixed(2)}</span>
+        <input type="number" value="${safeQty}" min="1" data-update-qty="${safeLineId}" data-category="${safeCategory}" style="width: 80px;">
+        <input type="text" readonly value="£${(resource.client_price || 0).toFixed(2)}" style="background: #f1f5f9;">
+        <span class="line-item-total">£${(total || 0).toFixed(2)}</span>
         <button class="remove-btn" data-remove-line="${safeLineId}" data-category="${safeCategory}">×</button>
     `;
     
@@ -10630,18 +10635,27 @@ function renderTeamMembersList() {
             margin-bottom: 0.5rem;
         `;
         
+        // Sanitize all member data
+        const safeName = sanitizeHTML(member.name);
+        const safeRole = sanitizeHTML(member.role);
+        const safeMaxHours = sanitizeHTML(String(member.max_hours));
+        const safeEmail = member.email ? sanitizeHTML(member.email) : '';
+        const safeId = sanitizeHTML(String(member.id));
+        const safeColor = sanitizeHTML(member.color);
+        const safeInitials = sanitizeHTML(member.name.split(' ').map(n => n[0]).join(''));
+        
         memberElement.innerHTML = `
             <div style="display: flex; align-items: center;">
-                <div class="assignee-avatar" style="background: ${member.color}; margin-right: 0.75rem;">
-                    ${member.name.split(' ').map(n => n[0]).join('')}
+                <div class="assignee-avatar" style="background: ${safeColor}; margin-right: 0.75rem;">
+                    ${safeInitials}
                 </div>
                 <div>
-                    <div style="font-weight: 500;">${member.name}</div>
-                    <div style="font-size: 0.875rem; color: #6b7280;">${member.role} • ${member.max_hours}h/week</div>
-                    ${member.email ? `<div style="font-size: 0.75rem; color: #9ca3af;">${member.email}</div>` : ''}
+                    <div style="font-weight: 500;">${safeName}</div>
+                    <div style="font-size: 0.875rem; color: #6b7280;">${safeRole} • ${safeMaxHours}h/week</div>
+                    ${safeEmail ? `<div style="font-size: 0.75rem; color: #9ca3af;">${safeEmail}</div>` : ''}
                 </div>
             </div>
-            <button onclick="window.removeTeamMember('${member.id}')" 
+            <button onclick="window.removeTeamMember('${safeId}')" 
                     style="background: #ef4444; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
                 Remove
             </button>
@@ -11030,9 +11044,12 @@ function enhanceActivityWithRecurring(activityElement, activity) {
             getRecurringText(activity.recurring_config) : 
             `Series ${activity.recurring_sequence}`;
         
+        const safeOriginalText = sanitizeHTML(originalText);
+        const safeRecurring = sanitizeHTML(recurring);
+        
         activityElement.innerHTML = `
-            ${originalText}
-            <span class="recurring-badge">${recurring}</span>
+            ${safeOriginalText}
+            <span class="recurring-badge">${safeRecurring}</span>
         `;
     }
 }
@@ -16768,7 +16785,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Wrap existing text
                 const text = button.textContent;
-                button.innerHTML = `<span class="btn-text">${text}</span>`;
+                const safeText = sanitizeHTML(text);
+                button.innerHTML = `<span class="btn-text">${safeText}</span>`;
                 
                 button.setAttribute('aria-label', `${text} - Loading`);
             } else {
@@ -16837,12 +16855,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const icon = this.getIcon(type);
             
+            const safeTitle = title ? sanitizeHTML(title) : '';
+            const safeMessage = sanitizeHTML(message);
+            
             toast.innerHTML = `
                 <div class="toast-header">
                     <div class="toast-icon" aria-hidden="true">${icon}</div>
                     <div class="toast-content">
-                        ${title ? `<div class="toast-title">${title}</div>` : ''}
-                        <div class="toast-message">${message}</div>
+                        ${safeTitle ? `<div class="toast-title">${safeTitle}</div>` : ''}
+                        <div class="toast-message">${safeMessage}</div>
                     </div>
                     ${!persistent ? `
                         <button class="toast-close" aria-label="Close notification" onclick="this.closest('.toast').remove()">
