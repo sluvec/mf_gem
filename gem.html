@@ -8023,12 +8023,12 @@ function addLineItem(category) {
 
     lineDiv.innerHTML = `
         <input type="checkbox" class="line-item-checkbox" data-line-id="${lineId}" data-category="${category}" 
-               onchange="window.updateBulkSelection()" style="margin-right: 0.5rem; transform: scale(1.2);">
+               data-bulk="selection" style="margin-right: 0.5rem; transform: scale(1.2);">
         <select onchange="window.updateLinePrice('${lineId}', '${category}')">${options}</select>
-        <input type="number" value="1" min="1" onchange="window.updateLineQty('${lineId}', '${category}')">
+        <input type="number" value="1" min="1" data-update-qty="${lineId}" data-category="${category}">
         <input type="text" readonly value="£0.00">
         <span class="line-item-total">£0.00</span>
-        <button class="remove-btn" onclick="window.removeLine('${lineId}', '${category}')">×</button>
+        <button class="remove-btn" data-remove-line="${lineId}" data-category="${category}">×</button>
     `;
     container.appendChild(lineDiv);
     db.quoteItems[category].push({ id: lineId, resourceId: '', name: '', qty: 1, rate: 0, total: 0 });
@@ -8624,14 +8624,14 @@ function addResourceToQuoteCategory(resource, qty) {
     
     lineDiv.innerHTML = `
         <input type="checkbox" class="line-item-checkbox" data-line-id="${safeLineId}" data-category="${safeCategory}" 
-               onchange="window.updateBulkSelection()" style="margin-right: 0.5rem; transform: scale(1.2);">
+               data-bulk="selection" style="margin-right: 0.5rem; transform: scale(1.2);">
         <select disabled style="background: #f1f5f9;">
             <option value="${safeResourceId}" data-price="${resource.client_price}">${safeResourceName}</option>
         </select>
-        <input type="number" value="${qty}" min="1" onchange="window.updateLineQty('${safeLineId}', '${safeCategory}')" style="width: 80px;">
+        <input type="number" value="${qty}" min="1" data-update-qty="${safeLineId}" data-category="${safeCategory}" style="width: 80px;">
         <input type="text" readonly value="£${resource.client_price.toFixed(2)}" style="background: #f1f5f9;">
         <span class="line-item-total">£${total.toFixed(2)}</span>
-        <button class="remove-btn" onclick="window.removeLine('${safeLineId}', '${safeCategory}')">×</button>
+        <button class="remove-btn" data-remove-line="${safeLineId}" data-category="${safeCategory}">×</button>
     `;
     
     container.appendChild(lineDiv);
@@ -18671,6 +18671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const editPcBtn = evt.target.closest('[data-edit-pc]');
         const editResourceBtn = evt.target.closest('[data-edit-resource]');
         const deleteResourceBtn = evt.target.closest('[data-delete-resource]');
+        const removeLineBtn = evt.target.closest('[data-remove-line]');
 
         if (editPcBtn) {
             evt.preventDefault();
@@ -18688,6 +18689,31 @@ document.addEventListener('DOMContentLoaded', () => {
             evt.preventDefault();
             const resourceId = deleteResourceBtn.dataset.deleteResource;
             if (resourceId && window.deleteResource) window.deleteResource(resourceId);
+        }
+        
+        if (removeLineBtn) {
+            evt.preventDefault();
+            const lineId = removeLineBtn.dataset.removeLine;
+            const category = removeLineBtn.dataset.category;
+            if (lineId && category && window.removeLine) window.removeLine(lineId, category);
+        }
+    });
+
+    // Delegated handlers for form changes
+    document.addEventListener('change', (evt) => {
+        const bulkSelectionEl = evt.target.closest('[data-bulk="selection"]');
+        const updateQtyEl = evt.target.closest('[data-update-qty]');
+
+        if (bulkSelectionEl && window.updateBulkSelection) {
+            window.updateBulkSelection();
+        }
+        
+        if (updateQtyEl) {
+            const lineId = updateQtyEl.dataset.updateQty;
+            const category = updateQtyEl.dataset.category;
+            if (lineId && category && window.updateLineQty) {
+                window.updateLineQty(lineId, category);
+            }
         }
     });
     
