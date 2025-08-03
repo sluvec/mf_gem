@@ -1089,12 +1089,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.showPage = (pageId) => app.navigateToPage(pageId);
     
     // Expose other essential functions for HTML onclick handlers
-    window.showActivityModal = () => uiModals.openModal('activityModal');
-    window.showResourceModal = () => uiModals.openModal('resourceModal');
-    window.showNewQuoteModal = () => uiModals.openModal('quoteModal');
-    window.closeActivityModal = () => uiModals.closeModal('activityModal');
-    window.closeResourceModal = () => uiModals.closeModal('resourceModal');
-    window.closeQuoteModal = () => uiModals.closeModal('quoteModal');
+    window.showActivityModal = () => uiModals.openModal('activity-modal');
+    window.showResourceModal = () => uiModals.openModal('resource-modal');
+    window.showNewQuoteModal = () => uiModals.openModal('quote-modal');
+    window.closeActivityModal = () => uiModals.closeModal('activity-modal');
+    window.closeResourceModal = () => uiModals.closeModal('resource-modal');
+    window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
     
     // Add placeholder functions for other missing onclick handlers
     window.resetData = async () => {
