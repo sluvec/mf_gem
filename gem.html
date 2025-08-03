@@ -7679,11 +7679,15 @@ function renderPCList() {
     const tbody = document.getElementById('pc-list');
     tbody.innerHTML = '';
     db.pcs.forEach(pc => {
-        const contact = [pc.collection_first_name, pc.collection_surname].filter(Boolean).join(' ') || pc.contactPerson || '-';
+        const pcNumber   = sanitizeHTML(pc.pc_number || pc.number);
+        const companyName = sanitizeHTML(pc.company_name || pc.company);
+        const projectName = sanitizeHTML(pc.project_name || pc.reference || '-');
+        const contact    = sanitizeHTML([pc.collection_first_name, pc.collection_surname].filter(Boolean).join(' ') || pc.contactPerson || '-');
+
         tbody.innerHTML += `<tr>
-            <td>${pc.pc_number || pc.number}</td>
-            <td>${pc.company_name || pc.company}</td>
-            <td>${pc.project_name || pc.reference || '-'}</td>
+            <td>${pcNumber}</td>
+            <td>${companyName}</td>
+            <td>${projectName}</td>
             <td>${contact}</td>
             <td><div class="action-btn-group">
                 <button onclick="window.viewPC('${pc.id}')" class="secondary">Show</button>
