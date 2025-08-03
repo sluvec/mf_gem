@@ -17432,6 +17432,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 activityTemplates: db.activityTemplates?.length || 0
             });
             
+            // Make db globally accessible for debugging
+            window.db = db;
+            
             loadingManager.updateProgress('app-init', 100, 'Ready!');
             
             // Small delay to show completion
