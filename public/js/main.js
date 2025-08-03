@@ -427,6 +427,12 @@ class CRMApplication {
                 pcForm.addEventListener('submit', this.handlePcNumberSubmit.bind(this));
             }
 
+            // PC Number edit form
+            const pcEditForm = document.getElementById('pc-edit-form');
+            if (pcEditForm) {
+                pcEditForm.addEventListener('submit', this.handlePcNumberUpdate.bind(this));
+            }
+
             // Activity form
             const activityForm = document.getElementById('activity-form');
             if (activityForm) {
@@ -501,6 +507,66 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to save PC Number:', error);
             uiModals.showToast('Failed to save PC Number', 'error');
+        }
+    }
+
+    /**
+     * @description Handle PC Number update form submission
+     * @param {Event} event - Form submit event
+     */
+    async handlePcNumberUpdate(event) {
+        event.preventDefault();
+        
+        try {
+            const formData = new FormData(event.target);
+            const pcId = document.getElementById('pc-edit-id').value;
+            
+            if (!pcId) {
+                uiModals.showToast('PC Number ID not found', 'error');
+                return;
+            }
+
+            // Collect data from form
+            const updatedData = {
+                id: pcId,
+                pcNumber: document.getElementById('pc-edit-number').value,
+                company: document.getElementById('pc-edit-company').value,
+                clientName: document.getElementById('pc-edit-company').value, // Keep both for compatibility
+                projectTitle: document.getElementById('pc-edit-title').value,
+                projectDescription: document.getElementById('pc-edit-description').value,
+                reference: document.getElementById('pc-edit-reference').value,
+                contactName: document.getElementById('pc-edit-contact').value,
+                estimatedValue: parseFloat(document.getElementById('pc-edit-value').value) || 0,
+                status: document.getElementById('pc-edit-status').value,
+                updatedAt: new Date()
+            };
+
+            // Validation
+            if (!updatedData.pcNumber || !updatedData.company || !updatedData.projectTitle || !updatedData.projectDescription) {
+                uiModals.showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Update in database
+            await db.save('pcNumbers', updatedData);
+            
+            // Close modal and show success
+            uiModals.closeModal('pc-edit-modal');
+            uiModals.showToast('PC Number updated successfully', 'success');
+            
+            // Refresh page data
+            if (this.currentPage === 'pcnumbers') {
+                await this.loadPcNumbersData();
+            }
+            
+            // Also refresh dashboard if that's current page
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
+            }
+
+        } catch (error) {
+            logError('Failed to update PC Number:', error);
+            uiModals.showToast('Failed to update PC Number', 'error');
         }
     }
 
@@ -1141,7 +1207,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Additional placeholder functions for missing onclick handlers
     window.editResource = (id) => console.log('Edit resource:', id);
     window.deleteResource = (id) => console.log('Delete resource:', id);
-    window.editPC = (id) => console.log('Edit PC:', id);
+    window.editPC = async (id) => {
+        try {
+            logDebug('Opening PC edit modal for ID:', id);
+            const pcData = await db.load('pcNumbers', id);
+            if (!pcData) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+            
+            // Populate modal fields
+            document.getElementById('pc-edit-id').value = pcData.id;
+            document.getElementById('pc-edit-number').value = pcData.pcNumber || '';
+            document.getElementById('pc-edit-company').value = pcData.company || pcData.clientName || '';
+            document.getElementById('pc-edit-title').value = pcData.projectTitle || '';
+            document.getElementById('pc-edit-description').value = pcData.projectDescription || '';
+            document.getElementById('pc-edit-reference').value = pcData.reference || '';
+            document.getElementById('pc-edit-contact').value = pcData.contactName || '';
+            document.getElementById('pc-edit-value').value = pcData.estimatedValue || '';
+            document.getElementById('pc-edit-status').value = pcData.status || 'active';
+            
+            // Open modal
+            uiModals.openModal('pc-edit-modal');
+            
+        } catch (error) {
+            logError('Failed to open PC edit modal:', error);
+            uiModals.showToast('Failed to load PC Number data', 'error');
+        }
+    };
+    
+    window.closePcEditModal = () => {
+        uiModals.closeModal('pc-edit-modal');
+    };
     window.createQuote = (id) => console.log('Create quote for PC:', id);
     window.editQuote = (id) => console.log('Edit quote:', id);
     window.viewQuote = (id) => console.log('View quote:', id);

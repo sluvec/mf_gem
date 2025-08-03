@@ -1414,6 +1414,80 @@
         </div>
     </div></div>
 
+    <!-- PC Number Edit Modal -->
+    <div id="pc-edit-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2 id="pc-edit-modal-title">Edit PC Number</h2>
+            <form id="pc-edit-form">
+                <input type="hidden" id="pc-edit-id">
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-grid">
+                        <div>
+                            <label>PC Number *</label>
+                            <input type="text" id="pc-edit-number" required 
+                                   placeholder="PC-000001" pattern="^PC-\d{6}$">
+                        </div>
+                        <div>
+                            <label>Status</label>
+                            <select id="pc-edit-status">
+                                <option value="draft">Draft</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Company & Project -->
+                <div class="form-section">
+                    <h3>Company & Project</h3>
+                    <div>
+                        <label>Company Name *</label>
+                        <input type="text" id="pc-edit-company" required placeholder="Company name">
+                    </div>
+                    <div>
+                        <label>Project Title *</label>
+                        <input type="text" id="pc-edit-title" required placeholder="Project title">
+                    </div>
+                    <div>
+                        <label>Project Description *</label>
+                        <textarea id="pc-edit-description" rows="3" required 
+                                  placeholder="Brief description of the project..."></textarea>
+                    </div>
+                    <div>
+                        <label>Reference</label>
+                        <input type="text" id="pc-edit-reference" placeholder="Project reference">
+                    </div>
+                </div>
+
+                <!-- Contact & Value -->
+                <div class="form-section">
+                    <h3>Contact & Value</h3>
+                    <div class="form-grid">
+                        <div>
+                            <label>Contact Name</label>
+                            <input type="text" id="pc-edit-contact" placeholder="Contact person">
+                        </div>
+                        <div>
+                            <label>Estimated Value (£)</label>
+                            <input type="number" id="pc-edit-value" min="0" step="0.01" 
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary">Update PC Number</button>
+                    <button type="button" onclick="window.closePcEditModal()" class="secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="activity-modal" class="modal"><div class="modal-content">
         <h2 id="activity-modal-title">New Activity</h2>
         <input type="hidden" id="activity-id">
