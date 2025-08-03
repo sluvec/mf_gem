@@ -13624,20 +13624,23 @@ function updateActivitiesList() {
     tbody.innerHTML = '';
     db.activities.forEach(a => {
         const pc = db.pcs.find(p => p.id === (a.pc_id || a.pcId));
-        const pcNumber = pc ? (pc.pc_number || pc.number) : (a.pc_number || '-');
-        const companyName = pc ? (pc.company_name || pc.company) : (a.company_name || '-');
+        const pcNumber    = sanitizeHTML(pc ? (pc.pc_number || pc.number) : (a.pc_number || '-'));
+        const companyName = sanitizeHTML(pc ? (pc.company_name || pc.company) : (a.company_name || '-'));
         const scheduledDate = a.scheduled_date ? new Date(a.scheduled_date).toLocaleDateString() : (a.date ? new Date(a.date).toLocaleDateString() : '-');
-        const title = a.title || a.type || '-';
-        const priority = a.priority ? `<span class="priority-${a.priority}">${a.priority.toUpperCase()}</span>` : '-';
+        const title       = sanitizeHTML(a.title || a.type || '-');
+        const type        = sanitizeHTML(a.type);
+        const priority    = a.priority ? `<span class=\"priority-${a.priority}\">${a.priority.toUpperCase()}</span>` : '-';
+        const status      = sanitizeHTML(a.status);
+
         tbody.innerHTML += `<tr>
             <td>${title}</td>
             <td>${pcNumber}</td>
             <td>${companyName}</td>
-            <td>${a.type}</td>
+            <td>${type}</td>
             <td>${scheduledDate}</td>
             <td>${priority}</td>
-            <td><span class="activity-status ${a.status}">${a.status}</span></td>
-            <td><button class="secondary" onclick="alert('Feature under development')">Show</button></td>
+            <td><span class=\"activity-status ${status}\">${status}</span></td>
+            <td><button class=\"secondary\" onclick=\"alert('Feature under development')\">Show</button></td>
         </tr>`;
     });
 }
