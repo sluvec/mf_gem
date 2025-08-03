@@ -9832,28 +9832,45 @@ function showActivityInSidebar(activity) {
     const content = document.getElementById('calendar-activity-content');
     
     const pc = db.pcs.find(p => p.id === activity.pc_id);
-    const statusBadge = `<span class="activity-status-${activity.status}">${activity.status.toUpperCase()}</span>`;
-    const priorityBadge = `<span class="priority-${activity.priority}">${activity.priority.toUpperCase()}</span>`;
+    
+    // Sanitize all activity data for safe HTML injection
+    const safeStatus = sanitizeHTML(activity.status);
+    const safePriority = sanitizeHTML(activity.priority);
+    const safeTitle = sanitizeHTML(activity.title);
+    const safeRecurringSequence = sanitizeHTML(String(activity.recurring_sequence || 'N/A'));
+    const safePcNumber = sanitizeHTML(activity.pc_number || 'N/A');
+    const safeCompanyName = sanitizeHTML(pc ? pc.company_name : 'N/A');
+    const safeEstimatedHours = sanitizeHTML(String(activity.estimated_hours || 'N/A'));
+    const safeDescription = activity.description ? sanitizeHTML(activity.description) : '';
+    const safeActivityId = sanitizeHTML(String(activity.id));
+    
+    const statusBadge = `<span class="activity-status-${safeStatus}">${safeStatus.toUpperCase()}</span>`;
+    const priorityBadge = `<span class="priority-${safePriority}">${safePriority.toUpperCase()}</span>`;
     
     // NEW Sprint 4.2.4: Check if this is a recurring activity
     const isRecurring = isRecurringActivity(activity);
+    const safeRecurringPattern = activity.recurring_config ? sanitizeHTML(getRecurringText(activity.recurring_config)) : '';
     const recurringInfo = isRecurring ? `
         <div style="background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 1rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem; color: #3730a3; font-weight: 600; margin-bottom: 0.5rem;">
                 🔄 Recurring Activity
             </div>
             <div style="font-size: 0.875rem; color: #3730a3;">
-                <strong>Series Position:</strong> ${activity.recurring_sequence || 'N/A'}<br>
-                ${activity.recurring_config ? `<strong>Pattern:</strong> ${getRecurringText(activity.recurring_config)}` : ''}
+                <strong>Series Position:</strong> ${safeRecurringSequence}<br>
+                ${safeRecurringPattern ? `<strong>Pattern:</strong> ${safeRecurringPattern}` : ''}
             </div>
         </div>
     ` : '';
     
     const assignedMember = getTeamMemberName(activity.assigned_to);
+    const safeAssignedMember = sanitizeHTML(assignedMember || 'Unassigned');
+    const safeScheduledDate = activity.scheduled_date ? 
+        sanitizeHTML(new Date(activity.scheduled_date).toLocaleDateString()) : 
+        'Not scheduled';
     
     content.innerHTML = `
         <div style="margin-bottom: 1rem;">
-            <h4 style="margin: 0 0 0.5rem 0;">${activity.title}</h4>
+            <h4 style="margin: 0 0 0.5rem 0;">${safeTitle}</h4>
             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                 ${statusBadge}
                 ${priorityBadge}
@@ -9863,24 +9880,24 @@ function showActivityInSidebar(activity) {
         ${recurringInfo}
         
         <div style="margin-bottom: 1rem;">
-            <strong>PC Number:</strong> ${activity.pc_number || 'N/A'}<br>
-            <strong>Company:</strong> ${pc ? pc.company_name : 'N/A'}<br>
-            <strong>Scheduled:</strong> ${activity.scheduled_date ? new Date(activity.scheduled_date).toLocaleDateString() : 'Not scheduled'}<br>
-            <strong>Duration:</strong> ${activity.estimated_hours || 'N/A'} hours<br>
-            <strong>Assigned to:</strong> ${assignedMember || 'Unassigned'}
+            <strong>PC Number:</strong> ${safePcNumber}<br>
+            <strong>Company:</strong> ${safeCompanyName}<br>
+            <strong>Scheduled:</strong> ${safeScheduledDate}<br>
+            <strong>Duration:</strong> ${safeEstimatedHours} hours<br>
+            <strong>Assigned to:</strong> ${safeAssignedMember}
         </div>
         
-        ${activity.description ? `
+        ${safeDescription ? `
             <div style="margin-bottom: 1rem;">
                 <strong>Description:</strong><br>
                 <div style="background: #f9fafb; padding: 0.5rem; border-radius: 0.25rem; margin-top: 0.25rem;">
-                    ${activity.description}
+                    ${safeDescription}
                 </div>
             </div>
         ` : ''}
         
         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-            <button onclick="window.editActivityFromCalendarRecurring('${activity.id}')" style="background: #3b82f6; color: white; padding: 0.5rem 1rem;">
+            <button onclick="window.editActivityFromCalendarRecurring('${safeActivityId}')" style="background: #3b82f6; color: white; padding: 0.5rem 1rem;">
                 ${isRecurring ? '🔄 Edit Series' : 'Edit'}
             </button>
             <button onclick="window.closeCalendarSidebar()" class="secondary" style="padding: 0.5rem 1rem;">Close</button>
@@ -11702,35 +11719,47 @@ function createResourceCard(resource) {
     
     const typeClass = mapResourceCategoryToType(resource.category);
     
+    // Sanitize all resource data
+    const safeName = sanitizeHTML(resource.name || 'Unnamed Resource');
+    const safeTypeClass = sanitizeHTML(typeClass);
+    const safeStatus = sanitizeHTML(status);
+    const safeUtilization = sanitizeHTML(String(Math.round(utilization)));
+    
     return `
-        <div class="resource-card ${typeClass}">
+        <div class="resource-card ${safeTypeClass}">
             <div class="resource-header">
                 <div>
-                    <div class="resource-name">${resource.name || 'Unnamed Resource'}</div>
-                    <div class="resource-type ${typeClass}">${typeClass}</div>
+                    <div class="resource-name">${safeName}</div>
+                    <div class="resource-type ${safeTypeClass}">${safeTypeClass}</div>
                 </div>
                 <div class="resource-status">
-                    <div class="resource-status-indicator ${status}"></div>
-                    <div class="resource-status-text ${status}">${capitalizeFirst(status.replace('-', ' '))}</div>
+                    <div class="resource-status-indicator ${safeStatus}"></div>
+                    <div class="resource-status-text ${safeStatus}">${capitalizeFirst(safeStatus.replace('-', ' '))}</div>
                 </div>
             </div>
             
             ${assignments.length > 0 ? `
                 <div class="resource-assignments">
                     <div style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;">Current Assignments:</div>
-                    ${assignments.slice(0, 3).map(assignment => `
+                    ${assignments.slice(0, 3).map(assignment => {
+                        const safeAssignmentTitle = sanitizeHTML(assignment.title);
+                        const safeAssignmentPcNumber = sanitizeHTML(assignment.pc_number);
+                        const safeAssignee = sanitizeHTML(assignment.assignee || 'Unassigned');
+                        const safeScheduledDate = sanitizeHTML(new Date(assignment.scheduled_date).toLocaleDateString());
+                        return `
                         <div class="resource-assignment-item">
                             <div class="assignment-activity">
-                                <div class="assignment-title">${assignment.title}</div>
+                                <div class="assignment-title">${safeAssignmentTitle}</div>
                                 <div class="assignment-details">
-                                    PC: ${assignment.pc_number} • ${assignment.assignee || 'Unassigned'}
+                                    PC: ${safeAssignmentPcNumber} • ${safeAssignee}
                                 </div>
                             </div>
                             <div class="assignment-period">
-                                ${new Date(assignment.scheduled_date).toLocaleDateString()}
+                                ${safeScheduledDate}
                             </div>
                         </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                     ${assignments.length > 3 ? `<div style="font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 0.5rem;">+${assignments.length - 3} more assignments</div>` : ''}
                 </div>
             ` : ''}
@@ -11738,7 +11767,7 @@ function createResourceCard(resource) {
             <div class="resource-utilization">
                 <div class="utilization-header">
                     <span class="utilization-label">Week Utilization</span>
-                    <span class="utilization-percentage">${Math.round(utilization)}%</span>
+                    <span class="utilization-percentage">${safeUtilization}%</span>
                 </div>
                 <div class="utilization-bar">
                     <div class="utilization-fill ${getUtilizationLevel(utilization)}" style="width: ${Math.min(utilization, 100)}%"></div>
