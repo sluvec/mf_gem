@@ -1285,6 +1285,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.closeResourceModal = () => uiModals.closeModal('resource-modal');
     window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
     
+    window.proceedToQuoteBuilder = () => {
+        // Get selected PC Number
+        const selectedPcId = document.getElementById('quote-modal-pc').value;
+        if (!selectedPcId) {
+            uiModals.showToast('Please select a PC Number first', 'error');
+            return;
+        }
+        
+        // Close modal
+        uiModals.closeModal('quote-modal');
+        
+        // Navigate to quote builder page
+        window.crmApp.navigateToPage('quote-builder');
+        
+        // Set the title and prepare quote builder for selected PC
+        const titleElement = document.getElementById('quote-builder-title');
+        if (titleElement) {
+            titleElement.textContent = 'New Quote - Loading PC Details...';
+        }
+        
+        logDebug('Proceeding to quote builder for PC ID:', selectedPcId);
+        uiModals.showToast('Quote builder opened for selected PC Number', 'success');
+    };
+    
     // Add placeholder functions for other missing onclick handlers
     window.resetData = async () => {
         if (confirm('This will clear all data and reload sample data. Are you sure?')) {
