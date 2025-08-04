@@ -3444,6 +3444,7 @@ class CRMApplication {
     clearPcFilter() {
         document.getElementById('pc-filter-company').value = '';
         document.getElementById('pc-filter-account-manager').value = '';
+        document.getElementById('pc-filter-pc-number').value = '';
         this.renderPcNumbersList(this.originalPcNumbers);
         this.updateFilterResults('pc-filter-results', this.originalPcNumbers.length, this.originalPcNumbers.length, 'PC Numbers');
     }
@@ -3454,6 +3455,7 @@ class CRMApplication {
     clearActivityFilter() {
         document.getElementById('activity-filter-company').value = '';
         document.getElementById('activity-filter-account-manager').value = '';
+        document.getElementById('activity-filter-pc-number').value = '';
         this.renderActivitiesList(this.originalActivities);
         this.updateFilterResults('activity-filter-results', this.originalActivities.length, this.originalActivities.length, 'Activities');
     }
@@ -3464,6 +3466,7 @@ class CRMApplication {
     clearQuoteFilter() {
         document.getElementById('quote-filter-company').value = '';
         document.getElementById('quote-filter-account-manager').value = '';
+        document.getElementById('quote-filter-pc-number').value = '';
         this.renderQuotesList(this.originalQuotes);
         this.updateFilterResults('quote-filter-results', this.originalQuotes.length, this.originalQuotes.length, 'Quotes');
     }
@@ -3561,6 +3564,80 @@ class CRMApplication {
             this.updateFilterResults('quote-filter-results', filtered.length, this.originalQuotes.length, 'Quotes');
         } catch (error) {
             logError('Failed to filter quotes by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter PC Numbers by PC Number
+     * @param {string} query - Search query
+     */
+    filterPcNumbersByPcNumber(query) {
+        try {
+            const filtered = this.originalPcNumbers.filter(pc => {
+                const pcNumber = (pc.pcNumber || '').toLowerCase();
+                return pcNumber.includes(query.toLowerCase());
+            });
+            
+            this.renderPcNumbersList(filtered);
+            this.updateFilterResults('pc-filter-results', filtered.length, this.originalPcNumbers.length, 'PC Numbers');
+        } catch (error) {
+            logError('Failed to filter PC numbers by PC number:', error);
+        }
+    }
+
+    /**
+     * @description Filter Quotes by PC Number
+     * @param {string} query - Search query
+     */
+    filterQuotesByPcNumber(query) {
+        try {
+            const filtered = this.originalQuotes.filter(quote => {
+                const pcNumber = (quote.pcNumber || '').toLowerCase();
+                return pcNumber.includes(query.toLowerCase());
+            });
+            
+            this.renderQuotesList(filtered);
+            this.updateFilterResults('quote-filter-results', filtered.length, this.originalQuotes.length, 'Quotes');
+        } catch (error) {
+            logError('Failed to filter quotes by PC number:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by PC Number
+     * @param {string} query - Search query
+     */
+    filterActivitiesByPcNumber(query) {
+        try {
+            const filtered = this.originalActivities.filter(activity => {
+                // First check if activity has direct PC number (legacy support)
+                let pcNumber = (activity.pcNumber || '').toLowerCase();
+                
+                // If no direct PC number, look it up via Quote → PC Number hierarchy
+                if (!pcNumber && activity.quoteId) {
+                    // Find related quote
+                    const relatedQuote = this.originalQuotes.find(quote => quote.id === activity.quoteId);
+                    if (relatedQuote) {
+                        // Get PC number from quote
+                        pcNumber = (relatedQuote.pcNumber || '').toLowerCase();
+                        
+                        // If quote doesn't have PC number, get it from PC Number via pcId
+                        if (!pcNumber && relatedQuote.pcId) {
+                            const relatedPc = this.originalPcNumbers.find(pc => pc.id === relatedQuote.pcId);
+                            if (relatedPc) {
+                                pcNumber = (relatedPc.pcNumber || '').toLowerCase();
+                            }
+                        }
+                    }
+                }
+                
+                return pcNumber.includes(query.toLowerCase());
+            });
+            
+            this.renderActivitiesList(filtered);
+            this.updateFilterResults('activity-filter-results', filtered.length, this.originalActivities.length, 'Activities');
+        } catch (error) {
+            logError('Failed to filter activities by PC number:', error);
         }
     }
 }
@@ -4108,10 +4185,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Smart Filtering functions
     window.filterPcNumbersByCompany = (query) => app.filterPcNumbersByCompany(query);
     window.filterPcNumbersByAccountManager = (query) => app.filterPcNumbersByAccountManager(query);
+    window.filterPcNumbersByPcNumber = (query) => app.filterPcNumbersByPcNumber(query);
     window.filterActivitiesByCompany = (query) => app.filterActivitiesByCompany(query);
     window.filterActivitiesByAccountManager = (query) => app.filterActivitiesByAccountManager(query);
+    window.filterActivitiesByPcNumber = (query) => app.filterActivitiesByPcNumber(query);
     window.filterQuotesByCompany = (query) => app.filterQuotesByCompany(query);
     window.filterQuotesByAccountManager = (query) => app.filterQuotesByAccountManager(query);
+    window.filterQuotesByPcNumber = (query) => app.filterQuotesByPcNumber(query);
     window.clearPcFilter = () => app.clearPcFilter();
     window.clearActivityFilter = () => app.clearActivityFilter();
     window.clearQuoteFilter = () => app.clearQuoteFilter();
