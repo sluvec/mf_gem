@@ -1803,6 +1803,90 @@
 
 
 
+        <!-- Price List Item Detail Page -->
+        <div id="pricelist-item-detail" class="page">
+            <h1 id="pricelist-item-title">Price List Item Details</h1>
+            
+            <div class="card">
+                <button onclick="window.editCurrentPriceListItem()" class="button primary">✏️ Edit Item</button>
+                <button onclick="window.deleteCurrentPriceListItem()" class="button danger">🗑️ Delete Item</button>
+                <button onclick="window.backToPriceListDetail()" class="button secondary">← Back to Price List</button>
+            </div>
+
+            <!-- Item Information -->
+            <div class="card">
+                <h2>Item Information</h2>
+                <div class="detail-grid">
+                    <div>
+                        <label>Description:</label>
+                        <span id="pricelist-item-detail-description">-</span>
+                    </div>
+                    <div>
+                        <label>Category:</label>
+                        <span id="pricelist-item-detail-category">-</span>
+                    </div>
+                    <div>
+                        <label>Unit:</label>
+                        <span id="pricelist-item-detail-unit">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Information -->
+            <div class="card">
+                <h2>Pricing Details</h2>
+                <div class="detail-grid">
+                    <div>
+                        <label>Net Cost:</label>
+                        <span id="pricelist-item-detail-price" style="font-weight: 600; color: #059669;">-</span>
+                    </div>
+                    <div>
+                        <label>Margin:</label>
+                        <span id="pricelist-item-detail-margin">-</span>
+                    </div>
+                    <div>
+                        <label>Client Price:</label>
+                        <span id="pricelist-item-detail-client-price" style="font-weight: 600; color: #dc2626;">-</span>
+                    </div>
+                    <div>
+                        <label>Profit per Unit:</label>
+                        <span id="pricelist-item-detail-profit" style="font-weight: 600; color: #0891b2;">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="card" id="pricelist-item-notes-card" style="display: none;">
+                <h2>Notes</h2>
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
+                    <span id="pricelist-item-detail-notes">-</span>
+                </div>
+            </div>
+
+            <!-- Price List Context -->
+            <div class="card">
+                <h2>Price List Information</h2>
+                <div class="detail-grid">
+                    <div>
+                        <label>Price List:</label>
+                        <span id="pricelist-item-detail-pricelist-name">-</span>
+                    </div>
+                    <div>
+                        <label>Region:</label>
+                        <span id="pricelist-item-detail-pricelist-region">-</span>
+                    </div>
+                    <div>
+                        <label>Currency:</label>
+                        <span id="pricelist-item-detail-pricelist-currency">-</span>
+                    </div>
+                    <div>
+                        <label>Status:</label>
+                        <span id="pricelist-item-detail-pricelist-status">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <div id="quote-modal" class="modal"><div class="modal-content">
@@ -3002,6 +3086,90 @@ Next steps:
                 <div class="form-actions">
                     <button type="submit">Update Price List</button>
                     <button type="button" onclick="window.closePriceListModal()" class="secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Price List Item Edit Modal -->
+    <div id="pricelist-item-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2 id="pricelist-item-modal-title">Edit Price List Item</h2>
+            <form id="pricelist-item-form">
+                <input type="hidden" id="pricelist-item-pricelist-id">
+                <input type="hidden" id="pricelist-item-index">
+                
+                <!-- Item Information -->
+                <div class="form-section">
+                    <h3>Item Details</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div style="grid-column: 1 / -1;">
+                            <label>Description *</label>
+                            <input type="text" id="pricelist-item-description" required placeholder="Office desk relocation">
+                        </div>
+                        <div>
+                            <label>Category</label>
+                            <select id="pricelist-item-category">
+                                <option value="">Select category...</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="Labor">Labor</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Materials">Materials</option>
+                                <option value="Storage">Storage</option>
+                                <option value="Services">Services</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Unit</label>
+                            <select id="pricelist-item-unit">
+                                <option value="each">Each</option>
+                                <option value="hour">Hour</option>
+                                <option value="day">Day</option>
+                                <option value="m3">Cubic Meter</option>
+                                <option value="kg">Kilogram</option>
+                                <option value="mile">Mile</option>
+                                <option value="set">Set</option>
+                                <option value="box">Box</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Information -->
+                <div class="form-section">
+                    <h3>Pricing</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Net Cost (£) *</label>
+                            <input type="number" id="pricelist-item-price" required min="0" step="0.01" placeholder="25.00">
+                            <small>Cost per unit (excluding VAT)</small>
+                        </div>
+                        <div>
+                            <label>Margin (%)</label>
+                            <input type="number" id="pricelist-item-margin" min="0" max="1000" step="0.1" placeholder="20" value="20">
+                            <small>Markup percentage</small>
+                        </div>
+                        <div>
+                            <label>Client Price (£)</label>
+                            <input type="number" id="pricelist-item-client-price" readonly step="0.01" style="background: #f3f4f6;">
+                            <small>Auto-calculated from cost + margin</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+                    <div>
+                        <label>Notes</label>
+                        <textarea id="pricelist-item-notes" rows="3" placeholder="Special requirements, handling notes, etc."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit">Save Item</button>
+                    <button type="button" onclick="window.closePriceListItemModal()" class="secondary">Cancel</button>
                 </div>
             </form>
         </div>

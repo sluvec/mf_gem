@@ -269,6 +269,9 @@ class CRMApplication {
                 case 'quote-builder':
                     await this.loadQuoteBuilderData();
                     break;
+                case 'pricelist-item-detail':
+                    // Detail pages are loaded via specific functions, not automatically
+                    break;
 
                 default:
                     logDebug('No specific loader for page:', pageName);
@@ -528,6 +531,29 @@ class CRMApplication {
             const priceListForm = document.getElementById('pricelist-form');
             if (priceListForm) {
                 priceListForm.addEventListener('submit', this.handlePriceListSubmit.bind(this));
+            }
+
+            // Price List Item form
+            const priceListItemForm = document.getElementById('pricelist-item-form');
+            if (priceListItemForm) {
+                priceListItemForm.addEventListener('submit', this.handlePriceListItemSubmit.bind(this));
+            }
+
+            // Price List Item margin calculation listener
+            const priceInput = document.getElementById('pricelist-item-price');
+            const marginInput = document.getElementById('pricelist-item-margin');
+            const clientPriceInput = document.getElementById('pricelist-item-client-price');
+            
+            const calculateClientPrice = () => {
+                const price = parseFloat(priceInput.value) || 0;
+                const margin = parseFloat(marginInput.value) || 0;
+                const clientPrice = price * (1 + margin / 100);
+                clientPriceInput.value = clientPrice.toFixed(2);
+            };
+            
+            if (priceInput && marginInput && clientPriceInput) {
+                priceInput.addEventListener('input', calculateClientPrice);
+                marginInput.addEventListener('input', calculateClientPrice);
             }
 
             // Activity status change listener (show/hide completion section)
@@ -2528,6 +2554,87 @@ class CRMApplication {
     }
 
     /**
+     * @description Handle price list item form submission
+     * @param {Event} event - Form submit event
+     */
+    async handlePriceListItemSubmit(event) {
+        event.preventDefault();
+        
+        try {
+            const priceListId = document.getElementById('pricelist-item-pricelist-id').value;
+            const itemIndex = parseInt(document.getElementById('pricelist-item-index').value);
+            
+            if (!priceListId) {
+                uiModals.showToast('Price List ID not found', 'error');
+                return;
+            }
+            
+            // Get existing price list data
+            const priceListData = await db.load('priceLists', priceListId);
+            if (!priceListData) {
+                uiModals.showToast('Price List not found', 'error');
+                return;
+            }
+            
+            // Collect updated item data from form fields
+            const updatedItemData = {
+                description: document.getElementById('pricelist-item-description').value,
+                category: document.getElementById('pricelist-item-category').value,
+                unit: document.getElementById('pricelist-item-unit').value,
+                price: parseFloat(document.getElementById('pricelist-item-price').value) || 0,
+                margin: parseFloat(document.getElementById('pricelist-item-margin').value) || 20,
+                notes: document.getElementById('pricelist-item-notes').value,
+                updatedAt: new Date()
+            };
+            
+            // Calculate client price
+            updatedItemData.clientPrice = updatedItemData.price * (1 + updatedItemData.margin / 100);
+            
+            // Basic validation
+            if (!updatedItemData.description || updatedItemData.price <= 0) {
+                uiModals.showToast('Please provide description and valid price', 'error');
+                return;
+            }
+            
+            // Initialize items array if not exists
+            if (!priceListData.items) {
+                priceListData.items = [];
+            }
+            
+            // Update or add item
+            if (itemIndex >= 0 && itemIndex < priceListData.items.length) {
+                // Update existing item
+                priceListData.items[itemIndex] = updatedItemData;
+                uiModals.showToast('Price List Item updated successfully', 'success');
+            } else {
+                // Add new item
+                priceListData.items.push(updatedItemData);
+                uiModals.showToast('Price List Item added successfully', 'success');
+            }
+            
+            // Update price list in database
+            priceListData.updatedAt = new Date();
+            await db.save('priceLists', priceListData);
+            
+            uiModals.closeModal('pricelist-item-modal');
+            
+            // Refresh price list detail page if that's current page
+            if (this.currentPage === 'pricelist-detail') {
+                await this.loadPriceListItems(priceListData);
+            }
+            
+            // Also refresh price lists page if that's current page
+            if (this.currentPage === 'pricelists') {
+                await this.loadPriceListsData();
+            }
+
+        } catch (error) {
+            logError('Failed to save price list item:', error);
+            uiModals.showToast('Failed to save price list item', 'error');
+        }
+    }
+
+    /**
      * @description Handle quote edit form submission
      * @param {Event} event - Form submit event
      */
@@ -3057,12 +3164,12 @@ class CRMApplication {
             }
 
             const rowsHTML = priceListData.items.map((item, index) => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewPriceListItem('${priceListData.id}', ${index})" style="cursor: pointer;">
                     <td>${sanitizeHTML(item.description || 'N/A')}</td>
                     <td>${formatCurrency(item.price || 0)}</td>
                     <td>${formatCurrency((item.price || 0) * 1.2)}</td>
                     <td>20%</td>
-                    <td>
+                    <td onclick="event.stopPropagation()">
                         <button onclick="window.editPriceListItem('${priceListData.id}', ${index})" class="secondary">Edit</button>
                         <button onclick="window.deletePriceListItem('${priceListData.id}', ${index})" class="danger">Delete</button>
                     </td>
@@ -3073,6 +3180,72 @@ class CRMApplication {
             logDebug(`Loaded ${priceListData.items.length} price list items`);
         } catch (error) {
             logError('Failed to load price list items:', error);
+        }
+    }
+
+    /**
+     * @description Show price list item detail page
+     * @param {string} priceListId - Price List ID
+     * @param {number} itemIndex - Item index in price list
+     */
+    async showPriceListItemDetail(priceListId, itemIndex) {
+        try {
+            const priceListData = await db.load('priceLists', priceListId);
+            if (!priceListData) {
+                uiModals.showToast('Price List not found', 'error');
+                return;
+            }
+
+            if (!priceListData.items || itemIndex < 0 || itemIndex >= priceListData.items.length) {
+                uiModals.showToast('Price List Item not found', 'error');
+                return;
+            }
+
+            const item = priceListData.items[itemIndex];
+
+            // Store current item globally for button actions
+            window.currentPriceListItem = { priceListId, itemIndex, item, priceListData };
+
+            // Populate detail fields
+            document.getElementById('pricelist-item-title').textContent = `Item: ${item.description || 'Unnamed Item'}`;
+            
+            // Item Information
+            document.getElementById('pricelist-item-detail-description').textContent = item.description || 'N/A';
+            document.getElementById('pricelist-item-detail-category').textContent = item.category || 'N/A';
+            document.getElementById('pricelist-item-detail-unit').textContent = item.unit || 'each';
+
+            // Pricing Details
+            const price = item.price || 0;
+            const margin = item.margin || 20;
+            const clientPrice = item.clientPrice || (price * (1 + margin / 100));
+            const profit = clientPrice - price;
+
+            document.getElementById('pricelist-item-detail-price').textContent = formatCurrency(price);
+            document.getElementById('pricelist-item-detail-margin').textContent = `${margin}%`;
+            document.getElementById('pricelist-item-detail-client-price').textContent = formatCurrency(clientPrice);
+            document.getElementById('pricelist-item-detail-profit').textContent = formatCurrency(profit);
+
+            // Notes (conditional display)
+            const notesCard = document.getElementById('pricelist-item-notes-card');
+            if (item.notes && item.notes.trim()) {
+                document.getElementById('pricelist-item-detail-notes').textContent = item.notes;
+                notesCard.style.display = 'block';
+            } else {
+                notesCard.style.display = 'none';
+            }
+
+            // Price List Context
+            document.getElementById('pricelist-item-detail-pricelist-name').textContent = priceListData.name || 'N/A';
+            document.getElementById('pricelist-item-detail-pricelist-region').textContent = priceListData.region || 'N/A';
+            document.getElementById('pricelist-item-detail-pricelist-currency').textContent = priceListData.currency || 'GBP';
+            document.getElementById('pricelist-item-detail-pricelist-status').textContent = priceListData.status || 'active';
+
+            // Navigate to detail page
+            this.navigateToPage('pricelist-item-detail');
+
+        } catch (error) {
+            logError('Failed to show price list item detail:', error);
+            uiModals.showToast('Failed to load Price List Item details', 'error');
         }
     }
 
@@ -3622,8 +3795,114 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     // Price List Items operations
-    window.editPriceListItem = (priceListId, index) => console.log('Edit price list item:', priceListId, index);
-    window.deletePriceListItem = (priceListId, index) => console.log('Delete price list item:', priceListId, index);
+    window.viewPriceListItem = async (priceListId, index) => {
+        await app.showPriceListItemDetail(priceListId, index);
+    };
+    
+    window.editPriceListItem = async (priceListId, index) => {
+        try {
+            const priceListData = await db.load('priceLists', priceListId);
+            if (!priceListData || !priceListData.items || index < 0 || index >= priceListData.items.length) {
+                uiModals.showToast('Price List Item not found', 'error');
+                return;
+            }
+
+            const item = priceListData.items[index];
+
+            // Change modal title to Edit mode
+            document.getElementById('pricelist-item-modal-title').textContent = 'Edit Price List Item';
+
+            // Populate modal fields
+            document.getElementById('pricelist-item-pricelist-id').value = priceListId;
+            document.getElementById('pricelist-item-index').value = index;
+            document.getElementById('pricelist-item-description').value = item.description || '';
+            document.getElementById('pricelist-item-category').value = item.category || '';
+            document.getElementById('pricelist-item-unit').value = item.unit || 'each';
+            document.getElementById('pricelist-item-price').value = item.price || '';
+            document.getElementById('pricelist-item-margin').value = item.margin || 20;
+            document.getElementById('pricelist-item-notes').value = item.notes || '';
+
+            // Calculate client price
+            const price = parseFloat(item.price) || 0;
+            const margin = parseFloat(item.margin) || 20;
+            const clientPrice = price * (1 + margin / 100);
+            document.getElementById('pricelist-item-client-price').value = clientPrice.toFixed(2);
+
+            // Open modal
+            uiModals.openModal('pricelist-item-modal');
+
+        } catch (error) {
+            logError('Failed to open Price List Item edit modal:', error);
+            uiModals.showToast('Failed to load Price List Item data', 'error');
+        }
+    };
+    
+    window.deletePriceListItem = async (priceListId, index) => {
+        try {
+            const priceListData = await db.load('priceLists', priceListId);
+            if (!priceListData || !priceListData.items || index < 0 || index >= priceListData.items.length) {
+                uiModals.showToast('Price List Item not found', 'error');
+                return;
+            }
+
+            const item = priceListData.items[index];
+
+            // Show confirmation dialog
+            const confirmed = confirm(`Are you sure you want to delete this item?\n\n"${item.description}"\n\nThis action cannot be undone.`);
+            if (!confirmed) {
+                return;
+            }
+
+            // Remove item from array
+            priceListData.items.splice(index, 1);
+            priceListData.updatedAt = new Date();
+
+            // Save updated price list
+            await db.save('priceLists', priceListData);
+
+            // Show success message
+            uiModals.showToast('Price List Item deleted successfully', 'success');
+
+            // Refresh price list detail page if that's current page
+            if (app.currentPage === 'pricelist-detail') {
+                await app.loadPriceListItems(priceListData);
+            }
+
+            // Also refresh price lists page if that's current page
+            if (app.currentPage === 'pricelists') {
+                await app.loadPriceListsData();
+            }
+
+        } catch (error) {
+            logError('Failed to delete price list item:', error);
+            uiModals.showToast('Failed to delete price list item', 'error');
+        }
+    };
+    
+    // Price List Item Detail page operations
+    window.editCurrentPriceListItem = () => {
+        if (window.currentPriceListItem) {
+            window.editPriceListItem(window.currentPriceListItem.priceListId, window.currentPriceListItem.itemIndex);
+        }
+    };
+    
+    window.deleteCurrentPriceListItem = () => {
+        if (window.currentPriceListItem) {
+            window.deletePriceListItem(window.currentPriceListItem.priceListId, window.currentPriceListItem.itemIndex);
+        }
+    };
+    
+    window.backToPriceListDetail = () => {
+        if (window.currentPriceListItem) {
+            window.viewPriceList(window.currentPriceListItem.priceListId);
+        } else {
+            app.navigateToPage('pricelists');
+        }
+    };
+    
+    window.closePriceListItemModal = () => {
+        uiModals.closeModal('pricelist-item-modal');
+    };
     window.showAddResourceToPriceList = () => console.log('Add resource to price list');
 
     // Quote Builder functions
