@@ -2762,7 +2762,45 @@ document.addEventListener('DOMContentLoaded', async () => {
             uiModals.showToast('Failed to load Activity data', 'error');
         }
     };
-    window.deleteActivity = (id) => console.log('Delete activity:', id);
+    window.deleteActivity = async (id) => {
+        try {
+            // Find activity for confirmation dialog
+            const activityData = await db.load('activities', id);
+            if (!activityData) {
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            // Show confirmation dialog
+            const confirmed = confirm(`Are you sure you want to delete activity "${activityData.title}"?\n\nThis action cannot be undone.`);
+            if (!confirmed) {
+                return;
+            }
+            
+            // Delete activity using activities module
+            await activities.deleteActivity(id);
+            
+            // Show success message
+            uiModals.showToast('Activity deleted successfully', 'success');
+            
+            // Refresh current page data
+            if (app.currentPage === 'activities') {
+                await app.loadActivitiesData();
+            } else if (app.currentPage === 'dashboard') {
+                await app.loadDashboardData();
+            } else if (app.currentPage === 'pc-detail') {
+                // Refresh related activities if we're on PC detail page
+                const pcId = window.currentPC?.id;
+                if (pcId) {
+                    await app.loadRelatedActivities(pcId);
+                }
+            }
+            
+        } catch (error) {
+            logError('Failed to delete activity:', error);
+            uiModals.showToast('Failed to delete activity', 'error');
+        }
+    };
     
     // Price List Items operations
     window.editPriceListItem = (priceListId, index) => console.log('Edit price list item:', priceListId, index);
