@@ -506,6 +506,7 @@ class CRMApplication {
         try {
             // Collect data directly from form elements using IDs
             const pcNumberData = {
+                // Basic fields
                 pcNumber: document.getElementById('pc-number').value,
                 projectTitle: document.getElementById('pc-project-name').value,
                 projectDescription: document.getElementById('pc-project-description').value,
@@ -519,6 +520,50 @@ class CRMApplication {
                 budgetRange: document.getElementById('pc-quote-limit').value,
                 postcode: document.getElementById('pc-postcode').value,
                 status: document.getElementById('pc-status').value || 'draft',
+                
+                // Classification & Management fields
+                clientCategory: document.getElementById('pc-client-category').value,
+                clientSource: document.getElementById('pc-client-source').value, // Note: This duplicates 'source' for compatibility
+                referralType: document.getElementById('pc-referral-type').value,
+                surveyor: document.getElementById('pc-surveyor').value,
+                propertyType: document.getElementById('pc-property-type').value,
+                sicCode1: document.getElementById('pc-sic-code-1').value,
+                sicCode2: document.getElementById('pc-sic-code-2').value,
+                sicCode3: document.getElementById('pc-sic-code-3').value,
+                
+                // Collection Address fields
+                collectionFirstName: document.getElementById('pc-collection-first-name').value,
+                collectionSurname: document.getElementById('pc-collection-surname').value,
+                collectionTitle: document.getElementById('pc-collection-title').value,
+                collectionPosition: document.getElementById('pc-collection-position').value,
+                collectionEmail: document.getElementById('pc-collection-email').value,
+                collectionPhone: document.getElementById('pc-collection-phone').value,
+                collectionMobile: document.getElementById('pc-collection-mobile').value,
+                collectionCountry: document.getElementById('pc-collection-country').value,
+                collectionPostcode: document.getElementById('pc-collection-postcode').value,
+                collectionAddress1: document.getElementById('pc-collection-address-1').value,
+                collectionAddress2: document.getElementById('pc-collection-address-2').value,
+                collectionAddress3: document.getElementById('pc-collection-address-3').value,
+                collectionAddress4: document.getElementById('pc-collection-address-4').value,
+                collectionDate: document.getElementById('pc-collection-date').value,
+                
+                // Delivery Address fields
+                deliveryFirstName: document.getElementById('pc-delivery-first-name').value,
+                deliverySurname: document.getElementById('pc-delivery-surname').value,
+                deliveryTitle: document.getElementById('pc-delivery-title').value,
+                deliveryPosition: document.getElementById('pc-delivery-position').value,
+                deliveryEmail: document.getElementById('pc-delivery-email').value,
+                deliveryPhone: document.getElementById('pc-delivery-phone').value,
+                deliveryMobile: document.getElementById('pc-delivery-mobile').value,
+                deliveryCountry: document.getElementById('pc-delivery-country').value,
+                deliveryPostcode: document.getElementById('pc-delivery-postcode').value,
+                deliveryAddress1: document.getElementById('pc-delivery-address-1').value,
+                deliveryAddress2: document.getElementById('pc-delivery-address-2').value,
+                deliveryAddress3: document.getElementById('pc-delivery-address-3').value,
+                deliveryAddress4: document.getElementById('pc-delivery-address-4').value,
+                deliveryDate: document.getElementById('pc-delivery-date').value,
+                
+                // Timestamps
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
@@ -540,6 +585,16 @@ class CRMApplication {
             if (!pcNumberData.contactPhone && !pcNumberData.contactEmail) {
                 uiModals.showToast('Please provide at least phone or email for contact', 'error');
                 return;
+            }
+
+            // Validate collection date before delivery date
+            if (pcNumberData.collectionDate && pcNumberData.deliveryDate) {
+                const collectionDate = new Date(pcNumberData.collectionDate);
+                const deliveryDate = new Date(pcNumberData.deliveryDate);
+                if (collectionDate >= deliveryDate) {
+                    uiModals.showToast('Collection date must be before delivery date', 'error');
+                    return;
+                }
             }
 
             const savedPcNumber = await db.save('pcNumbers', { ...pcNumberData, id: generateId() });
@@ -2251,6 +2306,48 @@ class CRMApplication {
             document.getElementById('pc-detail-status').textContent = this.formatStatus(pcData.status || 'draft');
             document.getElementById('pc-detail-project-description').textContent = pcData.projectDescription || 'No description provided';
             
+            // Classification & Management fields
+            document.getElementById('pc-detail-client-category').textContent = pcData.clientCategory || 'Not specified';
+            document.getElementById('pc-detail-client-source-new').textContent = pcData.clientSource || 'Not specified';
+            document.getElementById('pc-detail-referral-type').textContent = pcData.referralType || 'Not specified';
+            document.getElementById('pc-detail-surveyor').textContent = pcData.surveyor || 'Not assigned';
+            document.getElementById('pc-detail-property-type').textContent = pcData.propertyType || 'Not specified';
+            document.getElementById('pc-detail-sic-code-1').textContent = pcData.sicCode1 || 'N/A';
+            document.getElementById('pc-detail-sic-code-2').textContent = pcData.sicCode2 || 'N/A';
+            document.getElementById('pc-detail-sic-code-3').textContent = pcData.sicCode3 || 'N/A';
+
+            // Collection Address fields
+            document.getElementById('pc-detail-collection-title').textContent = pcData.collectionTitle || '';
+            document.getElementById('pc-detail-collection-first-name').textContent = pcData.collectionFirstName || '';
+            document.getElementById('pc-detail-collection-surname').textContent = pcData.collectionSurname || '';
+            document.getElementById('pc-detail-collection-position').textContent = pcData.collectionPosition || '';
+            document.getElementById('pc-detail-collection-date').textContent = pcData.collectionDate ? formatDate(new Date(pcData.collectionDate)) : '';
+            document.getElementById('pc-detail-collection-email').textContent = pcData.collectionEmail || '';
+            document.getElementById('pc-detail-collection-phone').textContent = pcData.collectionPhone || '';
+            document.getElementById('pc-detail-collection-mobile').textContent = pcData.collectionMobile || '';
+            document.getElementById('pc-detail-collection-address-1').textContent = pcData.collectionAddress1 || '';
+            document.getElementById('pc-detail-collection-address-2').textContent = pcData.collectionAddress2 || '';
+            document.getElementById('pc-detail-collection-address-3').textContent = pcData.collectionAddress3 || '';
+            document.getElementById('pc-detail-collection-address-4').textContent = pcData.collectionAddress4 || '';
+            document.getElementById('pc-detail-collection-postcode').textContent = pcData.collectionPostcode || '';
+            document.getElementById('pc-detail-collection-country').textContent = pcData.collectionCountry || '';
+
+            // Delivery Address fields
+            document.getElementById('pc-detail-delivery-title').textContent = pcData.deliveryTitle || '';
+            document.getElementById('pc-detail-delivery-first-name').textContent = pcData.deliveryFirstName || '';
+            document.getElementById('pc-detail-delivery-surname').textContent = pcData.deliverySurname || '';
+            document.getElementById('pc-detail-delivery-position').textContent = pcData.deliveryPosition || '';
+            document.getElementById('pc-detail-delivery-date').textContent = pcData.deliveryDate ? formatDate(new Date(pcData.deliveryDate)) : '';
+            document.getElementById('pc-detail-delivery-email').textContent = pcData.deliveryEmail || '';
+            document.getElementById('pc-detail-delivery-phone').textContent = pcData.deliveryPhone || '';
+            document.getElementById('pc-detail-delivery-mobile').textContent = pcData.deliveryMobile || '';
+            document.getElementById('pc-detail-delivery-address-1').textContent = pcData.deliveryAddress1 || '';
+            document.getElementById('pc-detail-delivery-address-2').textContent = pcData.deliveryAddress2 || '';
+            document.getElementById('pc-detail-delivery-address-3').textContent = pcData.deliveryAddress3 || '';
+            document.getElementById('pc-detail-delivery-address-4').textContent = pcData.deliveryAddress4 || '';
+            document.getElementById('pc-detail-delivery-postcode').textContent = pcData.deliveryPostcode || '';
+            document.getElementById('pc-detail-delivery-country').textContent = pcData.deliveryCountry || '';
+
             // Contact information
             document.getElementById('pc-detail-contact-name').textContent = pcData.contactName || '';
             document.getElementById('pc-detail-contact-phone').textContent = pcData.contactPhone || '';

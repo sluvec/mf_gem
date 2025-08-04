@@ -335,6 +335,262 @@
                         </div>
                     </div>
                     
+                    <!-- Classification & Management -->
+                    <div class="form-section">
+                        <h3>Classification & Management</h3>
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Client Category</label>
+                                <select id="pc-client-category">
+                                    <option value="">Select category...</option>
+                                    <option value="Corporate">Corporate</option>
+                                    <option value="SME">Small/Medium Enterprise</option>
+                                    <option value="Individual">Individual</option>
+                                    <option value="Government">Government</option>
+                                    <option value="Non-Profit">Non-Profit</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Client Source</label>
+                                <select id="pc-client-source">
+                                    <option value="">Select source...</option>
+                                    <option value="Website Inquiry">Website Inquiry</option>
+                                    <option value="Phone Inquiry">Phone Inquiry</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Referral">Referral</option>
+                                    <option value="Repeat Customer">Repeat Customer</option>
+                                    <option value="Marketing Campaign">Marketing Campaign</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Referral Type</label>
+                                <select id="pc-referral-type">
+                                    <option value="">Select type...</option>
+                                    <option value="Direct">Direct</option>
+                                    <option value="Partner">Partner</option>
+                                    <option value="Customer">Customer Referral</option>
+                                    <option value="Agency">Agency</option>
+                                    <option value="Online">Online</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Surveyor</label>
+                                <input type="text" id="pc-surveyor" placeholder="Assigned surveyor name">
+                            </div>
+                            <div>
+                                <label>Property Type</label>
+                                <select id="pc-property-type">
+                                    <option value="">Select type...</option>
+                                    <option value="Office Building">Office Building</option>
+                                    <option value="Retail Space">Retail Space</option>
+                                    <option value="Warehouse">Warehouse</option>
+                                    <option value="Residential">Residential</option>
+                                    <option value="Industrial">Industrial</option>
+                                    <option value="Mixed Use">Mixed Use</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>SIC Code 1</label>
+                                <input type="text" id="pc-sic-code-1" placeholder="Primary SIC code">
+                                <small>Standard Industrial Classification</small>
+                            </div>
+                            <div>
+                                <label>SIC Code 2</label>
+                                <input type="text" id="pc-sic-code-2" placeholder="Secondary SIC code">
+                            </div>
+                            <div>
+                                <label>SIC Code 3</label>
+                                <input type="text" id="pc-sic-code-3" placeholder="Tertiary SIC code">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collection Address -->
+                    <div class="form-section">
+                        <h3>Collection Address (Current Location)</h3>
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>First Name</label>
+                                <input type="text" id="pc-collection-first-name" placeholder="Contact first name">
+                            </div>
+                            <div>
+                                <label>Surname</label>
+                                <input type="text" id="pc-collection-surname" placeholder="Contact surname">
+                            </div>
+                            <div>
+                                <label>Title</label>
+                                <select id="pc-collection-title">
+                                    <option value="">Select title...</option>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Ms">Ms</option>
+                                    <option value="Mrs">Mrs</option>
+                                    <option value="Dr">Dr</option>
+                                    <option value="Prof">Prof</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Position</label>
+                                <input type="text" id="pc-collection-position" placeholder="Job title/position">
+                            </div>
+                            <div>
+                                <label>Collection Date</label>
+                                <input type="date" id="pc-collection-date">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Email</label>
+                                <input type="email" id="pc-collection-email" placeholder="contact@company.com">
+                            </div>
+                            <div>
+                                <label>Phone</label>
+                                <input type="tel" id="pc-collection-phone" placeholder="+44 20 7123 4567">
+                            </div>
+                            <div>
+                                <label>Mobile</label>
+                                <input type="tel" id="pc-collection-mobile" placeholder="+44 7xxx xxxxxx">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Address Line 1</label>
+                                <input type="text" id="pc-collection-address-1" placeholder="Building number and street">
+                            </div>
+                            <div>
+                                <label>Address Line 2</label>
+                                <input type="text" id="pc-collection-address-2" placeholder="Floor, suite, apartment">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Address Line 3</label>
+                                <input type="text" id="pc-collection-address-3" placeholder="District/area">
+                            </div>
+                            <div>
+                                <label>Address Line 4</label>
+                                <input type="text" id="pc-collection-address-4" placeholder="City/town">
+                            </div>
+                            <div>
+                                <label>Postcode</label>
+                                <input type="text" id="pc-collection-postcode" placeholder="SW1A 1AA">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label>Country</label>
+                            <select id="pc-collection-country">
+                                <option value="">Select country...</option>
+                                <option value="United Kingdom" selected>United Kingdom</option>
+                                <option value="Ireland">Ireland</option>
+                                <option value="France">France</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="form-section">
+                        <h3>Delivery Address (New Location)</h3>
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>First Name</label>
+                                <input type="text" id="pc-delivery-first-name" placeholder="Contact first name">
+                            </div>
+                            <div>
+                                <label>Surname</label>
+                                <input type="text" id="pc-delivery-surname" placeholder="Contact surname">
+                            </div>
+                            <div>
+                                <label>Title</label>
+                                <select id="pc-delivery-title">
+                                    <option value="">Select title...</option>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Ms">Ms</option>
+                                    <option value="Mrs">Mrs</option>
+                                    <option value="Dr">Dr</option>
+                                    <option value="Prof">Prof</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Position</label>
+                                <input type="text" id="pc-delivery-position" placeholder="Job title/position">
+                            </div>
+                            <div>
+                                <label>Delivery Date</label>
+                                <input type="date" id="pc-delivery-date">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Email</label>
+                                <input type="email" id="pc-delivery-email" placeholder="contact@company.com">
+                            </div>
+                            <div>
+                                <label>Phone</label>
+                                <input type="tel" id="pc-delivery-phone" placeholder="+44 20 7123 4567">
+                            </div>
+                            <div>
+                                <label>Mobile</label>
+                                <input type="tel" id="pc-delivery-mobile" placeholder="+44 7xxx xxxxxx">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Address Line 1</label>
+                                <input type="text" id="pc-delivery-address-1" placeholder="Building number and street">
+                            </div>
+                            <div>
+                                <label>Address Line 2</label>
+                                <input type="text" id="pc-delivery-address-2" placeholder="Floor, suite, apartment">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Address Line 3</label>
+                                <input type="text" id="pc-delivery-address-3" placeholder="District/area">
+                            </div>
+                            <div>
+                                <label>Address Line 4</label>
+                                <input type="text" id="pc-delivery-address-4" placeholder="City/town">
+                            </div>
+                            <div>
+                                <label>Postcode</label>
+                                <input type="text" id="pc-delivery-postcode" placeholder="SW1A 1AA">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label>Country</label>
+                            <select id="pc-delivery-country">
+                                <option value="">Select country...</option>
+                                <option value="United Kingdom" selected>United Kingdom</option>
+                                <option value="Ireland">Ireland</option>
+                                <option value="France">France</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <!-- Contact Information -->
                     <div class="form-section">
                         <h3>Contact Information</h3>
@@ -402,6 +658,70 @@
                 </div>
             </div>
             
+            <!-- Classification & Management -->
+            <div class="card">
+                <h2>Classification & Management</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Client Category:</strong> <span id="pc-detail-client-category"></span></div>
+                    <div><strong>Client Source:</strong> <span id="pc-detail-client-source-new"></span></div>
+                    <div><strong>Referral Type:</strong> <span id="pc-detail-referral-type"></span></div>
+                    <div><strong>Surveyor:</strong> <span id="pc-detail-surveyor"></span></div>
+                    <div><strong>Property Type:</strong> <span id="pc-detail-property-type"></span></div>
+                    <div style="grid-column: span 1;"></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>SIC Code 1:</strong> <span id="pc-detail-sic-code-1"></span></div>
+                    <div><strong>SIC Code 2:</strong> <span id="pc-detail-sic-code-2"></span></div>
+                    <div><strong>SIC Code 3:</strong> <span id="pc-detail-sic-code-3"></span></div>
+                </div>
+            </div>
+
+            <!-- Collection Address -->
+            <div class="card">
+                <h2>Collection Address (Current Location)</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Contact:</strong> <span id="pc-detail-collection-title"></span> <span id="pc-detail-collection-first-name"></span> <span id="pc-detail-collection-surname"></span></div>
+                    <div><strong>Position:</strong> <span id="pc-detail-collection-position"></span></div>
+                    <div><strong>Collection Date:</strong> <span id="pc-detail-collection-date"></span></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>Email:</strong> <span id="pc-detail-collection-email"></span></div>
+                    <div><strong>Phone:</strong> <span id="pc-detail-collection-phone"></span></div>
+                    <div><strong>Mobile:</strong> <span id="pc-detail-collection-mobile"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="pc-detail-collection-address-1"></span><br>
+                    <span id="pc-detail-collection-address-2"></span><br>
+                    <span id="pc-detail-collection-address-3"></span><br>
+                    <span id="pc-detail-collection-address-4"></span><br>
+                    <span id="pc-detail-collection-postcode"></span>, <span id="pc-detail-collection-country"></span>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="card">
+                <h2>Delivery Address (New Location)</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Contact:</strong> <span id="pc-detail-delivery-title"></span> <span id="pc-detail-delivery-first-name"></span> <span id="pc-detail-delivery-surname"></span></div>
+                    <div><strong>Position:</strong> <span id="pc-detail-delivery-position"></span></div>
+                    <div><strong>Delivery Date:</strong> <span id="pc-detail-delivery-date"></span></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>Email:</strong> <span id="pc-detail-delivery-email"></span></div>
+                    <div><strong>Phone:</strong> <span id="pc-detail-delivery-phone"></span></div>
+                    <div><strong>Mobile:</strong> <span id="pc-detail-delivery-mobile"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="pc-detail-delivery-address-1"></span><br>
+                    <span id="pc-detail-delivery-address-2"></span><br>
+                    <span id="pc-detail-delivery-address-3"></span><br>
+                    <span id="pc-detail-delivery-address-4"></span><br>
+                    <span id="pc-detail-delivery-postcode"></span>, <span id="pc-detail-delivery-country"></span>
+                </div>
+            </div>
+
             <!-- Contact Information -->
             <div class="card">
                 <h2>Primary Contact</h2>
