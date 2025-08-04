@@ -444,6 +444,12 @@ class CRMApplication {
                 pcEditForm.addEventListener('submit', this.handlePcNumberUpdate.bind(this));
             }
 
+            // Quote edit form
+            const quoteEditForm = document.getElementById('quote-edit-form');
+            if (quoteEditForm) {
+                quoteEditForm.addEventListener('submit', this.handleQuoteEditSubmit.bind(this));
+            }
+
             // Activity form
             const activityForm = document.getElementById('activity-form');
             if (activityForm) {
@@ -1899,6 +1905,70 @@ class CRMApplication {
     }
 
     /**
+     * @description Handle quote edit form submission
+     * @param {Event} event - Form submit event
+     */
+    async handleQuoteEditSubmit(event) {
+        event.preventDefault();
+        
+        try {
+            const quoteId = document.getElementById('quote-edit-id').value;
+            if (!quoteId) {
+                uiModals.showToast('Quote ID not found', 'error');
+                return;
+            }
+            
+            // Collect updated data from form fields
+            const updatedData = {
+                id: quoteId,
+                quoteNumber: document.getElementById('quote-edit-number').value,
+                pcNumber: document.getElementById('quote-edit-pc-number').value,
+                clientName: document.getElementById('quote-edit-client-name').value,
+                projectTitle: document.getElementById('quote-edit-project-title').value,
+                value: parseFloat(document.getElementById('quote-edit-value').value) || 0,
+                status: document.getElementById('quote-edit-status').value,
+                description: document.getElementById('quote-edit-description').value,
+                updatedAt: new Date()
+            };
+
+            // Handle valid until date
+            const validUntilInput = document.getElementById('quote-edit-valid-until').value;
+            if (validUntilInput) {
+                updatedData.validUntil = new Date(validUntilInput).toISOString();
+            }
+            
+            // Basic validation
+            if (!updatedData.quoteNumber || !updatedData.pcNumber || !updatedData.clientName || !updatedData.projectTitle) {
+                uiModals.showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Save to database
+            await db.save('quotes', updatedData);
+            
+            uiModals.showToast('Quote updated successfully', 'success');
+            uiModals.closeModal('quote-edit-modal');
+            
+            // Refresh page data
+            if (this.currentPage === 'quotes') {
+                await this.loadQuotesData();
+            } else if (this.currentPage === 'quote-detail') {
+                // Refresh the detail page with updated data
+                await this.showQuoteDetail(quoteId);
+            }
+            
+            // Also refresh dashboard if that's current page
+            if (this.currentPage === 'dashboard') {
+                await this.loadDashboardData();
+            }
+
+        } catch (error) {
+            logError('Failed to update quote:', error);
+            uiModals.showToast('Failed to update quote', 'error');
+        }
+    }
+
+    /**
      * @description Show activity detail page
      * @param {string} activityId - Activity ID
      */
@@ -2334,8 +2404,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.closePcEditModal = () => {
         uiModals.closeModal('pc-edit-modal');
     };
+    window.closeQuoteEditModal = () => {
+        uiModals.closeModal('quote-edit-modal');
+    };
     window.createQuote = (id) => console.log('Create quote for PC:', id);
-    window.editQuote = (id) => console.log('Edit quote:', id);
+    window.editQuote = async (id) => {
+        try {
+            logDebug('Opening Quote edit modal for ID:', id);
+            const quoteData = await db.load('quotes', id);
+            if (!quoteData) {
+                uiModals.showToast('Quote not found', 'error');
+                return;
+            }
+            
+            // Change modal title to Edit mode
+            document.getElementById('quote-edit-modal-title').textContent = 'Edit Quote';
+            
+            // Populate modal fields
+            document.getElementById('quote-edit-id').value = quoteData.id;
+            document.getElementById('quote-edit-number').value = quoteData.quoteNumber || '';
+            document.getElementById('quote-edit-pc-number').value = quoteData.pcNumber || '';
+            document.getElementById('quote-edit-client-name').value = quoteData.clientName || '';
+            document.getElementById('quote-edit-project-title').value = quoteData.projectTitle || '';
+            document.getElementById('quote-edit-value').value = quoteData.value || '';
+            document.getElementById('quote-edit-status').value = quoteData.status || 'draft';
+            document.getElementById('quote-edit-description').value = quoteData.description || '';
+            
+            // Format date for input field
+            if (quoteData.validUntil) {
+                const validUntilDate = new Date(quoteData.validUntil);
+                document.getElementById('quote-edit-valid-until').value = validUntilDate.toISOString().split('T')[0];
+            } else {
+                document.getElementById('quote-edit-valid-until').value = '';
+            }
+            
+            // Open modal
+            uiModals.openModal('quote-edit-modal');
+            
+        } catch (error) {
+            logError('Failed to open Quote edit modal:', error);
+            uiModals.showToast('Failed to load Quote data', 'error');
+        }
+    };
     window.viewQuote = (id) => console.log('View quote:', id);
     window.createPriceList = () => console.log('Create price list');
     window.editPriceList = async (id) => {
