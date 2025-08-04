@@ -82,17 +82,6 @@
                             </li>
                     
                     <li role="none" class="nav-row-1">
-                                <button 
-                            data-show-page="activities" 
-                            class="nav-btn"
-                                    role="menuitem"
-                                    aria-describedby="activities-desc">
-                            <span class="nav-icon">📅</span>
-                                    Activities
-                                </button>
-                    </li>
-                    
-                    <li role="none" class="nav-row-1">
                         <button 
                             data-show-page="quotes" 
                             class="nav-btn"
@@ -102,6 +91,17 @@
                                     Quotes
                                 </button>
                             </li>
+                    
+                    <li role="none" class="nav-row-1">
+                                <button 
+                            data-show-page="activities" 
+                            class="nav-btn"
+                                    role="menuitem"
+                                    aria-describedby="activities-desc">
+                            <span class="nav-icon">📅</span>
+                                    Activities
+                                </button>
+                    </li>
                     
                     <li role="none" class="nav-row-1">
                                 <button 
@@ -2090,11 +2090,11 @@
             <h3>Basic Information</h3>
         <div class="form-grid">
                 <div>
-                    <label>PC Number *</label>
-                    <select id="activity-pc-select"></select>
-                    <button type="button" onclick="app.autoFillActivityFromPC(document.getElementById('activity-pc-select').value)" 
+                    <label>Quote *</label>
+                    <select id="activity-quote-select"></select>
+                    <button type="button" onclick="app.autoFillActivityFromQuote(document.getElementById('activity-quote-select').value)" 
                             style="margin-top: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;">
-                        🔄 Auto-fill from PC
+                        🔄 Auto-fill from Quote
                     </button>
                 </div>
                 <div><label>Activity Type *</label><input type="text" id="activity-type" placeholder="e.g. Survey, Delivery, Installation" required></div>

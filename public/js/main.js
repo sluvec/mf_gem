@@ -392,8 +392,55 @@ class CRMApplication {
             this.originalActivities = allActivities; // Store for filtering
             this.renderActivitiesList(allActivities);
             this.renderActivitiesCalendar(allActivities);
+            
+            // Populate quote dropdown for activity forms
+            await this.populateActivityQuoteDropdown();
         } catch (error) {
             logError('Failed to load activities data:', error);
+        }
+    }
+
+    /**
+     * @description Populate quote dropdown in activity forms
+     */
+    async populateActivityQuoteDropdown() {
+        try {
+            const quoteSelect = document.getElementById('activity-quote-select');
+            if (!quoteSelect) return;
+
+            const allQuotes = await db.loadAll('quotes');
+            const allPCs = await db.loadAll('pcNumbers');
+            
+            // Create a map of PC Numbers for quick lookup
+            const pcMap = new Map();
+            allPCs.forEach(pc => {
+                pcMap.set(pc.id, pc);
+                if (pc.pcNumber) pcMap.set(pc.pcNumber, pc);
+            });
+
+            // Clear existing options
+            quoteSelect.innerHTML = '<option value="">Select Quote...</option>';
+
+            // Add quotes with PC Number context
+            allQuotes
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                .forEach(quote => {
+                    const option = document.createElement('option');
+                    option.value = quote.id;
+                    
+                    // Get related PC info
+                    let pcInfo = '';
+                    const relatedPC = pcMap.get(quote.pcId) || pcMap.get(quote.pcNumber);
+                    if (relatedPC) {
+                        pcInfo = ` (${relatedPC.pcNumber || relatedPC.id} - ${relatedPC.company || 'Unknown Company'})`;
+                    }
+                    
+                    option.textContent = `${quote.quoteNumber || quote.id}${pcInfo}`;
+                    quoteSelect.appendChild(option);
+                });
+
+        } catch (error) {
+            logError('Failed to populate activity quote dropdown:', error);
         }
     }
 
@@ -491,12 +538,12 @@ class CRMApplication {
                 });
             }
 
-            // Smart Features: Auto-fill Activity from PC Number selection
-            const activityPcSelect = document.getElementById('activity-pc-select');
-            if (activityPcSelect) {
-                activityPcSelect.addEventListener('change', (event) => {
+            // Smart Features: Auto-fill Activity from Quote selection
+            const activityQuoteSelect = document.getElementById('activity-quote-select');
+            if (activityQuoteSelect) {
+                activityQuoteSelect.addEventListener('change', (event) => {
                     if (event.target.value) {
-                        this.autoFillActivityFromPC(event.target.value);
+                        this.autoFillActivityFromQuote(event.target.value);
                     }
                 });
             }
@@ -732,7 +779,7 @@ class CRMApplication {
                 title: document.getElementById('activity-title').value,
                 description: document.getElementById('activity-description').value,
                 type: document.getElementById('activity-type').value,
-                pcId: document.getElementById('activity-pc-select').value,
+                quoteId: document.getElementById('activity-quote-select').value,
                 scheduledDate: document.getElementById('activity-scheduled-date').value,
                 scheduledTime: document.getElementById('activity-scheduled-time').value,
                 duration: parseInt(document.getElementById('activity-duration').value) || 60,
@@ -1803,15 +1850,33 @@ class CRMApplication {
     }
 
     /**
-     * @description Auto-fill Activity form from related PC Number data
-     * @param {string} pcId - PC Number ID to pull data from
+     * @description Auto-fill Activity form from related Quote data (and its PC Number)
+     * @param {string} quoteId - Quote ID to pull data from
      */
-    async autoFillActivityFromPC(pcId) {
+    async autoFillActivityFromQuote(quoteId) {
         try {
-            if (!pcId) return;
+            if (!quoteId) return;
             
-            const pcData = await db.load('pcNumbers', pcId);
-            if (!pcData) return;
+            // First get quote data
+            const quoteData = await db.load('quotes', quoteId);
+            if (!quoteData) return;
+            
+            // Then get related PC Number data
+            let pcData = null;
+            if (quoteData.pcId || quoteData.pcNumber) {
+                // Try to find PC by ID first, then by PC Number
+                if (quoteData.pcId) {
+                    pcData = await db.load('pcNumbers', quoteData.pcId);
+                } else if (quoteData.pcNumber) {
+                    const allPCs = await db.loadAll('pcNumbers');
+                    pcData = allPCs.find(pc => pc.pcNumber === quoteData.pcNumber);
+                }
+            }
+            
+            if (!pcData) {
+                uiModals.showToast('No PC Number data found for this quote', 'warning');
+                return;
+            }
             
             // Auto-fill contact information
             if (pcData.contactName) {
@@ -1860,10 +1925,10 @@ class CRMApplication {
                 }
             }
             
-            uiModals.showToast('Activity form auto-filled from PC Number data', 'success');
+            uiModals.showToast('Activity form auto-filled from Quote and PC Number data', 'success');
             
         } catch (error) {
-            logError('Failed to auto-fill activity from PC:', error);
+            logError('Failed to auto-fill activity from Quote:', error);
         }
     }
 
@@ -2988,7 +3053,27 @@ class CRMApplication {
                 // First check if activity has direct company name
                 let companyName = (activity.clientName || activity.company || '').toLowerCase();
                 
-                // If no direct company name, look it up via PC Number
+                // If no direct company name, look it up via Quote → PC Number hierarchy
+                if (!companyName && activity.quoteId) {
+                    // Find related quote
+                    const relatedQuote = this.originalQuotes.find(quote => quote.id === activity.quoteId);
+                    if (relatedQuote) {
+                        // Get company name from quote
+                        companyName = (relatedQuote.clientName || relatedQuote.company || '').toLowerCase();
+                        
+                        // If quote doesn't have company name, get it from PC Number
+                        if (!companyName && (relatedQuote.pcId || relatedQuote.pcNumber)) {
+                            const relatedPc = this.originalPcNumbers.find(pc => 
+                                pc.id === relatedQuote.pcId || pc.pcNumber === relatedQuote.pcNumber
+                            );
+                            if (relatedPc) {
+                                companyName = (relatedPc.company || relatedPc.clientName || '').toLowerCase();
+                            }
+                        }
+                    }
+                }
+                
+                // Fallback: If still no company name and activity has pcNumber (legacy support)
                 if (!companyName && activity.pcNumber) {
                     const relatedPc = this.originalPcNumbers.find(pc => pc.pcNumber === activity.pcNumber);
                     if (relatedPc) {
