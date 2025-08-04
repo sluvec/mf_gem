@@ -1730,14 +1730,14 @@ class CRMApplication {
             }
 
             const rowsHTML = priceListsList.map(priceList => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewPriceList('${priceList.id}')" style="cursor: pointer;">
                     <td>${sanitizeHTML(priceList.name)}</td>
                     <td>${sanitizeHTML(priceList.version || '1.0')}</td>
                     <td>${sanitizeHTML(priceList.currency || 'GBP')}</td>
                     <td>${formatDate(priceList.date || priceList.createdAt)}</td>
                     <td>${priceList.isDefault ? 'Yes' : 'No'}</td>
                     <td><span class="pricelist-status ${priceList.status || 'active'}">${sanitizeHTML(priceList.status || 'active')}</span></td>
-                    <td>
+                    <td onclick="event.stopPropagation()">
                         <button class="button secondary" onclick="window.editPriceList('${priceList.id}')">Edit</button>
                         <button class="button primary" onclick="window.viewPriceList('${priceList.id}')">View Items</button>
                     </td>
@@ -2204,6 +2204,70 @@ class CRMApplication {
             logError('Failed to load related activities:', error);
         }
     }
+
+    /**
+     * @description Show price list detail page
+     * @param {string} priceListId - Price List ID
+     */
+    async showPriceListDetail(priceListId) {
+        try {
+            const priceListData = await db.load('priceLists', priceListId);
+            if (!priceListData) {
+                uiModals.showToast('Price List not found', 'error');
+                return;
+            }
+
+            // Store current price list globally for button actions
+            window.currentPriceList = priceListData;
+
+            // Populate detail fields
+            document.getElementById('pricelist-title').textContent = `Price List: ${priceListData.name}`;
+
+            // Load price list items
+            await this.loadPriceListItems(priceListData);
+
+            // Navigate to detail page
+            this.navigateToPage('pricelist-detail');
+
+        } catch (error) {
+            logError('Failed to show price list detail:', error);
+            uiModals.showToast('Failed to load Price List details', 'error');
+        }
+    }
+
+    /**
+     * @description Load price list items for detail page
+     * @param {Object} priceListData - Price List data
+     */
+    async loadPriceListItems(priceListData) {
+        try {
+            const container = document.getElementById('pricelist-items');
+            if (!container) return;
+
+            if (!priceListData.items || priceListData.items.length === 0) {
+                container.innerHTML = '<tr><td colspan="5">No items found in this price list</td></tr>';
+                return;
+            }
+
+            const rowsHTML = priceListData.items.map((item, index) => `
+                <tr>
+                    <td>${sanitizeHTML(item.description || 'N/A')}</td>
+                    <td>${formatCurrency(item.price || 0)}</td>
+                    <td>${formatCurrency((item.price || 0) * 1.2)}</td>
+                    <td>20%</td>
+                    <td>
+                        <button onclick="window.editPriceListItem('${priceListData.id}', ${index})" class="secondary">Edit</button>
+                        <button onclick="window.deletePriceListItem('${priceListData.id}', ${index})" class="danger">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rowsHTML;
+            logDebug(`Loaded ${priceListData.items.length} price list items`);
+        } catch (error) {
+            logError('Failed to load price list items:', error);
+        }
+    }
 }
 
 // Initialize application when DOM is ready
@@ -2505,7 +2569,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             uiModals.showToast('Failed to load Price List data', 'error');
         }
     };
-    window.viewPriceList = (id) => console.log('View price list:', id);
+    window.viewPriceList = async (id) => {
+        await app.showPriceListDetail(id);
+    };
     
     // Detail view functions
     window.viewActivityDetail = async (id) => {
@@ -2570,6 +2636,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     window.deleteActivity = (id) => console.log('Delete activity:', id);
+    
+    // Price List Items operations
+    window.editPriceListItem = (priceListId, index) => console.log('Edit price list item:', priceListId, index);
+    window.deletePriceListItem = (priceListId, index) => console.log('Delete price list item:', priceListId, index);
+    window.showAddResourceToPriceList = () => console.log('Add resource to price list');
     
     // PHASE 2: Search-related placeholder functions (for modal compatibility)
     window.filterResources = () => logDebug('filterResources: Search functionality removed');
