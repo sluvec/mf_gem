@@ -581,6 +581,44 @@ class CRMApplication {
     }
 
     /**
+     * @description Load Settings page data and statistics
+     */
+    async loadSettingsData() {
+        try {
+            logInfo('Loading Settings page data...');
+            
+            // Update current user
+            const currentUser = this.getCurrentUser();
+            document.getElementById('settings-current-user').textContent = currentUser || 'Not logged in';
+            
+            // Get database statistics
+            const stats = await db.getStats();
+            
+            // Update statistics display
+            document.getElementById('settings-pc-count').textContent = stats.pcNumbers || '0';
+            document.getElementById('settings-quotes-count').textContent = stats.quotes || '0';
+            document.getElementById('settings-activities-count').textContent = stats.activities || '0';
+            document.getElementById('settings-pricelists-count').textContent = stats.priceLists || '0';
+            document.getElementById('settings-resources-count').textContent = stats.resources || '0';
+            
+            // Setup file input listener
+            const fileInput = document.getElementById('import-file');
+            const importButton = document.getElementById('import-button');
+            
+            if (fileInput && importButton) {
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    importButton.disabled = !file;
+                });
+            }
+            
+            logInfo('Settings page data loaded successfully');
+        } catch (error) {
+            logError('Failed to load Settings data:', error);
+        }
+    }
+
+    /**
      * @description Render activities list
      * @param {Array} activitiesList - Array of activities
      */
@@ -4048,44 +4086,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         uiModals.showToast('Quote builder opened for selected PC Number', 'success');
     };
 
-    /**
-     * @description Load Settings page data and statistics
-     */
-    async loadSettingsData() {
-        try {
-            logInfo('Loading Settings page data...');
-            
-            // Update current user
-            const currentUser = this.getCurrentUser();
-            document.getElementById('settings-current-user').textContent = currentUser || 'Not logged in';
-            
-            // Get database statistics
-            const stats = await db.getStats();
-            
-            // Update statistics display
-            document.getElementById('settings-pc-count').textContent = stats.pcNumbers || '0';
-            document.getElementById('settings-quotes-count').textContent = stats.quotes || '0';
-            document.getElementById('settings-activities-count').textContent = stats.activities || '0';
-            document.getElementById('settings-pricelists-count').textContent = stats.priceLists || '0';
-            document.getElementById('settings-resources-count').textContent = stats.resources || '0';
-            
-            // Setup file input listener
-            const fileInput = document.getElementById('import-file');
-            const importButton = document.getElementById('import-button');
-            
-            if (fileInput && importButton) {
-                fileInput.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    importButton.disabled = !file;
-                });
-            }
-            
-            logInfo('Settings page data loaded successfully');
-        } catch (error) {
-            logError('Failed to load Settings data:', error);
-        }
-    }
-    
+
     // Settings Functions
     window.exportData = async () => {
         try {
