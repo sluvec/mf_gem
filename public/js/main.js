@@ -3253,7 +3253,7 @@ class CRMApplication {
      * @description Filter PC Numbers by company name
      * @param {string} query - Search query
      */
-    filterPcNumbers(query) {
+    filterPcNumbersByCompany(query) {
         try {
             const filtered = this.originalPcNumbers.filter(pc => {
                 const companyName = (pc.company || pc.clientName || '').toLowerCase();
@@ -3271,7 +3271,7 @@ class CRMApplication {
      * @description Filter Activities by company name
      * @param {string} query - Search query
      */
-    filterActivities(query) {
+    filterActivitiesByCompany(query) {
         try {
             const filtered = this.originalActivities.filter(activity => {
                 // First check if activity has direct company name
@@ -3319,7 +3319,7 @@ class CRMApplication {
      * @description Filter Quotes by company name
      * @param {string} query - Search query
      */
-    filterQuotes(query) {
+    filterQuotesByCompany(query) {
         try {
             const filtered = this.originalQuotes.filter(quote => {
                 // First check if quote has direct company name
@@ -3366,6 +3366,7 @@ class CRMApplication {
      */
     clearPcFilter() {
         document.getElementById('pc-filter-company').value = '';
+        document.getElementById('pc-filter-account-manager').value = '';
         this.renderPcNumbersList(this.originalPcNumbers);
         this.updateFilterResults('pc-filter-results', this.originalPcNumbers.length, this.originalPcNumbers.length, 'PC Numbers');
     }
@@ -3375,6 +3376,7 @@ class CRMApplication {
      */
     clearActivityFilter() {
         document.getElementById('activity-filter-company').value = '';
+        document.getElementById('activity-filter-account-manager').value = '';
         this.renderActivitiesList(this.originalActivities);
         this.updateFilterResults('activity-filter-results', this.originalActivities.length, this.originalActivities.length, 'Activities');
     }
@@ -3384,8 +3386,105 @@ class CRMApplication {
      */
     clearQuoteFilter() {
         document.getElementById('quote-filter-company').value = '';
+        document.getElementById('quote-filter-account-manager').value = '';
         this.renderQuotesList(this.originalQuotes);
         this.updateFilterResults('quote-filter-results', this.originalQuotes.length, this.originalQuotes.length, 'Quotes');
+    }
+
+    /**
+     * @description Filter PC Numbers by account manager
+     * @param {string} query - Search query
+     */
+    filterPcNumbersByAccountManager(query) {
+        try {
+            const filtered = this.originalPcNumbers.filter(pc => {
+                const accountManager = (pc.accountManager || '').toLowerCase();
+                return accountManager.includes(query.toLowerCase());
+            });
+            
+            this.renderPcNumbersList(filtered);
+            this.updateFilterResults('pc-filter-results', filtered.length, this.originalPcNumbers.length, 'PC Numbers');
+        } catch (error) {
+            logError('Failed to filter PC numbers by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by account manager
+     * @param {string} query - Search query
+     */
+    filterActivitiesByAccountManager(query) {
+        try {
+            const filtered = this.originalActivities.filter(activity => {
+                // First check if activity has direct account manager
+                let accountManager = (activity.accountManager || '').toLowerCase();
+                
+                // If no direct account manager, look it up via Quote → PC Number hierarchy
+                if (!accountManager && activity.quoteId) {
+                    // Find related quote
+                    const relatedQuote = this.originalQuotes.find(quote => quote.id === activity.quoteId);
+                    if (relatedQuote) {
+                        // Get account manager from quote
+                        accountManager = (relatedQuote.accountManager || '').toLowerCase();
+                        
+                        // If quote doesn't have account manager, get it from PC Number
+                        if (!accountManager && (relatedQuote.pcId || relatedQuote.pcNumber)) {
+                            const relatedPc = this.originalPcNumbers.find(pc => 
+                                pc.id === relatedQuote.pcId || pc.pcNumber === relatedQuote.pcNumber
+                            );
+                            if (relatedPc) {
+                                accountManager = (relatedPc.accountManager || '').toLowerCase();
+                            }
+                        }
+                    }
+                }
+                
+                // Fallback: If still no account manager and activity has pcNumber (legacy support)
+                if (!accountManager && activity.pcNumber) {
+                    const relatedPc = this.originalPcNumbers.find(pc => pc.pcNumber === activity.pcNumber);
+                    if (relatedPc) {
+                        accountManager = (relatedPc.accountManager || '').toLowerCase();
+                    }
+                }
+                
+                return accountManager.includes(query.toLowerCase());
+            });
+            
+            this.renderActivitiesList(filtered);
+            this.updateFilterResults('activity-filter-results', filtered.length, this.originalActivities.length, 'Activities');
+        } catch (error) {
+            logError('Failed to filter activities by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter Quotes by account manager
+     * @param {string} query - Search query
+     */
+    filterQuotesByAccountManager(query) {
+        try {
+            const filtered = this.originalQuotes.filter(quote => {
+                // First check if quote has direct account manager
+                let accountManager = (quote.accountManager || '').toLowerCase();
+                
+                // If no direct account manager, look it up via PC Number
+                if (!accountManager && (quote.pcId || quote.pcNumber)) {
+                    const relatedPc = this.originalPcNumbers.find(pc => 
+                        pc.id === quote.pcId || pc.pcNumber === quote.pcNumber
+                    );
+                    if (relatedPc) {
+                        accountManager = (relatedPc.accountManager || '').toLowerCase();
+                    }
+                }
+                
+                return accountManager.includes(query.toLowerCase());
+            });
+            
+            this.renderQuotesList(filtered);
+            this.updateFilterResults('quote-filter-results', filtered.length, this.originalQuotes.length, 'Quotes');
+        } catch (error) {
+            logError('Failed to filter quotes by account manager:', error);
+        }
     }
 }
 
@@ -3930,9 +4029,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     // Smart Filtering functions
-    window.filterPcNumbers = (query) => app.filterPcNumbers(query);
-    window.filterActivities = (query) => app.filterActivities(query);
-    window.filterQuotes = (query) => app.filterQuotes(query);
+    window.filterPcNumbersByCompany = (query) => app.filterPcNumbersByCompany(query);
+    window.filterPcNumbersByAccountManager = (query) => app.filterPcNumbersByAccountManager(query);
+    window.filterActivitiesByCompany = (query) => app.filterActivitiesByCompany(query);
+    window.filterActivitiesByAccountManager = (query) => app.filterActivitiesByAccountManager(query);
+    window.filterQuotesByCompany = (query) => app.filterQuotesByCompany(query);
+    window.filterQuotesByAccountManager = (query) => app.filterQuotesByAccountManager(query);
     window.clearPcFilter = () => app.clearPcFilter();
     window.clearActivityFilter = () => app.clearActivityFilter();
     window.clearQuoteFilter = () => app.clearQuoteFilter();

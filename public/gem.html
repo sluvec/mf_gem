@@ -207,7 +207,17 @@
                             id="pc-filter-company" 
                             placeholder="Start typing company name..." 
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
-                            oninput="window.filterPcNumbers(this.value)"
+                            oninput="window.filterPcNumbersByCompany(this.value)"
+                        >
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="pc-filter-account-manager" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Account Manager:</label>
+                        <input 
+                            type="text" 
+                            id="pc-filter-account-manager" 
+                            placeholder="Start typing account manager..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterPcNumbersByAccountManager(this.value)"
                         >
                     </div>
                     <div style="margin-top: 1.5rem;">
@@ -769,7 +779,17 @@
                             id="quote-filter-company" 
                             placeholder="Start typing company name..." 
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
-                            oninput="window.filterQuotes(this.value)"
+                            oninput="window.filterQuotesByCompany(this.value)"
+                        >
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="quote-filter-account-manager" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Account Manager:</label>
+                        <input 
+                            type="text" 
+                            id="quote-filter-account-manager" 
+                            placeholder="Start typing account manager..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterQuotesByAccountManager(this.value)"
                         >
                     </div>
                     <div style="margin-top: 1.5rem;">
@@ -1077,7 +1097,17 @@
                             id="activity-filter-company" 
                             placeholder="Start typing company name..." 
                             style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
-                            oninput="window.filterActivities(this.value)"
+                            oninput="window.filterActivitiesByCompany(this.value)"
+                        >
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="activity-filter-account-manager" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Account Manager:</label>
+                        <input 
+                            type="text" 
+                            id="activity-filter-account-manager" 
+                            placeholder="Start typing account manager..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterActivitiesByAccountManager(this.value)"
                         >
                     </div>
                     <div style="margin-top: 1.5rem;">
