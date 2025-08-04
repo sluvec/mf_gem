@@ -195,6 +195,28 @@
         <div id="pcnumbers" class="page">
             <h1>🔢 PC Numbers</h1>
             <button data-show-page="new-pc">+ New PC Number</button>
+            
+            <!-- Smart Filter -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0.75rem;">🔍 Smart Filter</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="flex: 1;">
+                        <label for="pc-filter-company" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Company Name:</label>
+                        <input 
+                            type="text" 
+                            id="pc-filter-company" 
+                            placeholder="Start typing company name..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterPcNumbers(this.value)"
+                        >
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button onclick="window.clearPcFilter()" class="secondary">Clear Filter</button>
+                    </div>
+                </div>
+                <div id="pc-filter-results" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"></div>
+            </div>
+            
             <div class="card">
                 <h2>PC Numbers List</h2>
                 <table>
@@ -410,6 +432,28 @@
         <div id="quotes" class="page">
             <h1>💰 Quotes</h1>
             <button onclick="window.showNewQuoteModal()">+ New Quote</button>
+            
+            <!-- Smart Filter -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0.75rem;">🔍 Smart Filter</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="flex: 1;">
+                        <label for="quote-filter-company" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Company Name:</label>
+                        <input 
+                            type="text" 
+                            id="quote-filter-company" 
+                            placeholder="Start typing company name..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterQuotes(this.value)"
+                        >
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button onclick="window.clearQuoteFilter()" class="secondary">Clear Filter</button>
+                    </div>
+                </div>
+                <div id="quote-filter-results" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"></div>
+            </div>
+            
             <div class="card">
                 <h2>Quote List</h2>
                 <table>
@@ -695,6 +739,27 @@
                         <button onclick="window.navigateCalendar('today')" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white;">Today</button>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Smart Filter for Activities -->
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0.75rem;">🔍 Smart Filter</h3>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="flex: 1;">
+                        <label for="activity-filter-company" style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Company Name:</label>
+                        <input 
+                            type="text" 
+                            id="activity-filter-company" 
+                            placeholder="Start typing company name..." 
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;"
+                            oninput="window.filterActivities(this.value)"
+                        >
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button onclick="window.clearActivityFilter()" class="secondary">Clear Filter</button>
+                    </div>
+                </div>
+                <div id="activity-filter-results" style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;"></div>
             </div>
             
             <!-- List View (default) -->

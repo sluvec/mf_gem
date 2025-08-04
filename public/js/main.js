@@ -33,6 +33,11 @@ class CRMApplication {
             MAX_DESCRIPTION_LENGTH: 1000,
             DEFAULT_ACTIVITY_DURATION: 60
         };
+        
+        // Store original data for filtering
+        this.originalPcNumbers = [];
+        this.originalActivities = [];
+        this.originalQuotes = [];
     }
 
     /**
@@ -384,6 +389,7 @@ class CRMApplication {
     async loadActivitiesData() {
         try {
             const allActivities = await activities.getAllActivities();
+            this.originalActivities = allActivities; // Store for filtering
             this.renderActivitiesList(allActivities);
             this.renderActivitiesCalendar(allActivities);
         } catch (error) {
@@ -1586,6 +1592,7 @@ class CRMApplication {
         try {
             logDebug('Loading PC numbers data...');
             const allPcNumbers = await db.loadAll('pcNumbers');
+            this.originalPcNumbers = allPcNumbers; // Store for filtering
             this.renderPcNumbersList(allPcNumbers);
         } catch (error) {
             logError('Failed to load PC numbers data:', error);
@@ -1596,6 +1603,7 @@ class CRMApplication {
         try {
             logDebug('Loading quotes data...');
             const allQuotes = await db.loadAll('quotes');
+            this.originalQuotes = allQuotes; // Store for filtering
             this.renderQuotesList(allQuotes);
         } catch (error) {
             logError('Failed to load quotes data:', error);
@@ -2268,6 +2276,125 @@ class CRMApplication {
             logError('Failed to load price list items:', error);
         }
     }
+
+    /**
+     * @description Filter PC Numbers by company name
+     * @param {string} query - Search query
+     */
+    filterPcNumbers(query) {
+        try {
+            const filtered = this.originalPcNumbers.filter(pc => {
+                const companyName = (pc.company || pc.clientName || '').toLowerCase();
+                return companyName.includes(query.toLowerCase());
+            });
+            
+            this.renderPcNumbersList(filtered);
+            this.updateFilterResults('pc-filter-results', filtered.length, this.originalPcNumbers.length, 'PC Numbers');
+        } catch (error) {
+            logError('Failed to filter PC numbers:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by company name
+     * @param {string} query - Search query
+     */
+    filterActivities(query) {
+        try {
+            const filtered = this.originalActivities.filter(activity => {
+                // First check if activity has direct company name
+                let companyName = (activity.clientName || activity.company || '').toLowerCase();
+                
+                // If no direct company name, look it up via PC Number
+                if (!companyName && activity.pcNumber) {
+                    const relatedPc = this.originalPcNumbers.find(pc => pc.pcNumber === activity.pcNumber);
+                    if (relatedPc) {
+                        companyName = (relatedPc.company || relatedPc.clientName || '').toLowerCase();
+                    }
+                }
+                
+                return companyName.includes(query.toLowerCase());
+            });
+            
+            this.renderActivitiesList(filtered);
+            this.updateFilterResults('activity-filter-results', filtered.length, this.originalActivities.length, 'Activities');
+        } catch (error) {
+            logError('Failed to filter activities:', error);
+        }
+    }
+
+    /**
+     * @description Filter Quotes by company name
+     * @param {string} query - Search query
+     */
+    filterQuotes(query) {
+        try {
+            const filtered = this.originalQuotes.filter(quote => {
+                // First check if quote has direct company name
+                let companyName = (quote.clientName || quote.company || '').toLowerCase();
+                
+                // If no direct company name, look it up via PC Number
+                if (!companyName && quote.pcNumber) {
+                    const relatedPc = this.originalPcNumbers.find(pc => pc.pcNumber === quote.pcNumber);
+                    if (relatedPc) {
+                        companyName = (relatedPc.company || relatedPc.clientName || '').toLowerCase();
+                    }
+                }
+                
+                return companyName.includes(query.toLowerCase());
+            });
+            
+            this.renderQuotesList(filtered);
+            this.updateFilterResults('quote-filter-results', filtered.length, this.originalQuotes.length, 'Quotes');
+        } catch (error) {
+            logError('Failed to filter quotes:', error);
+        }
+    }
+
+    /**
+     * @description Update filter results display
+     * @param {string} elementId - Results element ID
+     * @param {number} filteredCount - Number of filtered results
+     * @param {number} totalCount - Total number of items
+     * @param {string} itemType - Type of items (PC Numbers, Activities, Quotes)
+     */
+    updateFilterResults(elementId, filteredCount, totalCount, itemType) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            if (filteredCount === totalCount) {
+                element.textContent = `Showing all ${totalCount} ${itemType}`;
+            } else {
+                element.textContent = `Showing ${filteredCount} of ${totalCount} ${itemType}`;
+            }
+        }
+    }
+
+    /**
+     * @description Clear PC Numbers filter
+     */
+    clearPcFilter() {
+        document.getElementById('pc-filter-company').value = '';
+        this.renderPcNumbersList(this.originalPcNumbers);
+        this.updateFilterResults('pc-filter-results', this.originalPcNumbers.length, this.originalPcNumbers.length, 'PC Numbers');
+    }
+
+    /**
+     * @description Clear Activities filter
+     */
+    clearActivityFilter() {
+        document.getElementById('activity-filter-company').value = '';
+        this.renderActivitiesList(this.originalActivities);
+        this.updateFilterResults('activity-filter-results', this.originalActivities.length, this.originalActivities.length, 'Activities');
+    }
+
+    /**
+     * @description Clear Quotes filter
+     */
+    clearQuoteFilter() {
+        document.getElementById('quote-filter-company').value = '';
+        this.renderQuotesList(this.originalQuotes);
+        this.updateFilterResults('quote-filter-results', this.originalQuotes.length, this.originalQuotes.length, 'Quotes');
+    }
 }
 
 // Initialize application when DOM is ready
@@ -2641,6 +2768,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.editPriceListItem = (priceListId, index) => console.log('Edit price list item:', priceListId, index);
     window.deletePriceListItem = (priceListId, index) => console.log('Delete price list item:', priceListId, index);
     window.showAddResourceToPriceList = () => console.log('Add resource to price list');
+    
+    // Smart Filtering functions
+    window.filterPcNumbers = (query) => app.filterPcNumbers(query);
+    window.filterActivities = (query) => app.filterActivities(query);
+    window.filterQuotes = (query) => app.filterQuotes(query);
+    window.clearPcFilter = () => app.clearPcFilter();
+    window.clearActivityFilter = () => app.clearActivityFilter();
+    window.clearQuoteFilter = () => app.clearQuoteFilter();
     
     // PHASE 2: Search-related placeholder functions (for modal compatibility)
     window.filterResources = () => logDebug('filterResources: Search functionality removed');
