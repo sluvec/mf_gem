@@ -349,19 +349,12 @@
                 <form id="pc-form">
                     <input type="hidden" id="pc-id">
                     
+                    <!-- PC Number (Hidden - Auto-Generated) -->
+                    <input type="hidden" id="pc-number">
+                    
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h3>Basic Information</h3>
-                        <div style="max-width: 400px;">
-                            <div>
-                                <label>PC Number (Auto-Generated) *</label>
-                                <input type="text" id="pc-number" readonly 
-                                       placeholder="Will be auto-generated (PC-000001)" 
-                                       style="background-color: #f9fafb; color: #6b7280; cursor: not-allowed;">
-                                <small>📋 Automatically assigned when saving</small>
-                            </div>
-                        </div>
-                        
                         <div class="form-grid">
                             <div>
                                 <label>Company Name *</label>
@@ -480,11 +473,7 @@
                             </div>
                         </div>
                         
-                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
-                            <div>
-                                <label>Surveyor</label>
-                                <input type="text" id="pc-surveyor" placeholder="Assigned surveyor name">
-                            </div>
+                        <div style="max-width: 400px;">
                             <div>
                                 <label>Property Type</label>
                                 <select id="pc-property-type">
@@ -513,6 +502,36 @@
                                 <label>SIC Code 3</label>
                                 <input type="text" id="pc-sic-code-3" placeholder="Tertiary SIC code">
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="form-section">
+                        <h3>Contact Information</h3>
+                        <div class="form-grid">
+                            <div>
+                                <label>Contact Name *</label>
+                                <input type="text" id="pc-contact-name" required placeholder="Primary contact person">
+                            </div>
+                            <div>
+                                <label>Phone Number</label>
+                                <input type="tel" id="pc-contact-phone" placeholder="+44 20 7123 4567">
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div>
+                                <label>Email Address</label>
+                                <input type="email" id="pc-contact-email" placeholder="email@address.com">
+                            </div>
+                            <div>
+                                <label>Postcode</label>
+                                <input type="text" id="pc-postcode" placeholder="e.g. SW1A 1AA">
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
+                            📞 <strong>Note:</strong> Please provide at least phone OR email for the contact person.
                         </div>
                     </div>
 
@@ -696,36 +715,6 @@
                         </div>
                     </div>
                     
-                    <!-- Contact Information -->
-                    <div class="form-section">
-                        <h3>Contact Information</h3>
-                        <div class="form-grid">
-                            <div>
-                                <label>Contact Name *</label>
-                                <input type="text" id="pc-contact-name" required placeholder="Primary contact person">
-                            </div>
-                            <div>
-                                <label>Phone Number</label>
-                                <input type="tel" id="pc-contact-phone" placeholder="+44 20 7123 4567">
-                            </div>
-                        </div>
-                        
-                        <div class="form-grid">
-                            <div>
-                                <label>Email Address</label>
-                                <input type="email" id="pc-contact-email" placeholder="email@address.com">
-                            </div>
-                            <div>
-                                <label>Postcode</label>
-                                <input type="text" id="pc-postcode" placeholder="e.g. SW1A 1AA">
-                            </div>
-                        </div>
-                        
-                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;">
-                            📞 <strong>Note:</strong> Please provide at least phone OR email for the contact person.
-                        </div>
-                    </div>
-                    
                     <!-- Form Actions -->
                     <div class="form-actions" style="margin-top: 2rem;">
                         <button type="submit">✓ Create PC Number</button>
@@ -770,9 +759,8 @@
                     <div><strong>Client Category:</strong> <span id="pc-detail-client-category"></span></div>
                     <div><strong>Client Source:</strong> <span id="pc-detail-client-source-new"></span></div>
                     <div><strong>Referral Type:</strong> <span id="pc-detail-referral-type"></span></div>
-                    <div><strong>Surveyor:</strong> <span id="pc-detail-surveyor"></span></div>
                     <div><strong>Property Type:</strong> <span id="pc-detail-property-type"></span></div>
-                    <div style="grid-column: span 1;"></div>
+                    <div style="grid-column: span 2;"></div>
                 </div>
                 <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
                     <div><strong>SIC Code 1:</strong> <span id="pc-detail-sic-code-1"></span></div>

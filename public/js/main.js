@@ -805,7 +805,7 @@ class CRMApplication {
                 clientCategory: document.getElementById('pc-client-category').value,
                 clientSource: document.getElementById('pc-client-source').value, // Note: This duplicates 'source' for compatibility
                 referralType: document.getElementById('pc-referral-type').value,
-                surveyor: document.getElementById('pc-surveyor').value,
+
                 propertyType: document.getElementById('pc-property-type').value,
                 sicCode1: document.getElementById('pc-sic-code-1').value,
                 sicCode2: document.getElementById('pc-sic-code-2').value,
@@ -3135,7 +3135,7 @@ class CRMApplication {
             document.getElementById('pc-detail-client-category').textContent = pcData.clientCategory || 'Not specified';
             document.getElementById('pc-detail-client-source-new').textContent = pcData.clientSource || 'Not specified';
             document.getElementById('pc-detail-referral-type').textContent = pcData.referralType || 'Not specified';
-            document.getElementById('pc-detail-surveyor').textContent = pcData.surveyor || 'Not assigned';
+
             document.getElementById('pc-detail-property-type').textContent = pcData.propertyType || 'Not specified';
             document.getElementById('pc-detail-sic-code-1').textContent = pcData.sicCode1 || 'N/A';
             document.getElementById('pc-detail-sic-code-2').textContent = pcData.sicCode2 || 'N/A';
