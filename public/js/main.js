@@ -278,6 +278,9 @@ class CRMApplication {
                 case 'pricelist-item-detail':
                     // Detail pages are loaded via specific functions, not automatically
                     break;
+                case 'settings':
+                    await this.loadSettingsData();
+                    break;
 
                 default:
                     logDebug('No specific loader for page:', pageName);
@@ -3975,27 +3978,165 @@ document.addEventListener('DOMContentLoaded', async () => {
         logDebug('Proceeding to quote builder for PC ID:', selectedPcId);
         uiModals.showToast('Quote builder opened for selected PC Number', 'success');
     };
-    
-    // Add placeholder functions for other missing onclick handlers
-    window.resetData = async () => {
-        if (confirm('This will clear all data and reload sample data. Are you sure?')) {
-            try {
-                await db.clearAllStores();
-                await app.loadSampleData();
-                window.location.reload();
-            } catch (error) {
-                logError('Failed to reset data:', error);
-                alert('Failed to reset data');
+
+    /**
+     * @description Load Settings page data and statistics
+     */
+    async loadSettingsData() {
+        try {
+            logInfo('Loading Settings page data...');
+            
+            // Update current user
+            const currentUser = this.getCurrentUser();
+            document.getElementById('settings-current-user').textContent = currentUser || 'Not logged in';
+            
+            // Get database statistics
+            const stats = await db.getStats();
+            
+            // Update statistics display
+            document.getElementById('settings-pc-count').textContent = stats.pcNumbers || '0';
+            document.getElementById('settings-quotes-count').textContent = stats.quotes || '0';
+            document.getElementById('settings-activities-count').textContent = stats.activities || '0';
+            document.getElementById('settings-pricelists-count').textContent = stats.priceLists || '0';
+            document.getElementById('settings-resources-count').textContent = stats.resources || '0';
+            
+            // Setup file input listener
+            const fileInput = document.getElementById('import-file');
+            const importButton = document.getElementById('import-button');
+            
+            if (fileInput && importButton) {
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    importButton.disabled = !file;
+                });
             }
+            
+            logInfo('Settings page data loaded successfully');
+        } catch (error) {
+            logError('Failed to load Settings data:', error);
+        }
+    }
+    
+    // Settings Functions
+    window.exportData = async () => {
+        try {
+            logInfo('Starting data export...');
+            
+            // Get all data from database
+            const allData = {
+                pcNumbers: await db.loadAll('pcNumbers'),
+                quotes: await db.loadAll('quotes'),
+                activities: await db.loadAll('activities'),
+                resources: await db.loadAll('resources'),
+                priceLists: await db.loadAll('priceLists'),
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            // Create download link
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            // Create temporary download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = `crm-data-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+            
+            uiModals.showToast('Data exported successfully!', 'success');
+            logInfo('Data export completed successfully');
+            
+        } catch (error) {
+            logError('Failed to export data:', error);
+            uiModals.showToast('Failed to export data', 'error');
         }
     };
-    window.loadSampleData = async () => {
+    
+    window.importData = async () => {
         try {
-            await app.loadSampleData();
-            window.location.reload();
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                uiModals.showToast('Please select a JSON file to import', 'error');
+                return;
+            }
+            
+            // Confirm the operation
+            const confirmed = confirm(
+                'WARNING: This will permanently replace ALL existing data with the imported data.\\n\\n' +
+                'Are you sure you want to continue? This action cannot be undone.\\n\\n' +
+                'Click OK to proceed or Cancel to abort.'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            logInfo('Starting data import...');
+            
+            // Read file content
+            const fileContent = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+            
+            // Parse JSON
+            let importData;
+            try {
+                importData = JSON.parse(fileContent);
+            } catch (parseError) {
+                throw new Error('Invalid JSON file format');
+            }
+            
+            // Validate data structure
+            const requiredKeys = ['pcNumbers', 'quotes', 'activities', 'resources', 'priceLists'];
+            const missingKeys = requiredKeys.filter(key => !importData.hasOwnProperty(key));
+            
+            if (missingKeys.length > 0) {
+                throw new Error(`Missing required data: ${missingKeys.join(', ')}`);
+            }
+            
+            // Clear existing data
+            await db.clearAllStores();
+            
+            // Import data
+            const stores = ['pcNumbers', 'quotes', 'activities', 'resources', 'priceLists'];
+            let totalImported = 0;
+            
+            for (const store of stores) {
+                const data = importData[store];
+                if (Array.isArray(data)) {
+                    for (const item of data) {
+                        await db.save(store, item);
+                        totalImported++;
+                    }
+                }
+            }
+            
+            uiModals.showToast(`Import successful! ${totalImported} records imported.`, 'success');
+            logInfo(`Data import completed: ${totalImported} records imported`);
+            
+            // Reset file input
+            fileInput.value = '';
+            document.getElementById('import-button').disabled = true;
+            
+            // Refresh current page data
+            if (app.currentPage === 'settings') {
+                await app.loadSettingsData();
+            }
+            
         } catch (error) {
-            logError('Failed to load sample data:', error);
-            alert('Failed to load sample data');
+            logError('Failed to import data:', error);
+            uiModals.showToast(`Import failed: ${error.message}`, 'error');
         }
     };
     

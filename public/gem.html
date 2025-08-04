@@ -180,10 +180,12 @@
                     </div>
 
                     <button 
-                        onclick="window.resetData()" 
-                        class="nav-btn danger"
-                        aria-label="Reset all demo data - this will delete all current data">
-                        Reset Demo Data
+                        data-show-page="settings" 
+                        class="nav-btn"
+                        role="menuitem"
+                        aria-describedby="settings-desc">
+                        <span class="nav-icon">⚙️</span>
+                        Settings
                     </button>
                 </div>
         </nav>
@@ -197,6 +199,7 @@
         <div id="activities-desc">Schedule and track project activities</div>
         <div id="resources-desc">Manage equipment, materials and labor resources</div>
         <div id="pricelists-desc">Manage pricing and rate cards</div>
+        <div id="settings-desc">System settings, data export and import options</div>
     </div>
 
 
@@ -2010,6 +2013,82 @@
                     <div>
                         <label>Status:</label>
                         <span id="pricelist-item-detail-pricelist-status">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings" class="page">
+            <h1>⚙️ System Settings</h1>
+            
+            <!-- Data Management Section -->
+            <div class="card">
+                <h2>📊 Data Management</h2>
+                <p>Export and import your CRM data in JSON format. This includes all PC Numbers, Quotes, Activities, Price Lists, and Resources.</p>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <!-- Export Data -->
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="margin: 0 0 1rem 0; color: #059669;">📤 Export Data</h3>
+                        <p style="margin: 0 0 1rem 0; color: #6b7280; font-size: 0.875rem;">Download all your data as a JSON file for backup or transfer.</p>
+                        <button onclick="window.exportData()" class="button primary" style="width: 100%;">
+                            💾 Export All Data
+                        </button>
+                    </div>
+                    
+                    <!-- Import Data -->
+                    <div style="flex: 1; min-width: 300px;">
+                        <h3 style="margin: 0 0 1rem 0; color: #dc2626;">📥 Import Data</h3>
+                        <p style="margin: 0 0 1rem 0; color: #6b7280; font-size: 0.875rem;">Upload a JSON file to restore or import data. <strong>Warning:</strong> This will replace all existing data.</p>
+                        <input type="file" id="import-file" accept=".json" style="margin-bottom: 1rem; width: 100%; padding: 0.5rem; border: 2px dashed #d1d5db; border-radius: 0.5rem;">
+                        <button onclick="window.importData()" class="button danger" style="width: 100%;" id="import-button" disabled>
+                            🔄 Import Data
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Warning Notice -->
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.25rem;">⚠️</span>
+                        <div>
+                            <strong style="color: #92400e;">Important Notice</strong>
+                            <p style="margin: 0.25rem 0 0 0; color: #92400e; font-size: 0.875rem;">
+                                Always export your data before importing new data. Import operations will permanently replace all existing data and cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Information -->
+            <div class="card">
+                <h2>ℹ️ System Information</h2>
+                <div class="detail-grid">
+                    <div>
+                        <label>Current User:</label>
+                        <span id="settings-current-user">-</span>
+                    </div>
+                    <div>
+                        <label>Total PC Numbers:</label>
+                        <span id="settings-pc-count">-</span>
+                    </div>
+                    <div>
+                        <label>Total Quotes:</label>
+                        <span id="settings-quotes-count">-</span>
+                    </div>
+                    <div>
+                        <label>Total Activities:</label>
+                        <span id="settings-activities-count">-</span>
+                    </div>
+                    <div>
+                        <label>Total Price Lists:</label>
+                        <span id="settings-pricelists-count">-</span>
+                    </div>
+                    <div>
+                        <label>Total Resources:</label>
+                        <span id="settings-resources-count">-</span>
                     </div>
                 </div>
             </div>
