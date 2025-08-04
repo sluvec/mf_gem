@@ -815,7 +815,49 @@ class CRMApplication {
                     contactName: 'James Morrison',
                     estimatedValue: 45000,
                     status: 'active',
-                    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000) // 12 days ago
+                    date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 days ago
+                    
+                    // New comprehensive fields
+                    clientCategory: 'Corporate',
+                    clientSource: 'Website Inquiry',
+                    referralType: 'Direct',
+                    surveyor: 'Marcus Thompson',
+                    propertyType: 'Office Building',
+                    sicCode1: '64191',
+                    sicCode2: '64999',
+                    sicCode3: '',
+                    
+                    // Collection Address (Current Office)
+                    collectionFirstName: 'James',
+                    collectionSurname: 'Morrison',
+                    collectionTitle: 'Mr',
+                    collectionPosition: 'Facilities Manager',
+                    collectionEmail: 'j.morrison@fintechinnovations.co.uk',
+                    collectionPhone: '020 7946 0958',
+                    collectionMobile: '07789 123456',
+                    collectionCountry: 'United Kingdom',
+                    collectionPostcode: 'EC2V 6DB',
+                    collectionAddress1: '15 Bishopsgate',
+                    collectionAddress2: '12th Floor',
+                    collectionAddress3: 'City of London',
+                    collectionAddress4: 'London',
+                    collectionDate: '2024-02-15',
+                    
+                    // Delivery Address (New Office)
+                    deliveryFirstName: 'Sarah',
+                    deliverySurname: 'Chen',
+                    deliveryTitle: 'Ms',
+                    deliveryPosition: 'Office Manager',
+                    deliveryEmail: 's.chen@fintechinnovations.co.uk',
+                    deliveryPhone: '020 7418 2000',
+                    deliveryMobile: '07789 654321',
+                    deliveryCountry: 'United Kingdom',
+                    deliveryPostcode: 'E14 5LQ',
+                    deliveryAddress1: '25 Canada Square',
+                    deliveryAddress2: '40th Floor',
+                    deliveryAddress3: 'Canary Wharf',
+                    deliveryAddress4: 'London',
+                    deliveryDate: '2024-02-16'
                 },
                 {
                     pcNumber: 'PC-2024-002', 
@@ -932,7 +974,7 @@ class CRMApplication {
                     assigneeId: 'EMP002',
                     notes: 'Requires scissor lift access.'
                 },
-                // PC-2024-001 - Fintech Move
+                // PC-2024-001 - Fintech Move (Enhanced with new fields)
                 {
                     title: 'Site Survey - Canary Wharf Office',
                     description: 'Comprehensive site assessment of new Canary Wharf headquarters, measuring rooms, elevator access, and IT infrastructure requirements',
@@ -946,7 +988,54 @@ class CRMApplication {
                     assignedTo: 'Marcus Thompson',
                     location: '25 Canada Square, Canary Wharf, London E14 5LQ',
                     contactName: 'James Morrison',
-                    contactPhone: '020 7946 0958'
+                    contactPhone: '020 7946 0958',
+                    
+                    // New comprehensive fields
+                    department: 'Survey Team',
+                    paymentType: 'Standard Rate',
+                    instructions: 'Contact building management for access. Security clearance required for financial services area.',
+                    timeDepotStart: '08:00',
+                    timeSiteStart: '09:00',
+                    timeSiteFinish: '12:00',
+                    timeDepotFinish: '13:00',
+                    hours: 5.0,
+                    activityNumber: 'ACT-2024-001',
+                    movemanJob: 'MJ-001',
+                    crmId: 'CRM-SF-12345',
+                    
+                    // Boolean flags
+                    parkingRequired: true,
+                    confirmed: false,
+                    riskAssessmentNeeded: true,
+                    
+                    // JSONB structures
+                    collectionAddress: {
+                        address1: '15 Bishopsgate',
+                        address2: '12th Floor',
+                        city: 'London',
+                        postcode: 'EC2V 6DB',
+                        country: 'United Kingdom',
+                        contact: 'James Morrison',
+                        phone: '020 7946 0958'
+                    },
+                    deliveryAddress: {
+                        address1: '25 Canada Square',
+                        address2: '40th Floor',
+                        city: 'London',
+                        postcode: 'E14 5LQ',
+                        country: 'United Kingdom',
+                        contact: 'Sarah Chen',
+                        phone: '020 7418 2000'
+                    },
+                    resources: [
+                        { type: 'Vehicle', name: 'Survey Van', quantity: 1 },
+                        { type: 'Equipment', name: 'Measuring Tools', quantity: 1 },
+                        { type: 'Personnel', name: 'Senior Surveyor', quantity: 1 }
+                    ],
+                    notesList: [
+                        { timestamp: new Date().toISOString(), author: 'Marcus Thompson', note: 'Initial survey scheduled' },
+                        { timestamp: new Date().toISOString(), author: 'Sarah Chen', note: 'Building access arranged' }
+                    ]
                 },
                 {
                     title: 'IT Infrastructure Disconnection',
@@ -1235,7 +1324,57 @@ class CRMApplication {
                     status: 'pending',
                     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
                     description: 'Full office relocation for 85 staff including IT infrastructure, secure document handling, and executive furniture',
-                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+                    
+                    // New comprehensive financial fields
+                    name: 'Fintech Complete Relocation Package',
+                    version: 1,
+                    netTotal: 39583.33,
+                    vatAmount: 7916.67,
+                    vatRate: 20.0,
+                    discount: 2500.00,
+                    standardLiability: 100000.00,
+                    declaredValue: 2500000.00,
+                    priceListId: 'PL-2024-OFFICE',
+                    
+                    // JSONB structures for detailed quote breakdown
+                    quoteItems: {
+                        survey: [
+                            { description: 'Site Survey - Current Office', quantity: 1, unitPrice: 750.00, total: 750.00 },
+                            { description: 'Site Survey - New Office', quantity: 1, unitPrice: 750.00, total: 750.00 }
+                        ],
+                        packing: [
+                            { description: 'Professional Packing - Workstations', quantity: 85, unitPrice: 45.00, total: 3825.00 },
+                            { description: 'Executive Furniture Packing', quantity: 25, unitPrice: 125.00, total: 3125.00 },
+                            { description: 'IT Equipment Packing', quantity: 150, unitPrice: 35.00, total: 5250.00 }
+                        ],
+                        transport: [
+                            { description: 'Large Removal Vehicles', quantity: 3, unitPrice: 850.00, total: 2550.00 },
+                            { description: 'Specialized IT Transport', quantity: 2, unitPrice: 650.00, total: 1300.00 }
+                        ],
+                        installation: [
+                            { description: 'Workstation Setup', quantity: 85, unitPrice: 65.00, total: 5525.00 },
+                            { description: 'Executive Office Setup', quantity: 12, unitPrice: 185.00, total: 2220.00 },
+                            { description: 'IT Infrastructure Setup', quantity: 1, unitPrice: 8500.00, total: 8500.00 }
+                        ]
+                    },
+                    otherCosts: [
+                        { description: 'Insurance Premium', amount: 1250.00 },
+                        { description: 'Security Clearance Fees', amount: 750.00 },
+                        { description: 'Weekend Work Premium', amount: 2500.00 }
+                    ],
+                    recyclingCharges: {
+                        cardboard: 125.00,
+                        plastic: 75.00,
+                        electronic: 250.00,
+                        total: 450.00
+                    },
+                    rebates: {
+                        volumeDiscount: 1500.00,
+                        loyaltyDiscount: 500.00,
+                        earlyPayment: 500.00,
+                        total: 2500.00
+                    }
                 },
                 {
                     quoteNumber: 'QT-2024-002',

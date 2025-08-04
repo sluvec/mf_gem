@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 4; // Increased after removing templates functionality
+        this.version = 5; // Added comprehensive field extensions for PC Numbers, Activities, and Quotes
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -80,6 +80,52 @@ export class Database {
                     priceListsStore.createIndex('name', 'name', { unique: false });
                 }
 
+                // Version 5 upgrades: Add indexes for new fields
+                if (event.oldVersion < 5) {
+                    logInfo('Upgrading to version 5: Adding indexes for new fields');
+                    
+                    // Add new indexes to PC Numbers
+                    if (db.objectStoreNames.contains('pcNumbers')) {
+                        const pcStore = event.target.transaction.objectStore('pcNumbers');
+                        if (!pcStore.indexNames.contains('clientCategory')) {
+                            pcStore.createIndex('clientCategory', 'clientCategory', { unique: false });
+                        }
+                        if (!pcStore.indexNames.contains('clientSource')) {
+                            pcStore.createIndex('clientSource', 'clientSource', { unique: false });
+                        }
+                        if (!pcStore.indexNames.contains('referralType')) {
+                            pcStore.createIndex('referralType', 'referralType', { unique: false });
+                        }
+                        if (!pcStore.indexNames.contains('surveyor')) {
+                            pcStore.createIndex('surveyor', 'surveyor', { unique: false });
+                        }
+                    }
+
+                    // Add new indexes to Activities
+                    if (db.objectStoreNames.contains('activities')) {
+                        const activitiesStore = event.target.transaction.objectStore('activities');
+                        if (!activitiesStore.indexNames.contains('department')) {
+                            activitiesStore.createIndex('department', 'department', { unique: false });
+                        }
+                        if (!activitiesStore.indexNames.contains('paymentType')) {
+                            activitiesStore.createIndex('paymentType', 'paymentType', { unique: false });
+                        }
+                        if (!activitiesStore.indexNames.contains('quoteId')) {
+                            activitiesStore.createIndex('quoteId', 'quoteId', { unique: false });
+                        }
+                    }
+
+                    // Add new indexes to Quotes
+                    if (db.objectStoreNames.contains('quotes')) {
+                        const quotesStore = event.target.transaction.objectStore('quotes');
+                        if (!quotesStore.indexNames.contains('version')) {
+                            quotesStore.createIndex('version', 'version', { unique: false });
+                        }
+                        if (!quotesStore.indexNames.contains('priceListId')) {
+                            quotesStore.createIndex('priceListId', 'priceListId', { unique: false });
+                        }
+                    }
+                }
 
             };
         });
@@ -300,6 +346,93 @@ export class Database {
             logInfo('All stores cleared successfully');
         } catch (error) {
             logError('Failed to clear all stores:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Export all data for backup purposes
+     * @returns {Promise<Object>} Complete database backup
+     */
+    async exportBackup() {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Database not initialized');
+            }
+
+            const backup = {
+                timestamp: new Date().toISOString(),
+                version: this.version,
+                data: {}
+            };
+
+            const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists'];
+            
+            for (const storeName of storeNames) {
+                backup.data[storeName] = await this.loadAll(storeName);
+            }
+
+            logInfo('Database backup created with', Object.keys(backup.data).length, 'stores');
+            return backup;
+
+        } catch (error) {
+            logError('Failed to create backup:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Import data from backup
+     * @param {Object} backup - Backup data object
+     * @returns {Promise<void>}
+     */
+    async importBackup(backup) {
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Database not initialized');
+            }
+
+            if (!backup || !backup.data) {
+                throw new Error('Invalid backup format');
+            }
+
+            logInfo('Importing backup from', backup.timestamp);
+
+            for (const [storeName, items] of Object.entries(backup.data)) {
+                if (Array.isArray(items)) {
+                    for (const item of items) {
+                        await this.save(storeName, item);
+                    }
+                    logInfo(`Imported ${items.length} items to ${storeName}`);
+                }
+            }
+
+            logInfo('Backup import completed successfully');
+
+        } catch (error) {
+            logError('Failed to import backup:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Download backup as JSON file
+     */
+    async downloadBackup() {
+        try {
+            const backup = await this.exportBackup();
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `crm-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            logInfo('Backup download initiated');
+
+        } catch (error) {
+            logError('Failed to download backup:', error);
             throw error;
         }
     }
