@@ -1728,6 +1728,44 @@ class CRMApplication {
     }
 
     /**
+     * @description Parse quote items from summary display
+     * @returns {object} Quote items structure
+     */
+    parseQuoteItemsFromSummary() {
+        try {
+            // This is a placeholder - in a real implementation, this would parse
+            // the quote items from the quote builder or a stored structure
+            return { 
+                items: [], 
+                categories: [],
+                totalItems: 0,
+                lastUpdated: new Date().toISOString()
+            };
+        } catch (error) {
+            logError('Failed to parse quote items:', error);
+            return { items: [], categories: [] };
+        }
+    }
+
+    /**
+     * @description Parse JSON field with fallback
+     * @param {string} jsonString - JSON string to parse
+     * @param {any} fallback - Fallback value if parsing fails
+     * @returns {any} Parsed JSON or fallback
+     */
+    parseJsonField(jsonString, fallback = null) {
+        try {
+            if (!jsonString || jsonString.trim() === '') {
+                return fallback;
+            }
+            return JSON.parse(jsonString);
+        } catch (error) {
+            logError('Failed to parse JSON field:', error);
+            return fallback;
+        }
+    }
+
+    /**
      * @description Setup keyboard shortcuts
      */
     setupKeyboardShortcuts() {
@@ -2174,6 +2212,32 @@ class CRMApplication {
                 value: parseFloat(document.getElementById('quote-edit-value').value) || 0,
                 status: document.getElementById('quote-edit-status').value,
                 description: document.getElementById('quote-edit-description').value,
+                
+                // Financial Details
+                version: parseInt(document.getElementById('quote-edit-version').value) || 1,
+                netTotal: parseFloat(document.getElementById('quote-edit-net-total').value) || 0,
+                vatRate: parseFloat(document.getElementById('quote-edit-vat-rate').value) || 20,
+                vatAmount: parseFloat(document.getElementById('quote-edit-vat-amount').value) || 0,
+                discount: parseFloat(document.getElementById('quote-edit-discount').value) || 0,
+                totalCost: parseFloat(document.getElementById('quote-edit-total-cost').value) || 0,
+                
+                // Professional Details
+                standardLiability: parseFloat(document.getElementById('quote-edit-standard-liability').value) || 100000,
+                declaredValue: parseFloat(document.getElementById('quote-edit-declared-value').value) || 0,
+                priceListId: document.getElementById('quote-edit-price-list-id').value,
+                
+                // JSONB structures for pricing breakdown
+                quoteItems: this.parseQuoteItemsFromSummary() || { items: [], categories: [] },
+                otherCosts: this.parseJsonField(document.getElementById('quote-edit-other-costs').value, []),
+                recyclingCharges: {
+                    recyclingFee: parseFloat(document.getElementById('quote-edit-recycling-fee').value) || 0,
+                    environmentalFee: parseFloat(document.getElementById('quote-edit-environmental-fee').value) || 0
+                },
+                rebates: {
+                    volumeRebate: parseFloat(document.getElementById('quote-edit-volume-rebate').value) || 0,
+                    loyaltyRebate: parseFloat(document.getElementById('quote-edit-loyalty-rebate').value) || 0
+                },
+                
                 updatedAt: new Date()
             };
 
@@ -2371,6 +2435,64 @@ class CRMApplication {
             }
             
             document.getElementById('quote-detail-description').textContent = quoteData.description || 'No description provided';
+
+            // Financial Details
+            document.getElementById('quote-detail-version').textContent = quoteData.version || '1';
+            document.getElementById('quote-detail-net-total').textContent = formatCurrency(quoteData.netTotal || 0);
+            document.getElementById('quote-detail-vat-rate').textContent = `${quoteData.vatRate || 20}%`;
+            document.getElementById('quote-detail-vat-amount').textContent = formatCurrency(quoteData.vatAmount || 0);
+            document.getElementById('quote-detail-discount').textContent = formatCurrency(quoteData.discount || 0);
+            document.getElementById('quote-detail-total-cost').textContent = formatCurrency(quoteData.totalCost || quoteData.value || 0);
+
+            // Professional Details
+            document.getElementById('quote-detail-standard-liability').textContent = formatCurrency(quoteData.standardLiability || 100000);
+            document.getElementById('quote-detail-declared-value').textContent = formatCurrency(quoteData.declaredValue || 0);
+            document.getElementById('quote-detail-price-list').textContent = quoteData.priceListId || 'Not specified';
+
+            // Pricing Breakdown - Quote Items
+            const quoteItemsElement = document.getElementById('quote-detail-items');
+            if (quoteData.quoteItems && quoteData.quoteItems.items && quoteData.quoteItems.items.length > 0) {
+                const itemsHtml = quoteData.quoteItems.items.map(item => 
+                    `<div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between;">
+                        <span><strong>${item.description || item.name}</strong> - ${item.quantity || 1} ${item.unit || 'units'}</span>
+                        <span>${formatCurrency(item.total || item.price || 0)}</span>
+                    </div>`
+                ).join('');
+                quoteItemsElement.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                        ${quoteData.quoteItems.items.length} items (Total: ${formatCurrency(quoteData.quoteItems.totalValue || 0)})
+                    </div>
+                    ${itemsHtml}
+                `;
+            } else {
+                quoteItemsElement.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 0.875rem;">No items in this quote</div>';
+            }
+
+            // Recycling Charges
+            const recyclingCharges = quoteData.recyclingCharges || {};
+            document.getElementById('quote-detail-recycling-fee').textContent = formatCurrency(recyclingCharges.recyclingFee || 0);
+            document.getElementById('quote-detail-environmental-fee').textContent = formatCurrency(recyclingCharges.environmentalFee || 0);
+
+            // Rebates
+            const rebates = quoteData.rebates || {};
+            document.getElementById('quote-detail-volume-rebate').textContent = formatCurrency(rebates.volumeRebate || 0);
+            document.getElementById('quote-detail-loyalty-rebate').textContent = formatCurrency(rebates.loyaltyRebate || 0);
+
+            // Other Costs (conditional display)
+            const otherCostsSection = document.getElementById('quote-detail-other-costs-section');
+            const otherCostsElement = document.getElementById('quote-detail-other-costs');
+            if (quoteData.otherCosts && Array.isArray(quoteData.otherCosts) && quoteData.otherCosts.length > 0) {
+                const otherCostsHtml = quoteData.otherCosts.map(cost => 
+                    `<div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between;">
+                        <span>${cost.description || 'Other cost'}</span>
+                        <span>${formatCurrency(cost.amount || 0)}</span>
+                    </div>`
+                ).join('');
+                otherCostsElement.innerHTML = otherCostsHtml;
+                otherCostsSection.style.display = 'block';
+            } else {
+                otherCostsSection.style.display = 'none';
+            }
 
             // Navigate to detail page
             this.navigateToPage('quote-detail');

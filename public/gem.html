@@ -1621,6 +1621,74 @@
                     <button data-show-page="quotes" class="secondary">Back to Quotes</button>
                 </div>
             </div>
+
+            <!-- Financial Details -->
+            <div class="card">
+                <h2>Financial Details</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Version:</strong> <span id="quote-detail-version"></span></div>
+                    <div><strong>Net Total:</strong> <span id="quote-detail-net-total"></span></div>
+                    <div><strong>VAT Rate:</strong> <span id="quote-detail-vat-rate"></span></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>VAT Amount:</strong> <span id="quote-detail-vat-amount"></span></div>
+                    <div><strong>Discount:</strong> <span id="quote-detail-discount"></span></div>
+                    <div><strong>Total Cost:</strong> <span id="quote-detail-total-cost"></span></div>
+                </div>
+            </div>
+
+            <!-- Professional Details -->
+            <div class="card">
+                <h2>Professional Details</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div><strong>Standard Liability:</strong> <span id="quote-detail-standard-liability"></span></div>
+                    <div><strong>Declared Value:</strong> <span id="quote-detail-declared-value"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Price List:</strong> <span id="quote-detail-price-list"></span>
+                </div>
+            </div>
+
+            <!-- Pricing Breakdown -->
+            <div class="card">
+                <h2>Pricing Breakdown</h2>
+                
+                <!-- Quote Items -->
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0 0 0.75rem 0; color: #374151;">Quote Items</h3>
+                    <div id="quote-detail-items" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; min-height: 60px;">
+                        <div style="text-align: center; color: #6b7280; font-size: 0.875rem;">
+                            No items in this quote
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Costs -->
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <strong>Recycling Charges:</strong>
+                        <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <div>Recycling Fee: <span id="quote-detail-recycling-fee"></span></div>
+                            <div>Environmental Fee: <span id="quote-detail-environmental-fee"></span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Rebates:</strong>
+                        <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <div>Volume Rebate: <span id="quote-detail-volume-rebate"></span></div>
+                            <div>Loyalty Rebate: <span id="quote-detail-loyalty-rebate"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Costs -->
+                <div id="quote-detail-other-costs-section" style="display: none;">
+                    <h4 style="margin: 0 0 0.75rem 0; color: #374151;">Other Costs</h4>
+                    <div id="quote-detail-other-costs" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem;">
+                        <!-- Other costs will be populated here -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="resources" class="page">
@@ -1794,6 +1862,125 @@
                     <div>
                         <label>Valid Until</label>
                         <input type="date" id="quote-edit-valid-until">
+                    </div>
+                </div>
+
+                <!-- Financial Details -->
+                <div class="form-section">
+                    <h3>Financial Details</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Version</label>
+                            <input type="number" id="quote-edit-version" min="1" value="1" placeholder="1">
+                            <small>Version number for tracking revisions</small>
+                        </div>
+                        <div>
+                            <label>Net Total (£)</label>
+                            <input type="number" id="quote-edit-net-total" min="0" step="0.01" placeholder="0.00">
+                            <small>Total before VAT and discount</small>
+                        </div>
+                        <div>
+                            <label>VAT Rate (%)</label>
+                            <input type="number" id="quote-edit-vat-rate" min="0" max="100" step="0.01" value="20.00" placeholder="20.00">
+                            <small>Standard UK VAT rate</small>
+                        </div>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 1rem;">
+                        <div>
+                            <label>VAT Amount (£)</label>
+                            <input type="number" id="quote-edit-vat-amount" min="0" step="0.01" placeholder="0.00" readonly>
+                            <small>Calculated automatically</small>
+                        </div>
+                        <div>
+                            <label>Discount (£)</label>
+                            <input type="number" id="quote-edit-discount" min="0" step="0.01" placeholder="0.00">
+                            <small>Total discount amount</small>
+                        </div>
+                        <div>
+                            <label>Total Cost (£)</label>
+                            <input type="number" id="quote-edit-total-cost" min="0" step="0.01" placeholder="0.00" readonly>
+                            <small>Final total after VAT and discount</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Details -->
+                <div class="form-section">
+                    <h3>Professional Details</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label>Standard Liability (£)</label>
+                            <input type="number" id="quote-edit-standard-liability" min="0" step="0.01" value="100000.00" placeholder="100000.00">
+                            <small>Standard liability coverage</small>
+                        </div>
+                        <div>
+                            <label>Declared Value (£)</label>
+                            <input type="number" id="quote-edit-declared-value" min="0" step="0.01" placeholder="0.00">
+                            <small>Client declared value of goods</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label>Price List</label>
+                        <select id="quote-edit-price-list-id">
+                            <option value="">Select price list...</option>
+                            <!-- Price lists will be populated dynamically -->
+                        </select>
+                        <small>Associated price list for this quote</small>
+                    </div>
+                </div>
+
+                <!-- Pricing Breakdown -->
+                <div class="form-section">
+                    <h3>Pricing Breakdown</h3>
+                    
+                    <!-- Quote Items Summary -->
+                    <div style="margin-bottom: 1rem;">
+                        <label>Quote Items</label>
+                        <div id="quote-edit-items-summary" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; min-height: 60px;">
+                            <div style="text-align: center; color: #6b7280; font-size: 0.875rem;">
+                                No items added. Use Quote Builder to add detailed items.
+                            </div>
+                        </div>
+                        <small>Detailed quote items managed in Quote Builder</small>
+                    </div>
+
+                    <!-- Additional Costs -->
+                    <div style="margin-bottom: 1rem;">
+                        <label>Other Costs</label>
+                        <textarea id="quote-edit-other-costs" rows="2" placeholder="Additional costs not in standard price list (JSON format: [{&quot;description&quot;: &quot;Special transport&quot;, &quot;amount&quot;: 150.00}])"></textarea>
+                        <small>JSON array of additional cost items</small>
+                    </div>
+
+                    <!-- Recycling & Environmental -->
+                    <div style="margin-bottom: 1rem;">
+                        <label>Recycling Charges</label>
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Recycling Fee (£)</label>
+                                <input type="number" id="quote-edit-recycling-fee" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label>Environmental Fee (£)</label>
+                                <input type="number" id="quote-edit-environmental-fee" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <small>Environmental and recycling charges</small>
+                    </div>
+
+                    <!-- Rebates & Discounts -->
+                    <div>
+                        <label>Rebates</label>
+                        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div>
+                                <label>Volume Rebate (£)</label>
+                                <input type="number" id="quote-edit-volume-rebate" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label>Loyalty Rebate (£)</label>
+                                <input type="number" id="quote-edit-loyalty-rebate" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <small>Customer rebates and incentives</small>
                     </div>
                 </div>
 
