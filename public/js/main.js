@@ -364,7 +364,7 @@ class CRMApplication {
             }
 
             const rows = recentPCs.map(pc => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewPcDetail('${pc.id}')" style="cursor: pointer;">
                     <td>${pc.pcNumber || ''}</td>
                     <td>${pc.company || ''}</td>
                     <td>${pc.reference || ''}</td>
@@ -1704,7 +1704,7 @@ class CRMApplication {
                     <td><span class="quote-status ${quote.status}">${sanitizeHTML(quote.status || 'draft')}</span></td>
                     <td onclick="event.stopPropagation()">
                         <button class="button secondary" onclick="window.editQuote('${quote.id}')">Edit</button>
-                        <button class="button primary" onclick="window.viewQuote('${quote.id}')">View</button>
+                        <button class="button primary" onclick="window.viewQuoteDetail('${quote.id}')">View</button>
                     </td>
                 </tr>
             `).join('');
@@ -2446,7 +2446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             uiModals.showToast('Failed to load Quote data', 'error');
         }
     };
-    window.viewQuote = (id) => console.log('View quote:', id);
+
     window.createPriceList = () => console.log('Create price list');
     window.editPriceList = async (id) => {
         try {
