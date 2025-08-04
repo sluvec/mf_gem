@@ -4582,9 +4582,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.filterResources = () => logDebug('filterResources: Search functionality removed');
     window.filterActivityResourceSelector = () => logDebug('filterActivityResourceSelector: Search functionality removed');
     window.filterDependencySelector = () => logDebug('filterDependencySelector: Search functionality removed');
-    
-    // Start the application
-    await app.initialize();
 });
 
 // Export for use in other modules
