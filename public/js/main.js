@@ -266,6 +266,9 @@ class CRMApplication {
                 case 'pricelists':
                     await this.loadPriceListsData();
                     break;
+                case 'quote-builder':
+                    await this.loadQuoteBuilderData();
+                    break;
 
                 default:
                     logDebug('No specific loader for page:', pageName);
@@ -2173,6 +2176,54 @@ class CRMApplication {
             logError('Failed to load quotes data:', error);
         }
     }
+    /**
+     * @description Load Quote Builder data
+     */
+    async loadQuoteBuilderData() {
+        try {
+            logDebug('Loading Quote Builder data...');
+            await this.populateQuotePriceListDropdown();
+        } catch (error) {
+            logError('Failed to load Quote Builder data:', error);
+        }
+    }
+
+    /**
+     * @description Populate price list dropdown in Quote Builder
+     */
+    async populateQuotePriceListDropdown() {
+        try {
+            const priceListSelect = document.getElementById('quote-price-list');
+            if (!priceListSelect) return;
+
+            const allPriceLists = await db.loadAll('priceLists');
+            
+            // Clear existing options
+            priceListSelect.innerHTML = '<option value="">Select Price List...</option>';
+
+            if (allPriceLists.length === 0) {
+                priceListSelect.innerHTML = '<option value="">No Price Lists available</option>';
+                logDebug('No price lists found in database');
+                return;
+            }
+
+            // Add price lists sorted by name
+            allPriceLists
+                .filter(priceList => priceList.status === 'active' || !priceList.status) // Only show active price lists
+                .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                .forEach(priceList => {
+                    const option = document.createElement('option');
+                    option.value = priceList.id;
+                    option.textContent = `${priceList.name} (${priceList.currency || 'GBP'}) - ${priceList.region || 'General'}`;
+                    priceListSelect.appendChild(option);
+                });
+
+            logDebug(`Populated Quote Builder with ${allPriceLists.length} price lists`);
+
+        } catch (error) {
+            logError('Failed to populate quote price list dropdown:', error);
+        }
+    }
     
     async loadPriceListsData() { 
         try {
@@ -3574,6 +3625,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.editPriceListItem = (priceListId, index) => console.log('Edit price list item:', priceListId, index);
     window.deletePriceListItem = (priceListId, index) => console.log('Delete price list item:', priceListId, index);
     window.showAddResourceToPriceList = () => console.log('Add resource to price list');
+
+    // Quote Builder functions
+    window.handlePriceListChange = () => {
+        const priceListSelect = document.getElementById('quote-price-list');
+        const quoteItemsSection = document.getElementById('quote-items-section');
+        
+        if (priceListSelect && quoteItemsSection) {
+            const selectedPriceListId = priceListSelect.value;
+            
+            if (selectedPriceListId) {
+                // Show Step 2: Build Quote section
+                quoteItemsSection.style.display = 'block';
+                
+                // Scroll to the quote items section
+                quoteItemsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                logDebug('Price List selected:', selectedPriceListId);
+                uiModals.showToast('Price List selected. You can now build your quote.', 'success');
+            } else {
+                // Hide Step 2 if no price list selected
+                quoteItemsSection.style.display = 'none';
+            }
+        }
+    };
     
     // Smart Filtering functions
     window.filterPcNumbers = (query) => app.filterPcNumbers(query);
