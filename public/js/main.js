@@ -107,6 +107,9 @@ class CRMApplication {
             if (Object.values(stats).every(count => count === 0)) {
                 await this.loadSampleData();
             }
+            
+            // Assign random users to existing records that don't have user audit fields
+            await db.assignRandomUsersToExistingData();
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
@@ -1146,7 +1149,12 @@ class CRMApplication {
                     deliveryAddress2: '40th Floor',
                     deliveryAddress3: 'Canary Wharf',
                     deliveryAddress4: 'London',
-                    deliveryDate: '2024-02-16'
+                    deliveryDate: '2024-02-16',
+                    
+                    // User Audit Fields
+                    createdBy: 'Slav',
+                    editedBy: 'Slav',
+                    lastModifiedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-002', 
@@ -1158,7 +1166,12 @@ class CRMApplication {
                     contactName: 'Patricia Whitfield QC',
                     estimatedValue: 32000,
                     status: 'active',
-                    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000) // 8 days ago
+                    date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Rob',
+                    editedBy: 'Rob',
+                    lastModifiedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-003',
@@ -1170,7 +1183,12 @@ class CRMApplication {
                     contactName: 'David Chen',
                     estimatedValue: 18500,
                     status: 'urgent',
-                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Kayleigh',
+                    editedBy: 'Kayleigh',
+                    lastModifiedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-004',
@@ -1182,7 +1200,12 @@ class CRMApplication {
                     contactName: 'Robert Stevens',
                     estimatedValue: 67500,
                     status: 'active',
-                    date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) // 20 days ago
+                    date: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Terry',
+                    editedBy: 'Terry',
+                    lastModifiedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-005',
@@ -1194,7 +1217,12 @@ class CRMApplication {
                     contactName: 'Sophie Martinez',
                     estimatedValue: 28750,
                     status: 'completed',
-                    date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000) // 45 days ago
+                    date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000), // 45 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Phil',
+                    editedBy: 'Phil',
+                    lastModifiedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-006',
@@ -1206,7 +1234,12 @@ class CRMApplication {
                     contactName: 'Michael Thompson',
                     estimatedValue: 125000,
                     status: 'active',
-                    date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000) // 35 days ago
+                    date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000), // 35 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Slav',
+                    editedBy: 'Rob',
+                    lastModifiedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-007',
@@ -1218,7 +1251,12 @@ class CRMApplication {
                     contactName: 'Lady Catherine Worthington',
                     estimatedValue: 85000,
                     status: 'draft',
-                    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+                    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Kayleigh',
+                    editedBy: 'Terry',
+                    lastModifiedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     pcNumber: 'PC-2024-008',
@@ -1230,7 +1268,12 @@ class CRMApplication {
                     contactName: 'Dr. Sarah Williams',
                     estimatedValue: 22500,
                     status: 'active',
-                    date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) // 15 days ago
+                    date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
+                    
+                    // User Audit Fields
+                    createdBy: 'Phil',
+                    editedBy: 'Kayleigh',
+                    lastModifiedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
                 }
             ];
 
@@ -1250,7 +1293,12 @@ class CRMApplication {
                     status: 'scheduled',
                     priority: 'high',
                     assigneeId: 'EMP001',
-                    notes: 'Client provided detailed blueprints.'
+                    notes: 'Client provided detailed blueprints.',
+                    
+                    // User Audit Fields
+                    createdBy: 'Terry',
+                    editedBy: 'Terry',
+                    lastModifiedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     title: 'LED Installation - Warehouse',
@@ -1261,7 +1309,12 @@ class CRMApplication {
                     status: 'scheduled',
                     priority: 'medium',
                     assigneeId: 'EMP002',
-                    notes: 'Requires scissor lift access.'
+                    notes: 'Requires scissor lift access.',
+                    
+                    // User Audit Fields
+                    createdBy: 'Phil',
+                    editedBy: 'Slav',
+                    lastModifiedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 // PC-2024-001 - Fintech Move (Enhanced with new fields)
                 {
@@ -1324,7 +1377,12 @@ class CRMApplication {
                     notesList: [
                         { timestamp: new Date().toISOString(), author: 'Marcus Thompson', note: 'Initial survey scheduled' },
                         { timestamp: new Date().toISOString(), author: 'Sarah Chen', note: 'Building access arranged' }
-                    ]
+                    ],
+                    
+                    // User Audit Fields
+                    createdBy: 'Rob',
+                    editedBy: 'Kayleigh',
+                    lastModifiedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     title: 'IT Infrastructure Disconnection',
@@ -1337,7 +1395,12 @@ class CRMApplication {
                     status: 'pending',
                     priority: 'high',
                     assignedTo: 'IT Specialist Team',
-                    location: '14 Old Broad Street, City of London, EC2N 1DL'
+                    location: '14 Old Broad Street, City of London, EC2N 1DL',
+                    
+                    // User Audit Fields
+                    createdBy: 'Terry',
+                    editedBy: 'Terry',
+                    lastModifiedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 
                 // PC-2024-002 - Law Chambers
@@ -1663,7 +1726,12 @@ class CRMApplication {
                         loyaltyDiscount: 500.00,
                         earlyPayment: 500.00,
                         total: 2500.00
-                    }
+                    },
+                    
+                    // User Audit Fields
+                    createdBy: 'Slav',
+                    editedBy: 'Rob',
+                    lastModifiedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
                     quoteNumber: 'QT-2024-002',

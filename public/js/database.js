@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 5; // Added comprehensive field extensions for PC Numbers, Activities, and Quotes
+        this.version = 6; // Added user audit fields (createdBy, editedBy, deletedBy)
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -123,6 +123,80 @@ export class Database {
                         }
                         if (!quotesStore.indexNames.contains('priceListId')) {
                             quotesStore.createIndex('priceListId', 'priceListId', { unique: false });
+                        }
+                    }
+                }
+
+                // Version 6 upgrades: Add indexes for user audit fields
+                if (event.oldVersion < 6) {
+                    logInfo('Upgrading to version 6: Adding user audit field indexes');
+                    
+                    // Add user audit indexes to PC Numbers
+                    if (db.objectStoreNames.contains('pcNumbers')) {
+                        const pcStore = event.target.transaction.objectStore('pcNumbers');
+                        if (!pcStore.indexNames.contains('createdBy')) {
+                            pcStore.createIndex('createdBy', 'createdBy', { unique: false });
+                        }
+                        if (!pcStore.indexNames.contains('editedBy')) {
+                            pcStore.createIndex('editedBy', 'editedBy', { unique: false });
+                        }
+                        if (!pcStore.indexNames.contains('lastModifiedAt')) {
+                            pcStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
+                        }
+                    }
+
+                    // Add user audit indexes to Activities
+                    if (db.objectStoreNames.contains('activities')) {
+                        const activitiesStore = event.target.transaction.objectStore('activities');
+                        if (!activitiesStore.indexNames.contains('createdBy')) {
+                            activitiesStore.createIndex('createdBy', 'createdBy', { unique: false });
+                        }
+                        if (!activitiesStore.indexNames.contains('editedBy')) {
+                            activitiesStore.createIndex('editedBy', 'editedBy', { unique: false });
+                        }
+                        if (!activitiesStore.indexNames.contains('lastModifiedAt')) {
+                            activitiesStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
+                        }
+                    }
+
+                    // Add user audit indexes to Quotes
+                    if (db.objectStoreNames.contains('quotes')) {
+                        const quotesStore = event.target.transaction.objectStore('quotes');
+                        if (!quotesStore.indexNames.contains('createdBy')) {
+                            quotesStore.createIndex('createdBy', 'createdBy', { unique: false });
+                        }
+                        if (!quotesStore.indexNames.contains('editedBy')) {
+                            quotesStore.createIndex('editedBy', 'editedBy', { unique: false });
+                        }
+                        if (!quotesStore.indexNames.contains('lastModifiedAt')) {
+                            quotesStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
+                        }
+                    }
+
+                    // Add user audit indexes to Resources and Price Lists too
+                    if (db.objectStoreNames.contains('resources')) {
+                        const resourcesStore = event.target.transaction.objectStore('resources');
+                        if (!resourcesStore.indexNames.contains('createdBy')) {
+                            resourcesStore.createIndex('createdBy', 'createdBy', { unique: false });
+                        }
+                        if (!resourcesStore.indexNames.contains('editedBy')) {
+                            resourcesStore.createIndex('editedBy', 'editedBy', { unique: false });
+                        }
+                        if (!resourcesStore.indexNames.contains('lastModifiedAt')) {
+                            resourcesStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
+                        }
+                    }
+
+                    if (db.objectStoreNames.contains('priceLists')) {
+                        const priceListsStore = event.target.transaction.objectStore('priceLists');
+                        if (!priceListsStore.indexNames.contains('createdBy')) {
+                            priceListsStore.createIndex('createdBy', 'createdBy', { unique: false });
+                        }
+                        if (!priceListsStore.indexNames.contains('editedBy')) {
+                            priceListsStore.createIndex('editedBy', 'editedBy', { unique: false });
+                        }
+                        if (!priceListsStore.indexNames.contains('lastModifiedAt')) {
+                            priceListsStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
                         }
                     }
                 }
@@ -433,6 +507,96 @@ export class Database {
 
         } catch (error) {
             logError('Failed to download backup:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Assign random users to existing records that don't have user audit fields
+     * @returns {Promise<void>}
+     */
+    async assignRandomUsersToExistingData() {
+        const availableUsers = ['Slav', 'Rob', 'Kayleigh', 'Terry', 'Phil'];
+        
+        try {
+            if (!this.isInitialized) {
+                throw new Error('Database not initialized');
+            }
+
+            logInfo('Starting user assignment to existing records');
+            let updatedCount = 0;
+
+            // Helper function to get random user
+            const getRandomUser = () => availableUsers[Math.floor(Math.random() * availableUsers.length)];
+
+            // Update PC Numbers
+            const pcNumbers = await this.loadAll('pcNumbers');
+            for (const pc of pcNumbers) {
+                if (!pc.createdBy) {
+                    const randomUser = getRandomUser();
+                    pc.createdBy = randomUser;
+                    pc.editedBy = randomUser;
+                    pc.lastModifiedAt = pc.createdAt || new Date().toISOString();
+                    await this.save('pcNumbers', pc);
+                    updatedCount++;
+                }
+            }
+
+            // Update Activities
+            const activities = await this.loadAll('activities');
+            for (const activity of activities) {
+                if (!activity.createdBy) {
+                    const randomUser = getRandomUser();
+                    activity.createdBy = randomUser;
+                    activity.editedBy = randomUser;
+                    activity.lastModifiedAt = activity.createdAt || new Date().toISOString();
+                    await this.save('activities', activity);
+                    updatedCount++;
+                }
+            }
+
+            // Update Quotes
+            const quotes = await this.loadAll('quotes');
+            for (const quote of quotes) {
+                if (!quote.createdBy) {
+                    const randomUser = getRandomUser();
+                    quote.createdBy = randomUser;
+                    quote.editedBy = randomUser;
+                    quote.lastModifiedAt = quote.createdAt || new Date().toISOString();
+                    await this.save('quotes', quote);
+                    updatedCount++;
+                }
+            }
+
+            // Update Resources
+            const resources = await this.loadAll('resources');
+            for (const resource of resources) {
+                if (!resource.createdBy) {
+                    const randomUser = getRandomUser();
+                    resource.createdBy = randomUser;
+                    resource.editedBy = randomUser;
+                    resource.lastModifiedAt = resource.createdAt || new Date().toISOString();
+                    await this.save('resources', resource);
+                    updatedCount++;
+                }
+            }
+
+            // Update Price Lists
+            const priceLists = await this.loadAll('priceLists');
+            for (const priceList of priceLists) {
+                if (!priceList.createdBy) {
+                    const randomUser = getRandomUser();
+                    priceList.createdBy = randomUser;
+                    priceList.editedBy = randomUser;
+                    priceList.lastModifiedAt = priceList.createdAt || new Date().toISOString();
+                    await this.save('priceLists', priceList);
+                    updatedCount++;
+                }
+            }
+
+            logInfo(`User assignment completed: ${updatedCount} records updated`);
+        } catch (error) {
+            logError('Failed to assign users to existing data:', error);
             throw error;
         }
     }
