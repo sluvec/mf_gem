@@ -110,6 +110,9 @@ class CRMApplication {
             
             // Assign random users to existing records that don't have user audit fields
             await db.assignRandomUsersToExistingData();
+            
+            // Migrate PC Numbers to new format PC-000001
+            await this.migratePcNumbersToNewFormat();
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
@@ -690,6 +693,102 @@ class CRMApplication {
     }
 
     /**
+     * @description Generate next PC Number in format PC-000001
+     */
+    async getNextPcNumber() {
+        try {
+            const allPcNumbers = await db.loadAll('pcNumbers');
+            
+            if (!allPcNumbers || allPcNumbers.length === 0) {
+                return 'PC-000001';
+            }
+            
+            // Extract numeric parts and find the highest number
+            const numbers = allPcNumbers
+                .map(pc => {
+                    const match = pc.pcNumber.match(/PC-(\d{6})/);
+                    return match ? parseInt(match[1], 10) : 0;
+                })
+                .filter(num => !isNaN(num));
+            
+            const maxNumber = Math.max(...numbers, 0);
+            const nextNumber = maxNumber + 1;
+            
+            // Format with leading zeros (6 digits)
+            return `PC-${nextNumber.toString().padStart(6, '0')}`;
+        } catch (error) {
+            logError('Error generating next PC Number:', error);
+            return 'PC-000001'; // Fallback
+        }
+    }
+
+    /**
+     * @description Migrate existing PC Numbers to new format
+     */
+    async migratePcNumbersToNewFormat() {
+        try {
+            const allPcNumbers = await db.loadAll('pcNumbers');
+            
+            if (!allPcNumbers || allPcNumbers.length === 0) {
+                logInfo('No PC Numbers to migrate');
+                return;
+            }
+            
+            // Sort by creation date to maintain chronological order
+            allPcNumbers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            
+            let migrationCount = 0;
+            
+            for (let i = 0; i < allPcNumbers.length; i++) {
+                const pcNumber = allPcNumbers[i];
+                const newPcNumber = `PC-${(i + 1).toString().padStart(6, '0')}`;
+                
+                if (pcNumber.pcNumber !== newPcNumber) {
+                    logInfo(`Migrating ${pcNumber.pcNumber} → ${newPcNumber}`);
+                    
+                    // Update PC Number
+                    pcNumber.pcNumber = newPcNumber;
+                    pcNumber.lastModifiedAt = new Date().toISOString();
+                    
+                    // Save updated PC Number
+                    await db.save('pcNumbers', pcNumber);
+                    
+                    // Update related quotes
+                    const relatedQuotes = await db.loadAll('quotes');
+                    for (const quote of relatedQuotes) {
+                        if (quote.pcNumber === pcNumber.pcNumber || quote.pcId === pcNumber.id) {
+                            quote.pcNumber = newPcNumber;
+                            await db.save('quotes', quote);
+                        }
+                    }
+                    
+                    // Update related activities (legacy support)
+                    const relatedActivities = await db.loadAll('activities');
+                    for (const activity of relatedActivities) {
+                        if (activity.pcNumber === pcNumber.pcNumber) {
+                            activity.pcNumber = newPcNumber;
+                            await db.save('activities', activity);
+                        }
+                    }
+                    
+                    migrationCount++;
+                }
+            }
+            
+            if (migrationCount > 0) {
+                logInfo(`Successfully migrated ${migrationCount} PC Numbers to new format`);
+                uiModals.showToast(`Migrated ${migrationCount} PC Numbers to new format PC-000001`, 'success');
+            } else {
+                logInfo('All PC Numbers already in correct format');
+            }
+            
+        } catch (error) {
+            logError('Error migrating PC Numbers:', error);
+            uiModals.showToast('Error migrating PC Numbers format', 'error');
+        }
+    }
+
+    /**
      * @description Handle PC Number form submission
      * @param {Event} event - Form submit event
      */
@@ -697,10 +796,13 @@ class CRMApplication {
         event.preventDefault();
         
         try {
+            // Auto-generate PC Number
+            const nextPcNumber = await this.getNextPcNumber();
+            
             // Collect data directly from form elements using IDs
             const pcNumberData = {
-                // Basic fields
-                pcNumber: document.getElementById('pc-number').value,
+                // Basic fields - PC Number is auto-generated
+                pcNumber: nextPcNumber,
                 projectTitle: document.getElementById('pc-project-name').value,
                 projectDescription: document.getElementById('pc-project-description').value,
                 clientName: document.getElementById('pc-company-name').value,
@@ -761,18 +863,14 @@ class CRMApplication {
                 updatedAt: new Date()
             };
 
-            // Basic validation
-            if (!pcNumberData.pcNumber || !pcNumberData.projectTitle || !pcNumberData.clientName || !pcNumberData.contactName || !pcNumberData.accountManager) {
+            // Basic validation (PC Number is auto-generated)
+            if (!pcNumberData.projectTitle || !pcNumberData.clientName || !pcNumberData.contactName || !pcNumberData.accountManager) {
                 uiModals.showToast('Please fill in all required fields', 'error');
                 return;
             }
 
-            // Validate PC Number format
-            const pcNumberPattern = /^PC-\d{6}$/;
-            if (!pcNumberPattern.test(pcNumberData.pcNumber)) {
-                uiModals.showToast('PC Number must be in format PC-000001', 'error');
-                return;
-            }
+            // PC Number is auto-generated, so no format validation needed
+            logDebug(`Auto-generated PC Number: ${pcNumberData.pcNumber}`);
 
             // Validate contact information (at least phone or email)
             if (!pcNumberData.contactPhone && !pcNumberData.contactEmail) {
@@ -1095,10 +1193,10 @@ class CRMApplication {
         try {
             logInfo('Loading sample data...');
             
-            // Sample PC Numbers - UK Office Relocations
+            // Sample PC Numbers - UK Office Relocations (New Format PC-000001)
             const samplePCNumbers = [
                 {
-                    pcNumber: 'PC-2024-001',
+                    pcNumber: 'PC-000001',
                     company: 'Fintech Innovations Ltd',
                     reference: 'City to Canary Wharf Move',
                     projectTitle: 'Complete Office Relocation - City to Canary Wharf',
@@ -1157,7 +1255,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-002', 
+                    pcNumber: 'PC-000002', 
                     company: 'Chambers & Associates',
                     reference: 'Law Firm Expansion Move',
                     projectTitle: 'Barrister Chambers Relocation',
@@ -1174,7 +1272,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-003',
+                    pcNumber: 'PC-000003',
                     company: 'TechStart Solutions',
                     reference: 'Emergency Relocation',
                     projectTitle: 'Emergency Office Move - Lease Termination',
@@ -1191,7 +1289,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-004',
+                    pcNumber: 'PC-000004',
                     company: 'Industrial Manufacturing UK',
                     reference: 'Head Office Consolidation',
                     projectTitle: 'Manufacturing HQ Office Consolidation',
@@ -1208,7 +1306,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-005',
+                    pcNumber: 'PC-000005',
                     company: 'Creative Media Agency',
                     reference: 'Studio Relocation',
                     projectTitle: 'Creative Studio & Office Move',
@@ -1225,7 +1323,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-006',
+                    pcNumber: 'PC-000006',
                     company: 'Global Consulting Partners',
                     reference: 'Multi-Floor Corporate Move',
                     projectTitle: 'Large Corporate Office Relocation',
@@ -1242,7 +1340,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-007',
+                    pcNumber: 'PC-000007',
                     company: 'Boutique Investments Ltd',
                     reference: 'Mayfair Office Setup',
                     projectTitle: 'Premium Investment Office Fitout',
@@ -1259,7 +1357,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    pcNumber: 'PC-2024-008',
+                    pcNumber: 'PC-000008',
                     company: 'NHS Trust Admin',
                     reference: 'Healthcare Admin Relocation',
                     projectTitle: 'NHS Administrative Office Move',
@@ -1316,12 +1414,12 @@ class CRMApplication {
                     editedBy: 'Slav',
                     lastModifiedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
                 },
-                // PC-2024-001 - Fintech Move (Enhanced with new fields)
+                // PC-000001 - Fintech Move (Enhanced with new fields)
                 {
                     title: 'Site Survey - Canary Wharf Office',
                     description: 'Comprehensive site assessment of new Canary Wharf headquarters, measuring rooms, elevator access, and IT infrastructure requirements',
                     type: 'Survey',
-                    pcNumber: 'PC-2024-001',
+                    pcNumber: 'PC-000001',
                     scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Day after tomorrow
                     scheduledTime: '09:00',
                     duration: 180,
@@ -1388,7 +1486,7 @@ class CRMApplication {
                     title: 'IT Infrastructure Disconnection',
                     description: 'Safely disconnect and pack server equipment, workstations, and telecom systems at City office',
                     type: 'IT Services',
-                    pcNumber: 'PC-2024-001',
+                    pcNumber: 'PC-000001',
                     scheduledDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
                     scheduledTime: '07:00',
                     duration: 360,
@@ -1403,12 +1501,12 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 
-                // PC-2024-002 - Law Chambers
+                // PC-000002 - Law Chambers
                 {
                     title: 'Legal Archive Boxing',
                     description: 'Specialist packing of confidential legal documents, case files, and law library books with chain of custody documentation',
                     type: 'Packing',
-                    pcNumber: 'PC-2024-002',
+                    pcNumber: 'PC-000002',
                     scheduledDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
                     scheduledTime: '08:30',
                     duration: 480,
@@ -1420,12 +1518,12 @@ class CRMApplication {
                     contactPhone: '020 7405 1234'
                 },
                 
-                // PC-2024-003 - Emergency Move
+                // PC-000003 - Emergency Move
                 {
                     title: 'Emergency Packing Service',
                     description: 'Rapid response packing of startup office, priority on IT equipment and essential documents',
                     type: 'Emergency',
-                    pcNumber: 'PC-2024-003',
+                    pcNumber: 'PC-000003',
                     scheduledDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
                     scheduledTime: '06:00',
                     duration: 240,
@@ -1437,12 +1535,12 @@ class CRMApplication {
                     contactPhone: '07789 123456'
                 },
                 
-                // PC-2024-005 - Creative Agency (Completed)
+                // PC-000005 - Creative Agency (Completed)
                 {
                     title: 'AV Equipment Setup - Completed',
                     description: 'Successfully installed expensive audio-visual equipment and production studio setup at new King\'s Cross location',
                     type: 'Installation',
-                    pcNumber: 'PC-2024-005',
+                    pcNumber: 'PC-000005',
                     scheduledDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
                     scheduledTime: '09:00',
                     duration: 420,
@@ -1455,12 +1553,12 @@ class CRMApplication {
                     completionNotes: 'All AV equipment successfully installed and tested. Client signed off on setup. Some minor cable management adjustments made post-installation.'
                 },
                 
-                // PC-2024-006 - Large Corporate
+                // PC-000006 - Large Corporate
                 {
                     title: 'Executive Floor Planning',
                     description: 'Detailed planning for executive suite relocation including boardrooms, private offices, and secure areas',
                     type: 'Planning',
-                    pcNumber: 'PC-2024-006',
+                    pcNumber: 'PC-000006',
                     scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                     scheduledTime: '14:00',
                     duration: 240,
@@ -1472,12 +1570,12 @@ class CRMApplication {
                     contactPhone: '020 7715 8888'
                 },
                 
-                // PC-2024-008 - NHS Trust
+                // PC-000008 - NHS Trust
                 {
                     title: 'Secure Data Transport Planning',
                     description: 'Security compliance planning for NHS patient data and medical records transport with GDPR requirements',
                     type: 'Compliance',
-                    pcNumber: 'PC-2024-008',
+                    pcNumber: 'PC-000008',
                     scheduledDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
                     scheduledTime: '13:30',
                     duration: 120,
@@ -1669,7 +1767,7 @@ class CRMApplication {
             const sampleQuotes = [
                 {
                     quoteNumber: 'QT-2024-001',
-                    pcNumber: 'PC-2024-001',
+                    pcNumber: 'PC-000001',
                     clientName: 'Fintech Innovations Ltd',
                     projectTitle: 'Complete Office Relocation - City to Canary Wharf',
                     value: 47500.00,
@@ -1735,7 +1833,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-002',
-                    pcNumber: 'PC-2024-002',
+                    pcNumber: 'PC-000002',
                     clientName: 'Chambers & Associates',
                     projectTitle: 'Barrister Chambers Relocation',
                     value: 34200.00,
@@ -1746,7 +1844,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-003',
-                    pcNumber: 'PC-2024-003',
+                    pcNumber: 'PC-000003',
                     clientName: 'TechStart Solutions',
                     projectTitle: 'Emergency Office Move - Lease Termination',
                     value: 19750.00,
@@ -1757,7 +1855,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-004',
-                    pcNumber: 'PC-2024-004',
+                    pcNumber: 'PC-000004',
                     clientName: 'Industrial Manufacturing UK',
                     projectTitle: 'Manufacturing HQ Office Consolidation',
                     value: 72800.00,
@@ -1768,7 +1866,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-005',
-                    pcNumber: 'PC-2024-005',
+                    pcNumber: 'PC-000005',
                     clientName: 'Creative Media Agency',
                     projectTitle: 'Creative Studio & Office Move',
                     value: 31250.00,
@@ -1779,7 +1877,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-006',
-                    pcNumber: 'PC-2024-006',
+                    pcNumber: 'PC-000006',
                     clientName: 'Global Consulting Partners',
                     projectTitle: 'Large Corporate Office Relocation',
                     value: 132500.00,
@@ -1790,7 +1888,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-007',
-                    pcNumber: 'PC-2024-007',
+                    pcNumber: 'PC-000007',
                     clientName: 'Boutique Investments Ltd',
                     projectTitle: 'Premium Investment Office Fitout',
                     value: 92700.00,
@@ -1801,7 +1899,7 @@ class CRMApplication {
                 },
                 {
                     quoteNumber: 'QT-2024-008',
-                    pcNumber: 'PC-2024-008',
+                    pcNumber: 'PC-000008',
                     clientName: 'NHS Trust Admin',
                     projectTitle: 'NHS Administrative Office Move',
                     value: 24800.00,
@@ -1813,7 +1911,7 @@ class CRMApplication {
                 // Additional quotes for some projects (multiple quotes per project)
                 {
                     quoteNumber: 'QT-2024-009',
-                    pcNumber: 'PC-2024-001',
+                    pcNumber: 'PC-000001',
                     clientName: 'Fintech Innovations Ltd',
                     projectTitle: 'Canary Wharf Move - IT Only Package',
                     value: 15750.00,

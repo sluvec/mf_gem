@@ -354,9 +354,11 @@
                         <h3>Basic Information</h3>
                         <div class="form-grid">
                             <div>
-                                <label>PC Number *</label>
-                                <input type="text" id="pc-number" required placeholder="PC-000001" pattern="^PC-\d{6}$">
-                                <small>Format: PC- followed by 6 digits (e.g., PC-000001)</small>
+                                <label>PC Number (Auto-Generated) *</label>
+                                <input type="text" id="pc-number" readonly 
+                                       placeholder="Will be auto-generated (PC-000001)" 
+                                       style="background-color: #f9fafb; color: #6b7280; cursor: not-allowed;">
+                                <small>📋 Automatically assigned when saving</small>
                             </div>
                             <div>
                                 <label>Status *</label>
