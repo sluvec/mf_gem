@@ -1519,6 +1519,72 @@
                 </div>
             </div>
 
+            <!-- Management & Timing Information -->
+            <div class="card">
+                <h2>Management & Timing</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Department:</strong> <span id="activity-detail-department"></span></div>
+                    <div><strong>Payment Type:</strong> <span id="activity-detail-payment-type"></span></div>
+                    <div><strong>Activity Number:</strong> <span id="activity-detail-activity-number"></span></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>Depot Start:</strong> <span id="activity-detail-time-depot-start"></span></div>
+                    <div><strong>Site Start:</strong> <span id="activity-detail-time-site-start"></span></div>
+                    <div><strong>Site Finish:</strong> <span id="activity-detail-time-site-finish"></span></div>
+                    <div><strong>Depot Finish:</strong> <span id="activity-detail-time-depot-finish"></span></div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                    <div><strong>Total Hours:</strong> <span id="activity-detail-hours"></span></div>
+                    <div><strong>Moveman Job:</strong> <span id="activity-detail-moveman-job"></span></div>
+                    <div><strong>CRM ID:</strong> <span id="activity-detail-crm-id"></span></div>
+                </div>
+            </div>
+
+            <!-- Professional Details -->
+            <div class="card" id="activity-detail-instructions-card" style="display: none;">
+                <h2>Professional Details</h2>
+                <div>
+                    <strong>Instructions:</strong><br>
+                    <span id="activity-detail-instructions" style="white-space: pre-wrap;"></span>
+                </div>
+            </div>
+
+            <!-- Logistics & Requirements -->
+            <div class="card">
+                <h2>Logistics & Requirements</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                    <div><strong>Parking Required:</strong> <span id="activity-detail-parking-required"></span></div>
+                    <div><strong>Confirmed:</strong> <span id="activity-detail-confirmed"></span></div>
+                    <div><strong>Risk Assessment Needed:</strong> <span id="activity-detail-risk-assessment-needed"></span></div>
+                </div>
+            </div>
+
+            <!-- Collection Address -->
+            <div class="card" id="activity-detail-collection-card" style="display: none;">
+                <h2>Collection Address</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div><strong>Contact:</strong> <span id="activity-detail-collection-contact"></span></div>
+                    <div><strong>Phone:</strong> <span id="activity-detail-collection-phone"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="activity-detail-collection-address"></span>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="card" id="activity-detail-delivery-card" style="display: none;">
+                <h2>Delivery Address</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div><strong>Contact:</strong> <span id="activity-detail-delivery-contact"></span></div>
+                    <div><strong>Phone:</strong> <span id="activity-detail-delivery-phone"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Address:</strong><br>
+                    <span id="activity-detail-delivery-address"></span>
+                </div>
+            </div>
+
             <!-- Completion Notes (if completed) -->
             <div class="card" id="activity-detail-completion-card" style="display: none;">
                 <h2>Completion Details</h2>
@@ -1947,6 +2013,201 @@
                 <div id="activity-successors-list" class="dependency-list">
                     <div id="activity-successors-empty" style="text-align: center; color: #6b7280; font-size: 0.875rem; padding: 1rem;">
                         No successors defined. This activity has no dependent activities.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management & Timing Section -->
+        <div class="form-section">
+            <h3>Management & Timing</h3>
+            <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div>
+                    <label>Department</label>
+                    <select id="activity-department">
+                        <option value="">Select department...</option>
+                        <option value="Survey Team">Survey Team</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Installation">Installation</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="Administration">Administration</option>
+                        <option value="Customer Service">Customer Service</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Payment Type</label>
+                    <select id="activity-payment-type">
+                        <option value="">Select payment type...</option>
+                        <option value="Standard Rate">Standard Rate</option>
+                        <option value="Overtime Rate">Overtime Rate</option>
+                        <option value="Weekend Rate">Weekend Rate</option>
+                        <option value="Emergency Rate">Emergency Rate</option>
+                        <option value="Contract Rate">Contract Rate</option>
+                        <option value="Fixed Price">Fixed Price</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Activity Number</label>
+                    <input type="text" id="activity-number" placeholder="ACT-2024-001">
+                </div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 1rem;">
+                <div>
+                    <label>Depot Start Time</label>
+                    <input type="time" id="activity-time-depot-start">
+                    <small>Time leaving depot</small>
+                </div>
+                <div>
+                    <label>Site Start Time</label>
+                    <input type="time" id="activity-time-site-start">
+                    <small>Arrival at site</small>
+                </div>
+                <div>
+                    <label>Site Finish Time</label>
+                    <input type="time" id="activity-time-site-finish">
+                    <small>Departure from site</small>
+                </div>
+                <div>
+                    <label>Depot Finish Time</label>
+                    <input type="time" id="activity-time-depot-finish">
+                    <small>Return to depot</small>
+                </div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 1rem;">
+                <div>
+                    <label>Total Hours</label>
+                    <input type="number" id="activity-hours" step="0.25" min="0" placeholder="8.0">
+                    <small>Calculated or manual entry</small>
+                </div>
+                <div>
+                    <label>Moveman Job</label>
+                    <input type="text" id="activity-moveman-job" placeholder="MJ-001">
+                </div>
+                <div>
+                    <label>CRM ID</label>
+                    <input type="text" id="activity-crm-id" placeholder="CRM-SF-12345">
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Details Section -->
+        <div class="form-section">
+            <h3>Professional Details</h3>
+            <div>
+                <label>Instructions</label>
+                <textarea id="activity-instructions" rows="3" placeholder="Special instructions, safety requirements, access details..."></textarea>
+            </div>
+        </div>
+
+        <!-- Logistics & Requirements Section -->
+        <div class="form-section">
+            <h3>Logistics & Requirements</h3>
+            <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="activity-parking-required">
+                    <label for="activity-parking-required" style="margin: 0;">Parking Required</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="activity-confirmed">
+                    <label for="activity-confirmed" style="margin: 0;">Confirmed</label>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" id="activity-risk-assessment-needed">
+                    <label for="activity-risk-assessment-needed" style="margin: 0;">Risk Assessment Needed</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Management Section -->
+        <div class="form-section">
+            <h3>Address Management</h3>
+            
+            <!-- Collection Address -->
+            <div style="margin-bottom: 1.5rem;">
+                <h4 style="margin: 0 0 0.75rem 0; color: #374151;">Collection Address</h4>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div>
+                        <label>Address Line 1</label>
+                        <input type="text" id="activity-collection-address-1" placeholder="Building number and street">
+                    </div>
+                    <div>
+                        <label>Address Line 2</label>
+                        <input type="text" id="activity-collection-address-2" placeholder="Floor, suite, apartment">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0.5rem;">
+                    <div>
+                        <label>City</label>
+                        <input type="text" id="activity-collection-city" placeholder="City/town">
+                    </div>
+                    <div>
+                        <label>Postcode</label>
+                        <input type="text" id="activity-collection-postcode" placeholder="SW1A 1AA">
+                    </div>
+                    <div>
+                        <label>Country</label>
+                        <select id="activity-collection-country">
+                            <option value="">Select country...</option>
+                            <option value="United Kingdom" selected>United Kingdom</option>
+                            <option value="Ireland">Ireland</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); margin-top: 0.5rem;">
+                    <div>
+                        <label>Contact Name</label>
+                        <input type="text" id="activity-collection-contact" placeholder="Collection contact person">
+                    </div>
+                    <div>
+                        <label>Contact Phone</label>
+                        <input type="tel" id="activity-collection-phone" placeholder="+44 20 7123 4567">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div>
+                <h4 style="margin: 0 0 0.75rem 0; color: #374151;">Delivery Address</h4>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div>
+                        <label>Address Line 1</label>
+                        <input type="text" id="activity-delivery-address-1" placeholder="Building number and street">
+                    </div>
+                    <div>
+                        <label>Address Line 2</label>
+                        <input type="text" id="activity-delivery-address-2" placeholder="Floor, suite, apartment">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0.5rem;">
+                    <div>
+                        <label>City</label>
+                        <input type="text" id="activity-delivery-city" placeholder="City/town">
+                    </div>
+                    <div>
+                        <label>Postcode</label>
+                        <input type="text" id="activity-delivery-postcode" placeholder="SW1A 1AA">
+                    </div>
+                    <div>
+                        <label>Country</label>
+                        <select id="activity-delivery-country">
+                            <option value="">Select country...</option>
+                            <option value="United Kingdom" selected>United Kingdom</option>
+                            <option value="Ireland">Ireland</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); margin-top: 0.5rem;">
+                    <div>
+                        <label>Contact Name</label>
+                        <input type="text" id="activity-delivery-contact" placeholder="Delivery contact person">
+                    </div>
+                    <div>
+                        <label>Contact Phone</label>
+                        <input type="tel" id="activity-delivery-phone" placeholder="+44 20 7123 4567">
                     </div>
                 </div>
             </div>

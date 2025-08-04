@@ -704,7 +704,51 @@ class CRMApplication {
                 assignedTo: document.getElementById('activity-assigned-to-name').value,
                 location: document.getElementById('activity-location').value,
                 contactName: document.getElementById('activity-contact-name').value,
-                contactPhone: document.getElementById('activity-contact-phone').value
+                contactPhone: document.getElementById('activity-contact-phone').value,
+                
+                // Management & Timing fields
+                department: document.getElementById('activity-department').value,
+                paymentType: document.getElementById('activity-payment-type').value,
+                activityNumber: document.getElementById('activity-number').value,
+                timeDepotStart: document.getElementById('activity-time-depot-start').value,
+                timeSiteStart: document.getElementById('activity-time-site-start').value,
+                timeSiteFinish: document.getElementById('activity-time-site-finish').value,
+                timeDepotFinish: document.getElementById('activity-time-depot-finish').value,
+                hours: parseFloat(document.getElementById('activity-hours').value) || null,
+                movemanJob: document.getElementById('activity-moveman-job').value,
+                crmId: document.getElementById('activity-crm-id').value,
+                
+                // Professional Details
+                instructions: document.getElementById('activity-instructions').value,
+                
+                // Logistics & Requirements (boolean flags)
+                parkingRequired: document.getElementById('activity-parking-required').checked,
+                confirmed: document.getElementById('activity-confirmed').checked,
+                riskAssessmentNeeded: document.getElementById('activity-risk-assessment-needed').checked,
+                
+                // JSONB structures for addresses
+                collectionAddress: {
+                    address1: document.getElementById('activity-collection-address-1').value,
+                    address2: document.getElementById('activity-collection-address-2').value,
+                    city: document.getElementById('activity-collection-city').value,
+                    postcode: document.getElementById('activity-collection-postcode').value,
+                    country: document.getElementById('activity-collection-country').value,
+                    contact: document.getElementById('activity-collection-contact').value,
+                    phone: document.getElementById('activity-collection-phone').value
+                },
+                deliveryAddress: {
+                    address1: document.getElementById('activity-delivery-address-1').value,
+                    address2: document.getElementById('activity-delivery-address-2').value,
+                    city: document.getElementById('activity-delivery-city').value,
+                    postcode: document.getElementById('activity-delivery-postcode').value,
+                    country: document.getElementById('activity-delivery-country').value,
+                    contact: document.getElementById('activity-delivery-contact').value,
+                    phone: document.getElementById('activity-delivery-phone').value
+                },
+                
+                // Initialize empty arrays for resources and notes if not already present
+                resources: [],
+                notesList: []
             };
 
             // Add completion notes if activity is completed
@@ -2210,6 +2254,64 @@ class CRMApplication {
             document.getElementById('activity-detail-location').textContent = activityData.location || 'Not specified';
             document.getElementById('activity-detail-contact-name').textContent = activityData.contactName || 'Not specified';
             document.getElementById('activity-detail-contact-phone').textContent = activityData.contactPhone || 'Not specified';
+            
+            // Management & Timing fields
+            document.getElementById('activity-detail-department').textContent = activityData.department || 'Not specified';
+            document.getElementById('activity-detail-payment-type').textContent = activityData.paymentType || 'Not specified';
+            document.getElementById('activity-detail-activity-number').textContent = activityData.activityNumber || 'N/A';
+            document.getElementById('activity-detail-time-depot-start').textContent = activityData.timeDepotStart || 'N/A';
+            document.getElementById('activity-detail-time-site-start').textContent = activityData.timeSiteStart || 'N/A';
+            document.getElementById('activity-detail-time-site-finish').textContent = activityData.timeSiteFinish || 'N/A';
+            document.getElementById('activity-detail-time-depot-finish').textContent = activityData.timeDepotFinish || 'N/A';
+            document.getElementById('activity-detail-hours').textContent = activityData.hours ? `${activityData.hours} hours` : 'N/A';
+            document.getElementById('activity-detail-moveman-job').textContent = activityData.movemanJob || 'N/A';
+            document.getElementById('activity-detail-crm-id').textContent = activityData.crmId || 'N/A';
+            
+            // Professional Details - Instructions
+            const instructionsCard = document.getElementById('activity-detail-instructions-card');
+            if (activityData.instructions && activityData.instructions.trim()) {
+                document.getElementById('activity-detail-instructions').textContent = activityData.instructions;
+                instructionsCard.style.display = 'block';
+            } else {
+                instructionsCard.style.display = 'none';
+            }
+            
+            // Logistics & Requirements (boolean flags)
+            document.getElementById('activity-detail-parking-required').textContent = activityData.parkingRequired ? 'Yes' : 'No';
+            document.getElementById('activity-detail-confirmed').textContent = activityData.confirmed ? 'Yes' : 'No';
+            document.getElementById('activity-detail-risk-assessment-needed').textContent = activityData.riskAssessmentNeeded ? 'Yes' : 'No';
+            
+            // Collection Address
+            const collectionCard = document.getElementById('activity-detail-collection-card');
+            if (activityData.collectionAddress && (activityData.collectionAddress.address1 || activityData.collectionAddress.contact)) {
+                const addr = activityData.collectionAddress;
+                document.getElementById('activity-detail-collection-contact').textContent = addr.contact || 'N/A';
+                document.getElementById('activity-detail-collection-phone').textContent = addr.phone || 'N/A';
+                
+                // Format address
+                const addressParts = [addr.address1, addr.address2, addr.city, addr.postcode, addr.country].filter(part => part && part.trim());
+                document.getElementById('activity-detail-collection-address').textContent = addressParts.length > 0 ? addressParts.join(', ') : 'Not specified';
+                
+                collectionCard.style.display = 'block';
+            } else {
+                collectionCard.style.display = 'none';
+            }
+            
+            // Delivery Address
+            const deliveryCard = document.getElementById('activity-detail-delivery-card');
+            if (activityData.deliveryAddress && (activityData.deliveryAddress.address1 || activityData.deliveryAddress.contact)) {
+                const addr = activityData.deliveryAddress;
+                document.getElementById('activity-detail-delivery-contact').textContent = addr.contact || 'N/A';
+                document.getElementById('activity-detail-delivery-phone').textContent = addr.phone || 'N/A';
+                
+                // Format address
+                const addressParts = [addr.address1, addr.address2, addr.city, addr.postcode, addr.country].filter(part => part && part.trim());
+                document.getElementById('activity-detail-delivery-address').textContent = addressParts.length > 0 ? addressParts.join(', ') : 'Not specified';
+                
+                deliveryCard.style.display = 'block';
+            } else {
+                deliveryCard.style.display = 'none';
+            }
             
             // Show completion details if completed
             const completionCard = document.getElementById('activity-detail-completion-card');
