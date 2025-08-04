@@ -261,6 +261,11 @@
                             <div>
                                 <label>Company Name *</label>
                                 <input type="text" id="pc-company-name" required placeholder="Enter company name">
+                                <button type="button" onclick="(async () => { const defaults = await app.getSmartPCDefaults(document.getElementById('pc-company-name').value); app.applySmartPCDefaults(defaults); })()" 
+                                        style="margin-top: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.25rem;">
+                                    ⚡ Apply Smart Defaults
+                                </button>
+                                <small style="display: block; margin-top: 0.25rem; color: #6b7280;">Auto-fill form based on similar projects for this company</small>
                             </div>
                             <div>
                                 <label>Project Name *</label>
@@ -2084,7 +2089,14 @@
         <div class="form-section">
             <h3>Basic Information</h3>
         <div class="form-grid">
-                <div><label>PC Number *</label><select id="activity-pc-select"></select></div>
+                <div>
+                    <label>PC Number *</label>
+                    <select id="activity-pc-select"></select>
+                    <button type="button" onclick="app.autoFillActivityFromPC(document.getElementById('activity-pc-select').value)" 
+                            style="margin-top: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem;">
+                        🔄 Auto-fill from PC
+                    </button>
+                </div>
                 <div><label>Activity Type *</label><input type="text" id="activity-type" placeholder="e.g. Survey, Delivery, Installation" required></div>
                 <div><label>Priority</label><select id="activity-priority">
                     <option value="low">Low</option>

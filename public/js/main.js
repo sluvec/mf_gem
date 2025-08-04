@@ -491,6 +491,43 @@ class CRMApplication {
                 });
             }
 
+            // Smart Features: Auto-fill Activity from PC Number selection
+            const activityPcSelect = document.getElementById('activity-pc-select');
+            if (activityPcSelect) {
+                activityPcSelect.addEventListener('change', (event) => {
+                    if (event.target.value) {
+                        this.autoFillActivityFromPC(event.target.value);
+                    }
+                });
+            }
+
+            // Smart Features: Auto-fill Quote from PC Number selection
+            const quoteModalPc = document.getElementById('quote-modal-pc');
+            if (quoteModalPc) {
+                quoteModalPc.addEventListener('change', (event) => {
+                    if (event.target.value) {
+                        this.autoFillQuoteFromPC(event.target.value);
+                    }
+                });
+            }
+
+            // Smart Features: PC Number company name change listener for smart defaults
+            const pcCompanyField = document.getElementById('pc-company-name');
+            if (pcCompanyField) {
+                let smartDefaultsTimeout;
+                pcCompanyField.addEventListener('input', (event) => {
+                    // Debounce the smart defaults lookup to avoid too many calls
+                    clearTimeout(smartDefaultsTimeout);
+                    smartDefaultsTimeout = setTimeout(async () => {
+                        const companyName = event.target.value.trim();
+                        if (companyName.length >= 3) {
+                            const defaults = await this.getSmartPCDefaults(companyName);
+                            this.applySmartPCDefaults(defaults);
+                        }
+                    }, 1000); // Wait 1 second after user stops typing
+                });
+            }
+
         } catch (error) {
             logError('Failed to setup form handlers:', error);
         }
@@ -1762,6 +1799,192 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to parse JSON field:', error);
             return fallback;
+        }
+    }
+
+    /**
+     * @description Auto-fill Activity form from related PC Number data
+     * @param {string} pcId - PC Number ID to pull data from
+     */
+    async autoFillActivityFromPC(pcId) {
+        try {
+            if (!pcId) return;
+            
+            const pcData = await db.load('pcNumbers', pcId);
+            if (!pcData) return;
+            
+            // Auto-fill contact information
+            if (pcData.contactName) {
+                document.getElementById('activity-contact-name').value = pcData.contactName;
+            }
+            if (pcData.phone) {
+                document.getElementById('activity-contact-phone').value = pcData.phone;
+            }
+            
+            // Auto-fill collection address from PC delivery address
+            if (pcData.deliveryAddress1) {
+                document.getElementById('activity-collection-address-1').value = pcData.deliveryAddress1 || '';
+                document.getElementById('activity-collection-address-2').value = pcData.deliveryAddress2 || '';
+                document.getElementById('activity-collection-city').value = pcData.deliveryCity || '';
+                document.getElementById('activity-collection-postcode').value = pcData.deliveryPostcode || '';
+                document.getElementById('activity-collection-country').value = pcData.deliveryCountry || 'United Kingdom';
+                document.getElementById('activity-collection-contact').value = pcData.deliveryFirstName && pcData.deliverySurname 
+                    ? `${pcData.deliveryFirstName} ${pcData.deliverySurname}` 
+                    : pcData.contactName || '';
+                document.getElementById('activity-collection-phone').value = pcData.deliveryPhone || pcData.phone || '';
+            }
+            
+            // Smart defaults for activity type based on PC project type
+            const activityTypeField = document.getElementById('activity-type');
+            if (pcData.propertyType && !activityTypeField.value) {
+                if (pcData.propertyType.toLowerCase().includes('office')) {
+                    activityTypeField.value = 'Office Survey';
+                } else if (pcData.propertyType.toLowerCase().includes('warehouse')) {
+                    activityTypeField.value = 'Warehouse Survey';
+                } else if (pcData.propertyType.toLowerCase().includes('retail')) {
+                    activityTypeField.value = 'Retail Survey';
+                } else {
+                    activityTypeField.value = 'Property Survey';
+                }
+            }
+            
+            // Auto-fill department based on PC client category
+            const departmentField = document.getElementById('activity-department');
+            if (pcData.clientCategory && !departmentField.value) {
+                if (pcData.clientCategory.toLowerCase().includes('corporate')) {
+                    departmentField.value = 'Operations';
+                } else if (pcData.clientCategory.toLowerCase().includes('government')) {
+                    departmentField.value = 'Administration';
+                } else {
+                    departmentField.value = 'Survey Team';
+                }
+            }
+            
+            uiModals.showToast('Activity form auto-filled from PC Number data', 'success');
+            
+        } catch (error) {
+            logError('Failed to auto-fill activity from PC:', error);
+        }
+    }
+
+    /**
+     * @description Auto-fill Quote form from related PC Number data
+     * @param {string} pcId - PC Number ID to pull data from
+     */
+    async autoFillQuoteFromPC(pcId) {
+        try {
+            if (!pcId) return;
+            
+            const pcData = await db.load('pcNumbers', pcId);
+            if (!pcData) return;
+            
+            // Auto-fill basic information
+            document.getElementById('quote-edit-client-name').value = pcData.company || '';
+            document.getElementById('quote-edit-project-title').value = pcData.title || '';
+            
+            // Smart defaults for standard liability based on declared value or project value
+            const standardLiabilityField = document.getElementById('quote-edit-standard-liability');
+            if (pcData.value && !standardLiabilityField.value) {
+                const projectValue = parseFloat(pcData.value);
+                if (projectValue > 500000) {
+                    standardLiabilityField.value = '250000.00';
+                } else if (projectValue > 100000) {
+                    standardLiabilityField.value = '150000.00';
+                } else {
+                    standardLiabilityField.value = '100000.00';
+                }
+            }
+            
+            // Auto-suggest VAT rate based on client category
+            const vatRateField = document.getElementById('quote-edit-vat-rate');
+            if (pcData.clientCategory && !vatRateField.value) {
+                if (pcData.clientCategory.toLowerCase().includes('charity') || 
+                    pcData.clientCategory.toLowerCase().includes('education')) {
+                    vatRateField.value = '0.00'; // VAT exempt
+                } else {
+                    vatRateField.value = '20.00'; // Standard UK VAT
+                }
+            }
+            
+            uiModals.showToast('Quote form auto-filled from PC Number data', 'success');
+            
+        } catch (error) {
+            logError('Failed to auto-fill quote from PC:', error);
+        }
+    }
+
+    /**
+     * @description Get smart defaults for new PC Number based on recent similar projects
+     * @param {string} companyName - Company name to find similar projects
+     * @returns {object} Smart default values
+     */
+    async getSmartPCDefaults(companyName) {
+        try {
+            const allPCs = await db.loadAll('pcNumbers');
+            const similarPCs = allPCs.filter(pc => 
+                pc.company && pc.company.toLowerCase().includes(companyName.toLowerCase())
+            ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            if (similarPCs.length === 0) {
+                return {}; // No similar projects found
+            }
+            
+            const mostRecent = similarPCs[0];
+            const defaults = {};
+            
+            // Smart defaults from most recent similar project
+            if (mostRecent.clientCategory) defaults.clientCategory = mostRecent.clientCategory;
+            if (mostRecent.clientSource) defaults.clientSource = mostRecent.clientSource;
+            if (mostRecent.propertyType) defaults.propertyType = mostRecent.propertyType;
+            if (mostRecent.accountManager) defaults.accountManager = mostRecent.accountManager;
+            if (mostRecent.surveyor) defaults.surveyor = mostRecent.surveyor;
+            
+            // Contact information from most recent
+            if (mostRecent.contactName) defaults.contactName = mostRecent.contactName;
+            if (mostRecent.phone) defaults.phone = mostRecent.phone;
+            if (mostRecent.email) defaults.email = mostRecent.email;
+            
+            // Delivery address from most recent (often same for returning clients)
+            if (mostRecent.deliveryAddress1) {
+                defaults.deliveryAddress1 = mostRecent.deliveryAddress1;
+                defaults.deliveryAddress2 = mostRecent.deliveryAddress2;
+                defaults.deliveryCity = mostRecent.deliveryCity;
+                defaults.deliveryPostcode = mostRecent.deliveryPostcode;
+                defaults.deliveryCountry = mostRecent.deliveryCountry;
+                defaults.deliveryFirstName = mostRecent.deliveryFirstName;
+                defaults.deliverySurname = mostRecent.deliverySurname;
+                defaults.deliveryPhone = mostRecent.deliveryPhone;
+                defaults.deliveryEmail = mostRecent.deliveryEmail;
+            }
+            
+            return defaults;
+            
+        } catch (error) {
+            logError('Failed to get smart PC defaults:', error);
+            return {};
+        }
+    }
+
+    /**
+     * @description Apply smart defaults to PC Number form
+     * @param {object} defaults - Default values to apply
+     */
+    applySmartPCDefaults(defaults) {
+        try {
+            Object.keys(defaults).forEach(key => {
+                const fieldId = `pc-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
+                const field = document.getElementById(fieldId);
+                if (field && !field.value) {
+                    field.value = defaults[key];
+                }
+            });
+            
+            if (Object.keys(defaults).length > 0) {
+                uiModals.showToast(`Applied smart defaults from similar projects (${Object.keys(defaults).length} fields)`, 'info');
+            }
+            
+        } catch (error) {
+            logError('Failed to apply smart PC defaults:', error);
         }
     }
 
