@@ -32,6 +32,34 @@
         <!-- Toasts will be dynamically added here -->
     </div>
     
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay" style="display: block; background: rgba(0,0,0,0.8); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000;">
+        <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 0.5rem; min-width: 400px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="margin: 0 0 0.5rem 0; color: #1f2937; font-size: 1.5rem;">🔐 Login to CRM Demo</h2>
+                <p style="margin: 0; color: #6b7280;">Please select your user account to continue</p>
+            </div>
+            
+            <form id="login-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div>
+                    <label for="user-select" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Select User:</label>
+                    <select id="user-select" required style="width: 100%; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; background: white;">
+                        <option value="">-- Choose User --</option>
+                        <option value="Slav">👨‍💼 Slav</option>
+                        <option value="Rob">👨‍💻 Rob</option>
+                        <option value="Kayleigh">👩‍💼 Kayleigh</option>
+                        <option value="Terry">👨‍🔧 Terry</option>
+                        <option value="Phil">👨‍📊 Phil</option>
+                    </select>
+                </div>
+                
+                <button type="submit" style="background: #3b82f6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s;">
+                    🚀 Login to System
+                </button>
+            </form>
+        </div>
+    </div>
+    
     <header role="banner">
         <nav class="navbar" role="navigation" aria-label="Main navigation">
             <div class="nav-left">
@@ -127,8 +155,29 @@
                 </ul>
             </div>
                             <div class="nav-right">
-
-                    
+                    <!-- User Info Display -->
+                    <div id="user-info" style="display: none; align-items: center; gap: 1rem; margin-right: 1rem;">
+                        <div style="background: #f3f4f6; padding: 0.5rem 1rem; border-radius: 0.375rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.2rem;">👤</span>
+                            <span id="current-user-name" style="font-weight: 500; color: #374151;"></span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button 
+                                onclick="window.showChangeUserModal()" 
+                                class="nav-btn secondary"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.875rem;"
+                                aria-label="Change current user">
+                                🔄 Change User
+                            </button>
+                            <button 
+                                onclick="window.logoutUser()" 
+                                class="nav-btn danger"
+                                style="padding: 0.25rem 0.5rem; font-size: 0.875rem;"
+                                aria-label="Logout current user">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
 
                     <button 
                         onclick="window.resetData()" 

@@ -3640,6 +3640,151 @@ class CRMApplication {
             logError('Failed to filter activities by PC number:', error);
         }
     }
+
+    // ============================================
+    // USER MANAGEMENT SYSTEM
+    // ============================================
+
+    /**
+     * @description Get current logged-in user from session storage
+     * @returns {string|null} Current user name or null if not logged in
+     */
+    getCurrentUser() {
+        return sessionStorage.getItem('currentUser');
+    }
+
+    /**
+     * @description Set current user in session storage
+     * @param {string} userName - User name to set
+     */
+    setCurrentUser(userName) {
+        sessionStorage.setItem('currentUser', userName);
+        this.updateUserDisplay();
+    }
+
+    /**
+     * @description Update user display in navigation header
+     */
+    updateUserDisplay() {
+        const currentUser = this.getCurrentUser();
+        const userInfo = document.getElementById('user-info');
+        const userNameElement = document.getElementById('current-user-name');
+        
+        if (currentUser && userInfo && userNameElement) {
+            userNameElement.textContent = currentUser;
+            userInfo.style.display = 'flex';
+        } else if (userInfo) {
+            userInfo.style.display = 'none';
+        }
+    }
+
+    /**
+     * @description Check if user is logged in and handle login modal
+     */
+    checkUserLogin() {
+        const currentUser = this.getCurrentUser();
+        const loginModal = document.getElementById('login-modal');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        if (currentUser) {
+            // User is logged in, hide login modal and show main app
+            if (loginModal) loginModal.style.display = 'none';
+            this.updateUserDisplay();
+            logDebug(`User ${currentUser} logged in`);
+        } else {
+            // User not logged in, show login modal and hide loading
+            if (loginModal) loginModal.style.display = 'block';
+            if (loadingOverlay) loadingOverlay.classList.remove('active');
+            logDebug('No user logged in, showing login modal');
+        }
+    }
+
+    /**
+     * @description Handle login form submission
+     * @param {Event} event - Form submission event
+     */
+    handleLogin(event) {
+        event.preventDefault();
+        
+        const userSelect = document.getElementById('user-select');
+        const selectedUser = userSelect.value;
+        
+        if (!selectedUser) {
+            uiModals.showToast('Please select a user', 'error');
+            return;
+        }
+        
+        // Set current user and hide login modal
+        this.setCurrentUser(selectedUser);
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) loginModal.style.display = 'none';
+        
+        // Show success message and continue with app initialization
+        uiModals.showToast(`Welcome ${selectedUser}! 🎉`, 'success');
+        
+        // Continue with normal app initialization
+        this.initialize();
+        
+        logDebug(`User ${selectedUser} successfully logged in`);
+    }
+
+    /**
+     * @description Show change user modal (reuses login modal)
+     */
+    showChangeUserModal() {
+        const loginModal = document.getElementById('login-modal');
+        const modalTitle = loginModal.querySelector('h2');
+        const modalDescription = loginModal.querySelector('p');
+        const submitButton = loginModal.querySelector('button[type="submit"]');
+        
+        // Update modal content for "change user" context
+        modalTitle.textContent = '🔄 Change User';
+        modalDescription.textContent = 'Select a different user account';
+        submitButton.textContent = '✅ Switch User';
+        
+        // Pre-select current user
+        const userSelect = document.getElementById('user-select');
+        const currentUser = this.getCurrentUser();
+        if (currentUser && userSelect) {
+            userSelect.value = currentUser;
+        }
+        
+        // Show modal
+        if (loginModal) loginModal.style.display = 'block';
+        
+        logDebug('Change user modal displayed');
+    }
+
+    /**
+     * @description Logout current user
+     */
+    logoutUser() {
+        const currentUser = this.getCurrentUser();
+        
+        // Clear session storage
+        sessionStorage.removeItem('currentUser');
+        
+        // Update UI
+        this.updateUserDisplay();
+        
+        // Reset login modal to original state
+        const loginModal = document.getElementById('login-modal');
+        const modalTitle = loginModal.querySelector('h2');
+        const modalDescription = loginModal.querySelector('p');
+        const submitButton = loginModal.querySelector('button[type="submit"]');
+        const userSelect = document.getElementById('user-select');
+        
+        modalTitle.textContent = '🔐 Login to CRM Demo';
+        modalDescription.textContent = 'Please select your user account to continue';
+        submitButton.textContent = '🚀 Login to System';
+        if (userSelect) userSelect.value = '';
+        
+        // Show login modal
+        if (loginModal) loginModal.style.display = 'block';
+        
+        uiModals.showToast(`${currentUser} logged out successfully`, 'info');
+        logDebug(`User ${currentUser} logged out`);
+    }
 }
 
 // Initialize application when DOM is ready
@@ -3648,6 +3793,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Make app globally available for debugging
     window.crmApp = app;
+    
+    // Setup login system first
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (event) => app.handleLogin(event));
+    }
+    
+    // Check if user is already logged in
+    app.checkUserLogin();
+    
+    // Only initialize main app if user is logged in
+    if (app.getCurrentUser()) {
+        await app.initialize();
+    }
     
     // Expose navigation function globally for HTML onclick handlers
     window.showPage = (pageId) => app.navigateToPage(pageId);
@@ -4195,6 +4354,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.clearPcFilter = () => app.clearPcFilter();
     window.clearActivityFilter = () => app.clearActivityFilter();
     window.clearQuoteFilter = () => app.clearQuoteFilter();
+    
+    // User Management functions
+    window.showChangeUserModal = () => app.showChangeUserModal();
+    window.logoutUser = () => app.logoutUser();
     
     // PHASE 2: Search-related placeholder functions (for modal compatibility)
     window.filterResources = () => logDebug('filterResources: Search functionality removed');
