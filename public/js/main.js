@@ -3812,19 +3812,19 @@ class CRMApplication {
     // ============================================
 
     /**
-     * @description Get current logged-in user from session storage
+     * @description Get current logged-in user from local storage (persistent)
      * @returns {string|null} Current user name or null if not logged in
      */
     getCurrentUser() {
-        return sessionStorage.getItem('currentUser');
+        return localStorage.getItem('currentUser');
     }
 
     /**
-     * @description Set current user in session storage
+     * @description Set current user in local storage (persistent)
      * @param {string} userName - User name to set
      */
     setCurrentUser(userName) {
-        sessionStorage.setItem('currentUser', userName);
+        localStorage.setItem('currentUser', userName);
         this.updateUserDisplay();
     }
 
@@ -3927,8 +3927,8 @@ class CRMApplication {
     logoutUser() {
         const currentUser = this.getCurrentUser();
         
-        // Clear session storage
-        sessionStorage.removeItem('currentUser');
+        // Clear local storage
+        localStorage.removeItem('currentUser');
         
         // Update UI
         this.updateUserDisplay();
