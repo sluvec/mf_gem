@@ -240,14 +240,23 @@ class CRMApplication {
                 case 'activities':
                     await this.loadActivitiesData();
                     break;
+                case 'activity-detail':
+                    // Detail pages are loaded via specific functions, not automatically
+                    break;
                 case 'resources':
                     await this.loadResourcesData();
                     break;
                 case 'pcnumbers':
                     await this.loadPcNumbersData();
                     break;
+                case 'pc-detail':
+                    // Detail pages are loaded via specific functions, not automatically
+                    break;
                 case 'quotes':
                     await this.loadQuotesData();
+                    break;
+                case 'quote-detail':
+                    // Detail pages are loaded via specific functions, not automatically
                     break;
                 case 'pricelists':
                     await this.loadPriceListsData();
@@ -397,13 +406,15 @@ class CRMApplication {
             }
 
             const rowsHTML = activitiesList.map(activity => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewActivityDetail('${activity.id}')" style="cursor: pointer;">
                     <td>${sanitizeHTML(activity.title)}</td>
+                    <td>${sanitizeHTML(activity.pcNumber || 'N/A')}</td>
+                    <td>${sanitizeHTML(activity.clientName || 'N/A')}</td>
                     <td>${this.formatActivityType(activity.type)}</td>
                     <td>${formatDate(activity.startDate || activity.scheduledDate)}</td>
-                    <td><span class="activity-status ${activity.status}">${this.formatStatus(activity.status)}</span></td>
                     <td><span class="priority-${activity.priority}">${this.formatPriority(activity.priority)}</span></td>
-                    <td>
+                    <td><span class="activity-status ${activity.status}">${this.formatStatus(activity.status)}</span></td>
+                    <td onclick="event.stopPropagation()">
                         <button onclick="window.editActivity('${activity.id}')" class="secondary">Edit</button>
                         <button onclick="window.deleteActivity('${activity.id}')" class="danger">Delete</button>
                     </td>
@@ -1646,12 +1657,12 @@ class CRMApplication {
             }
 
             const rowsHTML = pcNumbersList.map(pc => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewPcDetail('${pc.id}')" style="cursor: pointer;">
                     <td><strong>${sanitizeHTML(pc.pcNumber)}</strong></td>
-                    <td>${sanitizeHTML(pc.clientName || 'N/A')}</td>
-                    <td>${sanitizeHTML(pc.projectTitle || 'N/A')}</td>
+                    <td>${sanitizeHTML(pc.company || pc.clientName || 'N/A')}</td>
+                    <td>${sanitizeHTML(pc.reference || 'N/A')}</td>
                     <td>${sanitizeHTML(pc.contactName || 'N/A')}</td>
-                    <td>
+                    <td onclick="event.stopPropagation()">
                         <button class="button secondary" onclick="window.editPC('${pc.id}')">Edit</button>
                         <button class="button primary" onclick="window.createQuote('${pc.id}')">Quote</button>
                     </td>
@@ -1679,13 +1690,13 @@ class CRMApplication {
             }
 
             const rowsHTML = quotesList.map(quote => `
-                <tr>
+                <tr class="clickable-row" onclick="window.viewQuoteDetail('${quote.id}')" style="cursor: pointer;">
                     <td><strong>${sanitizeHTML(quote.quoteNumber || quote.id)}</strong></td>
+                    <td>${sanitizeHTML(quote.pcNumber || 'N/A')}</td>
                     <td>${sanitizeHTML(quote.clientName || 'N/A')}</td>
-                    <td>${formatCurrency(quote.total || 0)}</td>
+                    <td>${formatCurrency(quote.value || quote.total || 0)}</td>
                     <td><span class="quote-status ${quote.status}">${sanitizeHTML(quote.status || 'draft')}</span></td>
-                    <td>${formatDate(quote.createdAt)}</td>
-                    <td>
+                    <td onclick="event.stopPropagation()">
                         <button class="button secondary" onclick="window.editQuote('${quote.id}')">Edit</button>
                         <button class="button primary" onclick="window.viewQuote('${quote.id}')">View</button>
                     </td>
@@ -1884,6 +1895,243 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to update price list:', error);
             uiModals.showToast('Failed to update price list', 'error');
+        }
+    }
+
+    /**
+     * @description Show activity detail page
+     * @param {string} activityId - Activity ID
+     */
+    async showActivityDetail(activityId) {
+        try {
+            const activityData = await db.load('activities', activityId);
+            if (!activityData) {
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+
+            // Store current activity globally for button actions
+            window.currentActivity = activityData;
+
+            // Populate detail fields
+            document.getElementById('activity-detail-title').textContent = `Activity: ${activityData.title}`;
+            document.getElementById('activity-detail-title-text').textContent = activityData.title || '';
+            document.getElementById('activity-detail-type').textContent = activityData.type || '';
+            document.getElementById('activity-detail-pc-number').textContent = activityData.pcNumber || 'N/A';
+            document.getElementById('activity-detail-status').textContent = this.formatStatus(activityData.status);
+            document.getElementById('activity-detail-priority').textContent = this.formatPriority(activityData.priority);
+            document.getElementById('activity-detail-assigned-to').textContent = activityData.assignedTo || 'Unassigned';
+            
+            // Format and display date/time
+            if (activityData.scheduledDate) {
+                const date = new Date(activityData.scheduledDate);
+                document.getElementById('activity-detail-scheduled-date').textContent = formatDate(date);
+            } else {
+                document.getElementById('activity-detail-scheduled-date').textContent = 'Not scheduled';
+            }
+            
+            document.getElementById('activity-detail-scheduled-time').textContent = activityData.scheduledTime || 'Not specified';
+            document.getElementById('activity-detail-duration').textContent = activityData.duration ? `${activityData.duration} minutes` : 'Not specified';
+            document.getElementById('activity-detail-description').textContent = activityData.description || 'No description provided';
+            
+            // Location & Contact
+            document.getElementById('activity-detail-location').textContent = activityData.location || 'Not specified';
+            document.getElementById('activity-detail-contact-name').textContent = activityData.contactName || 'Not specified';
+            document.getElementById('activity-detail-contact-phone').textContent = activityData.contactPhone || 'Not specified';
+            
+            // Show completion details if completed
+            const completionCard = document.getElementById('activity-detail-completion-card');
+            if (activityData.status === 'completed' && activityData.completionNotes) {
+                document.getElementById('activity-detail-completion-notes').textContent = activityData.completionNotes;
+                completionCard.style.display = 'block';
+            } else {
+                completionCard.style.display = 'none';
+            }
+
+            // Navigate to detail page
+            this.navigateToPage('activity-detail');
+
+        } catch (error) {
+            logError('Failed to show activity detail:', error);
+            uiModals.showToast('Failed to load activity details', 'error');
+        }
+    }
+
+    /**
+     * @description Show quote detail page
+     * @param {string} quoteId - Quote ID
+     */
+    async showQuoteDetail(quoteId) {
+        try {
+            const quoteData = await db.load('quotes', quoteId);
+            if (!quoteData) {
+                uiModals.showToast('Quote not found', 'error');
+                return;
+            }
+
+            // Store current quote globally for button actions
+            window.currentQuote = quoteData;
+
+            // Populate detail fields
+            document.getElementById('quote-detail-title').textContent = `Quote: ${quoteData.quoteNumber || quoteData.id}`;
+            document.getElementById('quote-detail-number').textContent = quoteData.quoteNumber || quoteData.id;
+            document.getElementById('quote-detail-pc-number').textContent = quoteData.pcNumber || 'N/A';
+            document.getElementById('quote-detail-client-name').textContent = quoteData.clientName || 'N/A';
+            document.getElementById('quote-detail-project-title').textContent = quoteData.projectTitle || 'N/A';
+            document.getElementById('quote-detail-value').textContent = formatCurrency(quoteData.value || quoteData.total || 0);
+            document.getElementById('quote-detail-status').textContent = this.formatStatus(quoteData.status || 'draft');
+            
+            // Format and display dates
+            if (quoteData.validUntil) {
+                const validUntilDate = new Date(quoteData.validUntil);
+                document.getElementById('quote-detail-valid-until').textContent = formatDate(validUntilDate);
+            } else {
+                document.getElementById('quote-detail-valid-until').textContent = 'Not specified';
+            }
+            
+            if (quoteData.createdAt) {
+                const createdAtDate = new Date(quoteData.createdAt);
+                document.getElementById('quote-detail-created-at').textContent = formatDate(createdAtDate);
+            } else {
+                document.getElementById('quote-detail-created-at').textContent = 'Unknown';
+            }
+            
+            document.getElementById('quote-detail-description').textContent = quoteData.description || 'No description provided';
+
+            // Navigate to detail page
+            this.navigateToPage('quote-detail');
+
+        } catch (error) {
+            logError('Failed to show quote detail:', error);
+            uiModals.showToast('Failed to load quote details', 'error');
+        }
+    }
+
+    /**
+     * @description Show PC Number detail page
+     * @param {string} pcId - PC Number ID
+     */
+    async showPcDetail(pcId) {
+        try {
+            const pcData = await db.load('pcNumbers', pcId);
+            if (!pcData) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+
+            // Store current PC globally for button actions
+            window.currentPC = pcData;
+
+            // Populate detail fields (using existing PC detail page structure)
+            document.getElementById('pc-detail-title').textContent = `PC Number: ${pcData.pcNumber}`;
+            document.getElementById('pc-detail-number').textContent = pcData.pcNumber || '';
+            document.getElementById('pc-detail-company-name').textContent = pcData.company || pcData.clientName || '';
+            document.getElementById('pc-detail-project-name').textContent = pcData.projectTitle || '';
+            document.getElementById('pc-detail-account-manager').textContent = pcData.accountManager || '';
+            document.getElementById('pc-detail-client-industry').textContent = pcData.industry || 'Not specified';
+            document.getElementById('pc-detail-client-source').textContent = pcData.source || 'Not specified';
+            document.getElementById('pc-detail-quote-limit').textContent = pcData.budgetRange || 'Not specified';
+            document.getElementById('pc-detail-status').textContent = this.formatStatus(pcData.status || 'draft');
+            document.getElementById('pc-detail-project-description').textContent = pcData.projectDescription || 'No description provided';
+            
+            // Contact information
+            document.getElementById('pc-detail-contact-name').textContent = pcData.contactName || '';
+            document.getElementById('pc-detail-contact-phone').textContent = pcData.contactPhone || '';
+            document.getElementById('pc-detail-contact-email').textContent = pcData.contactEmail || '';
+            document.getElementById('pc-detail-postcode').textContent = pcData.postcode || '';
+
+            // Load related quotes and activities
+            await this.loadRelatedQuotes(pcId);
+            await this.loadRelatedActivities(pcId);
+
+            // Navigate to detail page
+            this.navigateToPage('pc-detail');
+
+        } catch (error) {
+            logError('Failed to show PC detail:', error);
+            uiModals.showToast('Failed to load PC Number details', 'error');
+        }
+    }
+
+    /**
+     * @description Load related quotes for PC detail page
+     * @param {string} pcId - PC Number ID
+     */
+    async loadRelatedQuotes(pcId) {
+        try {
+            const allQuotes = await db.loadAll('quotes');
+            const pcData = await db.load('pcNumbers', pcId);
+            const pcNumber = pcData.pcNumber;
+            
+            // Filter quotes by PC Number
+            const relatedQuotes = allQuotes.filter(quote => 
+                quote.pcId === pcId || quote.pcNumber === pcNumber
+            );
+
+            const container = document.getElementById('pc-quotes');
+            if (!container) return;
+
+            if (relatedQuotes.length === 0) {
+                container.innerHTML = '<tr><td colspan="5">No quotes found for this PC Number</td></tr>';
+                return;
+            }
+
+            const rowsHTML = relatedQuotes.map(quote => `
+                <tr class="clickable-row" onclick="window.viewQuoteDetail('${quote.id}')" style="cursor: pointer;">
+                    <td>${sanitizeHTML(quote.quoteNumber || quote.id)}</td>
+                    <td>${sanitizeHTML(quote.projectTitle || 'N/A')}</td>
+                    <td>${formatCurrency(quote.value || quote.total || 0)}</td>
+                    <td><span class="quote-status ${quote.status}">${sanitizeHTML(quote.status || 'draft')}</span></td>
+                    <td onclick="event.stopPropagation()">
+                        <button onclick="window.editQuote('${quote.id}')" class="secondary">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rowsHTML;
+        } catch (error) {
+            logError('Failed to load related quotes:', error);
+        }
+    }
+
+    /**
+     * @description Load related activities for PC detail page
+     * @param {string} pcId - PC Number ID
+     */
+    async loadRelatedActivities(pcId) {
+        try {
+            const allActivities = await db.loadAll('activities');
+            const pcData = await db.load('pcNumbers', pcId);
+            const pcNumber = pcData.pcNumber;
+            
+            // Filter activities by PC Number
+            const relatedActivities = allActivities.filter(activity => 
+                activity.pcId === pcId || activity.pcNumber === pcNumber
+            );
+
+            const container = document.getElementById('pc-activities');
+            if (!container) return;
+
+            if (relatedActivities.length === 0) {
+                container.innerHTML = '<tr><td colspan="5">No activities found for this PC Number</td></tr>';
+                return;
+            }
+
+            const rowsHTML = relatedActivities.map(activity => `
+                <tr class="clickable-row" onclick="window.viewActivityDetail('${activity.id}')" style="cursor: pointer;">
+                    <td>${sanitizeHTML(activity.title || activity.id)}</td>
+                    <td>${sanitizeHTML(activity.type || 'N/A')}</td>
+                    <td>${formatDate(activity.scheduledDate || activity.startDate)}</td>
+                    <td><span class="activity-status ${activity.status}">${this.formatStatus(activity.status)}</span></td>
+                    <td onclick="event.stopPropagation()">
+                        <button onclick="window.editActivity('${activity.id}')" class="secondary">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rowsHTML;
+        } catch (error) {
+            logError('Failed to load related activities:', error);
         }
     }
 }
@@ -2148,6 +2396,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     window.viewPriceList = (id) => console.log('View price list:', id);
+    
+    // Detail view functions
+    window.viewActivityDetail = async (id) => {
+        await app.showActivityDetail(id);
+    };
+    window.viewQuoteDetail = async (id) => {
+        await app.showQuoteDetail(id);
+    };
+    window.viewPcDetail = async (id) => {
+        await app.showPcDetail(id);
+    };
+    
     window.editActivity = async (id) => {
         try {
             logDebug('Opening Activity edit modal for ID:', id);

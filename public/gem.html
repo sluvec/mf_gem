@@ -1096,6 +1096,82 @@
             </div>
         </div>
 
+        <div id="activity-detail" class="page">
+            <h1 id="activity-detail-title">Activity Details</h1>
+            
+            <!-- Main Activity Data -->
+            <div class="card">
+                <h2>Activity Information</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    <div><strong>Title:</strong> <span id="activity-detail-title-text"></span></div>
+                    <div><strong>Type:</strong> <span id="activity-detail-type"></span></div>
+                    <div><strong>PC Number:</strong> <span id="activity-detail-pc-number"></span></div>
+                    <div><strong>Status:</strong> <span id="activity-detail-status"></span></div>
+                    <div><strong>Priority:</strong> <span id="activity-detail-priority"></span></div>
+                    <div><strong>Assigned To:</strong> <span id="activity-detail-assigned-to"></span></div>
+                    <div><strong>Scheduled Date:</strong> <span id="activity-detail-scheduled-date"></span></div>
+                    <div><strong>Scheduled Time:</strong> <span id="activity-detail-scheduled-time"></span></div>
+                    <div><strong>Duration:</strong> <span id="activity-detail-duration"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Description:</strong><br>
+                    <span id="activity-detail-description" style="white-space: pre-wrap;"></span>
+                </div>
+                <div class="form-actions">
+                    <button onclick="window.editActivity(window.currentActivity.id)" class="warning">Edit Activity</button>
+                    <button onclick="window.showActivityModal()" class="primary">Add New Activity</button>
+                    <button data-show-page="activities" class="secondary">Back to Activities</button>
+                </div>
+            </div>
+            
+            <!-- Location & Contact Information -->
+            <div class="card">
+                <h2>Location & Contact</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div><strong>Location:</strong> <span id="activity-detail-location"></span></div>
+                    <div><strong>Contact Name:</strong> <span id="activity-detail-contact-name"></span></div>
+                    <div><strong>Contact Phone:</strong> <span id="activity-detail-contact-phone"></span></div>
+                </div>
+            </div>
+
+            <!-- Completion Notes (if completed) -->
+            <div class="card" id="activity-detail-completion-card" style="display: none;">
+                <h2>Completion Details</h2>
+                <div>
+                    <strong>Completion Notes:</strong><br>
+                    <span id="activity-detail-completion-notes" style="white-space: pre-wrap;"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="quote-detail" class="page">
+            <h1 id="quote-detail-title">Quote Details</h1>
+            
+            <!-- Main Quote Data -->
+            <div class="card">
+                <h2>Quote Information</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                    <div><strong>Quote Number:</strong> <span id="quote-detail-number"></span></div>
+                    <div><strong>PC Number:</strong> <span id="quote-detail-pc-number"></span></div>
+                    <div><strong>Client Name:</strong> <span id="quote-detail-client-name"></span></div>
+                    <div><strong>Project Title:</strong> <span id="quote-detail-project-title"></span></div>
+                    <div><strong>Value:</strong> <span id="quote-detail-value"></span></div>
+                    <div><strong>Status:</strong> <span id="quote-detail-status"></span></div>
+                    <div><strong>Valid Until:</strong> <span id="quote-detail-valid-until"></span></div>
+                    <div><strong>Created:</strong> <span id="quote-detail-created-at"></span></div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Description:</strong><br>
+                    <span id="quote-detail-description" style="white-space: pre-wrap;"></span>
+                </div>
+                <div class="form-actions">
+                    <button onclick="window.editQuote(window.currentQuote.id)" class="warning">Edit Quote</button>
+                    <button onclick="window.showNewQuoteModal()" class="primary">Create New Quote</button>
+                    <button data-show-page="quotes" class="secondary">Back to Quotes</button>
+                </div>
+            </div>
+        </div>
+
         <div id="resources" class="page">
             <h1>🔧 Resources</h1>
             <button onclick="window.showResourceModal()">+ New Resource</button>
