@@ -181,13 +181,59 @@
                 </div>
             </div>
 
-             <div class="card">
+            <!-- Quick Actions -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <h2>🚀 Quick Actions</h2>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button 
+                        data-show-page="new-pc" 
+                        class="button primary" 
+                        style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                        📋 New PC Number
+                    </button>
+                    <button 
+                        onclick="window.showNewQuoteModal()" 
+                        class="button primary" 
+                        style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                        💰 New Quote
+                    </button>
+                    <button 
+                        onclick="window.showActivityModal()" 
+                        class="button primary" 
+                        style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                        📅 New Activity
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Data Tables -->
+            <div class="card">
                 <h2>Recent PC Numbers</h2>
                 <table>
                     <thead>
-                        <tr><th>PC Number</th><th>Company</th><th>Reference</th></tr>
+                        <tr><th>PC Number</th><th>Company</th><th>Reference</th><th>Created</th></tr>
                     </thead>
                     <tbody id="recent-pc"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Recent Quotes</h2>
+                <table>
+                    <thead>
+                        <tr><th>Quote Number</th><th>PC Number</th><th>Client Name</th><th>Value</th><th>Status</th><th>Created</th></tr>
+                    </thead>
+                    <tbody id="recent-quotes"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Recent Activities</h2>
+                <table>
+                    <thead>
+                        <tr><th>Title</th><th>Type</th><th>Quote</th><th>Status</th><th>Scheduled Date</th><th>Created</th></tr>
+                    </thead>
+                    <tbody id="recent-activities"></tbody>
                 </table>
             </div>
         </div>

@@ -327,8 +327,10 @@ class CRMApplication {
             // Calculate and update quote value
             await this.updateQuoteValue();
 
-            // Load recent PC numbers table
+            // Load recent data tables
             await this.loadRecentPCNumbers();
+            await this.loadRecentQuotes();
+            await this.loadRecentActivities();
 
             logDebug('Dashboard stats updated');
         } catch (error) {
@@ -370,7 +372,7 @@ class CRMApplication {
             if (!container) return;
 
             if (recentPCs.length === 0) {
-                container.innerHTML = '<tr><td colspan="3">No PC Numbers found</td></tr>';
+                container.innerHTML = '<tr><td colspan="4">No PC Numbers found</td></tr>';
                 return;
             }
 
@@ -379,6 +381,7 @@ class CRMApplication {
                     <td>${pc.pcNumber || ''}</td>
                     <td>${pc.company || ''}</td>
                     <td>${pc.reference || ''}</td>
+                    <td>${formatDate(pc.createdAt || pc.date)}</td>
                 </tr>
             `).join('');
 
@@ -386,6 +389,80 @@ class CRMApplication {
             logDebug(`Loaded ${recentPCs.length} recent PC numbers`);
         } catch (error) {
             logError('Failed to load recent PC numbers:', error);
+        }
+    }
+
+    /**
+     * @description Load recent quotes for dashboard table
+     */
+    async loadRecentQuotes() {
+        try {
+            const quotes = await db.loadAll('quotes');
+            // Sort by creation date and take last 5
+            const recentQuotes = quotes
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                .slice(0, 5);
+
+            const container = document.getElementById('recent-quotes');
+            if (!container) return;
+
+            if (recentQuotes.length === 0) {
+                container.innerHTML = '<tr><td colspan="6">No Quotes found</td></tr>';
+                return;
+            }
+
+            const rows = recentQuotes.map(quote => `
+                <tr class="clickable-row" onclick="window.viewQuoteDetail('${quote.id}')" style="cursor: pointer;">
+                    <td>${quote.quoteNumber || quote.id}</td>
+                    <td>${quote.pcNumber || 'N/A'}</td>
+                    <td>${quote.clientName || 'N/A'}</td>
+                    <td>${formatCurrency(quote.value || quote.total || 0)}</td>
+                    <td><span class="quote-status ${quote.status || 'draft'}">${quote.status || 'draft'}</span></td>
+                    <td>${formatDate(quote.createdAt)}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rows;
+            logDebug(`Loaded ${recentQuotes.length} recent quotes`);
+        } catch (error) {
+            logError('Failed to load recent quotes:', error);
+        }
+    }
+
+    /**
+     * @description Load recent activities for dashboard table
+     */
+    async loadRecentActivities() {
+        try {
+            const activities = await db.loadAll('activities');
+            // Sort by creation date and take last 5
+            const recentActivities = activities
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                .slice(0, 5);
+
+            const container = document.getElementById('recent-activities');
+            if (!container) return;
+
+            if (recentActivities.length === 0) {
+                container.innerHTML = '<tr><td colspan="6">No Activities found</td></tr>';
+                return;
+            }
+
+            const rows = recentActivities.map(activity => `
+                <tr class="clickable-row" onclick="window.viewActivityDetail('${activity.id}')" style="cursor: pointer;">
+                    <td>${activity.title || 'N/A'}</td>
+                    <td>${activity.type || 'N/A'}</td>
+                    <td>${activity.quoteId ? 'Quote: ' + activity.quoteId : (activity.pcNumber || 'N/A')}</td>
+                    <td><span class="activity-status ${activity.status || 'pending'}">${this.formatStatus(activity.status || 'pending')}</span></td>
+                    <td>${formatDate(activity.scheduledDate || activity.startDate)}</td>
+                    <td>${formatDate(activity.createdAt)}</td>
+                </tr>
+            `).join('');
+
+            container.innerHTML = rows;
+            logDebug(`Loaded ${recentActivities.length} recent activities`);
+        } catch (error) {
+            logError('Failed to load recent activities:', error);
         }
     }
 
