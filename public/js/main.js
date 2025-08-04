@@ -1083,6 +1083,8 @@ class CRMApplication {
                 if (messageElement) {
                     messageElement.textContent = message;
                 }
+                // Reset any inline styles and show overlay
+                this.loadingOverlay.style.display = '';
                 this.loadingOverlay.classList.add('active');
                 this.updateProgress(0);
             }
@@ -3765,7 +3767,6 @@ class CRMApplication {
     checkUserLogin() {
         const currentUser = this.getCurrentUser();
         const loginModal = document.getElementById('login-modal');
-        const loadingOverlay = document.getElementById('loading-overlay');
         
         if (currentUser) {
             // User is logged in, hide login modal and show main app
@@ -3773,9 +3774,9 @@ class CRMApplication {
             this.updateUserDisplay();
             logDebug(`User ${currentUser} logged in`);
         } else {
-            // User not logged in, show login modal and hide loading
+            // User not logged in, show login modal and hide loading immediately
             if (loginModal) loginModal.style.display = 'block';
-            if (loadingOverlay) loadingOverlay.classList.remove('active');
+            this.hideLoadingOverlay();
             logDebug('No user logged in, showing login modal');
         }
     }
@@ -3784,7 +3785,7 @@ class CRMApplication {
      * @description Handle login form submission
      * @param {Event} event - Form submission event
      */
-    handleLogin(event) {
+    async handleLogin(event) {
         event.preventDefault();
         
         const userSelect = document.getElementById('user-select');
@@ -3804,7 +3805,7 @@ class CRMApplication {
         uiModals.showToast(`Welcome ${selectedUser}! 🎉`, 'success');
         
         // Continue with normal app initialization
-        this.initialize();
+        await this.initialize();
         
         logDebug(`User ${selectedUser} successfully logged in`);
     }
