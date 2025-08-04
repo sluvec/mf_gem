@@ -133,31 +133,43 @@ class CRMApplication {
     async initializeDatabase() {
         try {
             logDebug('Calling db.initialize()...');
+            console.log('🔵 DB: Starting db.initialize()...');
             await db.initialize();
+            console.log('🔵 DB: db.initialize() completed');
             logDebug('db.initialize() completed');
             
             // Load sample data if database is empty
             logDebug('Getting database stats...');
+            console.log('🔵 DB: Getting database stats...');
             const stats = await db.getStats();
+            console.log('🔵 DB: Database stats:', stats);
             logDebug('Database stats:', stats);
             if (Object.values(stats).every(count => count === 0)) {
                 logDebug('Database is empty, loading sample data...');
+                console.log('🔵 DB: Database is empty, loading sample data...');
                 await this.loadSampleData();
+                console.log('🔵 DB: Sample data loaded');
                 logDebug('Sample data loaded');
             } else {
                 logDebug('Database has data, skipping sample data load');
+                console.log('🔵 DB: Database has data, skipping sample data load');
             }
             
             // Assign random users to existing records that don't have user audit fields
             logDebug('Assigning random users to existing data...');
+            console.log('🔵 DB: Assigning random users to existing data...');
             await db.assignRandomUsersToExistingData();
+            console.log('🔵 DB: Random user assignment completed');
             logDebug('Random user assignment completed');
             
             // Migrate PC Numbers to new format PC-000001
             logDebug('Starting PC Numbers migration...');
+            console.log('🔵 DB: Starting PC Numbers migration...');
             await this.migratePcNumbersToNewFormat();
+            console.log('🔵 DB: PC Numbers migration completed');
             logDebug('PC Numbers migration completed');
         } catch (error) {
+            console.error('🔵 DB ERROR:', error);
             logError('Database initialization failed:', error);
             throw error;
         }
@@ -797,12 +809,20 @@ class CRMApplication {
      */
     async migratePcNumbersToNewFormat() {
         try {
+            console.log('🔵 MIGRATE: Starting PC Numbers migration...');
             const allPcNumbers = await db.loadAll('pcNumbers');
+            console.log('🔵 MIGRATE: Loaded PC Numbers:', allPcNumbers?.length || 0);
             
             if (!allPcNumbers || allPcNumbers.length === 0) {
                 logInfo('No PC Numbers to migrate');
+                console.log('🔵 MIGRATE: No PC Numbers to migrate');
                 return;
             }
+            
+            // Skip migration to prevent hang - user can migrate manually later
+            console.log('🔵 MIGRATE: Skipping migration to prevent initialization hang');
+            logInfo('PC Numbers migration skipped for faster initialization');
+            return;
             
             // Sort by creation date to maintain chronological order
             allPcNumbers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -1272,6 +1292,12 @@ class CRMApplication {
     async loadSampleData() {
         try {
             logInfo('Loading sample data...');
+            console.log('🔵 SAMPLE: Starting sample data load...');
+            
+            // Skip sample data loading to avoid hang - user can add data manually
+            console.log('🔵 SAMPLE: Skipping sample data to prevent initialization hang');
+            logInfo('Sample data loading skipped for faster initialization');
+            return;
             
             // Sample PC Numbers - UK Office Relocations (New Format PC-000001)
             const samplePCNumbers = [

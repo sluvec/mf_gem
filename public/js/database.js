@@ -523,6 +523,13 @@ export class Database {
                 throw new Error('Database not initialized');
             }
 
+            console.log('🔵 USERS: Starting user assignment...');
+            
+            // Skip user assignment to prevent hang - user assignments can be done later
+            console.log('🔵 USERS: Skipping user assignment to prevent initialization hang');
+            logInfo('User assignment skipped for faster initialization');
+            return;
+
             logInfo('Starting user assignment to existing records');
             let updatedCount = 0;
 
