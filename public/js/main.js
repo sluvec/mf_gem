@@ -3775,7 +3775,10 @@ class CRMApplication {
             logDebug(`User ${currentUser} logged in`);
         } else {
             // User not logged in, show login modal and hide loading immediately
-            if (loginModal) loginModal.style.display = 'block';
+            if (loginModal) {
+                loginModal.style.display = 'block';
+                loginModal.style.visibility = 'visible';
+            }
             this.hideLoadingOverlay();
             logDebug('No user logged in, showing login modal');
         }
@@ -3787,9 +3790,11 @@ class CRMApplication {
      */
     async handleLogin(event) {
         event.preventDefault();
+        logDebug('handleLogin called');
         
         const userSelect = document.getElementById('user-select');
         const selectedUser = userSelect.value;
+        logDebug(`Selected user: ${selectedUser}`);
         
         if (!selectedUser) {
             uiModals.showToast('Please select a user', 'error');
@@ -3799,7 +3804,11 @@ class CRMApplication {
         // Set current user and hide login modal
         this.setCurrentUser(selectedUser);
         const loginModal = document.getElementById('login-modal');
-        if (loginModal) loginModal.style.display = 'none';
+        if (loginModal) {
+            loginModal.style.display = 'none';
+            loginModal.style.visibility = 'hidden';
+            loginModal.style.opacity = '0';
+        }
         
         // Show success message and continue with app initialization
         uiModals.showToast(`Welcome ${selectedUser}! 🎉`, 'success');
@@ -3879,7 +3888,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Setup login system first
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', (event) => app.handleLogin(event));
+        loginForm.addEventListener('submit', async (event) => {
+            try {
+                await app.handleLogin(event);
+            } catch (error) {
+                console.error('Login failed:', error);
+                uiModals.showToast('Login failed. Please try again.', 'error');
+            }
+        });
     }
     
     // Check if user is already logged in
