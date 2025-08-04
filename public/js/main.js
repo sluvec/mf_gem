@@ -44,25 +44,56 @@ class CRMApplication {
      * @description Initialize the application
      */
     async initialize() {
+        // Add timeout protection
+        const initTimeout = setTimeout(() => {
+            logError('Initialize timeout after 30 seconds!');
+            this.showError('Application initialization timed out. Please refresh the page.');
+            this.hideLoadingOverlay();
+        }, 30000);
+
         try {
             logInfo('Initializing CRM Application...');
+            console.log('🚀 INIT: Starting CRM Application initialization...');
             this.showLoadingOverlay('Initializing application...');
+            logDebug('Loading overlay shown, updating progress to 20%');
+            console.log('🚀 INIT: Loading overlay shown, progress updating to 20%');
+            
+            // Force show loading overlay if showLoadingOverlay failed
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                overlay.classList.add('active');
+                logDebug('Force-enabled loading overlay');
+            }
 
             // Initialize core systems
             this.updateProgress(20, 'Connecting to database...');
+            console.log('🚀 INIT: Progress updated to 20%, starting database init...');
+            logDebug('Starting database initialization...');
             await this.initializeDatabase();
+            logDebug('Database initialization completed');
             
             this.updateProgress(50, 'Setting up user interface...');
+            logDebug('Starting UI initialization...');
             await this.initializeUI();
+            logDebug('UI initialization completed');
             
             this.updateProgress(75, 'Loading data...');
+            logDebug('Setting up event listeners...');
             await this.setupEventListeners();
+            logDebug('Event listeners setup completed');
 
             this.updateProgress(90, 'Almost ready...');
+            logDebug('Navigating to page:', this.currentPage);
             // Set initial page
             this.navigateToPage(this.currentPage);
+            logDebug('Page navigation completed');
 
             this.updateProgress(100, 'Complete!');
+            logDebug('Initialize completed successfully');
+            
+            // Clear timeout since we completed successfully
+            clearTimeout(initTimeout);
             
             // Try immediate hiding first
             logDebug('Attempting immediate overlay hiding...');
@@ -89,6 +120,7 @@ class CRMApplication {
             logInfo('CRM Application initialized successfully');
 
         } catch (error) {
+            clearTimeout(initTimeout);
             logError('Failed to initialize application:', error);
             this.showError('Failed to initialize application. Please refresh the page.');
             this.hideLoadingOverlay();
@@ -100,19 +132,31 @@ class CRMApplication {
      */
     async initializeDatabase() {
         try {
+            logDebug('Calling db.initialize()...');
             await db.initialize();
+            logDebug('db.initialize() completed');
             
             // Load sample data if database is empty
+            logDebug('Getting database stats...');
             const stats = await db.getStats();
+            logDebug('Database stats:', stats);
             if (Object.values(stats).every(count => count === 0)) {
+                logDebug('Database is empty, loading sample data...');
                 await this.loadSampleData();
+                logDebug('Sample data loaded');
+            } else {
+                logDebug('Database has data, skipping sample data load');
             }
             
             // Assign random users to existing records that don't have user audit fields
+            logDebug('Assigning random users to existing data...');
             await db.assignRandomUsersToExistingData();
+            logDebug('Random user assignment completed');
             
             // Migrate PC Numbers to new format PC-000001
+            logDebug('Starting PC Numbers migration...');
             await this.migratePcNumbersToNewFormat();
+            logDebug('PC Numbers migration completed');
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
@@ -1100,18 +1144,26 @@ class CRMApplication {
      */
     updateProgress(percentage, text = null) {
         try {
+            console.log(`📊 PROGRESS: ${percentage}% - ${text || 'No text'}`);
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
             
             if (progressBar) {
                 progressBar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+                console.log(`📊 PROGRESS: Bar width set to ${progressBar.style.width}`);
+            } else {
+                console.log('📊 PROGRESS: Progress bar element not found!');
             }
             
             if (progressText) {
                 progressText.textContent = text || `${Math.round(percentage)}%`;
+                console.log(`📊 PROGRESS: Text set to "${progressText.textContent}"`);
+            } else {
+                console.log('📊 PROGRESS: Progress text element not found!');
             }
         } catch (error) {
             logError('Failed to update progress:', error);
+            console.error('📊 PROGRESS ERROR:', error);
         }
     }
 
