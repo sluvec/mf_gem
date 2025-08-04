@@ -352,7 +352,7 @@
                     <!-- Basic Information -->
                     <div class="form-section">
                         <h3>Basic Information</h3>
-                        <div class="form-grid">
+                        <div style="max-width: 400px;">
                             <div>
                                 <label>PC Number (Auto-Generated) *</label>
                                 <input type="text" id="pc-number" readonly 
@@ -360,29 +360,12 @@
                                        style="background-color: #f9fafb; color: #6b7280; cursor: not-allowed;">
                                 <small>📋 Automatically assigned when saving</small>
                             </div>
-                            <div>
-                                <label>Status *</label>
-                                <select id="pc-status" required>
-                                    <option value="">Select status...</option>
-                                    <option value="draft" selected>Draft</option>
-                                    <option value="active">Active</option>
-                                    <option value="quoted">Quoted</option>
-                                    <option value="won">Won</option>
-                                    <option value="lost">Lost</option>
-                                    <option value="on-hold">On Hold</option>
-                                </select>
-                            </div>
                         </div>
                         
                         <div class="form-grid">
                             <div>
                                 <label>Company Name *</label>
                                 <input type="text" id="pc-company-name" required placeholder="Enter company name">
-                                <button type="button" onclick="(async () => { const defaults = await app.getSmartPCDefaults(document.getElementById('pc-company-name').value); app.applySmartPCDefaults(defaults); })()" 
-                                        style="margin-top: 0.25rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #10b981; color: white; border: none; border-radius: 0.25rem;">
-                                    ⚡ Apply Smart Defaults
-                                </button>
-                                <small style="display: block; margin-top: 0.25rem; color: #6b7280;">Auto-fill form based on similar projects for this company</small>
                             </div>
                             <div>
                                 <label>Project Name *</label>

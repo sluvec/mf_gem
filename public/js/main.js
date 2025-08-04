@@ -670,22 +670,7 @@ class CRMApplication {
                 });
             }
 
-            // Smart Features: PC Number company name change listener for smart defaults
-            const pcCompanyField = document.getElementById('pc-company-name');
-            if (pcCompanyField) {
-                let smartDefaultsTimeout;
-                pcCompanyField.addEventListener('input', (event) => {
-                    // Debounce the smart defaults lookup to avoid too many calls
-                    clearTimeout(smartDefaultsTimeout);
-                    smartDefaultsTimeout = setTimeout(async () => {
-                        const companyName = event.target.value.trim();
-                        if (companyName.length >= 3) {
-                            const defaults = await this.getSmartPCDefaults(companyName);
-                            this.applySmartPCDefaults(defaults);
-                        }
-                    }, 1000); // Wait 1 second after user stops typing
-                });
-            }
+
 
         } catch (error) {
             logError('Failed to setup form handlers:', error);
@@ -814,7 +799,7 @@ class CRMApplication {
                 source: document.getElementById('pc-client-source').value,
                 budgetRange: document.getElementById('pc-quote-limit').value,
                 postcode: document.getElementById('pc-postcode').value,
-                status: document.getElementById('pc-status').value || 'draft',
+                status: 'active', // Automatically set to active when PC Number is created
                 
                 // Classification & Management fields
                 clientCategory: document.getElementById('pc-client-category').value,
@@ -2250,80 +2235,7 @@ class CRMApplication {
         }
     }
 
-    /**
-     * @description Get smart defaults for new PC Number based on recent similar projects
-     * @param {string} companyName - Company name to find similar projects
-     * @returns {object} Smart default values
-     */
-    async getSmartPCDefaults(companyName) {
-        try {
-            const allPCs = await db.loadAll('pcNumbers');
-            const similarPCs = allPCs.filter(pc => 
-                pc.company && pc.company.toLowerCase().includes(companyName.toLowerCase())
-            ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            if (similarPCs.length === 0) {
-                return {}; // No similar projects found
-            }
-            
-            const mostRecent = similarPCs[0];
-            const defaults = {};
-            
-            // Smart defaults from most recent similar project
-            if (mostRecent.clientCategory) defaults.clientCategory = mostRecent.clientCategory;
-            if (mostRecent.clientSource) defaults.clientSource = mostRecent.clientSource;
-            if (mostRecent.propertyType) defaults.propertyType = mostRecent.propertyType;
-            if (mostRecent.accountManager) defaults.accountManager = mostRecent.accountManager;
-            if (mostRecent.surveyor) defaults.surveyor = mostRecent.surveyor;
-            
-            // Contact information from most recent
-            if (mostRecent.contactName) defaults.contactName = mostRecent.contactName;
-            if (mostRecent.phone) defaults.phone = mostRecent.phone;
-            if (mostRecent.email) defaults.email = mostRecent.email;
-            
-            // Delivery address from most recent (often same for returning clients)
-            if (mostRecent.deliveryAddress1) {
-                defaults.deliveryAddress1 = mostRecent.deliveryAddress1;
-                defaults.deliveryAddress2 = mostRecent.deliveryAddress2;
-                defaults.deliveryCity = mostRecent.deliveryCity;
-                defaults.deliveryPostcode = mostRecent.deliveryPostcode;
-                defaults.deliveryCountry = mostRecent.deliveryCountry;
-                defaults.deliveryFirstName = mostRecent.deliveryFirstName;
-                defaults.deliverySurname = mostRecent.deliverySurname;
-                defaults.deliveryPhone = mostRecent.deliveryPhone;
-                defaults.deliveryEmail = mostRecent.deliveryEmail;
-            }
-            
-            return defaults;
-            
-        } catch (error) {
-            logError('Failed to get smart PC defaults:', error);
-            return {};
-        }
-    }
 
-    /**
-     * @description Apply smart defaults to PC Number form
-     * @param {object} defaults - Default values to apply
-     */
-    applySmartPCDefaults(defaults) {
-        try {
-            Object.keys(defaults).forEach(key => {
-                const fieldId = `pc-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-                const field = document.getElementById(fieldId);
-                if (field && !field.value) {
-                    field.value = defaults[key];
-                }
-            });
-            
-            if (Object.keys(defaults).length > 0) {
-                uiModals.showToast(`Applied smart defaults from similar projects (${Object.keys(defaults).length} fields)`, 'info');
-            }
-            
-        } catch (error) {
-            logError('Failed to apply smart PC defaults:', error);
-        }
-    }
 
     /**
      * @description Setup keyboard shortcuts
