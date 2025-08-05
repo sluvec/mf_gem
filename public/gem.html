@@ -1822,7 +1822,7 @@
             <div class="card">
                 <h2>Resource Database</h2>
                 <table>
-                    <thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Net Cost</th><th>Supplier</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Name</th><th>Category</th><th>Net Cost</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="resources-list"></tbody>
                 </table>
             </div>
@@ -3059,8 +3059,7 @@
         <div class="form-section">
             <h3>Basic Information</h3>
             <div class="form-grid">
-                <div><label>Resource Name *</label><input type="text" id="resource-name" placeholder="e.g. LED Downlight - 10W Cool White" required></div>
-                <div><label>SKU</label><input type="text" id="resource-sku" placeholder="e.g. LED-DL-10W-CW" pattern="[A-Z0-9-]+" title="SKU should contain only uppercase letters, numbers, and hyphens"></div>
+                <div><label>Resource Name *</label><input type="text" id="resource-name" placeholder="e.g. Fitter, Luton Van, Protection Blankets" required></div>
                 <div><label>Category *</label><select id="resource-category" required>
                     <option value="">Select...</option>
                     <option value="labour">Labour</option>
@@ -3068,11 +3067,6 @@
                     <option value="material">Material</option>
                     <option value="crates">Crates</option>
                 </select></div>
-                <div><label>Subcategory</label><input type="text" id="resource-subcategory" placeholder="e.g. downlights, cable"></div>
-            </div>
-            <div>
-                <label>Description</label>
-                <textarea id="resource-description" rows="2" placeholder="Detailed resource description..."></textarea>
             </div>
         </div>
         
@@ -3084,39 +3078,23 @@
                 <div><label>Unit *</label><select id="resource-unit" required>
                     <option value="">Select...</option>
                     <option value="each">Each</option>
-                    <option value="metre">Metre</option>
                     <option value="hour">Hour</option>
                     <option value="day">Day</option>
-                    <option value="kg">Kilogram</option>
-                    <option value="m2">Square Metre</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="pack">Pack</option>
+                    <option value="roll">Roll</option>
+                    <option value="sheet">Sheet</option>
                 </select></div>
-                <div><label>Min Quantity</label><input type="number" id="resource-min-quantity" min="1" placeholder="10"></div>
-                <div><label>Lead Time (days)</label><input type="number" id="resource-lead-time" min="0" placeholder="5"></div>
-            </div>
-        </div>
-        
-        <!-- Supplier Information -->
-        <div class="form-section">
-            <h3>Supplier Information</h3>
-            <div class="form-grid">
-                <div><label>Supplier</label><input type="text" id="resource-supplier" placeholder="e.g. Electrical Supplies Ltd"></div>
-                <div><label>Supplier Code</label><input type="text" id="resource-supplier-code" placeholder="e.g. ESL-LED-001"></div>
-                <div><label>Warranty (months)</label><input type="number" id="resource-warranty" min="0" placeholder="24"></div>
-                <div><label>Status</label><select id="resource-status">
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
+                <div><label>Status *</label><select id="resource-status" required>
+                    <option value="available">Available</option>
+                    <option value="in-use">In Use</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="unavailable">Unavailable</option>
                 </select></div>
             </div>
         </div>
-        
-        <!-- Physical Properties -->
-        <div class="form-section">
-            <h3>Physical Properties</h3>
-            <div class="form-grid">
-                <div><label>Weight (kg)</label><input type="number" id="resource-weight" step="0.001" min="0" placeholder="0.150"></div>
-                <div><label>Dimensions</label><input type="text" id="resource-dimensions" placeholder="e.g. 85mm diameter x 25mm depth"></div>
-            </div>
-        </div>
+
         
         <div class="form-actions">
             <button type="submit">Save Resource</button>
@@ -3166,7 +3144,6 @@
                             <tr>
                                 <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Select</th>
                                 <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Resource</th>
-                                <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">SKU</th>
                                 <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Category</th>
                                 <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Price</th>
                                 <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0;">Qty</th>

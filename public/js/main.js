@@ -2701,10 +2701,8 @@ class CRMApplication {
             const rowsHTML = resourcesList.map(resource => `
                 <tr>
                     <td>${sanitizeHTML(resource.name)}</td>
-                    <td>${resource.sku ? sanitizeHTML(resource.sku) : '-'}</td>
                     <td><span class="resource-type ${(resource.type || resource.category || 'unknown').toLowerCase()}">${sanitizeHTML(resource.type || resource.category || 'Unknown')}</span></td>
                     <td>${(resource.costPerUnit || resource.costPerHour) ? formatCurrency(resource.costPerUnit || resource.costPerHour) + (resource.unit ? '/' + resource.unit : '/hr') : '-'}</td>
-                    <td>${resource.supplier ? sanitizeHTML(resource.supplier) : '-'}</td>
                     <td><span class="resource-status ${resource.status.toLowerCase()}">${sanitizeHTML(resource.status)}</span></td>
                     <td>
                         <button class="button secondary" onclick="window.editResource('${resource.id}')">Edit</button>
@@ -2959,23 +2957,13 @@ class CRMApplication {
             const resourceId = document.getElementById('resource-id').value;
             const isEdit = Boolean(resourceId);
             
-            // Collect data from form fields directly
+            // Collect data from simplified form fields
             const resourceData = {
                 name: document.getElementById('resource-name').value,
-                sku: document.getElementById('resource-sku').value,
                 category: document.getElementById('resource-category').value,
-                subcategory: document.getElementById('resource-subcategory').value,
-                description: document.getElementById('resource-description').value,
                 cost: parseFloat(document.getElementById('resource-cost').value) || 0,
                 unit: document.getElementById('resource-unit').value,
-                minQuantity: parseInt(document.getElementById('resource-min-quantity').value) || 1,
-                leadTime: parseInt(document.getElementById('resource-lead-time').value) || 0,
-                supplier: document.getElementById('resource-supplier').value,
-                supplierCode: document.getElementById('resource-supplier-code').value,
-                warranty: parseInt(document.getElementById('resource-warranty').value) || 0,
-                status: document.getElementById('resource-status').value === 'true' ? 'available' : 'inactive',
-                weight: parseFloat(document.getElementById('resource-weight').value) || 0,
-                dimensions: document.getElementById('resource-dimensions').value
+                status: document.getElementById('resource-status').value
             };
 
             let id;
@@ -2988,18 +2976,19 @@ class CRMApplication {
                 
                 uiModals.showToast('Resource updated successfully', 'success');
             } else {
-                // Create new resource - map to Resources class format
+                // Create new resource - simplified data structure
                 const newResourceData = {
                     name: resourceData.name,
-                    description: resourceData.description,
                     type: resourceData.category, // map category to type
-                    sku: resourceData.sku,
                     costPerUnit: resourceData.cost,
                     unit: resourceData.unit,
-                    supplier: resourceData.supplier,
                     status: resourceData.status,
-                    quantity: resourceData.minQuantity,
-                    availableQuantity: resourceData.minQuantity
+                    // Set reasonable defaults for required fields
+                    description: '',
+                    sku: '',
+                    supplier: '',
+                    quantity: 1,
+                    availableQuantity: 1
                 };
                 
                 id = await resources.createResource(newResourceData);
@@ -4403,22 +4392,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('resource-modal-title').textContent = 'New Resource';
         document.getElementById('resource-id').value = '';
         
-        // Clear all form fields
+        // Clear simplified form fields
         document.getElementById('resource-name').value = '';
-        document.getElementById('resource-sku').value = '';
         document.getElementById('resource-category').value = '';
-        document.getElementById('resource-subcategory').value = '';
-        document.getElementById('resource-description').value = '';
         document.getElementById('resource-cost').value = '';
         document.getElementById('resource-unit').value = '';
-        document.getElementById('resource-min-quantity').value = '';
-        document.getElementById('resource-lead-time').value = '';
-        document.getElementById('resource-supplier').value = '';
-        document.getElementById('resource-supplier-code').value = '';
-        document.getElementById('resource-warranty').value = '';
-        document.getElementById('resource-status').value = 'true'; // default to active
-        document.getElementById('resource-weight').value = '';
-        document.getElementById('resource-dimensions').value = '';
+        document.getElementById('resource-status').value = 'available'; // default to available
         
         uiModals.openModal('resource-modal');
     };
@@ -5305,29 +5284,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Change modal title to Edit mode
             document.getElementById('resource-modal-title').textContent = 'Edit Resource';
             
-            // Populate modal fields
+            // Populate simplified modal fields
             document.getElementById('resource-id').value = resourceData.id;
             document.getElementById('resource-name').value = resourceData.name || '';
-            document.getElementById('resource-sku').value = resourceData.sku || '';
             document.getElementById('resource-category').value = resourceData.category || resourceData.type || '';
-            document.getElementById('resource-subcategory').value = resourceData.subcategory || '';
-            document.getElementById('resource-description').value = resourceData.description || '';
-            
-            // Pricing & Units
             document.getElementById('resource-cost').value = resourceData.costPerUnit || resourceData.cost || '';
             document.getElementById('resource-unit').value = resourceData.unit || '';
-            document.getElementById('resource-min-quantity').value = resourceData.minQuantity || '';
-            document.getElementById('resource-lead-time').value = resourceData.leadTime || '';
-            
-            // Supplier Information
-            document.getElementById('resource-supplier').value = resourceData.supplier || '';
-            document.getElementById('resource-supplier-code').value = resourceData.supplierCode || '';
-            document.getElementById('resource-warranty').value = resourceData.warranty || '';
-            document.getElementById('resource-status').value = resourceData.status === 'available' ? 'true' : 'false';
-            
-            // Physical Properties
-            document.getElementById('resource-weight').value = resourceData.weight || '';
-            document.getElementById('resource-dimensions').value = resourceData.dimensions || '';
+            document.getElementById('resource-status').value = resourceData.status || 'available';
             
             // Open modal
             uiModals.openModal('resource-modal');
