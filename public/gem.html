@@ -2096,14 +2096,51 @@
 
     </main>
 
-    <div id="quote-modal" class="modal"><div class="modal-content">
-        <h2>Select PC Number for new quote</h2>
-        <label>PC Number *</label>
-        <select id="quote-modal-pc"></select>
-        <div class="form-actions">
-            <button onclick="window.proceedToQuoteBuilder()">Continue</button>
-            <button onclick="window.closeQuoteModal()" class="secondary">Cancel</button>
-        </div>
+    <div id="quote-modal" class="modal"><div class="modal-content" style="max-width: 600px;">
+        <h2>Create New Quote</h2>
+        
+        <form id="new-quote-form">
+            <!-- Step 1: Company Selection (Optional) -->
+            <div class="form-section">
+                <h3>Step 1: Company Selection (Optional)</h3>
+                <div>
+                    <label>Company Name</label>
+                    <select id="quote-modal-company" onchange="window.filterPcNumbersByCompany()">
+                        <option value="">All Companies</option>
+                    </select>
+                    <small style="color: #6b7280;">Select a company to filter PC Numbers, or leave blank to see all</small>
+                </div>
+            </div>
+
+            <!-- Step 2: PC Number Selection -->
+            <div class="form-section">
+                <h3>Step 2: PC Number Selection</h3>
+                <div>
+                    <label>PC Number *</label>
+                    <select id="quote-modal-pc" required>
+                        <option value="">Select PC Number...</option>
+                    </select>
+                    <small style="color: #6b7280;">Choose the project for this quote</small>
+                </div>
+            </div>
+
+            <!-- Step 3: Price List Selection -->
+            <div class="form-section">
+                <h3>Step 3: Price List Selection</h3>
+                <div>
+                    <label>Price List *</label>
+                    <select id="quote-modal-pricelist" required>
+                        <option value="">Select Price List...</option>
+                    </select>
+                    <small style="color: #6b7280;">Choose the pricing structure for this quote</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary">Create Quote</button>
+                <button type="button" onclick="window.closeQuoteModal()" class="secondary">Cancel</button>
+            </div>
+        </form>
     </div></div>
 
     <!-- Quote Edit Modal -->

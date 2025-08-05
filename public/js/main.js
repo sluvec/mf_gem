@@ -2734,7 +2734,131 @@ class CRMApplication {
         }
     }
 
-    renderActivitiesCalendar(activitiesList) { logDebug('Rendering activities calendar...'); }
+    /**
+     * @description Render activities calendar view
+     * @param {Array} activitiesList - Array of activities
+     */
+    renderActivitiesCalendar(activitiesList) {
+        try {
+            logDebug('Rendering activities calendar...');
+            
+            // Use the global currentCalendarDate for navigation
+            const calendarDate = window.currentCalendarDate || new Date();
+            const currentMonth = calendarDate.getMonth();
+            const currentYear = calendarDate.getFullYear();
+            
+            // Generate calendar grid
+            this.generateCalendarGrid(currentYear, currentMonth, activitiesList);
+            
+        } catch (error) {
+            logError('Failed to render activities calendar:', error);
+        }
+    }
+
+    /**
+     * @description Generate calendar grid for activities
+     * @param {number} year - Year to display
+     * @param {number} month - Month to display (0-11)
+     * @param {Array} activitiesList - Array of activities
+     */
+    generateCalendarGrid(year, month, activitiesList) {
+        const calendarGrid = document.getElementById('calendar-grid');
+        if (!calendarGrid) return;
+
+        // Clear existing grid
+        calendarGrid.innerHTML = '';
+        
+        // Calendar header (days of week)
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.style.cssText = 'background: #f9fafb; padding: 0.75rem; font-weight: 600; text-align: center; color: #374151;';
+            dayHeader.textContent = day;
+            calendarGrid.appendChild(dayHeader);
+        });
+
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Add empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.style.cssText = 'background: white; min-height: 100px; border: 1px solid #e5e7eb;';
+            calendarGrid.appendChild(emptyCell);
+        }
+        
+        // Add days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayCell = document.createElement('div');
+            dayCell.style.cssText = 'background: white; min-height: 100px; border: 1px solid #e5e7eb; padding: 0.5rem; cursor: pointer; position: relative;';
+            
+            // Day number
+            const dayNumber = document.createElement('div');
+            dayNumber.style.cssText = 'font-weight: 600; margin-bottom: 0.25rem; color: #374151;';
+            dayNumber.textContent = day;
+            dayCell.appendChild(dayNumber);
+            
+            // Find activities for this day
+            const dayDate = new Date(year, month, day);
+            const dayActivities = activitiesList.filter(activity => {
+                if (!activity.scheduledDate) return false;
+                const activityDate = new Date(activity.scheduledDate);
+                return activityDate.toDateString() === dayDate.toDateString();
+            });
+            
+            // Add activity indicators
+            dayActivities.slice(0, 3).forEach((activity, index) => {
+                const activityDot = document.createElement('div');
+                activityDot.style.cssText = `
+                    background: ${this.getActivityColor(activity.priority)};
+                    height: 4px;
+                    border-radius: 2px;
+                    margin-bottom: 2px;
+                    font-size: 0.75rem;
+                    color: white;
+                    padding: 2px 4px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                `;
+                activityDot.textContent = activity.title;
+                activityDot.title = `${activity.title} - ${activity.type || 'No type'}`;
+                dayCell.appendChild(activityDot);
+            });
+            
+            // Show "more" indicator if there are additional activities
+            if (dayActivities.length > 3) {
+                const moreIndicator = document.createElement('div');
+                moreIndicator.style.cssText = 'font-size: 0.75rem; color: #6b7280; margin-top: 2px;';
+                moreIndicator.textContent = `+${dayActivities.length - 3} more`;
+                dayCell.appendChild(moreIndicator);
+            }
+            
+            // Highlight today
+            const today = new Date();
+            if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                dayCell.style.border = '2px solid #3b82f6';
+                dayNumber.style.color = '#3b82f6';
+            }
+            
+            calendarGrid.appendChild(dayCell);
+        }
+    }
+
+    /**
+     * @description Get color for activity based on priority
+     * @param {string} priority - Activity priority
+     * @returns {string} Color hex code
+     */
+    getActivityColor(priority) {
+        switch (priority) {
+            case 'high': return '#ef4444';
+            case 'medium': return '#f59e0b';
+            case 'low': return '#10b981';
+            default: return '#6b7280';
+        }
+    }
     showValidationErrors(form, errors) { 
         logDebug('Showing validation errors:', errors);
         uiModals.showToast(`Validation failed: ${errors.join(', ')}`, 'error');
@@ -4211,46 +4335,226 @@ document.addEventListener('DOMContentLoaded', async () => {
         uiModals.openModal('resource-modal');
     };
     window.showNewQuoteModal = async () => {
-        // Load PC Numbers dropdown for quote selection
-        await window.crmApp.loadPcNumbersForSelect('quote-modal-pc');
-        
-        // If we're in a PC detail view, pre-select the current PC
-        if (window.currentPC && window.currentPC.id) {
-            const pcSelect = document.getElementById('quote-modal-pc');
-            if (pcSelect) {
-                pcSelect.value = window.currentPC.id;
+        try {
+            // Load all data for the quote modal
+            await Promise.all([
+                window.loadCompaniesForQuoteModal(),
+                window.loadPcNumbersForQuoteModal(),
+                window.loadPriceListsForQuoteModal()
+            ]);
+            
+            // If we're in a PC detail view, pre-select the current PC
+            if (window.currentPC && window.currentPC.id) {
+                const pcSelect = document.getElementById('quote-modal-pc');
+                if (pcSelect) {
+                    pcSelect.value = window.currentPC.id;
+                }
             }
+            
+            // Set up form submission handler
+            const form = document.getElementById('new-quote-form');
+            if (form) {
+                form.onsubmit = window.handleNewQuoteSubmit;
+            }
+            
+            uiModals.openModal('quote-modal');
+        } catch (error) {
+            logError('Failed to open new quote modal:', error);
+            uiModals.showToast('Failed to open quote form', 'error');
         }
-        
-        uiModals.openModal('quote-modal');
     };
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
     window.closeResourceModal = () => uiModals.closeModal('resource-modal');
     window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
     window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
+
+    // Quote modal helper functions
+    window.loadCompaniesForQuoteModal = async () => {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            const companySelect = document.getElementById('quote-modal-company');
+            if (!companySelect) return;
+
+            // Extract unique companies from PC Numbers
+            const companies = [...new Set(pcNumbers.map(pc => pc.company || pc.clientName).filter(Boolean))].sort();
+            
+            // Clear existing options except "All Companies"
+            companySelect.innerHTML = '<option value="">All Companies</option>';
+            
+            // Add company options
+            companies.forEach(company => {
+                const option = document.createElement('option');
+                option.value = company;
+                option.textContent = company;
+                companySelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            logError('Failed to load companies for quote modal:', error);
+        }
+    };
+
+    window.loadPcNumbersForQuoteModal = async () => {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            window.allPcNumbers = pcNumbers; // Store for filtering
+            
+            const pcSelect = document.getElementById('quote-modal-pc');
+            if (!pcSelect) return;
+
+            // Clear existing options
+            pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
+            
+            // Add PC Number options
+            pcNumbers.forEach(pc => {
+                const option = document.createElement('option');
+                option.value = pc.id;
+                option.textContent = `${pc.pcNumber} - ${pc.company || pc.clientName || 'No Company'} - ${pc.projectTitle || 'No Title'}`;
+                pcSelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            logError('Failed to load PC Numbers for quote modal:', error);
+        }
+    };
+
+    window.loadPriceListsForQuoteModal = async () => {
+        try {
+            const priceLists = await db.loadAll('priceLists');
+            const priceListSelect = document.getElementById('quote-modal-pricelist');
+            if (!priceListSelect) return;
+
+            // Clear existing options
+            priceListSelect.innerHTML = '<option value="">Select Price List...</option>';
+            
+            // Add price list options
+            priceLists.forEach(priceList => {
+                const option = document.createElement('option');
+                option.value = priceList.id;
+                option.textContent = `${priceList.name} - ${priceList.description || 'No description'}`;
+                priceListSelect.appendChild(option);
+            });
+            
+        } catch (error) {
+            logError('Failed to load price lists for quote modal:', error);
+        }
+    };
+
+    window.filterPcNumbersByCompany = () => {
+        try {
+            const selectedCompany = document.getElementById('quote-modal-company').value;
+            const pcSelect = document.getElementById('quote-modal-pc');
+            
+            if (!pcSelect || !window.allPcNumbers) return;
+
+            // Clear existing options
+            pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
+            
+            // Filter PC Numbers by company
+            const filteredPcNumbers = selectedCompany 
+                ? window.allPcNumbers.filter(pc => 
+                    (pc.company === selectedCompany) || (pc.clientName === selectedCompany)
+                  )
+                : window.allPcNumbers;
+            
+            // Add filtered PC Number options
+            filteredPcNumbers.forEach(pc => {
+                const option = document.createElement('option');
+                option.value = pc.id;
+                option.textContent = `${pc.pcNumber} - ${pc.company || pc.clientName || 'No Company'} - ${pc.projectTitle || 'No Title'}`;
+                pcSelect.appendChild(option);
+            });
+
+            // Show feedback about filtering
+            if (selectedCompany && filteredPcNumbers.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No PC Numbers found for this company';
+                option.disabled = true;
+                pcSelect.appendChild(option);
+            }
+            
+        } catch (error) {
+            logError('Failed to filter PC Numbers by company:', error);
+        }
+    };
+
+    window.handleNewQuoteSubmit = (event) => {
+        event.preventDefault();
+        
+        try {
+            const pcId = document.getElementById('quote-modal-pc').value;
+            const priceListId = document.getElementById('quote-modal-pricelist').value;
+            
+            if (!pcId) {
+                uiModals.showToast('Please select a PC Number', 'error');
+                return;
+            }
+            
+            if (!priceListId) {
+                uiModals.showToast('Please select a Price List', 'error');
+                return;
+            }
+            
+            // Store selections for quote builder
+            window.selectedQuoteData = {
+                pcId: pcId,
+                priceListId: priceListId
+            };
+            
+            // Close modal and proceed to quote builder
+            uiModals.closeModal('quote-modal');
+            window.proceedToQuoteBuilder();
+            
+        } catch (error) {
+            logError('Failed to handle new quote submission:', error);
+            uiModals.showToast('Failed to create quote', 'error');
+        }
+    };
     
     window.proceedToQuoteBuilder = () => {
-        // Get selected PC Number
-        const selectedPcId = document.getElementById('quote-modal-pc').value;
-        if (!selectedPcId) {
+        // Use stored quote data or fallback to form values
+        const quoteData = window.selectedQuoteData || {
+            pcId: document.getElementById('quote-modal-pc')?.value,
+            priceListId: document.getElementById('quote-modal-pricelist')?.value
+        };
+        
+        if (!quoteData.pcId) {
             uiModals.showToast('Please select a PC Number first', 'error');
             return;
         }
         
-        // Close modal
-        uiModals.closeModal('quote-modal');
+        if (!quoteData.priceListId) {
+            uiModals.showToast('Please select a Price List first', 'error');
+            return;
+        }
         
         // Navigate to quote builder page
         window.crmApp.navigateToPage('quote-builder');
         
-        // Set the title and prepare quote builder for selected PC
+        // Set the title and prepare quote builder
         const titleElement = document.getElementById('quote-builder-title');
         if (titleElement) {
-            titleElement.textContent = 'New Quote - Loading PC Details...';
+            titleElement.textContent = 'New Quote - Setting up...';
         }
         
-        logDebug('Proceeding to quote builder for PC ID:', selectedPcId);
-        uiModals.showToast('Quote builder opened for selected PC Number', 'success');
+        // Pre-select the price list in quote builder
+        setTimeout(() => {
+            const priceListSelect = document.getElementById('quote-price-list');
+            if (priceListSelect && quoteData.priceListId) {
+                priceListSelect.value = quoteData.priceListId;
+                // Trigger the price list change event
+                if (window.handlePriceListChange) {
+                    window.handlePriceListChange();
+                }
+            }
+        }, 100);
+        
+        logDebug('Proceeding to quote builder with data:', quoteData);
+        uiModals.showToast('Quote builder opened with pre-selected settings', 'success');
+        
+        // Clear stored data
+        window.selectedQuoteData = null;
     };
 
 
@@ -4386,6 +4690,213 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Failed to link quotes:', error);
             return { linked: 0, total: 0, error: error.message };
+        }
+    };
+
+    // Activities view switching and calendar functions
+    window.switchActivitiesView = (viewType) => {
+        try {
+            logDebug(`Switching to activities ${viewType} view`);
+            
+            // Hide all views
+            const listView = document.getElementById('activities-list-view');
+            const calendarView = document.getElementById('activities-calendar-view');
+            const workflowView = document.getElementById('activities-workflow-view'); // If it exists
+            
+            if (listView) listView.style.display = 'none';
+            if (calendarView) calendarView.style.display = 'none';
+            if (workflowView) workflowView.style.display = 'none';
+            
+            // Reset all button styles
+            const listBtn = document.getElementById('activities-list-view-btn');
+            const calendarBtn = document.getElementById('activities-calendar-view-btn');
+            const workflowBtn = document.getElementById('activities-workflow-view-btn');
+            
+            [listBtn, calendarBtn, workflowBtn].forEach(btn => {
+                if (btn) {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#374151';
+                }
+            });
+            
+            // Show selected view and update button
+            switch (viewType) {
+                case 'list':
+                    if (listView) listView.style.display = 'block';
+                    if (listBtn) {
+                        listBtn.style.background = '#3b82f6';
+                        listBtn.style.color = 'white';
+                    }
+                    // Hide calendar navigation
+                    const calendarNavList = document.getElementById('calendar-navigation');
+                    if (calendarNavList) calendarNavList.style.display = 'none';
+                    // Refresh list view
+                    app.loadActivitiesData();
+                    break;
+                    
+                case 'calendar':
+                    if (calendarView) calendarView.style.display = 'block';
+                    if (calendarBtn) {
+                        calendarBtn.style.background = '#3b82f6';
+                        calendarBtn.style.color = 'white';
+                    }
+                    // Show calendar navigation
+                    const calendarNav = document.getElementById('calendar-navigation');
+                    if (calendarNav) calendarNav.style.display = 'flex';
+                    // Update calendar title and load calendar view
+                    window.updateCalendarTitle();
+                    window.loadActivitiesCalendar();
+                    break;
+                    
+                case 'workflow':
+                    if (workflowView) workflowView.style.display = 'block';
+                    if (workflowBtn) {
+                        workflowBtn.style.background = '#3b82f6';
+                        workflowBtn.style.color = 'white';
+                    }
+                    uiModals.showToast('Workflow view coming soon!', 'info');
+                    break;
+                    
+                default:
+                    logError('Unknown view type:', viewType);
+            }
+            
+        } catch (error) {
+            logError('Failed to switch activities view:', error);
+            uiModals.showToast('Failed to switch view', 'error');
+        }
+    };
+
+    window.loadActivitiesCalendar = async () => {
+        try {
+            const activities = await db.loadAll('activities');
+            app.renderActivitiesCalendar(activities);
+        } catch (error) {
+            logError('Failed to load activities calendar:', error);
+            uiModals.showToast('Failed to load calendar', 'error');
+        }
+    };
+
+    // Calendar navigation and interaction functions
+    window.toggleWorkloadPanel = () => {
+        const panel = document.getElementById('workload-panel');
+        if (panel) {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    };
+
+    window.showTeamManagement = () => {
+        uiModals.showToast('Team management coming soon!', 'info');
+    };
+
+    window.closeCalendarSidebar = () => {
+        const sidebar = document.getElementById('calendar-activity-sidebar');
+        if (sidebar) {
+            sidebar.style.display = 'none';
+        }
+    };
+
+    window.closeQuickCreate = () => {
+        const overlay = document.getElementById('quick-create-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    };
+
+    // Calendar navigation variables (make global)
+    window.currentCalendarDate = new Date();
+    window.currentCalendarView = 'month';
+
+    window.setCalendarView = (viewType) => {
+        window.currentCalendarView = viewType;
+        
+        // Update button styles
+        const monthBtn = document.getElementById('calendar-month-btn');
+        const weekBtn = document.getElementById('calendar-week-btn');
+        
+        if (monthBtn && weekBtn) {
+            if (viewType === 'month') {
+                monthBtn.style.background = '#3b82f6';
+                monthBtn.style.color = 'white';
+                weekBtn.style.background = 'transparent';
+                weekBtn.style.color = '#374151';
+            } else {
+                weekBtn.style.background = '#3b82f6';
+                weekBtn.style.color = 'white';
+                monthBtn.style.background = 'transparent';
+                monthBtn.style.color = '#374151';
+            }
+        }
+        
+        // Show/hide appropriate calendar views
+        const monthView = document.getElementById('calendar-month-view');
+        const weekView = document.getElementById('calendar-week-view');
+        
+        if (monthView && weekView) {
+            if (viewType === 'month') {
+                monthView.style.display = 'block';
+                weekView.style.display = 'none';
+            } else {
+                monthView.style.display = 'none';
+                weekView.style.display = 'block';
+            }
+        }
+        
+        // Refresh the calendar display
+        window.loadActivitiesCalendar();
+    };
+
+    window.navigateCalendar = (direction) => {
+        const today = new Date();
+        
+        switch (direction) {
+            case 'prev':
+                if (window.currentCalendarView === 'month') {
+                    window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() - 1);
+                } else {
+                    window.currentCalendarDate.setDate(window.currentCalendarDate.getDate() - 7);
+                }
+                break;
+                
+            case 'next':
+                if (window.currentCalendarView === 'month') {
+                    window.currentCalendarDate.setMonth(window.currentCalendarDate.getMonth() + 1);
+                } else {
+                    window.currentCalendarDate.setDate(window.currentCalendarDate.getDate() + 7);
+                }
+                break;
+                
+            case 'today':
+                window.currentCalendarDate = new Date();
+                break;
+        }
+        
+        // Update calendar title
+        window.updateCalendarTitle();
+        
+        // Refresh the calendar display
+        window.loadActivitiesCalendar();
+    };
+
+    window.updateCalendarTitle = () => {
+        const titleElement = document.getElementById('calendar-title');
+        if (!titleElement) return;
+        
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        if (window.currentCalendarView === 'month') {
+            titleElement.textContent = `${monthNames[window.currentCalendarDate.getMonth()]} ${window.currentCalendarDate.getFullYear()}`;
+        } else {
+            // For week view, show week range
+            const startOfWeek = new Date(window.currentCalendarDate);
+            startOfWeek.setDate(window.currentCalendarDate.getDate() - window.currentCalendarDate.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            titleElement.textContent = `${startOfWeek.getMonth() + 1}/${startOfWeek.getDate()} - ${endOfWeek.getMonth() + 1}/${endOfWeek.getDate()}, ${window.currentCalendarDate.getFullYear()}`;
         }
     };
     
