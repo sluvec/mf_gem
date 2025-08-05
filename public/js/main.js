@@ -4421,6 +4421,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('pc-edit-delivery-postcode').value = pcData.deliveryPostcode || '';
             document.getElementById('pc-edit-delivery-country').value = pcData.deliveryCountry || '';
             
+            // Update modal title to show PC Number
+            document.getElementById('pc-edit-modal-title').textContent = `Edit PC Number: ${pcData.pcNumber || 'Unknown'}`;
+            
             // Open modal
             uiModals.openModal('pc-edit-modal');
             

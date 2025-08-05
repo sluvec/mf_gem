@@ -2304,15 +2304,13 @@
             <form id="pc-edit-form">
                 <input type="hidden" id="pc-edit-id">
                 
+                <!-- Hidden PC Number -->
+                <input type="hidden" id="pc-edit-number">
+                
                 <!-- Basic Information -->
                 <div class="form-section">
                     <h3>Basic Information</h3>
                     <div class="form-grid">
-                        <div>
-                            <label>PC Number *</label>
-                            <input type="text" id="pc-edit-number" required 
-                                   placeholder="PC-000001" pattern="^PC-\d{6}$">
-                        </div>
                         <div>
                             <label>Status</label>
                             <select id="pc-edit-status">
