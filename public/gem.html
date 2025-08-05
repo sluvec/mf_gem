@@ -1814,7 +1814,10 @@
 
         <div id="resources" class="page">
             <h1>🔧 Resources</h1>
-            <button onclick="window.showResourceModal()">+ New Resource</button>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <button onclick="window.showResourceModal()">+ New Resource</button>
+                <button onclick="window.loadUKOfficeRelocationResources()" style="background: #10b981; color: white;">🇬🇧 Load UK Office Relocation Examples</button>
+            </div>
             <div class="card">
                 <h2>Resource Database</h2>
                 <table>

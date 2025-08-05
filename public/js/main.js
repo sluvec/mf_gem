@@ -2701,10 +2701,11 @@ class CRMApplication {
             const rowsHTML = resourcesList.map(resource => `
                 <tr>
                     <td>${sanitizeHTML(resource.name)}</td>
-                    <td><span class="resource-type ${resource.type.toLowerCase()}">${sanitizeHTML(resource.type)}</span></td>
                     <td>${resource.sku ? sanitizeHTML(resource.sku) : '-'}</td>
+                    <td><span class="resource-type ${(resource.type || resource.category || 'unknown').toLowerCase()}">${sanitizeHTML(resource.type || resource.category || 'Unknown')}</span></td>
+                    <td>${(resource.costPerUnit || resource.costPerHour) ? formatCurrency(resource.costPerUnit || resource.costPerHour) + (resource.unit ? '/' + resource.unit : '/hr') : '-'}</td>
+                    <td>${resource.supplier ? sanitizeHTML(resource.supplier) : '-'}</td>
                     <td><span class="resource-status ${resource.status.toLowerCase()}">${sanitizeHTML(resource.status)}</span></td>
-                    <td>${resource.costPerHour ? formatCurrency(resource.costPerHour) + '/hr' : '-'}</td>
                     <td>
                         <button class="button secondary" onclick="window.editResource('${resource.id}')">Edit</button>
                         <button class="button danger" onclick="window.deleteResource('${resource.id}')">Delete</button>
@@ -4331,6 +4332,7 @@ class CRMApplication {
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
     const app = new CRMApplication();
+    window.app = app; // Make app globally accessible
     
     // Make app globally available for debugging
     window.crmApp = app;
@@ -4982,6 +4984,263 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     
+    // Load UK office relocation resources manually
+    window.loadUKOfficeRelocationResources = async () => {
+        try {
+            if (!confirm('This will replace existing resources with UK office relocation examples. Continue?')) {
+                return;
+            }
+            
+            logInfo('Loading UK office relocation resources...');
+            
+            // Clear existing resources
+            await db.clearStore('resources');
+            
+            // UK Office Relocation Sample Resources
+            const ukResources = [
+                // Labour Resources
+                {
+                    name: 'Fitter',
+                    type: 'labour',
+                    sku: 'LAB-001',
+                    status: 'available',
+                    costPerUnit: 28.50,
+                    unit: 'hour',
+                    supplier: 'Skilled Trade Solutions UK',
+                    description: 'Experienced furniture fitter for assembly/disassembly of office furniture, workstations, and storage systems.'
+                },
+                {
+                    name: 'Porter',
+                    type: 'labour',
+                    sku: 'LAB-002',
+                    status: 'available',
+                    costPerUnit: 18.75,
+                    unit: 'hour',
+                    supplier: 'Workforce Solutions UK',
+                    description: 'Manual handling specialist for loading, unloading, and moving office contents with care.'
+                },
+                {
+                    name: 'HGV Driver',
+                    type: 'labour',
+                    sku: 'LAB-003',
+                    status: 'available',
+                    costPerUnit: 24.00,
+                    unit: 'hour',
+                    supplier: 'Commercial Driver Services',
+                    description: 'Licensed HGV driver with Category C+E licence for large office relocations across the UK.'
+                },
+                {
+                    name: 'Team Leader',
+                    type: 'labour',
+                    sku: 'LAB-004',
+                    status: 'available',
+                    costPerUnit: 32.00,
+                    unit: 'hour',
+                    supplier: 'Management Professionals UK',
+                    description: 'Experienced team leader to coordinate office relocation activities and manage crew efficiency.'
+                },
+                {
+                    name: 'IT Specialist',
+                    type: 'labour',
+                    sku: 'LAB-005',
+                    status: 'available',
+                    costPerUnit: 45.00,
+                    unit: 'hour',
+                    supplier: 'Tech Move Specialists',
+                    description: 'Certified IT professional for safe disconnection and reconnection of computer systems and servers.'
+                },
+                
+                // Vehicle Resources  
+                {
+                    name: 'Mercedes Luton Van 3.5T',
+                    type: 'vehicles',
+                    sku: 'VEH-001',
+                    status: 'available',
+                    costPerUnit: 185.00,
+                    unit: 'day',
+                    supplier: 'Commercial Vehicle Hire Ltd',
+                    description: 'Long-wheelbase Luton van with tail lift, ideal for office furniture and equipment transport.'
+                },
+                {
+                    name: 'Articulated Lorry 18T',
+                    type: 'vehicles',
+                    sku: 'VEH-002',
+                    status: 'available',
+                    costPerUnit: 495.00,
+                    unit: 'day',
+                    supplier: 'Heavy Transport Solutions',
+                    description: 'Large articulated lorry for major corporate relocations and long-distance office moves.'
+                },
+                {
+                    name: 'Ford Transit Van LWB',
+                    type: 'vehicles',
+                    sku: 'VEH-003',
+                    status: 'available',
+                    costPerUnit: 145.00,
+                    unit: 'day',
+                    supplier: 'Transit Hire Network',
+                    description: 'Long-wheelbase transit van perfect for crew transport and smaller office items.'
+                },
+                {
+                    name: 'Box Van 7.5T with Tail Lift',
+                    type: 'vehicles',
+                    sku: 'VEH-004',
+                    status: 'available',
+                    costPerUnit: 285.00,
+                    unit: 'day',
+                    supplier: 'Medium Vehicle Solutions',
+                    description: 'Mid-size box van with hydraulic tail lift for efficient loading of office furniture.'
+                },
+                {
+                    name: 'Specialist IT Transport Vehicle',
+                    type: 'vehicles',
+                    sku: 'VEH-005',
+                    status: 'available',
+                    costPerUnit: 325.00,
+                    unit: 'day',
+                    supplier: 'Tech Transport Services',
+                    description: 'Climate-controlled vehicle with anti-static interior for safe server and IT equipment transport.'
+                },
+                
+                // Material Resources
+                {
+                    name: 'Furniture Protection Blankets',
+                    type: 'material',
+                    sku: 'MAT-001',
+                    status: 'available',
+                    costPerUnit: 4.25,
+                    unit: 'each',
+                    supplier: 'Protection Materials UK',
+                    description: 'Heavy-duty quilted moving blankets for protecting office furniture during transport.'
+                },
+                {
+                    name: 'Bubble Wrap Roll (Anti-Static)',
+                    type: 'material',
+                    sku: 'MAT-002',
+                    status: 'available',
+                    costPerUnit: 35.50,
+                    unit: 'roll',
+                    supplier: 'Protective Packaging Solutions',
+                    description: '750mm x 100m anti-static bubble wrap roll for IT equipment and electronics protection.'
+                },
+                {
+                    name: 'Cardboard Sheets (Large)',
+                    type: 'material',
+                    sku: 'MAT-003',
+                    status: 'available',
+                    costPerUnit: 2.75,
+                    unit: 'sheet',
+                    supplier: 'Cardboard Supplies Direct',
+                    description: '1200mm x 800mm double-wall cardboard sheets for desk surface and monitor protection.'
+                },
+                {
+                    name: 'Stretch Wrap Film',
+                    type: 'material',
+                    sku: 'MAT-004',
+                    status: 'available',
+                    costPerUnit: 18.90,
+                    unit: 'roll',
+                    supplier: 'Wrapping Solutions UK',
+                    description: 'Industrial strength stretch wrap for securing palletised office contents.'
+                },
+                {
+                    name: 'Floor Protection Sheets',
+                    type: 'material',
+                    sku: 'MAT-005',
+                    status: 'available',
+                    costPerUnit: 12.50,
+                    unit: 'pack',
+                    supplier: 'Floor Care Products',
+                    description: 'Temporary floor protection sheets to prevent damage to carpets and flooring during moves.'
+                },
+                
+                // Crate Resources
+                {
+                    name: 'Standard Office Crate',
+                    type: 'crates',
+                    sku: 'CRT-001', 
+                    status: 'available',
+                    costPerUnit: 8.50,
+                    unit: 'week',
+                    supplier: 'Crate Rental Solutions',
+                    description: '60L plastic crate ideal for books, files, and general office supplies. Stackable and secure.'
+                },
+                {
+                    name: 'Archive Document Crate',
+                    type: 'crates',
+                    sku: 'CRT-002',
+                    status: 'available',
+                    costPerUnit: 12.00,
+                    unit: 'week',
+                    supplier: 'Document Storage Specialists',
+                    description: '80L reinforced crate with lid for confidential documents and heavy archive files.'
+                },
+                {
+                    name: 'IT Equipment Crate',
+                    type: 'crates',
+                    sku: 'CRT-003',
+                    status: 'available',
+                    costPerUnit: 15.75,
+                    unit: 'week',
+                    supplier: 'Technology Moving Solutions',
+                    description: '45L anti-static crate with foam inserts for computers, monitors, and sensitive electronics.'
+                },
+                {
+                    name: 'Personal Effects Crate',
+                    type: 'crates',
+                    sku: 'CRT-004',
+                    status: 'available',
+                    costPerUnit: 9.25,
+                    unit: 'week',
+                    supplier: 'Personal Moving Services',
+                    description: '50L crate for personal desk items, plants, and individual employee belongings.'
+                },
+                {
+                    name: 'Wardrobe Hanging Crate',
+                    type: 'crates',
+                    sku: 'CRT-005',
+                    status: 'available',
+                    costPerUnit: 18.50,
+                    unit: 'week',
+                    supplier: 'Textile Transport Solutions',
+                    description: 'Tall crate with hanging rail for executive suits, uniforms, and hanging garments.'
+                },
+                {
+                    name: 'Heavy Duty Crate (XL)',
+                    type: 'crates',
+                    sku: 'CRT-006',
+                    status: 'available',
+                    costPerUnit: 22.00,
+                    unit: 'week',
+                    supplier: 'Industrial Crate Solutions',
+                    description: '120L extra-large reinforced crate for heavy office equipment and bulk items.'
+                }
+            ];
+
+            // Save all resources
+            for (const resourceData of ukResources) {
+                await db.save('resources', { 
+                    ...resourceData, 
+                    id: generateId(), 
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+            }
+
+            logInfo('UK office relocation resources loaded successfully');
+            uiModals.showToast('UK office relocation resources loaded successfully!', 'success');
+            
+            // Refresh the resources view
+            if (document.getElementById('resources').classList.contains('active')) {
+                await window.app.loadResourcesData();
+            }
+            
+        } catch (error) {
+            logError('Failed to load UK office relocation resources:', error);
+            uiModals.showToast('Failed to load resources', 'error');
+        }
+    };
+
     // Additional placeholder functions for missing onclick handlers
     window.editResource = async (id) => {
         try {
