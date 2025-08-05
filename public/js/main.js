@@ -5428,17 +5428,144 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ========================================
     
     /**
+     * Automatically detects all required fields in a form
+     * @param {string} formId - The form element ID
+     * @returns {Object} - Configuration object with field IDs and labels
+     */
+    window.detectRequiredFields = (formId) => {
+        const form = document.getElementById(formId);
+        if (!form) {
+            logError('Form not found:', formId);
+            return {};
+        }
+        
+        const requiredFields = {};
+        
+        // Method 1: Find all form elements with 'required' attribute
+        const requiredElements = form.querySelectorAll('input[required], select[required], textarea[required]');
+        requiredElements.forEach(element => {
+            if (element.id && element.type !== 'hidden') {
+                const label = getFieldLabel(element);
+                if (label) {
+                    requiredFields[element.id] = label;
+                }
+            }
+        });
+        
+        // Method 2: Find all labels with asterisk (*) and their associated fields
+        const labelsWithAsterisk = form.querySelectorAll('label');
+        labelsWithAsterisk.forEach(label => {
+            const labelText = label.textContent || label.innerText;
+            if (labelText.includes('*')) {
+                // Find associated input by 'for' attribute or proximity
+                let associatedInput = null;
+                
+                if (label.getAttribute('for')) {
+                    associatedInput = form.querySelector(`#${label.getAttribute('for')}`);
+                } else {
+                    // Look for input/select/textarea as next sibling or child
+                    associatedInput = label.querySelector('input, select, textarea') || 
+                                    label.nextElementSibling?.matches('input, select, textarea') ? label.nextElementSibling : null;
+                }
+                
+                if (associatedInput && associatedInput.id && associatedInput.type !== 'hidden') {
+                    const cleanLabel = labelText.replace('*', '').trim();
+                    requiredFields[associatedInput.id] = cleanLabel;
+                }
+            }
+        });
+        
+        // Method 3: Look for inputs where the previous label contains asterisk
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(input => {
+            if (input.id && input.type !== 'hidden' && !requiredFields[input.id]) {
+                const prevLabel = input.previousElementSibling;
+                if (prevLabel && prevLabel.tagName === 'LABEL') {
+                    const labelText = prevLabel.textContent || prevLabel.innerText;
+                    if (labelText.includes('*')) {
+                        const cleanLabel = labelText.replace('*', '').trim();
+                        requiredFields[input.id] = cleanLabel;
+                    }
+                }
+                
+                // Also check parent container for label
+                const parentDiv = input.closest('div');
+                if (parentDiv) {
+                    const labelInParent = parentDiv.querySelector('label');
+                    if (labelInParent) {
+                        const labelText = labelInParent.textContent || labelInParent.innerText;
+                        if (labelText.includes('*') && !requiredFields[input.id]) {
+                            const cleanLabel = labelText.replace('*', '').trim();
+                            requiredFields[input.id] = cleanLabel;
+                        }
+                    }
+                }
+            }
+        });
+        
+        logDebug(`Detected ${Object.keys(requiredFields).length} required fields in form ${formId}:`, requiredFields);
+        return requiredFields;
+    };
+    
+    /**
+     * Gets the label text for a form field
+     * @param {HTMLElement} element - The form element
+     * @returns {string} - The label text
+     */
+    window.getFieldLabel = (element) => {
+        // Try different methods to find the label
+        let label = '';
+        
+        // Method 1: label[for] attribute
+        const labelFor = document.querySelector(`label[for="${element.id}"]`);
+        if (labelFor) {
+            label = labelFor.textContent || labelFor.innerText;
+        }
+        
+        // Method 2: label as previous sibling
+        if (!label && element.previousElementSibling?.tagName === 'LABEL') {
+            label = element.previousElementSibling.textContent || element.previousElementSibling.innerText;
+        }
+        
+        // Method 3: label in parent container
+        if (!label) {
+            const parentDiv = element.closest('div');
+            if (parentDiv) {
+                const labelInParent = parentDiv.querySelector('label');
+                if (labelInParent) {
+                    label = labelInParent.textContent || labelInParent.innerText;
+                }
+            }
+        }
+        
+        // Method 4: placeholder or data attributes
+        if (!label) {
+            label = element.getAttribute('placeholder') || 
+                   element.getAttribute('data-label') || 
+                   element.getAttribute('aria-label') || 
+                   element.name || 
+                   element.id;
+        }
+        
+        // Clean up the label
+        return label ? label.replace('*', '').replace(':', '').trim() : 'This field';
+    };
+
+    /**
      * Validates required fields in a form and highlights errors
      * @param {string} formId - The form element ID
-     * @param {Object} fieldConfig - Configuration object with field IDs and labels
+     * @param {Object} fieldConfig - Optional configuration object with field IDs and labels
      * @returns {boolean} - True if all required fields are valid, false otherwise
      */
-    window.validateRequiredFields = (formId, fieldConfig) => {
+    window.validateRequiredFields = (formId, fieldConfig = null) => {
         const form = document.getElementById(formId);
         if (!form) {
             logError('Form not found:', formId);
             return false;
         }
+        
+        // Auto-detect required fields if no config provided
+        const finalConfig = fieldConfig || window.detectRequiredFields(formId);
         
         let isValid = true;
         const errors = [];
@@ -5447,9 +5574,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearFormValidationSummary(formId);
         
         // Validate each required field
-        Object.keys(fieldConfig).forEach(fieldId => {
+        Object.keys(finalConfig).forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            const fieldLabel = fieldConfig[fieldId];
+            const fieldLabel = finalConfig[fieldId];
             
             if (!field) {
                 logError('Field not found:', fieldId);
@@ -5473,7 +5600,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showFormValidationSummary(formId, errors);
             
             // Focus on first error field
-            const firstErrorField = Object.keys(fieldConfig).find(fieldId => {
+            const firstErrorField = Object.keys(finalConfig).find(fieldId => {
                 const field = document.getElementById(fieldId);
                 return field && field.classList.contains('field-error');
             });
@@ -5631,19 +5758,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     
-    // Enhanced validation function for specific forms
+    // Enhanced validation function for specific forms with automatic detection
     window.validatePcNumberForm = (isEdit = false) => {
-        const config = isEdit ? window.VALIDATION_CONFIGS.PC_NUMBER_EDIT : window.VALIDATION_CONFIGS.PC_NUMBER;
         const formId = isEdit ? 'pc-edit-form' : 'pc-form';
-        return window.validateRequiredFields(formId, config);
+        // Use automatic detection by default, fallback to manual config if needed
+        return window.validateRequiredFields(formId);
     };
     
     window.validateQuoteForm = () => {
-        return window.validateRequiredFields('new-quote-form', window.VALIDATION_CONFIGS.QUOTE);
+        // Use automatic detection to find all required fields
+        return window.validateRequiredFields('new-quote-form');
     };
     
     window.validateActivityForm = () => {
-        return window.validateRequiredFields('activity-form', window.VALIDATION_CONFIGS.ACTIVITY);
+        // Use automatic detection to find all required fields  
+        return window.validateRequiredFields('activity-form');
+    };
+    
+    // Universal form validation function for any form
+    window.validateForm = (formId) => {
+        return window.validateRequiredFields(formId);
+    };
+    
+    // Function to manually validate a form and show detected fields (for debugging)
+    window.debugFormValidation = (formId) => {
+        const detectedFields = window.detectRequiredFields(formId);
+        console.log(`Required fields detected in ${formId}:`, detectedFields);
+        return detectedFields;
     };
 });
 
