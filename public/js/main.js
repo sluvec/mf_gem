@@ -168,6 +168,13 @@ class CRMApplication {
             await this.migratePcNumbersToNewFormat();
             console.log('🔵 DB: PC Numbers migration completed');
             logDebug('PC Numbers migration completed');
+            
+            // Ensure all quotes are linked to PC Numbers
+            logDebug('Starting quote linking process...');
+            console.log('🔵 DB: Checking quote-PC Number linkages...');
+            await this.linkUnlinkedQuotes();
+            console.log('🔵 DB: Quote linking process completed');
+            logDebug('Quote linking process completed');
         } catch (error) {
             console.error('🔵 DB ERROR:', error);
             logError('Database initialization failed:', error);
@@ -3448,6 +3455,71 @@ class CRMApplication {
     }
 
     /**
+     * @description Ensure all quotes are linked to PC Numbers, randomly assign if not linked
+     */
+    async linkUnlinkedQuotes() {
+        try {
+            logInfo('Starting quote linking process...');
+            
+            // Load all quotes and PC numbers
+            const allQuotes = await db.loadAll('quotes');
+            const allPcNumbers = await db.loadAll('pcNumbers');
+            
+            if (allPcNumbers.length === 0) {
+                logInfo('No PC Numbers found - cannot link quotes');
+                return { linked: 0, total: allQuotes.length };
+            }
+            
+            // Find quotes that are not properly linked
+            const unlinkedQuotes = allQuotes.filter(quote => {
+                // Quote is unlinked if it has neither pcId nor pcNumber, or they're empty/invalid
+                const hasPcId = quote.pcId && quote.pcId.trim() !== '';
+                const hasPcNumber = quote.pcNumber && quote.pcNumber.trim() !== '';
+                return !hasPcId && !hasPcNumber;
+            });
+            
+            logInfo(`Found ${unlinkedQuotes.length} unlinked quotes out of ${allQuotes.length} total quotes`);
+            
+            if (unlinkedQuotes.length === 0) {
+                logInfo('All quotes are already linked to PC Numbers');
+                return { linked: 0, total: allQuotes.length };
+            }
+            
+            // Randomly assign unlinked quotes to PC Numbers
+            let linkedCount = 0;
+            for (const quote of unlinkedQuotes) {
+                // Pick a random PC Number
+                const randomIndex = Math.floor(Math.random() * allPcNumbers.length);
+                const randomPc = allPcNumbers[randomIndex];
+                
+                // Update the quote with PC Number information
+                const updatedQuote = {
+                    ...quote,
+                    pcId: randomPc.id,
+                    pcNumber: randomPc.pcNumber,
+                    updatedAt: new Date()
+                };
+                
+                // Save the updated quote
+                await db.save('quotes', updatedQuote);
+                linkedCount++;
+                
+                logInfo(`Linked quote ${quote.quoteNumber || quote.id} to PC Number ${randomPc.pcNumber}`);
+            }
+            
+            logInfo(`Successfully linked ${linkedCount} quotes to PC Numbers`);
+            uiModals.showToast(`Linked ${linkedCount} quotes to PC Numbers`, 'success');
+            
+            return { linked: linkedCount, total: allQuotes.length };
+            
+        } catch (error) {
+            logError('Failed to link quotes to PC Numbers:', error);
+            uiModals.showToast('Failed to link quotes to PC Numbers', 'error');
+            throw error;
+        }
+    }
+
+    /**
      * @description Show price list detail page
      * @param {string} priceListId - Price List ID
      */
@@ -4302,6 +4374,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             logError('Failed to import data:', error);
             uiModals.showToast(`Import failed: ${error.message}`, 'error');
+        }
+    };
+    
+    // Expose quote linking function globally
+    window.linkUnlinkedQuotes = async () => {
+        try {
+            const result = await app.linkUnlinkedQuotes();
+            console.log('Quote linking result:', result);
+            return result;
+        } catch (error) {
+            console.error('Failed to link quotes:', error);
+            return { linked: 0, total: 0, error: error.message };
         }
     };
     
