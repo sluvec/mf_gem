@@ -1384,10 +1384,9 @@ class CRMApplication {
             logInfo('Loading sample data...');
             console.log('🔵 SAMPLE: Starting sample data load...');
             
-            // Skip sample data loading to avoid hang - user can add data manually
-            console.log('🔵 SAMPLE: Skipping sample data to prevent initialization hang');
-            logInfo('Sample data loading skipped for faster initialization');
-            return;
+            // Load sample data for UK office relocation resources
+            console.log('🔵 SAMPLE: Loading UK office relocation sample data...');
+            logInfo('Loading UK office relocation sample data...');
             
             // Sample PC Numbers - UK Office Relocations (New Format PC-000001)
             const samplePCNumbers = [
@@ -1789,168 +1788,224 @@ class CRMApplication {
                 logInfo('Saved Activity:', savedActivity.title);
             }
 
-            // Sample Resources - Office Relocation Equipment & Materials
+            // Sample Resources - UK Office Relocation Services
             const sampleResources = [
-                // Vehicles
+                // Labour Resources
                 {
-                    name: 'Mercedes Luton Van with Tail Lift',
-                    type: 'Vehicle',
-                    sku: 'VEH-001',
+                    name: 'Fitter',
+                    type: 'labour',
+                    sku: 'LAB-001',
                     status: 'available',
-                    costPerUnit: 220.00,
-                    unit: 'day',
-                    supplier: 'Commercial Vehicle Hire Ltd',
-                    description: 'Long-wheelbase Luton van with hydraulic tail lift, perfect for office furniture and equipment.'
+                    costPerUnit: 28.50,
+                    unit: 'hour',
+                    supplier: 'Skilled Trade Solutions UK',
+                    description: 'Experienced furniture fitter for assembly/disassembly of office furniture, workstations, and storage systems.'
                 },
                 {
-                    name: 'Articulated Lorry 18t',
-                    type: 'Vehicle', 
+                    name: 'Porter',
+                    type: 'labour',
+                    sku: 'LAB-002',
+                    status: 'available',
+                    costPerUnit: 18.75,
+                    unit: 'hour',
+                    supplier: 'Workforce Solutions UK',
+                    description: 'Manual handling specialist for loading, unloading, and moving office contents with care.'
+                },
+                {
+                    name: 'HGV Driver',
+                    type: 'labour',
+                    sku: 'LAB-003',
+                    status: 'available',
+                    costPerUnit: 24.00,
+                    unit: 'hour',
+                    supplier: 'Commercial Driver Services',
+                    description: 'Licensed HGV driver with Category C+E licence for large office relocations across the UK.'
+                },
+                {
+                    name: 'Team Leader',
+                    type: 'labour',
+                    sku: 'LAB-004',
+                    status: 'available',
+                    costPerUnit: 32.00,
+                    unit: 'hour',
+                    supplier: 'Management Professionals UK',
+                    description: 'Experienced team leader to coordinate office relocation activities and manage crew efficiency.'
+                },
+                {
+                    name: 'IT Specialist',
+                    type: 'labour',
+                    sku: 'LAB-005',
+                    status: 'available',
+                    costPerUnit: 45.00,
+                    unit: 'hour',
+                    supplier: 'Tech Move Specialists',
+                    description: 'Certified IT professional for safe disconnection and reconnection of computer systems and servers.'
+                },
+                
+                // Vehicle Resources  
+                {
+                    name: 'Mercedes Luton Van 3.5T',
+                    type: 'vehicles',
+                    sku: 'VEH-001',
+                    status: 'available',
+                    costPerUnit: 185.00,
+                    unit: 'day',
+                    supplier: 'Commercial Vehicle Hire Ltd',
+                    description: 'Long-wheelbase Luton van with tail lift, ideal for office furniture and equipment transport.'
+                },
+                {
+                    name: 'Articulated Lorry 18T',
+                    type: 'vehicles',
                     sku: 'VEH-002',
                     status: 'available',
-                    costPerUnit: 650.00,
+                    costPerUnit: 495.00,
                     unit: 'day',
                     supplier: 'Heavy Transport Solutions',
-                    description: 'Large articulated lorry for major corporate relocations and long-distance moves.'
+                    description: 'Large articulated lorry for major corporate relocations and long-distance office moves.'
                 },
                 {
                     name: 'Ford Transit Van LWB',
-                    type: 'Vehicle',
+                    type: 'vehicles',
                     sku: 'VEH-003',
-                    status: 'in-use',
-                    costPerUnit: 180.00,
+                    status: 'available',
+                    costPerUnit: 145.00,
                     unit: 'day',
                     supplier: 'Transit Hire Network',
-                    description: 'Standard long-wheelbase transit van for crew, tools and smaller office items.'
+                    description: 'Long-wheelbase transit van perfect for crew transport and smaller office items.'
+                },
+                {
+                    name: 'Box Van 7.5T with Tail Lift',
+                    type: 'vehicles',
+                    sku: 'VEH-004',
+                    status: 'available',
+                    costPerUnit: 285.00,
+                    unit: 'day',
+                    supplier: 'Medium Vehicle Solutions',
+                    description: 'Mid-size box van with hydraulic tail lift for efficient loading of office furniture.'
+                },
+                {
+                    name: 'Specialist IT Transport Vehicle',
+                    type: 'vehicles',
+                    sku: 'VEH-005',
+                    status: 'available',
+                    costPerUnit: 325.00,
+                    unit: 'day',
+                    supplier: 'Tech Transport Services',
+                    description: 'Climate-controlled vehicle with anti-static interior for safe server and IT equipment transport.'
                 },
                 
-                // Specialist Equipment
+                // Material Resources
                 {
-                    name: 'Piano Moving Dolly & Straps',
-                    type: 'Equipment',
-                    sku: 'EQP-001',
-                    status: 'available',
-                    costPerUnit: 45.00,
-                    unit: 'day',
-                    supplier: 'Specialist Moving Equipment Ltd',
-                    description: 'Heavy-duty dolly system for moving safes, servers, and heavy office equipment.'
-                },
-                {
-                    name: 'Stair Climbing Hand Truck',
-                    type: 'Equipment',
-                    sku: 'EQP-002',
-                    status: 'available',
-                    costPerUnit: 35.00,
-                    unit: 'day',
-                    supplier: 'Mobility Solutions UK',
-                    description: 'Electric stair-climbing trolley for heavy items in buildings without lift access.'
-                },
-                {
-                    name: 'Furniture Protection Blankets (Set of 50)',
-                    type: 'Materials',
+                    name: 'Furniture Protection Blankets',
+                    type: 'material',
                     sku: 'MAT-001',
                     status: 'available',
-                    costPerUnit: 75.00,
-                    unit: 'set',
-                    supplier: 'Protection Supplies Direct',
-                    description: 'Professional quilted moving blankets for furniture protection during transport.'
+                    costPerUnit: 4.25,
+                    unit: 'each',
+                    supplier: 'Protection Materials UK',
+                    description: 'Heavy-duty quilted moving blankets for protecting office furniture during transport.'
                 },
-                
-                // IT & Electronics
                 {
-                    name: 'Anti-Static Bubble Wrap (Industrial)',
-                    type: 'Materials',
+                    name: 'Bubble Wrap Roll (Anti-Static)',
+                    type: 'material',
                     sku: 'MAT-002',
                     status: 'available',
-                    costPerUnit: 28.00,
+                    costPerUnit: 35.50,
                     unit: 'roll',
-                    supplier: 'Electronic Packaging Solutions',
-                    description: 'Anti-static bubble wrap roll (750mm x 100m) for IT equipment protection.'
+                    supplier: 'Protective Packaging Solutions',
+                    description: '750mm x 100m anti-static bubble wrap roll for IT equipment and electronics protection.'
                 },
                 {
-                    name: 'Server Rack Moving Kit',
-                    type: 'Equipment',
-                    sku: 'EQP-003',
-                    status: 'available',
-                    costPerUnit: 95.00,
-                    unit: 'day',
-                    supplier: 'IT Infrastructure Movers',
-                    description: 'Specialized equipment for safely moving server racks and data centre equipment.'
-                },
-                
-                // Storage & Containers
-                {
-                    name: 'Archive Boxes (Heavy Duty)',
-                    type: 'Materials',
+                    name: 'Cardboard Sheets (Large)',
+                    type: 'material',
                     sku: 'MAT-003',
                     status: 'available',
-                    costPerUnit: 8.50,
-                    unit: 'each',
-                    supplier: 'Document Storage Solutions',
-                    description: 'Heavy-duty archive boxes suitable for legal documents and confidential files.'
+                    costPerUnit: 2.75,
+                    unit: 'sheet',
+                    supplier: 'Cardboard Supplies Direct',
+                    description: '1200mm x 800mm double-wall cardboard sheets for desk surface and monitor protection.'
                 },
                 {
-                    name: 'Climate-Controlled Storage Unit',
-                    type: 'Storage',
-                    sku: 'STO-001',
-                    status: 'available',
-                    costPerUnit: 25.00,
-                    unit: 'week/m³',
-                    supplier: 'Secure Storage London',
-                    description: 'Temperature and humidity controlled storage for sensitive documents and artwork.'
-                },
-                
-                // Specialized Services
-                {
-                    name: 'IT Technician (Certified)',
-                    type: 'Labour',
-                    sku: 'LAB-001',
-                    status: 'available',
-                    costPerUnit: 65.00,
-                    unit: 'hour',
-                    supplier: 'IT Support Specialists',
-                    description: 'Certified IT technician for server disconnection, transport setup and configuration.'
-                },
-                {
-                    name: 'Security Guard (CRB Checked)',
-                    type: 'Labour',
-                    sku: 'LAB-002',
-                    status: 'available',
-                    costPerUnit: 25.00,
-                    unit: 'hour',
-                    supplier: 'Professional Security Services',
-                    description: 'CRB checked security personnel for sensitive document and equipment transport.'
-                },
-                
-                // Tools & Accessories
-                {
-                    name: 'Floor Protection Sheets',
-                    type: 'Materials',
+                    name: 'Stretch Wrap Film',
+                    type: 'material',
                     sku: 'MAT-004',
                     status: 'available',
-                    costPerUnit: 3.50,
-                    unit: 'm²',
-                    supplier: 'Site Protection Supplies',
-                    description: 'Heavy-duty floor protection sheets for carpets and flooring during moves.'
+                    costPerUnit: 18.90,
+                    unit: 'roll',
+                    supplier: 'Wrapping Solutions UK',
+                    description: 'Industrial strength stretch wrap for securing palletised office contents.'
                 },
                 {
-                    name: 'Vacuum Lifting System',
-                    type: 'Equipment',
-                    sku: 'EQP-004',
-                    status: 'maintenance',
-                    costPerUnit: 125.00,
-                    unit: 'day',
-                    supplier: 'Advanced Lifting Solutions',
-                    description: 'Vacuum lifting system for glass panels, mirrors and delicate artwork.'
-                },
-                {
-                    name: 'Professional Packing Team (4 people)',
-                    type: 'Labour',
-                    sku: 'LAB-003',
+                    name: 'Floor Protection Sheets',
+                    type: 'material',
+                    sku: 'MAT-005',
                     status: 'available',
-                    costPerUnit: 160.00,
-                    unit: 'hour',
-                    supplier: 'Expert Packing Services',
-                    description: 'Experienced 4-person packing team for efficient office content preparation.'
+                    costPerUnit: 12.50,
+                    unit: 'pack',
+                    supplier: 'Floor Care Products',
+                    description: 'Temporary floor protection sheets to prevent damage to carpets and flooring during moves.'
+                },
+                
+                // Crate Resources
+                {
+                    name: 'Standard Office Crate',
+                    type: 'crates',
+                    sku: 'CRT-001', 
+                    status: 'available',
+                    costPerUnit: 8.50,
+                    unit: 'week',
+                    supplier: 'Crate Rental Solutions',
+                    description: '60L plastic crate ideal for books, files, and general office supplies. Stackable and secure.'
+                },
+                {
+                    name: 'Archive Document Crate',
+                    type: 'crates',
+                    sku: 'CRT-002',
+                    status: 'available',
+                    costPerUnit: 12.00,
+                    unit: 'week',
+                    supplier: 'Document Storage Specialists',
+                    description: '80L reinforced crate with lid for confidential documents and heavy archive files.'
+                },
+                {
+                    name: 'IT Equipment Crate',
+                    type: 'crates',
+                    sku: 'CRT-003',
+                    status: 'available',
+                    costPerUnit: 15.75,
+                    unit: 'week',
+                    supplier: 'Technology Moving Solutions',
+                    description: '45L anti-static crate with foam inserts for computers, monitors, and sensitive electronics.'
+                },
+                {
+                    name: 'Personal Effects Crate',
+                    type: 'crates',
+                    sku: 'CRT-004',
+                    status: 'available',
+                    costPerUnit: 9.25,
+                    unit: 'week',
+                    supplier: 'Personal Moving Services',
+                    description: '50L crate for personal desk items, plants, and individual employee belongings.'
+                },
+                {
+                    name: 'Wardrobe Hanging Crate',
+                    type: 'crates',
+                    sku: 'CRT-005',
+                    status: 'available',
+                    costPerUnit: 18.50,
+                    unit: 'week',
+                    supplier: 'Textile Transport Solutions',
+                    description: 'Tall crate with hanging rail for executive suits, uniforms, and hanging garments.'
+                },
+                {
+                    name: 'Heavy Duty Crate (XL)',
+                    type: 'crates',
+                    sku: 'CRT-006',
+                    status: 'available',
+                    costPerUnit: 22.00,
+                    unit: 'week',
+                    supplier: 'Industrial Crate Solutions',
+                    description: '120L extra-large reinforced crate for heavy office equipment and bulk items.'
                 }
             ];
 

@@ -3059,12 +3059,10 @@
                 <div><label>SKU</label><input type="text" id="resource-sku" placeholder="e.g. LED-DL-10W-CW" pattern="[A-Z0-9-]+" title="SKU should contain only uppercase letters, numbers, and hyphens"></div>
                 <div><label>Category *</label><select id="resource-category" required>
                     <option value="">Select...</option>
-                    <option value="lighting">Lighting</option>
-                    <option value="electrical">Electrical</option>
                     <option value="labour">Labour</option>
-                    <option value="transport">Transport</option>
-                    <option value="materials">Materials</option>
-                    <option value="other">Other</option>
+                    <option value="vehicles">Vehicles</option>
+                    <option value="material">Material</option>
+                    <option value="crates">Crates</option>
                 </select></div>
                 <div><label>Subcategory</label><input type="text" id="resource-subcategory" placeholder="e.g. downlights, cable"></div>
             </div>
@@ -3137,10 +3135,10 @@
                             <label>Category</label>
                             <select id="resource-category-filter" onchange="window.filterResources()" style="margin-top: 0.25rem;">
                                 <option value="">All Categories</option>
-                                <option value="human">Human Resources</option>
+                                <option value="labour">Labour</option>
                                 <option value="vehicles">Vehicles</option>
-                                <option value="materials">Materials</option>
-                                <option value="other">Other</option>
+                                <option value="material">Material</option>
+                                <option value="crates">Crates</option>
                             </select>
                         </div>
                         <div>
