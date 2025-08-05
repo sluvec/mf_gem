@@ -178,6 +178,101 @@ tr:hover td { background: var(--primary-50); }
 .field-note { font-size: 0.875rem; color: var(--neutral-600); margin-top: 0.5rem; font-style: italic; }
 
 /* ========================================
+   FORM VALIDATION STYLES
+   ======================================== */
+
+/* Required field error highlighting */
+.field-error {
+    border: 2px solid var(--error-500) !important;
+    background-color: var(--error-50) !important;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.field-error:focus {
+    border-color: var(--error-600) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    outline: none;
+}
+
+.field-error-message {
+    color: var(--error-600);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.field-error-message::before {
+    content: "⚠️";
+    font-size: 0.875rem;
+}
+
+/* Validation summary for forms */
+.form-validation-summary {
+    background: var(--error-50);
+    border: 1px solid var(--error-200);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: none;
+}
+
+.form-validation-summary.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+.form-validation-summary h4 {
+    color: var(--error-700);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-validation-summary h4::before {
+    content: "❌";
+    font-size: 1rem;
+}
+
+.form-validation-summary ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.form-validation-summary li {
+    color: var(--error-600);
+    font-size: var(--text-sm);
+    margin-bottom: 0.25rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.form-validation-summary li::before {
+    content: "•";
+    color: var(--error-500);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
    ACCESSIBILITY & MOBILE FIRST STYLES
    ======================================== */
 

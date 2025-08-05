@@ -893,6 +893,12 @@ class CRMApplication {
         event.preventDefault();
         
         try {
+            // ✅ NEW: Validate required fields with visual highlighting
+            if (!window.validatePcNumberForm(false)) {
+                logDebug('PC Number form validation failed');
+                return; // Stop submission if validation fails
+            }
+            
             // Auto-generate PC Number
             const nextPcNumber = await this.getNextPcNumber();
             
@@ -960,18 +966,15 @@ class CRMApplication {
                 updatedAt: new Date()
             };
 
-            // Basic validation (PC Number is auto-generated)
-            if (!pcNumberData.projectTitle || !pcNumberData.clientName || !pcNumberData.contactName || !pcNumberData.accountManager) {
-                uiModals.showToast('Please fill in all required fields', 'error');
-                return;
-            }
-
             // PC Number is auto-generated, so no format validation needed
             logDebug(`Auto-generated PC Number: ${pcNumberData.pcNumber}`);
 
+            // ✅ ENHANCED: Additional business logic validation with visual feedback
             // Validate contact information (at least phone or email)
             if (!pcNumberData.contactPhone && !pcNumberData.contactEmail) {
-                uiModals.showToast('Please provide at least phone or email for contact', 'error');
+                window.showFieldError('pc-contact-phone', 'Please provide phone or email');
+                window.showFieldError('pc-contact-email', 'Please provide phone or email');
+                window.showFormValidationSummary('pc-form', ['Please provide at least phone or email for contact']);
                 return;
             }
 
@@ -980,7 +983,9 @@ class CRMApplication {
                 const collectionDate = new Date(pcNumberData.collectionDate);
                 const deliveryDate = new Date(pcNumberData.deliveryDate);
                 if (collectionDate >= deliveryDate) {
-                    uiModals.showToast('Collection date must be before delivery date', 'error');
+                    window.showFieldError('pc-collection-date', 'Collection date must be before delivery date');
+                    window.showFieldError('pc-delivery-date', 'Delivery date must be after collection date');
+                    window.showFormValidationSummary('pc-form', ['Collection date must be before delivery date']);
                     return;
                 }
             }
@@ -1014,12 +1019,17 @@ class CRMApplication {
         event.preventDefault();
         
         try {
-            const formData = new FormData(event.target);
             const pcId = document.getElementById('pc-edit-id').value;
             
             if (!pcId) {
                 uiModals.showToast('PC Number ID not found', 'error');
                 return;
+            }
+
+            // ✅ NEW: Validate required fields with visual highlighting
+            if (!window.validatePcNumberForm(true)) {
+                logDebug('PC Number edit form validation failed');
+                return; // Stop submission if validation fails
             }
 
             // Collect data from form
@@ -1089,10 +1099,25 @@ class CRMApplication {
                 updatedAt: new Date()
             };
 
-            // Validation
-            if (!updatedData.pcNumber || !updatedData.company || !updatedData.projectTitle) {
-                uiModals.showToast('Please fill in all required fields (PC Number, Company Name, Project Title)', 'error');
+            // ✅ ENHANCED: Additional business logic validation with visual feedback
+            // Validate contact information (at least phone or email)
+            if (!updatedData.contactPhone && !updatedData.contactEmail) {
+                window.showFieldError('pc-edit-contact-phone', 'Please provide phone or email');
+                window.showFieldError('pc-edit-contact-email', 'Please provide phone or email');
+                window.showFormValidationSummary('pc-edit-form', ['Please provide at least phone or email for contact']);
                 return;
+            }
+
+            // Validate collection date before delivery date
+            if (updatedData.collectionDate && updatedData.deliveryDate) {
+                const collectionDate = new Date(updatedData.collectionDate);
+                const deliveryDate = new Date(updatedData.deliveryDate);
+                if (collectionDate >= deliveryDate) {
+                    window.showFieldError('pc-edit-collection-date', 'Collection date must be before delivery date');
+                    window.showFieldError('pc-edit-delivery-date', 'Delivery date must be after collection date');
+                    window.showFormValidationSummary('pc-edit-form', ['Collection date must be before delivery date']);
+                    return;
+                }
             }
 
             // Update in database
@@ -1126,6 +1151,12 @@ class CRMApplication {
         event.preventDefault();
         
         try {
+            // ✅ NEW: Validate required fields with visual highlighting
+            if (!window.validateActivityForm()) {
+                logDebug('Activity form validation failed');
+                return; // Stop submission if validation fails
+            }
+            
             // Check if we're editing (activity-id has value) or creating new
             const activityId = document.getElementById('activity-id').value;
             const isEdit = Boolean(activityId);
@@ -4483,18 +4514,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         event.preventDefault();
         
         try {
+            // ✅ NEW: Validate required fields with visual highlighting
+            if (!window.validateQuoteForm()) {
+                logDebug('Quote form validation failed');
+                return; // Stop submission if validation fails
+            }
+            
             const pcId = document.getElementById('quote-modal-pc').value;
             const priceListId = document.getElementById('quote-modal-pricelist').value;
-            
-            if (!pcId) {
-                uiModals.showToast('Please select a PC Number', 'error');
-                return;
-            }
-            
-            if (!priceListId) {
-                uiModals.showToast('Please select a Price List', 'error');
-                return;
-            }
             
             // Store selections for quote builder
             window.selectedQuoteData = {
@@ -5395,6 +5422,229 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.filterResources = () => logDebug('filterResources: Search functionality removed');
     window.filterActivityResourceSelector = () => logDebug('filterActivityResourceSelector: Search functionality removed');
     window.filterDependencySelector = () => logDebug('filterDependencySelector: Search functionality removed');
+    
+    // ========================================
+    // FORM VALIDATION SYSTEM
+    // ========================================
+    
+    /**
+     * Validates required fields in a form and highlights errors
+     * @param {string} formId - The form element ID
+     * @param {Object} fieldConfig - Configuration object with field IDs and labels
+     * @returns {boolean} - True if all required fields are valid, false otherwise
+     */
+    window.validateRequiredFields = (formId, fieldConfig) => {
+        const form = document.getElementById(formId);
+        if (!form) {
+            logError('Form not found:', formId);
+            return false;
+        }
+        
+        let isValid = true;
+        const errors = [];
+        
+        // Clear any existing validation summary
+        clearFormValidationSummary(formId);
+        
+        // Validate each required field
+        Object.keys(fieldConfig).forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            const fieldLabel = fieldConfig[fieldId];
+            
+            if (!field) {
+                logError('Field not found:', fieldId);
+                return;
+            }
+            
+            // Clear any existing error state
+            clearFieldError(fieldId);
+            
+            // Check if field is empty
+            const value = field.value ? field.value.trim() : '';
+            if (!value) {
+                showFieldError(fieldId, `${fieldLabel} is required`);
+                errors.push(fieldLabel);
+                isValid = false;
+            }
+        });
+        
+        // Show validation summary if there are errors
+        if (!isValid) {
+            showFormValidationSummary(formId, errors);
+            
+            // Focus on first error field
+            const firstErrorField = Object.keys(fieldConfig).find(fieldId => {
+                const field = document.getElementById(fieldId);
+                return field && field.classList.contains('field-error');
+            });
+            
+            if (firstErrorField) {
+                const field = document.getElementById(firstErrorField);
+                field.focus();
+                field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        return isValid;
+    };
+    
+    /**
+     * Shows error state for a specific field
+     * @param {string} fieldId - The field element ID
+     * @param {string} message - Error message to display
+     */
+    window.showFieldError = (fieldId, message) => {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        
+        // Add error class
+        field.classList.add('field-error');
+        
+        // Remove existing error message
+        const existingError = field.parentNode.querySelector('.field-error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add error message
+        const errorElement = document.createElement('div');
+        errorElement.className = 'field-error-message';
+        errorElement.textContent = message;
+        
+        // Insert after the field
+        field.parentNode.insertBefore(errorElement, field.nextSibling);
+        
+        // Add event listener to clear error when user starts typing
+        field.addEventListener('input', () => clearFieldError(fieldId), { once: true });
+        field.addEventListener('change', () => clearFieldError(fieldId), { once: true });
+    };
+    
+    /**
+     * Clears error state for a specific field
+     * @param {string} fieldId - The field element ID
+     */
+    window.clearFieldError = (fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        
+        // Remove error class
+        field.classList.remove('field-error');
+        
+        // Remove error message
+        const errorMessage = field.parentNode.querySelector('.field-error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    };
+    
+    /**
+     * Clears all field errors in a form
+     * @param {string} formId - The form element ID
+     */
+    window.clearAllFieldErrors = (formId) => {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        
+        // Remove all error classes and messages
+        const errorFields = form.querySelectorAll('.field-error');
+        errorFields.forEach(field => {
+            field.classList.remove('field-error');
+        });
+        
+        const errorMessages = form.querySelectorAll('.field-error-message');
+        errorMessages.forEach(message => {
+            message.remove();
+        });
+        
+        // Clear validation summary
+        clearFormValidationSummary(formId);
+    };
+    
+    /**
+     * Shows a validation summary at the top of the form
+     * @param {string} formId - The form element ID
+     * @param {Array} errors - Array of error messages
+     */
+    window.showFormValidationSummary = (formId, errors) => {
+        const form = document.getElementById(formId);
+        if (!form || !errors.length) return;
+        
+        // Create or update validation summary
+        let summary = form.querySelector('.form-validation-summary');
+        if (!summary) {
+            summary = document.createElement('div');
+            summary.className = 'form-validation-summary';
+            form.insertBefore(summary, form.firstChild);
+        }
+        
+        summary.innerHTML = `
+            <h4>Please correct the following errors:</h4>
+            <ul>
+                ${errors.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+        `;
+        
+        summary.classList.add('show');
+        summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    
+    /**
+     * Clears validation summary from a form
+     * @param {string} formId - The form element ID
+     */
+    window.clearFormValidationSummary = (formId) => {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        
+        const summary = form.querySelector('.form-validation-summary');
+        if (summary) {
+            summary.classList.remove('show');
+            setTimeout(() => {
+                if (summary.parentNode) {
+                    summary.remove();
+                }
+            }, 300);
+        }
+    };
+    
+    // Form-specific validation configurations
+    window.VALIDATION_CONFIGS = {
+        PC_NUMBER: {
+            'pc-company-name': 'Company Name',
+            'pc-project-name': 'Project Name',
+            'pc-account-manager': 'Account Manager',
+            'pc-contact-name': 'Contact Name'
+        },
+        PC_NUMBER_EDIT: {
+            'pc-edit-company': 'Company Name',
+            'pc-edit-title': 'Project Title',
+            'pc-edit-account-manager': 'Account Manager',
+            'pc-edit-contact-name': 'Contact Name'
+        },
+        QUOTE: {
+            'quote-modal-pc': 'PC Number',
+            'quote-modal-pricelist': 'Price List'
+        },
+        ACTIVITY: {
+            'activity-title': 'Activity Title',
+            'activity-type': 'Activity Type'
+        }
+    };
+    
+    // Enhanced validation function for specific forms
+    window.validatePcNumberForm = (isEdit = false) => {
+        const config = isEdit ? window.VALIDATION_CONFIGS.PC_NUMBER_EDIT : window.VALIDATION_CONFIGS.PC_NUMBER;
+        const formId = isEdit ? 'pc-edit-form' : 'pc-form';
+        return window.validateRequiredFields(formId, config);
+    };
+    
+    window.validateQuoteForm = () => {
+        return window.validateRequiredFields('new-quote-form', window.VALIDATION_CONFIGS.QUOTE);
+    };
+    
+    window.validateActivityForm = () => {
+        return window.validateRequiredFields('activity-form', window.VALIDATION_CONFIGS.ACTIVITY);
+    };
 });
 
 // Export for use in other modules
