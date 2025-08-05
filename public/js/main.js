@@ -4052,6 +4052,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Load PC Numbers dropdown
         await window.crmApp.loadPcNumbersForSelect('activity-pc-select');
         
+        // If we're in a PC detail view, pre-select the current PC
+        if (window.currentPC && window.currentPC.id) {
+            const pcSelect = document.getElementById('activity-pc-select');
+            if (pcSelect) {
+                pcSelect.value = window.currentPC.id;
+            }
+        }
+        
         uiModals.openModal('activity-modal');
     };
     window.showResourceModal = () => {
@@ -4081,6 +4089,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.showNewQuoteModal = async () => {
         // Load PC Numbers dropdown for quote selection
         await window.crmApp.loadPcNumbersForSelect('quote-modal-pc');
+        
+        // If we're in a PC detail view, pre-select the current PC
+        if (window.currentPC && window.currentPC.id) {
+            const pcSelect = document.getElementById('quote-modal-pc');
+            if (pcSelect) {
+                pcSelect.value = window.currentPC.id;
+            }
+        }
+        
         uiModals.openModal('quote-modal');
     };
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
