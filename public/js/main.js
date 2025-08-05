@@ -4984,6 +4984,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     
+    // Convert equipment category to material category
+    window.convertEquipmentToMaterial = async () => {
+        try {
+            if (!confirm('This will convert all existing "equipment" category items to "material" category. Continue?')) {
+                return;
+            }
+            
+            logInfo('Converting equipment category to material...');
+            
+            // Load all existing resources
+            const allResources = await db.loadAll('resources');
+            let convertedCount = 0;
+            
+            // Find and update equipment items
+            for (const resource of allResources) {
+                if (resource.type === 'equipment' || resource.category === 'equipment' || 
+                    resource.type === 'Equipment' || resource.category === 'Equipment') {
+                    
+                    // Update the resource category/type to material
+                    const updatedResource = {
+                        ...resource,
+                        type: 'material',
+                        category: 'material', // Ensure both fields are updated
+                        updatedAt: new Date()
+                    };
+                    
+                    await db.save('resources', updatedResource);
+                    convertedCount++;
+                    logInfo(`Converted resource: ${resource.name} from equipment to material`);
+                }
+            }
+            
+            if (convertedCount > 0) {
+                logInfo(`Successfully converted ${convertedCount} equipment items to material category`);
+                uiModals.showToast(`Converted ${convertedCount} equipment items to material category`, 'success');
+                
+                // Refresh the resources view if currently active
+                if (document.getElementById('resources').classList.contains('active')) {
+                    await window.app.loadResourcesData();
+                }
+            } else {
+                logInfo('No equipment category items found to convert');
+                uiModals.showToast('No equipment category items found to convert', 'info');
+            }
+            
+        } catch (error) {
+            logError('Failed to convert equipment to material:', error);
+            uiModals.showToast('Failed to convert equipment items', 'error');
+        }
+    };
+
     // Load UK office relocation resources manually
     window.loadUKOfficeRelocationResources = async () => {
         try {
