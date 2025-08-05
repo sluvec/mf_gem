@@ -2299,7 +2299,7 @@
 
     <!-- PC Number Edit Modal -->
     <div id="pc-edit-modal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
             <h2 id="pc-edit-modal-title">Edit PC Number</h2>
             <form id="pc-edit-form">
                 <input type="hidden" id="pc-edit-id">
@@ -2323,43 +2323,358 @@
                             </select>
                         </div>
                     </div>
-                </div>
-
-                <!-- Company & Project -->
-                <div class="form-section">
-                    <h3>Company & Project</h3>
-                    <div>
-                        <label>Company Name *</label>
-                        <input type="text" id="pc-edit-company" required placeholder="Company name">
-                    </div>
-                    <div>
-                        <label>Project Title *</label>
-                        <input type="text" id="pc-edit-title" required placeholder="Project title">
-                    </div>
-                    <div>
-                        <label>Project Description *</label>
-                        <textarea id="pc-edit-description" rows="3" required 
-                                  placeholder="Brief description of the project..."></textarea>
-                    </div>
-                    <div>
-                        <label>Reference</label>
-                        <input type="text" id="pc-edit-reference" placeholder="Project reference">
-                    </div>
-                </div>
-
-                <!-- Contact & Value -->
-                <div class="form-section">
-                    <h3>Contact & Value</h3>
                     <div class="form-grid">
                         <div>
-                            <label>Contact Name</label>
-                            <input type="text" id="pc-edit-contact" placeholder="Contact person">
+                            <label>Company Name *</label>
+                            <input type="text" id="pc-edit-company" required placeholder="Enter company name">
                         </div>
                         <div>
-                            <label>Estimated Value (£)</label>
-                            <input type="number" id="pc-edit-value" min="0" step="0.01" 
-                                   placeholder="0.00">
+                            <label>Project Name *</label>
+                            <input type="text" id="pc-edit-title" required placeholder="Enter project name">
                         </div>
+                    </div>
+                    <div>
+                        <label>Project Description</label>
+                        <textarea id="pc-edit-description" rows="3" placeholder="Describe the project requirements, scope, and any special considerations..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Client Details -->
+                <div class="form-section">
+                    <h3>Client Details</h3>
+                    <div class="form-grid">
+                        <div>
+                            <label>Account Manager *</label>
+                            <input type="text" id="pc-edit-account-manager" placeholder="Account manager name">
+                        </div>
+                        <div>
+                            <label>Industry/Sector</label>
+                            <select id="pc-edit-client-industry">
+                                <option value="">Select industry...</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Financial Services">Financial Services</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Professional Services">Professional Services</option>
+                                <option value="Construction">Construction</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Media & Creative">Media & Creative</option>
+                                <option value="Education">Education</option>
+                                <option value="Government">Government</option>
+                                <option value="Non-profit">Non-profit</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div>
+                            <label>How did they find us?</label>
+                            <select id="pc-edit-client-source">
+                                <option value="">Select source...</option>
+                                <option value="Existing client referral">Existing client referral</option>
+                                <option value="Personal network">Personal network</option>
+                                <option value="Website/Online">Website/Online</option>
+                                <option value="Trade directory">Trade directory</option>
+                                <option value="Cold outreach">Cold outreach</option>
+                                <option value="Trade show/Event">Trade show/Event</option>
+                                <option value="Repeat business">Repeat business</option>
+                                <option value="Google/Search">Google/Search</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Budget Range (£)</label>
+                            <select id="pc-edit-quote-limit">
+                                <option value="">Select budget range...</option>
+                                <option value="Under £5,000">Under £5,000</option>
+                                <option value="£5,000 - £15,000">£5,000 - £15,000</option>
+                                <option value="£15,000 - £30,000">£15,000 - £30,000</option>
+                                <option value="£30,000 - £50,000">£30,000 - £50,000</option>
+                                <option value="£50,000 - £100,000">£50,000 - £100,000</option>
+                                <option value="Over £100,000">Over £100,000</option>
+                                <option value="To be determined">To be determined</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classification & Management -->
+                <div class="form-section">
+                    <h3>Classification & Management</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Client Category</label>
+                            <select id="pc-edit-client-category">
+                                <option value="">Select category...</option>
+                                <option value="Corporate">Corporate</option>
+                                <option value="SME">Small/Medium Enterprise</option>
+                                <option value="Individual">Individual</option>
+                                <option value="Government">Government</option>
+                                <option value="Non-Profit">Non-Profit</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Client Source</label>
+                            <select id="pc-edit-client-source-new">
+                                <option value="">Select source...</option>
+                                <option value="Website Inquiry">Website Inquiry</option>
+                                <option value="Phone Inquiry">Phone Inquiry</option>
+                                <option value="Email">Email</option>
+                                <option value="Referral">Referral</option>
+                                <option value="Repeat Customer">Repeat Customer</option>
+                                <option value="Marketing Campaign">Marketing Campaign</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Referral Type</label>
+                            <select id="pc-edit-referral-type">
+                                <option value="">Select type...</option>
+                                <option value="Direct">Direct</option>
+                                <option value="Partner">Partner</option>
+                                <option value="Customer">Customer Referral</option>
+                                <option value="Agency">Agency</option>
+                                <option value="Online">Online</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="max-width: 400px;">
+                        <div>
+                            <label>Property Type</label>
+                            <select id="pc-edit-property-type">
+                                <option value="">Select type...</option>
+                                <option value="Office Building">Office Building</option>
+                                <option value="Retail Space">Retail Space</option>
+                                <option value="Warehouse">Warehouse</option>
+                                <option value="Residential">Residential</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Mixed Use">Mixed Use</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>SIC Code 1</label>
+                            <input type="text" id="pc-edit-sic-code-1" placeholder="Primary SIC code">
+                            <small>Standard Industrial Classification</small>
+                        </div>
+                        <div>
+                            <label>SIC Code 2</label>
+                            <input type="text" id="pc-edit-sic-code-2" placeholder="Secondary SIC code">
+                        </div>
+                        <div>
+                            <label>SIC Code 3</label>
+                            <input type="text" id="pc-edit-sic-code-3" placeholder="Tertiary SIC code">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+                    <div class="form-grid">
+                        <div>
+                            <label>Contact Name *</label>
+                            <input type="text" id="pc-edit-contact-name" placeholder="Primary contact person">
+                        </div>
+                        <div>
+                            <label>Phone Number</label>
+                            <input type="tel" id="pc-edit-contact-phone" placeholder="+44 20 7123 4567">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div>
+                            <label>Email Address</label>
+                            <input type="email" id="pc-edit-contact-email" placeholder="email@address.com">
+                        </div>
+                        <div>
+                            <label>Postcode</label>
+                            <input type="text" id="pc-edit-postcode" placeholder="e.g. SW1A 1AA">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collection Address -->
+                <div class="form-section">
+                    <h3>Collection Address (Current Location)</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>First Name</label>
+                            <input type="text" id="pc-edit-collection-first-name" placeholder="Contact first name">
+                        </div>
+                        <div>
+                            <label>Surname</label>
+                            <input type="text" id="pc-edit-collection-surname" placeholder="Contact surname">
+                        </div>
+                        <div>
+                            <label>Title</label>
+                            <select id="pc-edit-collection-title">
+                                <option value="">Select title...</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label>Position</label>
+                            <input type="text" id="pc-edit-collection-position" placeholder="Job title/position">
+                        </div>
+                        <div>
+                            <label>Collection Date</label>
+                            <input type="date" id="pc-edit-collection-date">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Email</label>
+                            <input type="email" id="pc-edit-collection-email" placeholder="contact@company.com">
+                        </div>
+                        <div>
+                            <label>Phone</label>
+                            <input type="tel" id="pc-edit-collection-phone" placeholder="+44 20 7123 4567">
+                        </div>
+                        <div>
+                            <label>Mobile</label>
+                            <input type="tel" id="pc-edit-collection-mobile" placeholder="+44 7xxx xxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label>Address Line 1</label>
+                            <input type="text" id="pc-edit-collection-address-1" placeholder="Building number and street">
+                        </div>
+                        <div>
+                            <label>Address Line 2</label>
+                            <input type="text" id="pc-edit-collection-address-2" placeholder="Floor, suite, apartment">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Address Line 3</label>
+                            <input type="text" id="pc-edit-collection-address-3" placeholder="District/area">
+                        </div>
+                        <div>
+                            <label>Address Line 4</label>
+                            <input type="text" id="pc-edit-collection-address-4" placeholder="City/town">
+                        </div>
+                        <div>
+                            <label>Postcode</label>
+                            <input type="text" id="pc-edit-collection-postcode" placeholder="SW1A 1AA">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Country</label>
+                        <select id="pc-edit-collection-country">
+                            <option value="">Select country...</option>
+                            <option value="United Kingdom" selected>United Kingdom</option>
+                            <option value="Ireland">Ireland</option>
+                            <option value="France">France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="form-section">
+                    <h3>Delivery Address (New Location)</h3>
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>First Name</label>
+                            <input type="text" id="pc-edit-delivery-first-name" placeholder="Contact first name">
+                        </div>
+                        <div>
+                            <label>Surname</label>
+                            <input type="text" id="pc-edit-delivery-surname" placeholder="Contact surname">
+                        </div>
+                        <div>
+                            <label>Title</label>
+                            <select id="pc-edit-delivery-title">
+                                <option value="">Select title...</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Dr">Dr</option>
+                                <option value="Prof">Prof</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label>Position</label>
+                            <input type="text" id="pc-edit-delivery-position" placeholder="Job title/position">
+                        </div>
+                        <div>
+                            <label>Delivery Date</label>
+                            <input type="date" id="pc-edit-delivery-date">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Email</label>
+                            <input type="email" id="pc-edit-delivery-email" placeholder="contact@company.com">
+                        </div>
+                        <div>
+                            <label>Phone</label>
+                            <input type="tel" id="pc-edit-delivery-phone" placeholder="+44 20 7123 4567">
+                        </div>
+                        <div>
+                            <label>Mobile</label>
+                            <input type="tel" id="pc-edit-delivery-mobile" placeholder="+44 7xxx xxxxxx">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div>
+                            <label>Address Line 1</label>
+                            <input type="text" id="pc-edit-delivery-address-1" placeholder="Building number and street">
+                        </div>
+                        <div>
+                            <label>Address Line 2</label>
+                            <input type="text" id="pc-edit-delivery-address-2" placeholder="Floor, suite, apartment">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Address Line 3</label>
+                            <input type="text" id="pc-edit-delivery-address-3" placeholder="District/area">
+                        </div>
+                        <div>
+                            <label>Address Line 4</label>
+                            <input type="text" id="pc-edit-delivery-address-4" placeholder="City/town">
+                        </div>
+                        <div>
+                            <label>Postcode</label>
+                            <input type="text" id="pc-edit-delivery-postcode" placeholder="SW1A 1AA">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Country</label>
+                        <select id="pc-edit-delivery-country">
+                            <option value="">Select country...</option>
+                            <option value="United Kingdom" selected>United Kingdom</option>
+                            <option value="Ireland">Ireland</option>
+                            <option value="France">France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
