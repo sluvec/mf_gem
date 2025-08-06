@@ -495,6 +495,15 @@ class CRMApplication {
             });
         }
 
+        // Price List form
+        const priceListForm = document.getElementById('pricelist-form');
+        if (priceListForm) {
+            priceListForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.savePriceList();
+            });
+        }
+
         logDebug('Form listeners setup completed');
     }
 
@@ -2877,6 +2886,149 @@ class CRMApplication {
     }
 
     /**
+     * @description Save price list (create or update)
+     */
+    async savePriceList() {
+        try {
+            const formData = this.getPriceListFormData();
+            if (!formData) return;
+
+            const existingId = document.getElementById('pricelist-id')?.value;
+            
+            if (existingId) {
+                // Update existing price list
+                await this.updatePriceList();
+            } else {
+                // Create new price list
+                const priceListId = `PL-${Date.now()}`;
+                
+                const priceListData = {
+                    id: priceListId,
+                    name: formData.name,
+                    category: formData.category,
+                    description: formData.description || '',
+                    currency: 'GBP',
+                    status: 'active',
+                    markup: 25,
+                    discount: 0,
+                    effectiveFrom: new Date().toISOString(),
+                    isDefault: false,
+                    items: [],
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: this.currentUser || 'User'
+                };
+
+                await db.save('priceLists', priceListData);
+                uiModals.showToast(`Price List "${priceListData.name}" created successfully!`, 'success');
+                
+                this.closePriceListModal();
+                
+                // Refresh price lists if we're on pricelists page
+                if (this.currentPage === 'pricelists') {
+                    await this.loadPriceListsData();
+                }
+                
+                logDebug('Price list created successfully:', priceListData);
+            }
+        } catch (error) {
+            logError('Failed to save price list:', error);
+            uiModals.showToast('Failed to save price list', 'error');
+        }
+    }
+
+    /**
+     * @description Get price list form data
+     */
+    getPriceListFormData() {
+        try {
+            const name = document.getElementById('pricelist-name')?.value?.trim();
+            const category = document.getElementById('pricelist-category')?.value;
+            const description = document.getElementById('pricelist-description')?.value?.trim();
+
+            if (!name || !category) {
+                uiModals.showToast('Please fill in all required fields', 'error');
+                return null;
+            }
+
+            return { name, category, description };
+        } catch (error) {
+            logError('Failed to get price list form data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * @description Update price list
+     */
+    async updatePriceList() {
+        try {
+            const formData = this.getPriceListFormData();
+            if (!formData) return;
+
+            const priceListId = document.getElementById('pricelist-id').value;
+            const existingPriceList = await db.load('priceLists', priceListId);
+            
+            if (!existingPriceList) {
+                uiModals.showToast('Price list not found', 'error');
+                return;
+            }
+
+            const updatedPriceList = {
+                ...existingPriceList,
+                name: formData.name,
+                category: formData.category,
+                description: formData.description,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+
+            await db.save('priceLists', updatedPriceList);
+            uiModals.showToast(`Price List "${updatedPriceList.name}" updated successfully!`, 'success');
+            
+            this.closePriceListModal();
+            
+            // Refresh price lists if we're on pricelists page
+            if (this.currentPage === 'pricelists') {
+                await this.loadPriceListsData();
+            }
+            
+            logDebug('Price list updated successfully:', updatedPriceList);
+        } catch (error) {
+            logError('Failed to update price list:', error);
+            uiModals.showToast('Failed to update price list', 'error');
+        }
+    }
+
+    /**
+     * @description Close price list modal
+     */
+    closePriceListModal() {
+        try {
+            uiModals.closeModal('pricelist-modal');
+            this.clearPriceListForm();
+            logDebug('Price list modal closed');
+        } catch (error) {
+            logError('Failed to close price list modal:', error);
+        }
+    }
+
+    /**
+     * @description Clear price list form
+     */
+    clearPriceListForm() {
+        try {
+            const form = document.getElementById('pricelist-form');
+            if (form) {
+                form.reset();
+                document.getElementById('pricelist-id').value = '';
+            }
+        } catch (error) {
+            logError('Failed to clear price list form:', error);
+        }
+    }
+
+    /**
      * @description Get cached activities or load fresh from database
      * @returns {Promise<Array>} Array of activities
      */
@@ -3105,7 +3257,7 @@ function setupLegacyCompatibility() {
     // Close modal functions
     window.closeActivityModal = () => app.closeActivityModal();
     window.closeResourceModal = () => app.closeResourceModal();
-    window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
+    window.closePriceListModal = () => app.closePriceListModal();
 
     // Resources functions
     window.showResourceModal = () => app.showResourceModal();
