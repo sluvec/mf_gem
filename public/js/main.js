@@ -381,7 +381,36 @@ class CRMApplication {
      * @description Setup event listeners
      */
     setupEventListeners() {
+        // Setup form listeners
+        this.setupFormListeners();
+        
         // Additional event listeners can be added here
+        logDebug('Event listeners setup completed');
+    }
+
+    /**
+     * @description Setup form event listeners
+     */
+    setupFormListeners() {
+        // PC Number form
+        const pcForm = document.getElementById('pc-form');
+        if (pcForm) {
+            pcForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.savePcNumber();
+            });
+        }
+
+        // PC Edit form
+        const pcEditForm = document.getElementById('pc-edit-form');
+        if (pcEditForm) {
+            pcEditForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.updatePcNumber();
+            });
+        }
+
+        logDebug('Form listeners setup completed');
     }
 
     /**
@@ -777,6 +806,197 @@ class CRMApplication {
         
         logDebug(`Progress: ${percentage}% - ${message}`);
     }
+
+    /**
+     * @description Open PC Edit Modal
+     * @param {string} id - PC Number ID
+     */
+    async openPcEditModal(id) {
+        try {
+            const pcData = await db.load('pcNumbers', id);
+            if (!pcData) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+            
+            // Populate basic fields
+            document.getElementById('pc-edit-id').value = pcData.id || '';
+            document.getElementById('pc-edit-number').value = pcData.pcNumber || '';
+            document.getElementById('pc-edit-company').value = pcData.company || pcData.clientName || '';
+            document.getElementById('pc-edit-title').value = pcData.projectTitle || '';
+            document.getElementById('pc-edit-description').value = pcData.projectDescription || '';
+            document.getElementById('pc-edit-status').value = pcData.status || 'active';
+            
+            // Contact Information
+            document.getElementById('pc-edit-contact-name').value = pcData.contactName || '';
+            document.getElementById('pc-edit-contact-phone').value = pcData.contactPhone || '';
+            document.getElementById('pc-edit-contact-email').value = pcData.contactEmail || '';
+            
+            // Show modal
+            const modal = document.getElementById('pc-edit-modal');
+            if (modal) {
+                modal.style.display = 'block';
+                uiModals.showToast(`Editing ${pcData.pcNumber}`, 'info');
+            }
+            
+        } catch (error) {
+            logError('Failed to open PC edit modal:', error);
+            uiModals.showToast('Failed to load PC Number', 'error');
+        }
+    }
+
+    /**
+     * @description Close PC Edit Modal
+     */
+    closePcEditModal() {
+        const modal = document.getElementById('pc-edit-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    /**
+     * @description Save new PC Number
+     */
+    async savePcNumber() {
+        try {
+            const formData = this.getPcFormData();
+            if (!formData) return;
+            
+            // Generate PC Number
+            const allPcs = await db.loadAll('pcNumbers');
+            const nextNumber = (allPcs.length + 1).toString().padStart(6, '0');
+            const pcNumber = `PC-${nextNumber}`;
+            
+            const pcData = {
+                id: `pc-${Date.now()}`,
+                pcNumber: pcNumber,
+                company: formData.company,
+                projectTitle: formData.projectTitle,
+                projectDescription: formData.projectDescription,
+                clientName: formData.company,
+                contactName: formData.contactName,
+                contactEmail: formData.contactEmail,
+                contactPhone: formData.contactPhone,
+                postcode: formData.postcode,
+                estimatedValue: 0, // Default value
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                lastModifiedAt: new Date().toISOString(),
+                createdBy: this.currentUser || 'User',
+                editedBy: this.currentUser || 'User'
+            };
+            
+            await db.save('pcNumbers', pcData);
+            uiModals.showToast(`PC Number ${pcNumber} created successfully!`, 'success');
+            
+            // Clear form and navigate back
+            this.clearPcForm();
+            await this.navigateToPage('pcnumbers');
+            
+        } catch (error) {
+            logError('Failed to save PC Number:', error);
+            uiModals.showToast('Failed to create PC Number', 'error');
+        }
+    }
+
+    /**
+     * @description Update existing PC Number
+     */
+    async updatePcNumber() {
+        try {
+            const id = document.getElementById('pc-edit-id').value;
+            if (!id) {
+                uiModals.showToast('No PC Number selected for editing', 'error');
+                return;
+            }
+            
+            const existingPc = await db.load('pcNumbers', id);
+            if (!existingPc) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+            
+            // Get updated data
+            const updatedData = {
+                ...existingPc,
+                company: document.getElementById('pc-edit-company').value,
+                projectTitle: document.getElementById('pc-edit-title').value,
+                projectDescription: document.getElementById('pc-edit-description').value,
+                status: document.getElementById('pc-edit-status').value,
+                contactName: document.getElementById('pc-edit-contact-name').value,
+                contactEmail: document.getElementById('pc-edit-contact-email').value,
+                contactPhone: document.getElementById('pc-edit-contact-phone').value,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+            
+            await db.save('pcNumbers', updatedData);
+            uiModals.showToast(`PC Number ${existingPc.pcNumber} updated successfully!`, 'success');
+            
+            this.closePcEditModal();
+            await this.loadPcNumbersData(); // Refresh the list
+            
+        } catch (error) {
+            logError('Failed to update PC Number:', error);
+            uiModals.showToast('Failed to update PC Number', 'error');
+        }
+    }
+
+    /**
+     * @description Get PC form data
+     */
+    getPcFormData() {
+        const company = document.getElementById('pc-company-name')?.value.trim();
+        const projectTitle = document.getElementById('pc-project-name')?.value.trim();
+        const contactName = document.getElementById('pc-contact-name')?.value.trim();
+        
+        if (!company || !projectTitle || !contactName) {
+            uiModals.showToast('Please fill in required fields (Company Name, Project Name, Contact Name)', 'error');
+            return null;
+        }
+        
+        return {
+            company: company,
+            projectTitle: projectTitle,
+            projectDescription: document.getElementById('pc-project-description')?.value.trim() || '',
+            contactName: contactName,
+            contactEmail: document.getElementById('pc-contact-email')?.value.trim() || '',
+            contactPhone: document.getElementById('pc-contact-phone')?.value.trim() || '',
+            postcode: document.getElementById('pc-postcode')?.value.trim() || ''
+        };
+    }
+
+    /**
+     * @description Clear PC form
+     */
+    clearPcForm() {
+        const form = document.getElementById('pc-form');
+        if (form) {
+            form.reset();
+        }
+    }
+
+    /**
+     * @description Open PC Details Page
+     */
+    async openPcDetailsPage(id) {
+        try {
+            const pcData = await db.load('pcNumbers', id);
+            if (!pcData) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+            
+            // Store current PC for detail view
+            window.currentPC = pcData;
+            await this.navigateToPage('pc-detail');
+            
+        } catch (error) {
+            logError('Failed to open PC details:', error);
+            uiModals.showToast('Failed to load PC details', 'error');
+        }
+    }
 }
 
 /**
@@ -833,10 +1053,32 @@ function setupLegacyCompatibility() {
     window.navigateToPage = (page) => app.navigateToPage(page);
     window.showPage = (page) => app.navigateToPage(page);
     
-    // Modal functions (placeholders for now)
+    // PC Numbers functionality
     window.showNewPcModal = () => {
-        logDebug('PC Number modal requested');
-        uiModals.showToast('PC Number functionality will be restored soon', 'info');
+        logDebug('Navigating to new PC page');
+        app.navigateToPage('new-pc');
+    };
+    
+    window.editPC = async (id) => {
+        logDebug('Edit PC requested for ID:', id);
+        await app.openPcEditModal(id);
+    };
+    
+    window.viewPcDetails = async (id) => {
+        logDebug('View PC details requested for ID:', id);
+        await app.openPcDetailsPage(id);
+    };
+    
+    window.savePc = async () => {
+        await app.savePcNumber();
+    };
+    
+    window.updatePC = async () => {
+        await app.updatePcNumber();
+    };
+    
+    window.closePcEditModal = () => {
+        app.closePcEditModal();
     };
     
     window.showNewQuoteModal = () => {
