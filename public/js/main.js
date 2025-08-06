@@ -951,6 +951,14 @@ class CRMApplication {
      */
     async saveActivity() {
         try {
+            // Check if this is an edit (has activity-id)
+            const existingId = document.getElementById('activity-id')?.value;
+            if (existingId) {
+                // This is an edit, use updateActivity instead
+                await this.updateActivity();
+                return;
+            }
+            
             logDebug('Saving new activity');
             
             const formData = this.getActivityFormData();
@@ -1060,6 +1068,189 @@ class CRMApplication {
         const priorityField = document.getElementById('activity-priority');
         if (statusField) statusField.value = 'pending';
         if (priorityField) priorityField.value = 'medium';
+    }
+
+    /**
+     * @description Edit Activity - opens modal with activity data
+     */
+    async editActivity(id) {
+        try {
+            logDebug(`Opening activity edit modal for ID: ${id}`);
+            
+            const activityData = await db.load('activities', id);
+            if (!activityData) {
+                logError(`Activity not found: ${id}`);
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            logDebug('Activity data loaded:', activityData);
+            
+            // Load Quotes for dropdown first
+            const quotes = await db.loadAll('quotes');
+            const quoteSelect = document.getElementById('activity-quote-select');
+            
+            if (quoteSelect) {
+                quoteSelect.innerHTML = '<option value="">Select Quote</option>';
+                quotes.forEach(quote => {
+                    quoteSelect.innerHTML += `<option value="${quote.id}" data-quote-number="${quote.quoteNumber}">${quote.quoteNumber} - ${quote.clientName}</option>`;
+                });
+            }
+            
+            // Populate form fields with activity data
+            const fields = [
+                { id: 'activity-id', value: activityData.id || '' },
+                { id: 'activity-title', value: activityData.title || '' },
+                { id: 'activity-type', value: activityData.type || '' },
+                { id: 'activity-quote-select', value: activityData.quoteId || '' },
+                { id: 'activity-status', value: activityData.status || 'pending' },
+                { id: 'activity-priority', value: activityData.priority || 'medium' },
+                { id: 'activity-assigned-to-name', value: activityData.assignedTo || '' },
+                { id: 'activity-description', value: activityData.description || '' },
+                { id: 'activity-duration', value: activityData.duration || 60 }
+            ];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.value = field.value;
+                    logDebug(`Set ${field.id} = ${field.value}`);
+                } else {
+                    logError(`Field not found: ${field.id}`);
+                }
+            });
+            
+            // Handle scheduled date and time separately
+            if (activityData.scheduledDate) {
+                const scheduledDate = new Date(activityData.scheduledDate);
+                const dateField = document.getElementById('activity-scheduled-date');
+                const timeField = document.getElementById('activity-scheduled-time');
+                
+                if (dateField) {
+                    dateField.value = scheduledDate.toISOString().split('T')[0];
+                }
+                if (timeField) {
+                    timeField.value = scheduledDate.toTimeString().slice(0, 5);
+                }
+            }
+            
+            // Set modal title for editing
+            const modalTitle = document.getElementById('activity-modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = `Edit Activity: ${activityData.title}`;
+            }
+            
+            // Open modal
+            await uiModals.openModal('activity-modal');
+            uiModals.showToast(`Editing "${activityData.title}"`, 'info');
+            logDebug('Activity edit modal opened successfully');
+            
+        } catch (error) {
+            logError('Failed to open activity edit modal:', error);
+            uiModals.showToast('Failed to load activity', 'error');
+        }
+    }
+
+    /**
+     * @description Update Activity - saves changes to existing activity
+     */
+    async updateActivity() {
+        try {
+            logDebug('Updating activity');
+            
+            const id = document.getElementById('activity-id')?.value;
+            if (!id) {
+                // This is a new activity, use saveActivity instead
+                await this.saveActivity();
+                return;
+            }
+            
+            // Load existing activity
+            const existingActivity = await db.load('activities', id);
+            if (!existingActivity) {
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            // Get form data
+            const formData = this.getActivityFormData();
+            if (!formData) {
+                return; // Validation failed
+            }
+            
+            // Get PC Number from quote if quote is selected
+            let pcId = null;
+            let pcNumber = null;
+            if (formData.quoteId) {
+                const quoteData = await db.load('quotes', formData.quoteId);
+                if (quoteData) {
+                    pcId = quoteData.pcId;
+                    pcNumber = quoteData.pcNumber;
+                }
+            }
+            
+            // Update activity data
+            const updatedActivity = {
+                ...existingActivity,
+                title: formData.title,
+                type: formData.type,
+                quoteId: formData.quoteId || null,
+                pcId: pcId,
+                pcNumber: pcNumber,
+                scheduledDate: formData.scheduledDate,
+                duration: formData.duration,
+                status: formData.status,
+                priority: formData.priority,
+                assignedTo: formData.assignedTo,
+                description: formData.description,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+            
+            await db.save('activities', updatedActivity);
+            uiModals.showToast(`Activity "${updatedActivity.title}" updated successfully!`, 'success');
+            
+            // Clear form and close modal
+            this.clearActivityForm();
+            this.closeActivityModal();
+            
+            // Refresh activities list if we're on activities page
+            if (this.currentPage === 'activities') {
+                await this.loadActivitiesData();
+            }
+            
+            logDebug('Activity updated successfully:', updatedActivity);
+            
+        } catch (error) {
+            logError('Failed to update activity:', error);
+            uiModals.showToast('Failed to update activity', 'error');
+        }
+    }
+
+    /**
+     * @description View Activity Details - opens detailed view
+     */
+    async viewActivityDetails(id) {
+        try {
+            logDebug(`Opening activity details for ID: ${id}`);
+            
+            const activityData = await db.load('activities', id);
+            if (!activityData) {
+                logError(`Activity not found: ${id}`);
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            // Store current activity in global state
+            window.currentActivity = activityData;
+            
+            logDebug('Activity details functionality will be restored soon');
+            uiModals.showToast('Activity details functionality will be restored soon', 'info');
+            
+        } catch (error) {
+            logError('Failed to open activity details:', error);
+            uiModals.showToast('Failed to load activity details', 'error');
+        }
     }
 
     // ===== QUOTES FUNCTIONALITY =====
@@ -1848,6 +2039,14 @@ function setupLegacyCompatibility() {
 
     window.saveActivity = async () => {
         await app.saveActivity();
+    };
+
+    window.editActivity = async (id) => {
+        await app.editActivity(id);
+    };
+
+    window.viewActivityDetails = async (id) => {
+        await app.viewActivityDetails(id);
     };
     
     window.showResourceModal = () => {
