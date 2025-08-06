@@ -694,6 +694,48 @@ class CRMApplication {
     }
 
     /**
+     * @description Add Quote for specific PC Number
+     * @param {string} pcId - PC Number ID
+     */
+    async addQuoteForPc(pcId) {
+        try {
+            logDebug(`Opening Quote modal for PC ID: ${pcId}`);
+            
+            // Load PC data to get details
+            const pcData = await db.load('pcNumbers', pcId);
+            if (!pcData) {
+                uiModals.showToast('PC Number not found', 'error');
+                return;
+            }
+            
+            // Open quote modal
+            await this.openQuoteModal();
+            
+            // Pre-fill the PC Number dropdown
+            const pcSelect = document.getElementById('quote-modal-pc');
+            if (pcSelect) {
+                pcSelect.value = pcData.pcNumber;
+                logDebug(`Pre-selected PC Number: ${pcData.pcNumber}`);
+            }
+            
+            // Pre-fill company name if it exists
+            const companyInput = document.getElementById('quote-modal-company');
+            if (companyInput && pcData.company) {
+                companyInput.value = pcData.company;
+                // Trigger company search to filter PC Numbers
+                await this.searchCompanies(pcData.company);
+                logDebug(`Pre-filled company: ${pcData.company}`);
+            }
+            
+            uiModals.showToast(`Creating quote for ${pcData.pcNumber}`, 'info');
+            
+        } catch (error) {
+            logError('Failed to add quote for PC:', error);
+            uiModals.showToast('Failed to open quote form', 'error');
+        }
+    }
+
+    /**
      * @description Load PC Numbers data
      */
     async loadPcNumbersData() {
@@ -714,6 +756,7 @@ class CRMApplication {
                             <td>
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
+                                <button onclick="window.addQuoteForPc('${pc.id}')" class="button success small">Add Quote</button>
                             </td>
                         </tr>
                     `).join('');
@@ -3700,6 +3743,7 @@ class CRMApplication {
                             <td>
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
+                                <button onclick="window.addQuoteForPc('${pc.id}')" class="button success small">Add Quote</button>
                             </td>
                         </tr>
                     `).join('');
@@ -3985,6 +4029,11 @@ function setupLegacyCompatibility() {
     window.viewPcDetails = async (id) => {
         logDebug('View PC details requested for ID:', id);
         await app.openPcDetailsPage(id);
+    };
+    
+    window.addQuoteForPc = async (id) => {
+        logDebug('Add Quote for PC requested for ID:', id);
+        await app.addQuoteForPc(id);
     };
     
     window.savePc = async () => {
