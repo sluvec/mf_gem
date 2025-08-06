@@ -996,6 +996,11 @@ class CRMApplication {
             
             logDebug('Quote saved successfully:', quoteData);
             
+            // Immediately open Quote Edit Modal for further editing
+            setTimeout(async () => {
+                await this.openQuoteEditModal(quoteData.id);
+            }, 500); // Small delay to allow modal transition
+            
         } catch (error) {
             logError('Failed to save quote:', error);
             uiModals.showToast('Failed to save quote', 'error');
