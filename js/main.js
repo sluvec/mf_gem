@@ -583,6 +583,9 @@ class CRMApplication {
                 case 'pcnumbers':
                     await this.loadPcNumbersData();
                     break;
+                case 'pc-detail':
+                    await this.loadPcDetailData();
+                    break;
                 case 'quotes':
                     await this.loadQuotesData();
                     break;
@@ -631,6 +634,59 @@ class CRMApplication {
             logDebug('Dashboard data loaded');
         } catch (error) {
             logError('Failed to load dashboard data:', error);
+        }
+    }
+
+    /**
+     * @description Load PC Detail data
+     */
+    async loadPcDetailData() {
+        try {
+            if (!window.currentPC) {
+                logError('No current PC data available for detail view');
+                return;
+            }
+
+            const pcData = window.currentPC;
+            logDebug('Loading PC detail data:', pcData);
+
+            // Populate main data fields
+            const fields = [
+                { id: 'pc-detail-number', value: pcData.pcNumber || 'N/A' },
+                { id: 'pc-detail-company-name', value: pcData.company || pcData.clientName || 'N/A' },
+                { id: 'pc-detail-project-name', value: pcData.projectTitle || 'N/A' },
+                { id: 'pc-detail-account-manager', value: pcData.accountManager || 'N/A' },
+                { id: 'pc-detail-client-industry', value: pcData.clientIndustry || 'N/A' },
+                { id: 'pc-detail-client-source', value: pcData.clientSource || 'N/A' },
+                { id: 'pc-detail-quote-limit', value: pcData.quoteLimit || 'N/A' },
+                { id: 'pc-detail-status', value: pcData.status || 'active' },
+                { id: 'pc-detail-project-description', value: pcData.projectDescription || 'No description available' },
+                { id: 'pc-detail-contact-name', value: pcData.contactName || 'N/A' },
+                { id: 'pc-detail-contact-phone', value: pcData.contactPhone || 'N/A' },
+                { id: 'pc-detail-contact-email', value: pcData.contactEmail || 'N/A' },
+                { id: 'pc-detail-postcode', value: pcData.postcode || 'N/A' }
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.textContent = field.value;
+                    logDebug(`Set ${field.id} = ${field.value}`);
+                } else {
+                    logError(`Field not found: ${field.id}`);
+                }
+            });
+
+            // Update page title
+            const titleElement = document.getElementById('pc-detail-title');
+            if (titleElement) {
+                titleElement.textContent = `PC Details - ${pcData.pcNumber || 'Unknown'}`;
+            }
+
+            logDebug('PC detail data loaded successfully');
+
+        } catch (error) {
+            logError('Failed to load PC detail data:', error);
         }
     }
 
@@ -946,6 +1002,7 @@ class CRMApplication {
                 { id: 'pc-edit-company', value: pcData.company || pcData.clientName || '' },
                 { id: 'pc-edit-title', value: pcData.projectTitle || '' },
                 { id: 'pc-edit-description', value: pcData.projectDescription || '' },
+                { id: 'pc-edit-account-manager', value: pcData.accountManager || '' },
                 { id: 'pc-edit-status', value: pcData.status || 'active' },
                 { id: 'pc-edit-contact-name', value: pcData.contactName || '' },
                 { id: 'pc-edit-contact-phone', value: pcData.contactPhone || '' },
@@ -1934,6 +1991,7 @@ class CRMApplication {
                 company: formData.company,
                 projectTitle: formData.projectTitle,
                 projectDescription: formData.projectDescription,
+                accountManager: formData.accountManager,
                 clientName: formData.company,
                 contactName: formData.contactName,
                 contactEmail: formData.contactEmail,
@@ -1987,14 +2045,15 @@ class CRMApplication {
             const company = document.getElementById('pc-edit-company')?.value || '';
             const projectTitle = document.getElementById('pc-edit-title')?.value || '';
             const projectDescription = document.getElementById('pc-edit-description')?.value || '';
+            const accountManager = document.getElementById('pc-edit-account-manager')?.value || '';
             const status = document.getElementById('pc-edit-status')?.value || 'active';
             const contactName = document.getElementById('pc-edit-contact-name')?.value || '';
             const contactEmail = document.getElementById('pc-edit-contact-email')?.value || '';
             const contactPhone = document.getElementById('pc-edit-contact-phone')?.value || '';
             
             // Validation
-            if (!company.trim() || !projectTitle.trim() || !contactName.trim()) {
-                uiModals.showToast('Please fill in required fields (Company, Project Title, Contact Name)', 'error');
+            if (!company.trim() || !projectTitle.trim() || !contactName.trim() || !accountManager.trim()) {
+                uiModals.showToast('Please fill in required fields (Company, Project Title, Contact Name, Account Manager)', 'error');
                 return;
             }
             
@@ -2004,6 +2063,7 @@ class CRMApplication {
                 clientName: company.trim(), // Keep both for compatibility
                 projectTitle: projectTitle.trim(),
                 projectDescription: projectDescription.trim(),
+                accountManager: accountManager.trim(),
                 status: status,
                 contactName: contactName.trim(),
                 contactEmail: contactEmail.trim(),
@@ -2035,9 +2095,10 @@ class CRMApplication {
         const company = document.getElementById('pc-company-name')?.value.trim();
         const projectTitle = document.getElementById('pc-project-name')?.value.trim();
         const contactName = document.getElementById('pc-contact-name')?.value.trim();
+        const accountManager = document.getElementById('pc-account-manager')?.value.trim();
         
-        if (!company || !projectTitle || !contactName) {
-            uiModals.showToast('Please fill in required fields (Company Name, Project Name, Contact Name)', 'error');
+        if (!company || !projectTitle || !contactName || !accountManager) {
+            uiModals.showToast('Please fill in required fields (Company Name, Project Name, Contact Name, Account Manager)', 'error');
             return null;
         }
         
@@ -2045,6 +2106,7 @@ class CRMApplication {
             company: company,
             projectTitle: projectTitle,
             projectDescription: document.getElementById('pc-project-description')?.value.trim() || '',
+            accountManager: accountManager,
             contactName: contactName,
             contactEmail: document.getElementById('pc-contact-email')?.value.trim() || '',
             contactPhone: document.getElementById('pc-contact-phone')?.value.trim() || '',
