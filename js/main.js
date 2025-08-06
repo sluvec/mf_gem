@@ -3488,6 +3488,17 @@ class CRMApplication {
     }
 
     /**
+     * @description Filter Quotes by PC number
+     */
+    async filterQuotesByPcNumber(query) {
+        try {
+            await this.applySmartFilter('quotes', 'pcNumber', query, 'quote-filter-results');
+        } catch (error) {
+            logError('Failed to filter Quotes by PC number:', error);
+        }
+    }
+
+    /**
      * @description Filter Activities by company name
      */
     async filterActivitiesByCompany(query) {
@@ -3539,7 +3550,7 @@ class CRMApplication {
             switch (dataType) {
                 case 'pcNumbers':
                     allData = await db.loadAll('pcNumbers');
-                    containerSelector = '#pc-numbers-list';
+                    containerSelector = '#pc-list';
                     loadDataMethod = 'loadPcNumbersData';
                     break;
                 case 'quotes':
@@ -3748,6 +3759,7 @@ class CRMApplication {
         try {
             document.getElementById('quote-filter-company').value = '';
             document.getElementById('quote-filter-account-manager').value = '';
+            document.getElementById('quote-filter-pc-number').value = '';
             await this.clearSmartFilter('quotes', 'quote-filter-results');
         } catch (error) {
             logError('Failed to clear quote filter:', error);
@@ -4020,6 +4032,7 @@ function setupLegacyCompatibility() {
     window.filterPcNumbersByPcNumber = (query) => app.filterPcNumbersByPcNumber(query);
     window.filterQuotesByCompany = (query) => app.filterQuotesByCompany(query);
     window.filterQuotesByAccountManager = (query) => app.filterQuotesByAccountManager(query);
+    window.filterQuotesByPcNumber = (query) => app.filterQuotesByPcNumber(query);
     window.filterActivitiesByCompany = (query) => app.filterActivitiesByCompany(query);
     window.filterActivitiesByAccountManager = (query) => app.filterActivitiesByAccountManager(query);
     window.filterActivitiesByPcNumber = (query) => app.filterActivitiesByPcNumber(query);
