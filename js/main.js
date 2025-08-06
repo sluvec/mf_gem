@@ -2801,11 +2801,7 @@ function setupLegacyCompatibility() {
         uiModals.showToast('Bulk operations will be restored soon', 'info');
     };
     
-    // Price list functions
-    window.createPriceList = () => {
-        logDebug('Create price list requested');
-        uiModals.showToast('Price list creation will be restored soon', 'info');
-    };
+
     
     // Placeholder for any other missing functions
     const createPlaceholderFunction = (name) => {
@@ -2820,7 +2816,9 @@ function setupLegacyCompatibility() {
         'editActivity', 'editQuote', 'showAddResourceToPriceList',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
-        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement'
+        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement',
+        'editResource', 'viewResourceDetails', 'editPriceList', 'viewPriceListDetails',
+        'showResourceModal', 'createPriceList'
     ];
     
     missingFunctions.forEach(funcName => {
