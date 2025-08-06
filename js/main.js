@@ -592,6 +592,9 @@ class CRMApplication {
                 case 'quotes':
                     await this.loadQuotesData();
                     break;
+                case 'quote-detail':
+                    await this.loadQuoteDetailData();
+                    break;
                 case 'activities':
                     await this.loadActivitiesData();
                     break;
@@ -690,6 +693,99 @@ class CRMApplication {
 
         } catch (error) {
             logError('Failed to load PC detail data:', error);
+        }
+    }
+
+    /**
+     * @description Load Quote detail data
+     */
+    async loadQuoteDetailData() {
+        try {
+            if (!window.currentQuote) {
+                logError('No current Quote data available for detail view');
+                return;
+            }
+
+            const quoteData = window.currentQuote;
+            logDebug('Loading Quote detail data:', quoteData);
+
+            // Populate main data fields
+            const fields = [
+                { id: 'quote-detail-number', value: quoteData.quoteNumber || quoteData.id || 'N/A' },
+                { id: 'quote-detail-pc-number', value: quoteData.pcNumber || 'N/A' },
+                { id: 'quote-detail-client-name', value: quoteData.clientName || quoteData.companyName || 'N/A' },
+                { id: 'quote-detail-project-title', value: quoteData.projectTitle || 'N/A' },
+                { id: 'quote-detail-value', value: quoteData.totalAmount ? `£${quoteData.totalAmount.toLocaleString()}` : 'N/A' },
+                { id: 'quote-detail-status', value: quoteData.status || 'draft' },
+                { id: 'quote-detail-valid-until', value: quoteData.validUntil ? new Date(quoteData.validUntil).toLocaleDateString() : 'N/A' },
+                { id: 'quote-detail-created-at', value: quoteData.createdAt ? new Date(quoteData.createdAt).toLocaleDateString() : 'N/A' },
+                { id: 'quote-detail-description', value: quoteData.description || 'No description' },
+                { id: 'quote-detail-version', value: quoteData.version || '1.0' },
+                { id: 'quote-detail-net-total', value: quoteData.netTotal ? `£${quoteData.netTotal.toLocaleString()}` : 'N/A' },
+                { id: 'quote-detail-vat-rate', value: quoteData.vatRate ? `${quoteData.vatRate}%` : '20%' },
+                { id: 'quote-detail-vat-amount', value: quoteData.vatAmount ? `£${quoteData.vatAmount.toLocaleString()}` : 'N/A' },
+                { id: 'quote-detail-discount', value: quoteData.discount ? `£${quoteData.discount.toLocaleString()}` : '£0' },
+                { id: 'quote-detail-total-cost', value: quoteData.totalCost ? `£${quoteData.totalCost.toLocaleString()}` : 'N/A' },
+                { id: 'quote-detail-standard-liability', value: quoteData.standardLiability || 'Standard' },
+                { id: 'quote-detail-declared-value', value: quoteData.declaredValue ? `£${quoteData.declaredValue.toLocaleString()}` : 'N/A' },
+                { id: 'quote-detail-price-list', value: quoteData.priceList || 'Standard Price List' },
+                { id: 'quote-detail-recycling-fee', value: quoteData.recyclingFee ? `£${quoteData.recyclingFee}` : '£0' },
+                { id: 'quote-detail-environmental-fee', value: quoteData.environmentalFee ? `£${quoteData.environmentalFee}` : '£0' },
+                { id: 'quote-detail-volume-rebate', value: quoteData.volumeRebate ? `£${quoteData.volumeRebate}` : '£0' },
+                { id: 'quote-detail-loyalty-rebate', value: quoteData.loyaltyRebate ? `£${quoteData.loyaltyRebate}` : '£0' }
+            ];
+
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.textContent = field.value;
+                    logDebug(`Set ${field.id} = ${field.value}`);
+                } else {
+                    logError(`Field not found: ${field.id}`);
+                }
+            });
+
+            // Update page title
+            const titleElement = document.getElementById('quote-detail-title');
+            if (titleElement) {
+                titleElement.textContent = `Quote Details - ${quoteData.quoteNumber || quoteData.id || 'Unknown'}`;
+            }
+
+            // Handle quote items display
+            const itemsContainer = document.getElementById('quote-detail-items');
+            if (itemsContainer) {
+                if (quoteData.items && quoteData.items.length > 0) {
+                    itemsContainer.innerHTML = quoteData.items.map(item => `
+                        <div style="padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
+                            <strong>${item.name || 'Item'}</strong> - ${item.description || 'No description'}<br>
+                            <small>Quantity: ${item.quantity || 1} | Unit Price: £${(item.unitPrice || 0).toFixed(2)} | Total: £${((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)}</small>
+                        </div>
+                    `).join('');
+                } else {
+                    itemsContainer.innerHTML = '<p style="margin: 0; color: #6b7280;">No items added to this quote yet.</p>';
+                }
+            }
+
+            // Handle other costs section
+            const otherCostsSection = document.getElementById('quote-detail-other-costs-section');
+            const otherCostsContainer = document.getElementById('quote-detail-other-costs');
+            if (quoteData.otherCosts && quoteData.otherCosts.length > 0) {
+                if (otherCostsSection) otherCostsSection.style.display = 'block';
+                if (otherCostsContainer) {
+                    otherCostsContainer.innerHTML = quoteData.otherCosts.map(cost => `
+                        <div style="padding: 0.25rem 0;">
+                            ${cost.description}: £${cost.amount.toFixed(2)}
+                        </div>
+                    `).join('');
+                }
+            } else {
+                if (otherCostsSection) otherCostsSection.style.display = 'none';
+            }
+
+            logDebug('Quote detail data loaded successfully');
+
+        } catch (error) {
+            logError('Failed to load Quote detail data:', error);
         }
     }
 
@@ -2057,8 +2153,10 @@ class CRMApplication {
             // Store current quote in global state
             window.currentQuote = quoteData;
             
-            logDebug('Quote details functionality will be restored soon');
-            uiModals.showToast('Quote details functionality will be restored soon', 'info');
+            // Navigate to quote detail page
+            await this.navigateToPage('quote-detail');
+            
+            logDebug(`Quote details loaded for: ${quoteData.quoteNumber || quoteData.id}`);
             
         } catch (error) {
             logError('Failed to open quote details:', error);
