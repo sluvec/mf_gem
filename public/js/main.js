@@ -1037,6 +1037,123 @@ class CRMApplication {
         if (form) {
             form.reset();
         }
+        // Also hide company dropdown
+        this.hideCompanyDropdown();
+    }
+
+    /**
+     * @description Search companies for quote company field
+     */
+    async searchCompanies(query) {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            const resultsContainer = document.getElementById('company-search-results');
+            
+            if (!resultsContainer) return;
+            
+            if (!query || query.trim().length === 0) {
+                resultsContainer.style.display = 'none';
+                // Show all PC Numbers when no company filter
+                await this.updatePcNumberDropdown(pcNumbers);
+                return;
+            }
+            
+            // Filter companies by query
+            const filteredCompanies = pcNumbers.filter(pc => 
+                pc.company && pc.company.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            // Get unique companies
+            const uniqueCompanies = [...new Set(filteredCompanies.map(pc => pc.company))];
+            
+            if (uniqueCompanies.length === 0) {
+                resultsContainer.innerHTML = '<div style="padding: 0.5rem; color: #6b7280;">No companies found</div>';
+                resultsContainer.style.display = 'block';
+                // Show all PC Numbers if no match
+                await this.updatePcNumberDropdown(pcNumbers);
+                return;
+            }
+            
+            // Display company results
+            resultsContainer.innerHTML = uniqueCompanies.map(company => `
+                <div onclick="window.selectCompany('${company}')" 
+                     style="padding: 0.5rem; cursor: pointer; border-bottom: 1px solid #f1f5f9;"
+                     onmouseover="this.style.backgroundColor='#f8fafc'"
+                     onmouseout="this.style.backgroundColor='white'">
+                    ${company}
+                </div>
+            `).join('');
+            
+            resultsContainer.style.display = 'block';
+            
+            // Update PC Numbers dropdown to show only for filtered companies
+            await this.updatePcNumberDropdown(filteredCompanies);
+            
+        } catch (error) {
+            logError('Failed to search companies:', error);
+        }
+    }
+
+    /**
+     * @description Show company dropdown
+     */
+    showCompanyDropdown() {
+        const resultsContainer = document.getElementById('company-search-results');
+        const input = document.getElementById('quote-modal-company');
+        
+        if (resultsContainer && input && input.value.trim().length > 0) {
+            resultsContainer.style.display = 'block';
+        }
+    }
+
+    /**
+     * @description Hide company dropdown
+     */
+    hideCompanyDropdown() {
+        const resultsContainer = document.getElementById('company-search-results');
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+        }
+    }
+
+    /**
+     * @description Select company from dropdown
+     */
+    async selectCompany(companyName) {
+        try {
+            const input = document.getElementById('quote-modal-company');
+            if (input) {
+                input.value = companyName;
+            }
+            
+            this.hideCompanyDropdown();
+            
+            // Filter PC Numbers for this company
+            const pcNumbers = await db.loadAll('pcNumbers');
+            const filteredPcNumbers = pcNumbers.filter(pc => pc.company === companyName);
+            await this.updatePcNumberDropdown(filteredPcNumbers);
+            
+            logDebug(`Selected company: ${companyName}, found ${filteredPcNumbers.length} PC Numbers`);
+            
+        } catch (error) {
+            logError('Failed to select company:', error);
+        }
+    }
+
+    /**
+     * @description Update PC Number dropdown with filtered results
+     */
+    async updatePcNumberDropdown(pcNumbers) {
+        const pcSelect = document.getElementById('quote-modal-pc');
+        if (!pcSelect) return;
+        
+        pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
+        
+        pcNumbers.forEach(pc => {
+            pcSelect.innerHTML += `<option value="${pc.id}" data-pc-number="${pc.pcNumber}">${pc.pcNumber} - ${pc.company}</option>`;
+        });
+        
+        logDebug(`Updated PC Number dropdown with ${pcNumbers.length} options`);
     }
 
     /**
@@ -1526,6 +1643,23 @@ function setupLegacyCompatibility() {
 
     window.updateQuote = async () => {
         await app.updateQuote();
+    };
+
+    window.searchCompanies = (query) => {
+        app.searchCompanies(query);
+    };
+
+    window.showCompanyDropdown = () => {
+        app.showCompanyDropdown();
+    };
+
+    window.hideCompanyDropdown = () => {
+        // Delay to allow click on dropdown items
+        setTimeout(() => app.hideCompanyDropdown(), 200);
+    };
+
+    window.selectCompany = async (companyName) => {
+        await app.selectCompany(companyName);
     };
     
     window.showActivityModal = () => {
