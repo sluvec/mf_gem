@@ -1435,6 +1435,10 @@ class CRMApplication {
             form.reset();
         }
         
+        // Clear activity ID to ensure this is treated as a new activity
+        const activityIdField = document.getElementById('activity-id');
+        if (activityIdField) activityIdField.value = '';
+        
         // Reset to default values
         const statusField = document.getElementById('activity-status');
         const priorityField = document.getElementById('activity-priority');
@@ -1510,6 +1514,12 @@ class CRMApplication {
             const modalTitle = document.getElementById('activity-modal-title');
             if (modalTitle) {
                 modalTitle.textContent = `Edit Activity: ${activityData.title}`;
+            }
+            
+            // Close details modal if it's open
+            const detailsModal = document.getElementById('activity-details-modal');
+            if (detailsModal && detailsModal.style.display !== 'none') {
+                uiModals.closeModal('activity-details-modal');
             }
             
             // Open modal
