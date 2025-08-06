@@ -2022,21 +2022,18 @@ class CRMApplication {
             // Hide all views
             const listView = document.getElementById('activities-list-view');
             const calendarView = document.getElementById('activities-calendar-view');
-            const workflowView = document.getElementById('activities-workflow-view');
             const calendarNavigation = document.getElementById('calendar-navigation');
             
             if (listView) listView.style.display = 'none';
             if (calendarView) calendarView.style.display = 'none';
-            if (workflowView) workflowView.style.display = 'none';
             if (calendarNavigation) calendarNavigation.style.display = 'none';
             
             // Update button styles
             const listBtn = document.getElementById('activities-list-view-btn');
             const calendarBtn = document.getElementById('activities-calendar-view-btn');
-            const workflowBtn = document.getElementById('activities-workflow-view-btn');
             
             // Reset button styles
-            [listBtn, calendarBtn, workflowBtn].forEach(btn => {
+            [listBtn, calendarBtn].forEach(btn => {
                 if (btn) {
                     btn.style.background = 'transparent';
                     btn.style.color = '#374151';
@@ -2064,14 +2061,7 @@ class CRMApplication {
                     this.initializeCalendar();
                     break;
                     
-                case 'workflow':
-                    if (workflowView) workflowView.style.display = 'block';
-                    if (workflowBtn) {
-                        workflowBtn.style.background = '#3b82f6';
-                        workflowBtn.style.color = 'white';
-                    }
-                    uiModals.showToast('Workflow view coming soon', 'info');
-                    break;
+
                     
                 default:
                     logError('Unknown view type:', viewType);
@@ -2665,8 +2655,7 @@ function setupLegacyCompatibility() {
         'editActivity', 'editQuote', 'showAddResourceToPriceList',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
-        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement',
-        'autoLayoutWorkflow', 'calculateCriticalPath', 'optimizeWorkflow'
+        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement'
     ];
     
     missingFunctions.forEach(funcName => {

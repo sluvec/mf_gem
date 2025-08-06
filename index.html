@@ -1134,10 +1134,7 @@
                                 style="padding: 0.5rem 1rem; border: none; background: transparent; color: #374151; border-radius: 0.25rem;">
                             📅 Calendar View
                         </button>
-                        <button id="activities-workflow-view-btn" onclick="window.switchActivitiesView('workflow')" 
-                                style="padding: 0.5rem 1rem; border: none; background: transparent; color: #374151; border-radius: 0.25rem;">
-                            🔗 Workflow
-                        </button>
+
                     </div>
                 </div>
                 
@@ -1508,98 +1505,7 @@
                 </div>
             </div>
 
-            <!-- NEW Sprint 4.4: Workflow View -->
-            <div id="activities-workflow-view" style="display: none;">
-                <!-- Workflow Stats Dashboard -->
-                <div class="workflow-stats">
-                    <div class="workflow-stat">
-                        <div class="workflow-stat-value" id="workflow-total-activities">0</div>
-                        <div class="workflow-stat-label">Total Activities</div>
-                    </div>
-                    <div class="workflow-stat">
-                        <div class="workflow-stat-value" id="workflow-in-progress">0</div>
-                        <div class="workflow-stat-label">In Progress</div>
-                    </div>
-                    <div class="workflow-stat">
-                        <div class="workflow-stat-value" id="workflow-completed">0</div>
-                        <div class="workflow-stat-label">Completed</div>
-                    </div>
-                    <div class="workflow-stat">
-                        <div class="workflow-stat-value" id="workflow-blocked">0</div>
-                        <div class="workflow-stat-label">Blocked</div>
-                    </div>
-                    <div class="workflow-stat">
-                        <div class="workflow-stat-value" id="workflow-critical-path">0</div>
-                        <div class="workflow-stat-label">Critical Path Days</div>
-                    </div>
-                </div>
 
-                <!-- Workflow Canvas -->
-                <div class="workflow-panel">
-                    <div class="workflow-header">
-                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 600;">🔗 Activity Dependencies & Workflow</h2>
-                        <div class="workflow-toolbar">
-                            <div class="workflow-mode-toggle">
-                                <button class="workflow-mode-btn active" onclick="window.setWorkflowMode('view')">👁️ View</button>
-                                <button class="workflow-mode-btn" onclick="window.setWorkflowMode('edit')">✏️ Edit</button>
-                                <button class="workflow-mode-btn" onclick="window.setWorkflowMode('connect')">🔗 Connect</button>
-                            </div>
-                            <button class="workflow-action-btn" onclick="window.autoLayoutWorkflow()">🔄 Auto Layout</button>
-                            <button class="workflow-action-btn" onclick="window.calculateCriticalPath()">🚨 Critical Path</button>
-                            <button class="workflow-action-btn primary" onclick="window.optimizeWorkflow()">⚡ Optimize</button>
-                        </div>
-                    </div>
-                    
-                    <div id="workflow-canvas" class="workflow-canvas">
-                        <!-- Workflow nodes and connections will be generated here -->
-                        <svg id="workflow-connections" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
-                            <defs>
-                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                                    <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
-                                </marker>
-                            </defs>
-                        </svg>
-                        
-                        <div id="workflow-nodes-container">
-                            <!-- Workflow nodes will be positioned here -->
-                        </div>
-                        
-                        <!-- Workflow minimap -->
-                        <div class="workflow-minimap">
-                            <div style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb; font-size: 0.75rem; font-weight: 600; background: #f8fafc;">
-                                Workflow Overview
-                            </div>
-                            <div id="workflow-minimap-content" style="padding: 0.5rem; font-size: 0.75rem; color: #6b7280;">
-                                <!-- Minimap content -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Workflow Legend -->
-                <div class="workflow-legend">
-                    <div class="legend-item">
-                        <div class="legend-indicator pending"></div>
-                        <span>Pending</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-indicator in-progress"></div>
-                        <span>In Progress</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-indicator completed"></div>
-                        <span>Completed</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-indicator blocked"></div>
-                        <span>Blocked</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-indicator critical"></div>
-                        <span>Critical Path</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div id="activity-detail" class="page">
@@ -2811,44 +2717,7 @@
             </div>
         </div>
         
-        <!-- NEW Sprint 4.4: Dependencies Section -->
-        <div class="form-section">
-            <h3>Activity Dependencies</h3>
-            <div style="margin-bottom: 1rem;">
-                <label>Dependencies & Workflow</label>
-                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                    <button type="button" onclick="window.showDependencySelector('predecessor')" class="resource-action-btn primary">
-                        ⬅️ Add Predecessor
-                    </button>
-                    <button type="button" onclick="window.showDependencySelector('successor')" class="resource-action-btn">
-                        ➡️ Add Successor
-                    </button>
-                    <button type="button" onclick="window.calculateActivitySchedule()" class="resource-action-btn">
-                        📊 Auto Schedule
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Predecessors -->
-            <div class="dependency-section">
-                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">⬅️ Predecessors (Must complete before this activity)</div>
-                <div id="activity-predecessors-list" class="dependency-list">
-                    <div id="activity-predecessors-empty" style="text-align: center; color: #6b7280; font-size: 0.875rem; padding: 1rem;">
-                        No predecessors defined. This activity can start immediately.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Successors -->
-            <div class="dependency-section">
-                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">➡️ Successors (Will start after this activity)</div>
-                <div id="activity-successors-list" class="dependency-list">
-                    <div id="activity-successors-empty" style="text-align: center; color: #6b7280; font-size: 0.875rem; padding: 1rem;">
-                        No successors defined. This activity has no dependent activities.
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Management & Timing Section -->
         <div class="form-section">
