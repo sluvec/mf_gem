@@ -855,8 +855,8 @@ class CRMApplication {
                 }
             });
             
-            // Show modal
-            modal.style.display = 'block';
+            // Show modal using uiModals
+            await uiModals.openModal('pc-edit-modal');
             uiModals.showToast(`Editing ${pcData.pcNumber}`, 'info');
             logDebug('PC edit modal opened successfully');
             
@@ -870,10 +870,7 @@ class CRMApplication {
      * @description Close PC Edit Modal
      */
     closePcEditModal() {
-        const modal = document.getElementById('pc-edit-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
+        uiModals.closeModal('pc-edit-modal');
     }
 
     /**
@@ -1123,9 +1120,7 @@ function setupLegacyCompatibility() {
         await app.updatePcNumber();
     };
     
-    window.closePcEditModal = () => {
-        app.closePcEditModal();
-    };
+
     
     window.showNewQuoteModal = () => {
         logDebug('Quote modal requested');
