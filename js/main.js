@@ -2784,7 +2784,7 @@ class CRMApplication {
      */
     async editPriceList(id) {
         try {
-            const priceList = await db.load('pricelists', id);
+            const priceList = await db.load('priceLists', id);
             if (!priceList) {
                 uiModals.showToast('Price list not found', 'error');
                 return;
@@ -2810,7 +2810,7 @@ class CRMApplication {
      */
     async viewPriceListDetails(id) {
         try {
-            const priceList = await db.load('pricelists', id);
+            const priceList = await db.load('priceLists', id);
             if (!priceList) {
                 uiModals.showToast('Price list not found', 'error');
                 return;
