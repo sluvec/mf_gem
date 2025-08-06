@@ -4,10 +4,262 @@
  */
 
 import { logInfo, logError, logDebug } from './utils.js';
-import CRMApplication from './core/app.js';
+import { db } from './database.js';
 import { uiModals } from './ui-modals.js';
-import { stateManager } from './shared/state-manager.js';
-import { errorHandler } from './shared/error-handler.js';
+
+/**
+ * @description Simplified CRM Application Class
+ */
+class CRMApplication {
+    constructor() {
+        this.initialized = false;
+        this.currentPage = 'dashboard';
+        this.currentUser = null;
+    }
+
+    /**
+     * @description Initialize the application
+     */
+    async initialize() {
+        const initTimeout = setTimeout(() => {
+            logError('Application initialization timed out');
+            this.hideLoadingOverlay();
+        }, 30000);
+
+        try {
+            logInfo('🚀 Initializing CRM Application...');
+            this.showLoadingOverlay('Initializing application...');
+            
+            this.updateProgress(20, 'Connecting to database...');
+            await this.initializeDatabase();
+            
+            this.updateProgress(50, 'Setting up user interface...');
+            this.setupUI();
+            
+            this.updateProgress(75, 'Setting up event listeners...');
+            this.setupEventListeners();
+            
+            this.updateProgress(90, 'Finalizing setup...');
+            this.navigateToPage(this.currentPage);
+            
+            this.updateProgress(100, 'Ready!');
+            
+            this.initialized = true;
+            clearTimeout(initTimeout);
+            setTimeout(() => this.hideLoadingOverlay(), 1000);
+            
+            logInfo('✅ CRM Application initialized successfully');
+            
+        } catch (error) {
+            clearTimeout(initTimeout);
+            logError('❌ Failed to initialize CRM application:', error);
+            this.hideLoadingOverlay();
+            throw error;
+        }
+    }
+
+    /**
+     * @description Initialize database
+     */
+    async initializeDatabase() {
+        try {
+            logDebug('🔵 Starting database initialization...');
+            await db.initialize();
+            logDebug('🔵 Database initialization completed');
+        } catch (error) {
+            logError('Database initialization failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * @description Setup UI components
+     */
+    setupUI() {
+        this.setupLoginSystem();
+        this.setupNavigation();
+        this.initializeMobileMenu();
+    }
+
+    /**
+     * @description Setup login system
+     */
+    setupLoginSystem() {
+        const userSelect = document.getElementById('user-select');
+        if (userSelect) {
+            userSelect.innerHTML = `
+                <option value="">Select User...</option>
+                <option value="slav">👨‍💼 Slav (admin)</option>
+                <option value="rob">👨‍💻 Rob (manager)</option>
+                <option value="kayleigh">👩‍💼 Kayleigh (manager)</option>
+                <option value="terry">👨‍🔧 Terry (user)</option>
+                <option value="phil">👨‍📊 Phil (user)</option>
+            `;
+        }
+
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser && userSelect) {
+            userSelect.value = savedUser;
+            this.setCurrentUser(savedUser);
+        } else {
+            this.showLoginModal();
+        }
+    }
+
+    /**
+     * @description Setup navigation
+     */
+    setupNavigation() {
+        const navItems = document.querySelectorAll('[data-page]');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = item.getAttribute('data-page');
+                this.navigateToPage(page);
+            });
+        });
+    }
+
+    /**
+     * @description Setup event listeners
+     */
+    setupEventListeners() {
+        // Additional event listeners can be added here
+    }
+
+    /**
+     * @description Navigate to a page
+     * @param {string} pageName - Page name to navigate to
+     */
+    navigateToPage(pageName) {
+        try {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.style.display = 'none');
+
+            // Show target page
+            const targetPage = document.getElementById(pageName);
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                this.currentPage = pageName;
+
+                // Update navigation state
+                this.updateNavigationState(pageName);
+
+                logDebug(`Navigated to page: ${pageName}`);
+            } else {
+                logError(`Page not found: ${pageName}`);
+            }
+        } catch (error) {
+            logError('Navigation error:', error);
+        }
+    }
+
+    /**
+     * @description Update navigation state
+     */
+    updateNavigationState(activePageId) {
+        const navItems = document.querySelectorAll('[data-page]');
+        navItems.forEach(item => {
+            const pageId = item.getAttribute('data-page');
+            if (pageId === activePageId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    /**
+     * @description Set current user
+     */
+    setCurrentUser(userId) {
+        this.currentUser = userId;
+        localStorage.setItem('currentUser', userId);
+        
+        const userDisplay = document.getElementById('current-user');
+        if (userDisplay) {
+            const userMap = {
+                'slav': '👨‍💼 Slav',
+                'rob': '👨‍💻 Rob', 
+                'kayleigh': '👩‍💼 Kayleigh',
+                'terry': '👨‍🔧 Terry',
+                'phil': '👨‍📊 Phil'
+            };
+            userDisplay.textContent = userMap[userId] || userId;
+        }
+        
+        logInfo(`User logged in: ${userId}`);
+    }
+
+    /**
+     * @description Show login modal
+     */
+    showLoginModal() {
+        uiModals.openModal('login-modal');
+    }
+
+    /**
+     * @description Initialize mobile menu
+     */
+    initializeMobileMenu() {
+        const toggleButton = document.getElementById('mobile-menu-toggle');
+        const navigation = document.getElementById('main-navigation');
+        
+        if (toggleButton && navigation) {
+            toggleButton.addEventListener('click', () => {
+                navigation.classList.toggle('mobile-open');
+            });
+        }
+    }
+
+    /**
+     * @description Show loading overlay
+     */
+    showLoadingOverlay(message = 'Loading...') {
+        const overlay = document.getElementById('loading-overlay');
+        const text = document.getElementById('progress-text');
+        
+        if (overlay) {
+            overlay.style.display = 'flex';
+            overlay.classList.add('active');
+        }
+        
+        if (text) {
+            text.textContent = message;
+        }
+    }
+
+    /**
+     * @description Hide loading overlay
+     */
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('loading-overlay');
+        
+        if (overlay) {
+            overlay.style.display = 'none';
+            overlay.classList.remove('active');
+        }
+    }
+
+    /**
+     * @description Update progress
+     */
+    updateProgress(percentage, message = '') {
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        if (progressBar) {
+            progressBar.style.width = `${percentage}%`;
+        }
+        
+        if (progressText && message) {
+            progressText.textContent = message;
+        }
+        
+        logDebug(`Progress: ${percentage}% - ${message}`);
+    }
+}
 
 /**
  * @description Application instance
@@ -57,87 +309,51 @@ async function initializeApplication() {
 
 /**
  * @description Setup legacy compatibility functions
- * @description These functions maintain backward compatibility with existing HTML
  */
 function setupLegacyCompatibility() {
-    // PC Numbers functions
-    window.showNewPcModal = () => app.pcController?.showNewPcModal();
-    window.editPC = (id) => app.pcController?.showEditPcModal(id);
-    window.viewPcDetails = (id) => app.pcController?.viewPcDetails(id);
-    window.deletePcNumber = (id) => app.pcController?.deletePcNumber(id);
+    // Navigation functions
+    window.navigateToPage = (page) => app.navigateToPage(page);
+    window.showPage = (page) => app.navigateToPage(page);
     
-    // Quote functions
-    window.showNewQuoteModal = () => app.quoteController?.showNewQuoteModal();
-    window.searchCompanies = (term) => app.quoteController?.searchCompanies(term);
-    window.selectCompany = (name) => app.quoteController?.selectCompany(name);
-    window.showCompanyDropdown = () => app.quoteController?.showCompanyDropdown();
-    window.hideCompanyDropdown = () => app.quoteController?.hideCompanyDropdown();
-    window.filterPcNumbersByCompany = (company) => app.quoteController?.filterPcNumbersByCompany(company);
+    // Modal functions (placeholders for now)
+    window.showNewPcModal = () => {
+        logDebug('PC Number modal requested');
+        uiModals.showToast('PC Number functionality will be restored soon', 'info');
+    };
     
-    // Modal functions
+    window.showNewQuoteModal = () => {
+        logDebug('Quote modal requested');
+        uiModals.showToast('Quote functionality will be restored soon', 'info');
+    };
+    
+    window.showActivityModal = () => {
+        logDebug('Activity modal requested');
+        uiModals.showToast('Activity functionality will be restored soon', 'info');
+    };
+    
+    window.showResourceModal = () => {
+        logDebug('Resource modal requested');
+        uiModals.showToast('Resource functionality will be restored soon', 'info');
+    };
+    
+    window.showPriceListModal = () => {
+        logDebug('Price List modal requested');
+        uiModals.showToast('Price List functionality will be restored soon', 'info');
+    };
+    
+    // Close modal functions
     window.closeActivityModal = () => uiModals.closeModal('activity-modal');
     window.closeResourceModal = () => uiModals.closeModal('resource-modal');
     window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
-    window.closeQuoteModal = () => app.quoteController?.closeQuoteModal();
-    window.closePcModal = () => app.pcController?.closePcModal();
-    window.closePcEditModal = () => app.pcController?.closePcEditModal();
-    
-    // Navigation functions
-    window.navigateToPage = (page) => app.navigateToPage(page);
-    window.showPage = (page) => app.navigateToPage(page); // Alternative name
-    
-    // Login functions
-    window.handleLogin = (event) => {
-        event.preventDefault();
-        const userSelect = document.getElementById('user-select');
-        const userId = userSelect?.value;
-        
-        if (userId) {
-            app.setCurrentUser(userId);
-            uiModals.closeModal('login-modal');
-        } else {
-            uiModals.showToast('Please select a user', 'error');
-        }
-    };
-    
-    // State access functions for debugging
-    window.getAppState = () => stateManager.getSnapshot();
-    window.getAppStats = () => app.getStats();
-    window.getErrorStats = () => errorHandler.getStats();
-    
-    // Legacy data access (for backward compatibility)
-    window.getCurrentPC = () => app.pcService?.getCurrentPcNumber();
-    window.getAllPcNumbers = () => stateManager.getState('data.allPcNumbers', []);
-    window.getAllQuotes = () => stateManager.getState('data.allQuotes', []);
-    window.getAllCompanies = () => stateManager.getState('data.allCompanies', []);
-    
-    // Activity functions (placeholder for future implementation)
-    window.showActivityModal = () => {
-        // TODO: Implement activity modal
-        logDebug('Activity modal requested - not yet implemented in new architecture');
-        uiModals.openModal('activity-modal');
-    };
-    
-    // Resource functions (placeholder for future implementation)  
-    window.showResourceModal = () => {
-        // TODO: Implement resource modal
-        logDebug('Resource modal requested - not yet implemented in new architecture');
-        uiModals.openModal('resource-modal');
-    };
-    
-    // Price list functions (placeholder for future implementation)
-    window.showPriceListModal = () => {
-        // TODO: Implement price list modal
-        logDebug('Price list modal requested - not yet implemented in new architecture');
-        uiModals.openModal('pricelist-modal');
-    };
+    window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
+    window.closePcModal = () => uiModals.closeModal('pc-modal');
+    window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
     
     logDebug('Legacy compatibility functions setup completed');
 }
 
 /**
  * @description Handle user login
- * @param {Event} event - Form submit event
  */
 window.handleLogin = (event) => {
     event.preventDefault();
@@ -159,7 +375,7 @@ window.handleLogin = (event) => {
             uiModals.showToast('Application not ready', 'error');
         }
     } catch (error) {
-        errorHandler.handleError(error, 'User Login');
+        logError('Login error:', error);
     }
 };
 
@@ -169,19 +385,11 @@ window.handleLogin = (event) => {
 window.toggleMobileMenu = () => {
     try {
         const navigation = document.getElementById('main-navigation');
-        const isOpen = stateManager.getState('ui.mobileMenuOpen', false);
-        
-        stateManager.setState('ui.mobileMenuOpen', !isOpen);
-        
         if (navigation) {
-            if (!isOpen) {
-                navigation.classList.add('mobile-open');
-            } else {
-                navigation.classList.remove('mobile-open');
-            }
+            navigation.classList.toggle('mobile-open');
         }
     } catch (error) {
-        errorHandler.handleError(error, 'Mobile Menu Toggle');
+        logError('Mobile menu toggle error:', error);
     }
 };
 
