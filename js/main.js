@@ -2760,7 +2760,7 @@ class CRMApplication {
                     
                     <div style="text-align: right; margin-top: 1rem;">
                         <button onclick="window.editResource('${resource.id}')" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; margin-right: 0.5rem;">Edit</button>
-                        <button onclick="uiModals.closeModal('resource-details-modal')" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Close</button>
+                        <button onclick="window.closeResourceDetailsModal()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Close</button>
                     </div>
                 </div>
             `;
@@ -3244,11 +3244,6 @@ function setupLegacyCompatibility() {
         await app.viewActivityDetails(id);
     };
     
-    window.showResourceModal = () => {
-        logDebug('Resource modal requested');
-        uiModals.showToast('Resource functionality will be restored soon', 'info');
-    };
-    
     window.showPriceListModal = () => {
         logDebug('Price List modal requested');
         uiModals.showToast('Price List functionality will be restored soon', 'info');
@@ -3263,6 +3258,7 @@ function setupLegacyCompatibility() {
     window.showResourceModal = () => app.showResourceModal();
     window.editResource = (id) => app.editResource(id);
     window.viewResourceDetails = (id) => app.viewResourceDetails(id);
+    window.closeResourceDetailsModal = () => uiModals.closeModal('resource-details-modal');
 
     // Price Lists functions
     window.editPriceList = (id) => app.editPriceList(id);
