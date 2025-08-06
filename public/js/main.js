@@ -40,7 +40,7 @@ class CRMApplication {
             this.setupEventListeners();
             
             this.updateProgress(90, 'Finalizing setup...');
-            this.navigateToPage(this.currentPage);
+            await this.navigateToPage(this.currentPage);
 
             this.updateProgress(100, 'Ready!');
             
@@ -329,10 +329,10 @@ class CRMApplication {
     setupNavigation() {
         const navItems = document.querySelectorAll('[data-show-page]');
         navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const page = item.getAttribute('data-show-page');
-                this.navigateToPage(page);
+                await this.navigateToPage(page);
             });
         });
     }
@@ -348,7 +348,7 @@ class CRMApplication {
      * @description Navigate to a page
      * @param {string} pageName - Page name to navigate to
      */
-    navigateToPage(pageName) {
+    async navigateToPage(pageName) {
         try {
             logDebug(`Attempting to navigate to: ${pageName}`);
             
