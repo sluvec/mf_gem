@@ -1,0 +1,869 @@
+{
+  "pcNumbers": [
+    {
+      "pcNumber": "PC-2024-004",
+      "company": "Industrial Manufacturing UK",
+      "reference": "Head Office Consolidation",
+      "projectTitle": "Manufacturing HQ Office Consolidation",
+      "projectDescription": "Consolidating three satellite offices into new Birmingham headquarters, heavy equipment and machinery documentation",
+      "clientName": "Industrial Manufacturing UK",
+      "contactName": "Robert Stevens",
+      "estimatedValue": 67500,
+      "status": "active",
+      "date": "2025-07-14T22:30:45.691Z",
+      "id": "0bff7062-5ec0-4852-9396-b4d1183645b6",
+      "createdAt": "2025-08-03T22:30:45.693Z"
+    },
+    {
+      "pcNumber": "PC-2024-001",
+      "company": "Fintech Innovations Ltd",
+      "reference": "City to Canary Wharf Move",
+      "projectTitle": "Complete Office Relocation - City to Canary Wharf",
+      "projectDescription": "Full office relocation for 85 staff from City of London to new Canary Wharf headquarters including IT infrastructure and secure document handling",
+      "clientName": "Fintech Innovations Ltd",
+      "contactName": "James Morrison",
+      "estimatedValue": 45000,
+      "status": "active",
+      "date": "2025-07-22T22:30:45.691Z",
+      "id": "19273650-8880-46fc-a36a-b81db0d84a1f",
+      "createdAt": "2025-08-03T22:30:45.692Z"
+    },
+    {
+      "pcNumber": "PC-2024-007",
+      "company": "Boutique Investments Ltd",
+      "reference": "Mayfair Office Setup",
+      "projectTitle": "Premium Investment Office Fitout",
+      "projectDescription": "High-end investment firm establishing prestigious Mayfair office, white-glove service required for antique furniture and artwork",
+      "clientName": "Boutique Investments Ltd",
+      "contactName": "Lady Catherine Worthington",
+      "estimatedValue": 85000,
+      "status": "draft",
+      "date": "2025-07-29T22:30:45.691Z",
+      "id": "288bf9ac-75c6-4002-b772-2d8f280fea70",
+      "createdAt": "2025-08-03T22:30:45.694Z"
+    },
+    {
+      "pcNumber": "PC-2024-008",
+      "company": "NHS Trust Admin",
+      "reference": "Healthcare Admin Relocation",
+      "projectTitle": "NHS Administrative Office Move",
+      "projectDescription": "NHS Trust relocating administrative offices with strict security requirements for patient data and medical records",
+      "clientName": "NHS Trust Admin",
+      "contactName": "Dr. Sarah Williams",
+      "estimatedValue": 22500,
+      "status": "active",
+      "date": "2025-07-19T22:30:45.691Z",
+      "id": "5f3fc713-993d-4b28-83e8-b1326711ea3d",
+      "createdAt": "2025-08-03T22:30:45.694Z"
+    },
+    {
+      "pcNumber": "PC-2024-002",
+      "company": "Chambers & Associates",
+      "reference": "Law Firm Expansion Move",
+      "projectTitle": "Barrister Chambers Relocation",
+      "projectDescription": "Prestigious law chambers moving from Lincoln's Inn to larger premises in Temple with specialist library and archive handling",
+      "clientName": "Chambers & Associates",
+      "contactName": "Patricia Whitfield QC",
+      "estimatedValue": 32000,
+      "status": "active",
+      "date": "2025-07-26T22:30:45.691Z",
+      "id": "6af8cb07-5c94-4088-a5ea-98c140ed4d7d",
+      "createdAt": "2025-08-03T22:30:45.692Z"
+    },
+    {
+      "pcNumber": "PC-2024-006",
+      "company": "Global Consulting Partners",
+      "reference": "Multi-Floor Corporate Move",
+      "projectTitle": "Large Corporate Office Relocation",
+      "projectDescription": "Major consulting firm relocating 200+ staff across 4 floors, executive suites, multiple conference rooms, and data centre",
+      "clientName": "Global Consulting Partners",
+      "contactName": "Michael Thompson",
+      "estimatedValue": 125000,
+      "status": "active",
+      "date": "2025-06-29T22:30:45.691Z",
+      "id": "6be17851-89ff-4c29-9a0d-8e5990b9a3df",
+      "createdAt": "2025-08-03T22:30:45.694Z"
+    },
+    {
+      "pcNumber": "PC-2024-005",
+      "company": "Creative Media Agency",
+      "reference": "Studio Relocation",
+      "projectTitle": "Creative Studio & Office Move",
+      "projectDescription": "Moving creative agency with production studios, expensive AV equipment, and client presentation suites from Shoreditch to King's Cross",
+      "clientName": "Creative Media Agency",
+      "contactName": "Sophie Martinez",
+      "estimatedValue": 28750,
+      "status": "completed",
+      "date": "2025-06-19T22:30:45.691Z",
+      "id": "8a822f20-2323-4aa5-b347-56294fdc8f9b",
+      "createdAt": "2025-08-03T22:30:45.693Z"
+    },
+    {
+      "pcNumber": "PC-2024-003",
+      "company": "TechStart Solutions",
+      "reference": "Emergency Relocation",
+      "projectTitle": "Emergency Office Move - Lease Termination",
+      "projectDescription": "Urgent relocation of startup office due to unexpected lease termination, 25 staff, minimal downtime required",
+      "clientName": "TechStart Solutions",
+      "contactName": "David Chen",
+      "estimatedValue": 18500,
+      "status": "urgent",
+      "date": "2025-07-31T22:30:45.691Z",
+      "id": "bc60d8da-8992-4941-b05d-afbc6691b141",
+      "createdAt": "2025-08-03T22:30:45.693Z"
+    }
+  ],
+  "quotes": [
+    {
+      "quoteNumber": "QT-2024-001",
+      "pcNumber": "PC-2024-001",
+      "clientName": "Fintech Innovations Ltd",
+      "projectTitle": "Complete Office Relocation - City to Canary Wharf",
+      "value": 47500,
+      "status": "pending",
+      "validUntil": "2025-09-02T22:30:45.701Z",
+      "description": "Full office relocation for 85 staff including IT infrastructure, secure document handling, and executive furniture",
+      "createdAt": "2025-07-29T22:30:45.701Z",
+      "id": "2d1377a8-8932-4a5c-8780-b411a9635f50"
+    },
+    {
+      "quoteNumber": "QT-2024-007",
+      "pcNumber": "PC-2024-007",
+      "clientName": "Boutique Investments Ltd",
+      "projectTitle": "Premium Investment Office Fitout",
+      "value": 92700,
+      "status": "pending",
+      "validUntil": "2025-08-24T22:30:45.701Z",
+      "description": "High-end Mayfair office with white-glove service for antique furniture and artwork collection",
+      "createdAt": "2025-07-31T22:30:45.701Z",
+      "id": "625fb1e3-48e3-4164-bcac-614e7a986f57"
+    },
+    {
+      "quoteNumber": "QT-2024-002",
+      "pcNumber": "PC-2024-002",
+      "clientName": "Chambers & Associates",
+      "projectTitle": "Barrister Chambers Relocation",
+      "value": 34200,
+      "status": "approved",
+      "validUntil": "2025-09-17T22:30:45.701Z",
+      "description": "Prestigious law chambers with specialist library and archive handling, white-glove service for antique furniture",
+      "createdAt": "2025-07-31T22:30:45.701Z",
+      "id": "69b3de76-8cb4-4704-8c6c-ab2196ee1c3f"
+    },
+    {
+      "quoteNumber": "QT-2024-003",
+      "pcNumber": "PC-2024-003",
+      "clientName": "TechStart Solutions",
+      "projectTitle": "Emergency Office Move - Lease Termination",
+      "value": 19750,
+      "status": "approved",
+      "validUntil": "2025-08-10T22:30:45.701Z",
+      "description": "Urgent relocation with emergency premiums, 25 staff, minimal downtime weekend service",
+      "createdAt": "2025-08-01T22:30:45.701Z",
+      "id": "88523cb8-1c08-403c-8ec1-e824ef731d19"
+    },
+    {
+      "quoteNumber": "QT-2024-005",
+      "pcNumber": "PC-2024-005",
+      "clientName": "Creative Media Agency",
+      "projectTitle": "Creative Studio & Office Move",
+      "value": 31250,
+      "status": "completed",
+      "validUntil": "2025-07-19T22:30:45.701Z",
+      "description": "Successfully completed: Creative agency with production studios and expensive AV equipment",
+      "createdAt": "2025-06-14T22:30:45.701Z",
+      "id": "8885e2fd-031e-43a3-9a8c-38dc04495709"
+    },
+    {
+      "quoteNumber": "QT-2024-004",
+      "pcNumber": "PC-2024-004",
+      "clientName": "Industrial Manufacturing UK",
+      "projectTitle": "Manufacturing HQ Office Consolidation",
+      "value": 72800,
+      "status": "pending",
+      "validUntil": "2025-10-02T22:30:45.701Z",
+      "description": "Consolidating three satellite offices with heavy machinery documentation and compliance records",
+      "createdAt": "2025-07-26T22:30:45.701Z",
+      "id": "9645840a-55de-46ed-9727-7c4f35856af3"
+    },
+    {
+      "quoteNumber": "QT-2024-009",
+      "pcNumber": "PC-2024-001",
+      "clientName": "Fintech Innovations Ltd",
+      "projectTitle": "Canary Wharf Move - IT Only Package",
+      "value": 15750,
+      "status": "declined",
+      "validUntil": "2025-07-24T22:30:45.701Z",
+      "description": "Alternative quote for IT infrastructure only (client chose full service)",
+      "createdAt": "2025-07-22T22:30:45.701Z",
+      "id": "a00888ec-099a-4b3e-a94e-561561e713e8"
+    },
+    {
+      "quoteNumber": "QT-2024-008",
+      "pcNumber": "PC-2024-008",
+      "clientName": "NHS Trust Admin",
+      "projectTitle": "NHS Administrative Office Move",
+      "value": 24800,
+      "status": "pending",
+      "validUntil": "2025-09-17T22:30:45.701Z",
+      "description": "NHS Trust with strict security requirements for patient data and medical records compliance",
+      "createdAt": "2025-07-27T22:30:45.701Z",
+      "id": "a4abfcf2-6031-4b64-8ed5-2ffa96c5eac9"
+    },
+    {
+      "quoteNumber": "QT-2024-006",
+      "pcNumber": "PC-2024-006",
+      "clientName": "Global Consulting Partners",
+      "projectTitle": "Large Corporate Office Relocation",
+      "value": 132500,
+      "status": "draft",
+      "validUntil": "2025-11-01T22:30:45.701Z",
+      "description": "Major consulting firm 200+ staff across 4 floors with executive suites and data centre",
+      "createdAt": "2025-08-02T22:30:45.701Z",
+      "id": "b0f8c81a-a8c4-437f-8453-ba22291ce132"
+    }
+  ],
+  "activities": [
+    {
+      "title": "AV Equipment Setup - Completed",
+      "description": "Successfully installed expensive audio-visual equipment and production studio setup at new King's Cross location",
+      "type": "Installation",
+      "pcNumber": "PC-2024-005",
+      "scheduledDate": "2025-07-04T22:30:45.695Z",
+      "scheduledTime": "09:00",
+      "duration": 420,
+      "status": "completed",
+      "priority": "high",
+      "assignedTo": "AV Specialists",
+      "location": "King's Cross Creative Quarter, London N1C 4QP",
+      "contactName": "Sophie Martinez",
+      "contactPhone": "020 3987 6543",
+      "completionNotes": "All AV equipment successfully installed and tested. Client signed off on setup. Some minor cable management adjustments made post-installation.",
+      "id": "38e9395a-a21b-4036-822e-8919729b6380",
+      "createdAt": "2025-08-03T22:30:45.697Z"
+    },
+    {
+      "title": "Executive Floor Planning",
+      "description": "Detailed planning for executive suite relocation including boardrooms, private offices, and secure areas",
+      "type": "Planning",
+      "pcNumber": "PC-2024-006",
+      "scheduledDate": "2025-08-10T22:30:45.695Z",
+      "scheduledTime": "14:00",
+      "duration": 240,
+      "status": "pending",
+      "priority": "high",
+      "assignedTo": "Senior Project Manager",
+      "location": "1 Canary Wharf, London E14 5AB",
+      "contactName": "Michael Thompson",
+      "contactPhone": "020 7715 8888",
+      "id": "a98c1d6c-9107-488b-ad95-26562d11a7fa",
+      "createdAt": "2025-08-03T22:30:45.697Z"
+    },
+    {
+      "title": "Site Survey - Canary Wharf Office",
+      "description": "Comprehensive site assessment of new Canary Wharf headquarters, measuring rooms, elevator access, and IT infrastructure requirements",
+      "type": "Survey",
+      "pcNumber": "PC-2024-001",
+      "scheduledDate": "2025-08-05T22:30:45.695Z",
+      "scheduledTime": "09:00",
+      "duration": 180,
+      "status": "pending",
+      "priority": "high",
+      "assignedTo": "Marcus Thompson",
+      "location": "25 Canada Square, Canary Wharf, London E14 5LQ",
+      "contactName": "James Morrison",
+      "contactPhone": "020 7946 0958",
+      "id": "b042e9a4-5fda-41e0-a411-ecf762709d1d",
+      "createdAt": "2025-08-03T22:30:45.695Z"
+    },
+    {
+      "title": "Emergency Packing Service",
+      "description": "Rapid response packing of startup office, priority on IT equipment and essential documents",
+      "type": "Emergency",
+      "pcNumber": "PC-2024-003",
+      "scheduledDate": "2025-08-04T22:30:45.695Z",
+      "scheduledTime": "06:00",
+      "duration": 240,
+      "status": "in_progress",
+      "priority": "urgent",
+      "assignedTo": "Emergency Response Team",
+      "location": "Tech Hub, 42 Shoreditch High Street, London E1 6JJ",
+      "contactName": "David Chen",
+      "contactPhone": "07789 123456",
+      "id": "b97f1731-54a6-4c88-a20d-ba41d51335ca",
+      "createdAt": "2025-08-03T22:30:45.697Z"
+    },
+    {
+      "title": "Legal Archive Boxing",
+      "description": "Specialist packing of confidential legal documents, case files, and law library books with chain of custody documentation",
+      "type": "Packing",
+      "pcNumber": "PC-2024-002",
+      "scheduledDate": "2025-08-08T22:30:45.695Z",
+      "scheduledTime": "08:30",
+      "duration": 480,
+      "status": "pending",
+      "priority": "high",
+      "assignedTo": "Secure Packing Team",
+      "location": "Lincoln's Inn, London WC2A 3TL",
+      "contactName": "Patricia Whitfield QC",
+      "contactPhone": "020 7405 1234",
+      "id": "ba1c6c85-1b24-4235-ae31-9960db41cd4d",
+      "createdAt": "2025-08-03T22:30:45.696Z"
+    },
+    {
+      "title": "Site Survey - Office Upgrade",
+      "description": "Comprehensive site survey to assess electrical requirements and plan installation work",
+      "type": "Survey",
+      "startDate": "2025-08-04T22:30:45.695Z",
+      "duration": 120,
+      "status": "scheduled",
+      "priority": "high",
+      "assigneeId": "EMP001",
+      "notes": "Client provided detailed blueprints.",
+      "id": "eb5e4a67-90c5-48d9-9af8-a409dd226d4f",
+      "createdAt": "2025-08-03T22:30:45.695Z"
+    },
+    {
+      "title": "Secure Data Transport Planning",
+      "description": "Security compliance planning for NHS patient data and medical records transport with GDPR requirements",
+      "type": "Compliance",
+      "pcNumber": "PC-2024-008",
+      "scheduledDate": "2025-08-09T22:30:45.695Z",
+      "scheduledTime": "13:30",
+      "duration": 120,
+      "status": "pending",
+      "priority": "high",
+      "assignedTo": "Security Compliance Officer",
+      "location": "NHS Administrative Centre, London SE1 7EH",
+      "contactName": "Dr. Sarah Williams",
+      "contactPhone": "020 3317 8000",
+      "id": "f6ac0e13-64cf-44bb-9a5b-5ae6a0dad824",
+      "createdAt": "2025-08-03T22:30:45.697Z"
+    }
+  ],
+  "resources": [
+    {
+      "name": "Ford Transit Van LWB",
+      "type": "Vehicle",
+      "sku": "VEH-003",
+      "status": "in-use",
+      "costPerUnit": 180,
+      "unit": "day",
+      "supplier": "Transit Hire Network",
+      "description": "Standard long-wheelbase transit van for crew, tools and smaller office items.",
+      "id": "00f47101-e812-434f-9bbc-2032c2c37365",
+      "createdAt": "2025-08-03T22:30:45.698Z"
+    },
+    {
+      "name": "Mercedes Luton Van with Tail Lift",
+      "type": "Vehicle",
+      "sku": "VEH-001",
+      "status": "available",
+      "costPerUnit": 220,
+      "unit": "day",
+      "supplier": "Commercial Vehicle Hire Ltd",
+      "description": "Long-wheelbase Luton van with hydraulic tail lift, perfect for office furniture and equipment.",
+      "id": "254b4252-de46-4289-ab2e-00c4cb47811b",
+      "createdAt": "2025-08-03T22:30:45.698Z"
+    },
+    {
+      "name": "Vacuum Lifting System",
+      "type": "Equipment",
+      "sku": "EQP-004",
+      "status": "maintenance",
+      "costPerUnit": 125,
+      "unit": "day",
+      "supplier": "Advanced Lifting Solutions",
+      "description": "Vacuum lifting system for glass panels, mirrors and delicate artwork.",
+      "id": "5d21aa9e-b7ae-42ed-a745-d100b5bed8a4",
+      "createdAt": "2025-08-03T22:30:45.700Z"
+    },
+    {
+      "name": "Security Guard (CRB Checked)",
+      "type": "Labour",
+      "sku": "LAB-002",
+      "status": "available",
+      "costPerUnit": 25,
+      "unit": "hour",
+      "supplier": "Professional Security Services",
+      "description": "CRB checked security personnel for sensitive document and equipment transport.",
+      "id": "701a1503-8ad2-4bfd-a88e-7c8a25286ad1",
+      "createdAt": "2025-08-03T22:30:45.700Z"
+    },
+    {
+      "name": "Anti-Static Bubble Wrap (Industrial)",
+      "type": "Materials",
+      "sku": "MAT-002",
+      "status": "available",
+      "costPerUnit": 28,
+      "unit": "roll",
+      "supplier": "Electronic Packaging Solutions",
+      "description": "Anti-static bubble wrap roll (750mm x 100m) for IT equipment protection.",
+      "id": "8c47d982-e0bd-484c-98d1-1c7ba2aef20c",
+      "createdAt": "2025-08-03T22:30:45.699Z"
+    },
+    {
+      "name": "Stair Climbing Hand Truck",
+      "type": "Equipment",
+      "sku": "EQP-002",
+      "status": "available",
+      "costPerUnit": 35,
+      "unit": "day",
+      "supplier": "Mobility Solutions UK",
+      "description": "Electric stair-climbing trolley for heavy items in buildings without lift access.",
+      "id": "a0d8e3f1-b5f4-4449-b71d-964b17fccd94",
+      "createdAt": "2025-08-03T22:30:45.698Z"
+    },
+    {
+      "name": "Furniture Protection Blankets (Set of 50)",
+      "type": "Materials",
+      "sku": "MAT-001",
+      "status": "available",
+      "costPerUnit": 75,
+      "unit": "set",
+      "supplier": "Protection Supplies Direct",
+      "description": "Professional quilted moving blankets for furniture protection during transport.",
+      "id": "aad4ef08-d89d-4af9-ad8f-86c00a084ddb",
+      "createdAt": "2025-08-03T22:30:45.699Z"
+    },
+    {
+      "name": "Server Rack Moving Kit",
+      "type": "Equipment",
+      "sku": "EQP-003",
+      "status": "available",
+      "costPerUnit": 95,
+      "unit": "day",
+      "supplier": "IT Infrastructure Movers",
+      "description": "Specialized equipment for safely moving server racks and data centre equipment.",
+      "id": "bc575a51-7932-4121-9768-b0a803496251",
+      "createdAt": "2025-08-03T22:30:45.699Z"
+    },
+    {
+      "name": "Climate-Controlled Storage Unit",
+      "type": "Storage",
+      "sku": "STO-001",
+      "status": "available",
+      "costPerUnit": 25,
+      "unit": "week/m³",
+      "supplier": "Secure Storage London",
+      "description": "Temperature and humidity controlled storage for sensitive documents and artwork.",
+      "id": "c02bd3cb-58f5-411b-a472-1fe3752cfd38",
+      "createdAt": "2025-08-03T22:30:45.700Z"
+    },
+    {
+      "name": "IT Technician (Certified)",
+      "type": "Labour",
+      "sku": "LAB-001",
+      "status": "available",
+      "costPerUnit": 65,
+      "unit": "hour",
+      "supplier": "IT Support Specialists",
+      "description": "Certified IT technician for server disconnection, transport setup and configuration.",
+      "id": "cf208d7b-a2a5-4c71-a38b-6bd51f59a662",
+      "createdAt": "2025-08-03T22:30:45.700Z"
+    },
+    {
+      "name": "Floor Protection Sheets",
+      "type": "Materials",
+      "sku": "MAT-004",
+      "status": "available",
+      "costPerUnit": 3.5,
+      "unit": "m²",
+      "supplier": "Site Protection Supplies",
+      "description": "Heavy-duty floor protection sheets for carpets and flooring during moves.",
+      "id": "d0c1673a-e1d3-4df2-8d4c-3f9a20ebe248",
+      "createdAt": "2025-08-03T22:30:45.700Z"
+    },
+    {
+      "name": "Professional Packing Team (4 people)",
+      "type": "Labour",
+      "sku": "LAB-003",
+      "status": "available",
+      "costPerUnit": 160,
+      "unit": "hour",
+      "supplier": "Expert Packing Services",
+      "description": "Experienced 4-person packing team for efficient office content preparation.",
+      "id": "d8ddcf54-dac0-40cc-b6ca-72c6930af543",
+      "createdAt": "2025-08-03T22:30:45.701Z"
+    },
+    {
+      "name": "Articulated Lorry 18t",
+      "type": "Vehicle",
+      "sku": "VEH-002",
+      "status": "available",
+      "costPerUnit": 650,
+      "unit": "day",
+      "supplier": "Heavy Transport Solutions",
+      "description": "Large articulated lorry for major corporate relocations and long-distance moves.",
+      "id": "dd84f93f-1512-4444-ae10-67684818bb0a",
+      "createdAt": "2025-08-03T22:30:45.698Z"
+    },
+    {
+      "name": "Archive Boxes (Heavy Duty)",
+      "type": "Materials",
+      "sku": "MAT-003",
+      "status": "available",
+      "costPerUnit": 8.5,
+      "unit": "each",
+      "supplier": "Document Storage Solutions",
+      "description": "Heavy-duty archive boxes suitable for legal documents and confidential files.",
+      "id": "eee7bc43-0a6a-480d-bc47-477319f59dc2",
+      "createdAt": "2025-08-03T22:30:45.699Z"
+    },
+    {
+      "name": "Piano Moving Dolly & Straps",
+      "type": "Equipment",
+      "sku": "EQP-001",
+      "status": "available",
+      "costPerUnit": 45,
+      "unit": "day",
+      "supplier": "Specialist Moving Equipment Ltd",
+      "description": "Heavy-duty dolly system for moving safes, servers, and heavy office equipment.",
+      "id": "ff12abf7-8cc3-4370-9521-a5f7f9021798",
+      "createdAt": "2025-08-03T22:30:45.698Z"
+    }
+  ],
+  "priceLists": [
+    {
+      "name": "Specialist Equipment & Materials",
+      "description": "Additional equipment and materials for complex office relocations",
+      "category": "Equipment & Materials",
+      "region": "UK National",
+      "currency": "GBP",
+      "validFrom": "2025-08-03T22:30:45.703Z",
+      "validUntil": "2026-01-30T22:30:45.703Z",
+      "status": "active",
+      "items": [
+        {
+          "description": "Piano/safe moving equipment",
+          "unit": "per day",
+          "price": 150,
+          "category": "Equipment"
+        },
+        {
+          "description": "Stair climbing trolley",
+          "unit": "per day",
+          "price": 45,
+          "category": "Equipment"
+        },
+        {
+          "description": "Furniture protection covers",
+          "unit": "per item",
+          "price": 15,
+          "category": "Materials"
+        },
+        {
+          "description": "Bubble wrap (industrial)",
+          "unit": "per roll (750mm x 100m)",
+          "price": 28,
+          "category": "Materials"
+        },
+        {
+          "description": "Wooden crates (custom)",
+          "unit": "per m³",
+          "price": 120,
+          "category": "Materials"
+        },
+        {
+          "description": "Floor protection sheets",
+          "unit": "per m²",
+          "price": 3.5,
+          "category": "Materials"
+        },
+        {
+          "description": "Hydraulic platform trolley",
+          "unit": "per day",
+          "price": 65,
+          "category": "Equipment"
+        },
+        {
+          "description": "Vacuum lifting equipment",
+          "unit": "per day",
+          "price": 95,
+          "category": "Equipment"
+        }
+      ],
+      "createdAt": "2025-07-14T22:30:45.703Z",
+      "updatedAt": "2025-07-31T22:30:45.703Z",
+      "id": "6b46a3e6-6849-4d5e-9b96-8eb250d13bb6"
+    },
+    {
+      "name": "Emergency & Rush Services",
+      "description": "Premium emergency relocation services with same-day response",
+      "category": "Emergency Services",
+      "region": "London & Home Counties",
+      "currency": "GBP",
+      "validFrom": "2025-08-03T22:30:45.703Z",
+      "validUntil": "2025-11-01T22:30:45.703Z",
+      "status": "active",
+      "items": [
+        {
+          "description": "Emergency call-out (same day)",
+          "unit": "per call-out",
+          "price": 250,
+          "category": "Emergency"
+        },
+        {
+          "description": "Weekend emergency service",
+          "unit": "percentage premium",
+          "price": 50,
+          "category": "Premium"
+        },
+        {
+          "description": "Bank holiday service",
+          "unit": "percentage premium",
+          "price": 100,
+          "category": "Premium"
+        },
+        {
+          "description": "Express packing service",
+          "unit": "per hour/person",
+          "price": 55,
+          "category": "Labour"
+        },
+        {
+          "description": "24-hour security storage",
+          "unit": "per day/m³",
+          "price": 15,
+          "category": "Storage"
+        },
+        {
+          "description": "Emergency vehicle hire",
+          "unit": "per hour",
+          "price": 85,
+          "category": "Vehicle"
+        },
+        {
+          "description": "Temporary office setup",
+          "unit": "per workstation",
+          "price": 125,
+          "category": "Setup"
+        }
+      ],
+      "createdAt": "2025-07-19T22:30:45.703Z",
+      "updatedAt": "2025-08-02T22:30:45.703Z",
+      "id": "7aae02a5-10ea-4a46-a3e2-1eee6186f6ad"
+    },
+    {
+      "name": "Office Relocation - Medium (21-100 employees)",
+      "description": "Comprehensive office relocation for medium-sized businesses with specialist equipment handling",
+      "category": "Office Relocation",
+      "region": "UK National",
+      "currency": "GBP",
+      "validFrom": "2025-08-03T22:30:45.703Z",
+      "validUntil": "2026-08-03T22:30:45.703Z",
+      "status": "active",
+      "items": [
+        {
+          "description": "Detailed site survey & project planning",
+          "unit": "per project",
+          "price": 450,
+          "category": "Consultation"
+        },
+        {
+          "description": "Professional packing team",
+          "unit": "per hour/person",
+          "price": 38,
+          "category": "Labour"
+        },
+        {
+          "description": "Specialist furniture handling",
+          "unit": "per hour/person",
+          "price": 50,
+          "category": "Labour"
+        },
+        {
+          "description": "Server room relocation",
+          "unit": "per server rack",
+          "price": 350,
+          "category": "IT Services"
+        },
+        {
+          "description": "Heavy duty moving boxes",
+          "unit": "per box",
+          "price": 12,
+          "category": "Materials"
+        },
+        {
+          "description": "Luton van with tail lift",
+          "unit": "per day",
+          "price": 220,
+          "category": "Vehicle"
+        },
+        {
+          "description": "7.5t truck with hydraulic lift",
+          "unit": "per day",
+          "price": 380,
+          "category": "Vehicle"
+        },
+        {
+          "description": "Moving crew (4 people)",
+          "unit": "per hour",
+          "price": 160,
+          "category": "Labour"
+        },
+        {
+          "description": "Specialist IT technician",
+          "unit": "per hour",
+          "price": 65,
+          "category": "IT Services"
+        },
+        {
+          "description": "Weekend/evening premium",
+          "unit": "percentage",
+          "price": 25,
+          "category": "Premium"
+        }
+      ],
+      "createdAt": "2025-06-19T22:30:45.703Z",
+      "updatedAt": "2025-07-24T22:30:45.703Z",
+      "id": "c34f44f5-e669-4e18-bc76-1138cfffc959"
+    },
+    {
+      "name": "Office Relocation - Large Enterprise (100+ employees)",
+      "description": "Full-scale enterprise office relocation with project management and phased moves",
+      "category": "Office Relocation",
+      "region": "UK & Europe",
+      "currency": "GBP",
+      "validFrom": "2025-08-03T22:30:45.703Z",
+      "validUntil": "2026-08-03T22:30:45.703Z",
+      "status": "active",
+      "items": [
+        {
+          "description": "Dedicated project manager",
+          "unit": "per week",
+          "price": 1200,
+          "category": "Management"
+        },
+        {
+          "description": "Comprehensive site survey",
+          "unit": "per site",
+          "price": 850,
+          "category": "Consultation"
+        },
+        {
+          "description": "Executive furniture white-glove service",
+          "unit": "per hour/person",
+          "price": 65,
+          "category": "Labour"
+        },
+        {
+          "description": "Data centre migration",
+          "unit": "per rack unit",
+          "price": 450,
+          "category": "IT Services"
+        },
+        {
+          "description": "Climate-controlled storage",
+          "unit": "per week/m³",
+          "price": 25,
+          "category": "Storage"
+        },
+        {
+          "description": "Articulated lorry (18t+)",
+          "unit": "per day",
+          "price": 650,
+          "category": "Vehicle"
+        },
+        {
+          "description": "Specialist moving crew (6 people)",
+          "unit": "per hour",
+          "price": 280,
+          "category": "Labour"
+        },
+        {
+          "description": "Out-of-hours security escort",
+          "unit": "per hour",
+          "price": 95,
+          "category": "Security"
+        },
+        {
+          "description": "International shipping",
+          "unit": "per m³",
+          "price": 180,
+          "category": "Shipping"
+        },
+        {
+          "description": "Insurance (comprehensive cover)",
+          "unit": "percentage of value",
+          "price": 0.5,
+          "category": "Insurance"
+        }
+      ],
+      "createdAt": "2025-06-04T22:30:45.703Z",
+      "updatedAt": "2025-08-01T22:30:45.703Z",
+      "id": "e7d81ff6-7eed-47f5-afb5-4f0dc11c9373"
+    },
+    {
+      "name": "Office Relocation - Small (1-20 employees)",
+      "description": "Complete office relocation package for small businesses up to 20 employees",
+      "category": "Office Relocation",
+      "region": "London & M25",
+      "currency": "GBP",
+      "validFrom": "2025-08-03T22:30:45.703Z",
+      "validUntil": "2026-08-03T22:30:45.703Z",
+      "status": "active",
+      "items": [
+        {
+          "description": "Pre-move consultation & planning",
+          "unit": "per consultation",
+          "price": 150,
+          "category": "Consultation"
+        },
+        {
+          "description": "Professional packing service",
+          "unit": "per hour/person",
+          "price": 35,
+          "category": "Labour"
+        },
+        {
+          "description": "Office furniture disassembly",
+          "unit": "per hour/person",
+          "price": 40,
+          "category": "Labour"
+        },
+        {
+          "description": "IT equipment disconnection & packing",
+          "unit": "per workstation",
+          "price": 75,
+          "category": "IT Services"
+        },
+        {
+          "description": "Document archive boxing",
+          "unit": "per archive box",
+          "price": 8.5,
+          "category": "Materials"
+        },
+        {
+          "description": "Standard moving van (3.5t)",
+          "unit": "per day",
+          "price": 180,
+          "category": "Vehicle"
+        },
+        {
+          "description": "Moving crew (2 people)",
+          "unit": "per hour",
+          "price": 80,
+          "category": "Labour"
+        },
+        {
+          "description": "Office furniture reassembly",
+          "unit": "per hour/person",
+          "price": 45,
+          "category": "Labour"
+        },
+        {
+          "description": "IT equipment reconnection & setup",
+          "unit": "per workstation",
+          "price": 85,
+          "category": "IT Services"
+        }
+      ],
+      "createdAt": "2025-07-04T22:30:45.703Z",
+      "updatedAt": "2025-07-29T22:30:45.703Z",
+      "id": "ea0c03c8-2e6f-4f1f-ab81-d212ffce8df1"
+    }
+  ],
+  "exportDate": "2025-08-06T12:17:59.370Z",
+  "version": "1.0"
+}
