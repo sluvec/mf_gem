@@ -644,15 +644,14 @@ class CRMApplication {
             
             if (container) {
                 if (pcNumbers.length === 0) {
-                    container.innerHTML = '<tr><td colspan="6">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="5">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
                 } else {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr>
                             <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
                             <td>${pc.company || pc.clientName || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
-                            <td>£${(pc.estimatedValue || 0).toLocaleString()}</td>
-                            <td><span class="status-badge ${pc.status || 'pending'}">${pc.status || 'pending'}</span></td>
+                            <td>${pc.contactName || 'N/A'}</td>
                             <td>
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
@@ -3573,9 +3572,13 @@ class CRMApplication {
                 
                 switch (filterField) {
                     case 'company':
-                        searchValue = item.companyName || item.company || '';
+                        // For PC Numbers: use company or clientName
+                        // For Quotes/Activities: use companyName or company
+                        searchValue = item.companyName || item.company || item.clientName || '';
                         break;
                     case 'accountManager':
+                        // For PC Numbers: not applicable (they don't have accountManager)
+                        // For Quotes/Activities: use accountManager or assignedTo
                         searchValue = item.accountManager || item.assignedTo || '';
                         break;
                     case 'pcNumber':
@@ -3611,7 +3614,12 @@ class CRMApplication {
             if (!container) return;
 
             if (filteredData.length === 0) {
-                container.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">No results found for current filter.</td></tr>`;
+                // Use appropriate colspan based on data type
+                let colspan = 8; // default for Activities
+                if (dataType === 'pcNumbers') colspan = 5;
+                if (dataType === 'quotes') colspan = 6;
+                
+                container.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: #6b7280;">No results found for current filter.</td></tr>`;
                 return;
             }
 
@@ -3620,14 +3628,12 @@ class CRMApplication {
                 case 'pcNumbers':
                     container.innerHTML = filteredData.map(pc => `
                         <tr>
-                            <td><strong><a href="#" onclick="window.viewPcDetails('${pc.id}')" style="color: #3b82f6;">${pc.pcNumber}</a></strong></td>
-                            <td>${pc.companyName || 'N/A'}</td>
-                            <td>${pc.project || 'N/A'}</td>
-                            <td>${pc.accountManager || 'N/A'}</td>
-                            <td>${new Date(pc.createdAt).toLocaleDateString() || 'N/A'}</td>
-                            <td><span class="status-badge ${pc.status || 'active'}">${pc.status || 'active'}</span></td>
+                            <td><strong><a href="#" onclick="window.viewPcDetails('${pc.id}')" style="color: #3b82f6;">${pc.pcNumber || 'N/A'}</a></strong></td>
+                            <td>${pc.company || pc.clientName || 'N/A'}</td>
+                            <td>${pc.projectTitle || 'N/A'}</td>
+                            <td>${pc.contactName || 'N/A'}</td>
                             <td>
-                                <button onclick="window.editPc('${pc.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
                             </td>
                         </tr>
