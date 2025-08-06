@@ -477,7 +477,7 @@ class CRMApplication {
     async loadPcNumbersData() {
         try {
             const pcNumbers = await db.loadAll('pcNumbers');
-            const container = document.querySelector('#pcnumbers .table-container tbody');
+            const container = document.getElementById('pc-list');
             
             if (container) {
                 if (pcNumbers.length === 0) {
@@ -497,6 +497,8 @@ class CRMApplication {
                         </tr>
                     `).join('');
                 }
+            } else {
+                logError('PC Numbers container not found: #pc-list');
             }
             
             logDebug(`Loaded ${pcNumbers.length} PC Numbers`);
@@ -511,7 +513,7 @@ class CRMApplication {
     async loadQuotesData() {
         try {
             const quotes = await db.loadAll('quotes');
-            const container = document.querySelector('#quotes .table-container tbody');
+            const container = document.getElementById('quotes-list');
             
             if (container) {
                 if (quotes.length === 0) {
@@ -531,6 +533,8 @@ class CRMApplication {
                         </tr>
                     `).join('');
                 }
+            } else {
+                logError('Quotes container not found: #quotes-list');
             }
             
             logDebug(`Loaded ${quotes.length} quotes`);
@@ -545,7 +549,7 @@ class CRMApplication {
     async loadActivitiesData() {
         try {
             const activities = await db.loadAll('activities');
-            const container = document.querySelector('#activities .table-container tbody');
+            const container = document.getElementById('activities-list');
             
             if (container) {
                 if (activities.length === 0) {
@@ -565,6 +569,8 @@ class CRMApplication {
                         </tr>
                     `).join('');
                 }
+            } else {
+                logError('Activities container not found: #activities-list');
             }
             
             logDebug(`Loaded ${activities.length} activities`);
@@ -579,7 +585,7 @@ class CRMApplication {
     async loadResourcesData() {
         try {
             const resources = await db.loadAll('resources');
-            const container = document.querySelector('#resources .table-container tbody');
+            const container = document.getElementById('resources-list');
             
             if (container) {
                 if (resources.length === 0) {
@@ -598,6 +604,8 @@ class CRMApplication {
                         </tr>
                     `).join('');
                 }
+            } else {
+                logError('Resources container not found: #resources-list');
             }
             
             logDebug(`Loaded ${resources.length} resources`);
