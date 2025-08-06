@@ -2092,12 +2092,17 @@
             <!-- Step 1: Company Selection (Optional) -->
             <div class="form-section">
                 <h3>Step 1: Company Selection (Optional)</h3>
-                <div>
+                <div style="position: relative;">
                     <label>Company Name</label>
-                    <select id="quote-modal-company" onchange="window.filterPcNumbersByCompany()">
-                        <option value="">All Companies</option>
-                    </select>
-                    <small style="color: #6b7280;">Select a company to filter PC Numbers, or leave blank to see all</small>
+                    <input type="text" id="quote-modal-company" placeholder="Start typing company name..." 
+                           oninput="window.searchCompanies(this.value)" 
+                           onfocus="window.showCompanyDropdown()"
+                           onblur="window.hideCompanyDropdown()"
+                           autocomplete="off">
+                    <div id="company-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.375rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 1000; max-height: 200px; overflow-y: auto;">
+                        <!-- Search results will be populated here -->
+                    </div>
+                    <small style="color: #6b7280;">Start typing to search companies, or leave blank to see all PC Numbers</small>
                 </div>
             </div>
 

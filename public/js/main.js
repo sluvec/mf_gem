@@ -4435,30 +4435,94 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
     window.closeQuoteModal = () => uiModals.closeModal('quote-modal');
 
+    // Store all companies for search functionality
+    window.allCompanies = [];
+
     // Quote modal helper functions
     window.loadCompaniesForQuoteModal = async () => {
         try {
             const pcNumbers = await db.loadAll('pcNumbers');
-            const companySelect = document.getElementById('quote-modal-company');
-            if (!companySelect) return;
 
             // Extract unique companies from PC Numbers
-            const companies = [...new Set(pcNumbers.map(pc => pc.company || pc.clientName).filter(Boolean))].sort();
+            window.allCompanies = [...new Set(pcNumbers.map(pc => pc.company || pc.clientName).filter(Boolean))].sort();
             
-            // Clear existing options except "All Companies"
-            companySelect.innerHTML = '<option value="">All Companies</option>';
-            
-            // Add company options
-            companies.forEach(company => {
-                const option = document.createElement('option');
-                option.value = company;
-                option.textContent = company;
-                companySelect.appendChild(option);
-            });
+            logDebug(`Loaded ${window.allCompanies.length} unique companies for quote modal`);
             
         } catch (error) {
             logError('Failed to load companies for quote modal:', error);
         }
+    };
+
+    // Smart company search functionality
+    window.searchCompanies = (searchTerm) => {
+        const resultsContainer = document.getElementById('company-search-results');
+        if (!resultsContainer) return;
+
+        if (!searchTerm || searchTerm.trim().length === 0) {
+            resultsContainer.style.display = 'none';
+            // Show all PC Numbers when no company is searched
+            window.filterPcNumbersByCompany('');
+            return;
+        }
+
+        const filteredCompanies = window.allCompanies.filter(company => 
+            company.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        if (filteredCompanies.length === 0) {
+            resultsContainer.innerHTML = '<div style="padding: 0.5rem; color: #6b7280; font-style: italic;">No companies found</div>';
+            resultsContainer.style.display = 'block';
+            return;
+        }
+
+        // Create search results HTML
+        const resultsHTML = filteredCompanies.map(company => `
+            <div class="company-search-result" 
+                 style="padding: 0.5rem; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background-color 0.15s;"
+                 onmousedown="window.selectCompany('${company.replace(/'/g, "\\\'")}')"
+                 onmouseover="this.style.backgroundColor='#f9fafb'"
+                 onmouseout="this.style.backgroundColor='white'">
+                ${company}
+            </div>
+        `).join('');
+
+        resultsContainer.innerHTML = resultsHTML;
+        resultsContainer.style.display = 'block';
+    };
+
+    // Select a company from search results
+    window.selectCompany = (companyName) => {
+        const companyInput = document.getElementById('quote-modal-company');
+        const resultsContainer = document.getElementById('company-search-results');
+        
+        if (companyInput) {
+            companyInput.value = companyName;
+        }
+        
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+        }
+
+        // Filter PC Numbers by selected company
+        window.filterPcNumbersByCompany(companyName);
+    };
+
+    // Show company dropdown on focus
+    window.showCompanyDropdown = () => {
+        const companyInput = document.getElementById('quote-modal-company');
+        if (companyInput && companyInput.value.trim().length > 0) {
+            window.searchCompanies(companyInput.value);
+        }
+    };
+
+    // Hide company dropdown on blur (with delay to allow clicks)
+    window.hideCompanyDropdown = () => {
+        setTimeout(() => {
+            const resultsContainer = document.getElementById('company-search-results');
+            if (resultsContainer) {
+                resultsContainer.style.display = 'none';
+            }
+        }, 150); // Small delay to allow for clicks on results
     };
 
     window.loadPcNumbersForQuoteModal = async () => {
@@ -4507,9 +4571,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    window.filterPcNumbersByCompany = () => {
+    window.filterPcNumbersByCompany = (companyName = null) => {
         try {
-            const selectedCompany = document.getElementById('quote-modal-company').value;
+            // Get company name from parameter or input field
+            const selectedCompany = companyName !== null ? companyName : document.getElementById('quote-modal-company').value;
             const pcSelect = document.getElementById('quote-modal-pc');
             
             if (!pcSelect || !window.allPcNumbers) return;
@@ -4518,7 +4583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pcSelect.innerHTML = '<option value="">Select PC Number...</option>';
             
             // Filter PC Numbers by company
-            const filteredPcNumbers = selectedCompany 
+            const filteredPcNumbers = selectedCompany && selectedCompany.trim() !== ''
                 ? window.allPcNumbers.filter(pc => 
                     (pc.company === selectedCompany) || (pc.clientName === selectedCompany)
                   )
@@ -4533,13 +4598,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             // Show feedback about filtering
-            if (selectedCompany && filteredPcNumbers.length === 0) {
+            if (selectedCompany && selectedCompany.trim() !== '' && filteredPcNumbers.length === 0) {
                 const option = document.createElement('option');
                 option.value = '';
-                option.textContent = 'No PC Numbers found for this company';
+                option.textContent = `No PC Numbers found for "${selectedCompany}"`;
                 option.disabled = true;
                 pcSelect.appendChild(option);
             }
+
+            logDebug(`Filtered PC Numbers: ${filteredPcNumbers.length} of ${window.allPcNumbers.length} for company: "${selectedCompany}"`);
             
         } catch (error) {
             logError('Failed to filter PC Numbers by company:', error);
