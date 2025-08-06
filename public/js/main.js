@@ -66,9 +66,226 @@ class CRMApplication {
             logDebug('🔵 Starting database initialization...');
             await db.initialize();
             logDebug('🔵 Database initialization completed');
+            
+            // Load sample data if database is empty
+            await this.loadSampleDataIfNeeded();
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
+        }
+    }
+    
+    /**
+     * @description Load sample data if database is empty
+     */
+    async loadSampleDataIfNeeded() {
+        try {
+            const stats = await db.getStats();
+            if (stats.pcNumbers === 0) {
+                logInfo('🔵 Database is empty, loading sample data...');
+                await this.loadSampleData();
+            } else {
+                logDebug('Database contains data, skipping sample data load');
+            }
+        } catch (error) {
+            logError('Failed to check/load sample data:', error);
+        }
+    }
+    
+    /**
+     * @description Load sample data
+     */
+    async loadSampleData() {
+        try {
+            logInfo('Loading sample data...');
+            
+            // Load basic sample PC Numbers
+            const samplePCNumbers = [
+                {
+                    id: 'pc-1',
+                    pcNumber: 'PC-000001',
+                    company: 'Fintech Innovations Ltd',
+                    projectTitle: 'Complete Office Relocation - City to Canary Wharf',
+                    projectDescription: 'Full office relocation for 85 staff',
+                    clientName: 'Fintech Innovations Ltd',
+                    contactName: 'James Morrison',
+                    contactEmail: 'james.morrison@fintech-innovations.co.uk',
+                    contactPhone: '+44 20 7946 0958',
+                    estimatedValue: 45000,
+                    status: 'active',
+                    createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                },
+                {
+                    id: 'pc-2',
+                    pcNumber: 'PC-000002',
+                    company: 'Chambers & Associates',
+                    projectTitle: 'Law Firm Relocation - Fleet Street to Temple',
+                    projectDescription: 'Traditional law firm moving offices',
+                    clientName: 'Chambers & Associates',
+                    contactName: 'Victoria Chambers',
+                    contactEmail: 'v.chambers@chamberslaw.co.uk',
+                    contactPhone: '+44 20 7353 2468',
+                    estimatedValue: 28000,
+                    status: 'active',
+                    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Rob',
+                    editedBy: 'Rob'
+                },
+                {
+                    id: 'pc-3',
+                    pcNumber: 'PC-000003',
+                    company: 'TechStart Solutions',
+                    projectTitle: 'Startup Office Setup - Shoreditch Hub',
+                    projectDescription: 'New tech startup office setup',
+                    clientName: 'TechStart Solutions',
+                    contactName: 'Alex Chen',
+                    contactEmail: 'alex@techstart.io',
+                    contactPhone: '+44 20 7739 1234',
+                    estimatedValue: 15000,
+                    status: 'pending',
+                    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Kayleigh',
+                    editedBy: 'Kayleigh'
+                }
+            ];
+            
+            // Load sample quotes
+            const sampleQuotes = [
+                {
+                    id: 'quote-1',
+                    quoteNumber: 'QT-000001',
+                    pcId: 'pc-1',
+                    pcNumber: 'PC-000001',
+                    clientName: 'Fintech Innovations Ltd',
+                    totalAmount: 42500,
+                    status: 'approved',
+                    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav',
+                    items: []
+                },
+                {
+                    id: 'quote-2',
+                    quoteNumber: 'QT-000002',
+                    pcId: 'pc-2',
+                    pcNumber: 'PC-000002',
+                    clientName: 'Chambers & Associates',
+                    totalAmount: 26800,
+                    status: 'pending',
+                    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Rob',
+                    editedBy: 'Rob',
+                    items: []
+                }
+            ];
+            
+            // Load sample activities
+            const sampleActivities = [
+                {
+                    id: 'activity-1',
+                    title: 'Initial Site Survey',
+                    type: 'Survey',
+                    pcId: 'pc-1',
+                    pcNumber: 'PC-000001',
+                    scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+                    duration: 120,
+                    status: 'scheduled',
+                    priority: 'high',
+                    assignedTo: 'Marcus Thompson',
+                    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                },
+                {
+                    id: 'activity-2',
+                    title: 'Pre-move Consultation',
+                    type: 'Meeting',
+                    pcId: 'pc-2',
+                    pcNumber: 'PC-000002',
+                    scheduledDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+                    duration: 90,
+                    status: 'scheduled',
+                    priority: 'medium',
+                    assignedTo: 'Victoria Chambers',
+                    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Rob',
+                    editedBy: 'Rob'
+                }
+            ];
+            
+            // Load sample resources
+            const sampleResources = [
+                {
+                    id: 'resource-1',
+                    name: 'Office Fitter',
+                    category: 'labour',
+                    type: 'labour',
+                    costPerHour: 35,
+                    unit: 'hour',
+                    status: 'available',
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                },
+                {
+                    id: 'resource-2',
+                    name: 'HGV Driver',
+                    category: 'labour',
+                    type: 'labour',
+                    costPerHour: 28,
+                    unit: 'hour',
+                    status: 'available',
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                },
+                {
+                    id: 'resource-3',
+                    name: 'Moving Van (7.5T)',
+                    category: 'vehicles',
+                    type: 'vehicles',
+                    costPerDay: 180,
+                    unit: 'day',
+                    status: 'available',
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                }
+            ];
+            
+            // Save to database
+            for (const pcNumber of samplePCNumbers) {
+                await db.save('pcNumbers', pcNumber);
+            }
+            
+            for (const quote of sampleQuotes) {
+                await db.save('quotes', quote);
+            }
+            
+            for (const activity of sampleActivities) {
+                await db.save('activities', activity);
+            }
+            
+            for (const resource of sampleResources) {
+                await db.save('resources', resource);
+            }
+            
+            logInfo(`Sample data loaded: ${samplePCNumbers.length} PC Numbers, ${sampleQuotes.length} Quotes, ${sampleActivities.length} Activities, ${sampleResources.length} Resources`);
+            
+        } catch (error) {
+            logError('Failed to load sample data:', error);
         }
     }
 
@@ -162,6 +379,9 @@ class CRMApplication {
                 // Update navigation state (use original pageName for button highlighting)
                 this.updateNavigationState(pageName);
 
+                // Load data for the page
+                await this.loadPageData(targetPageId);
+
                 logDebug(`Successfully navigated to page: ${targetPageId}`);
             } else {
                 logError(`Page not found: ${pageName} (mapped to: ${targetPageId})`);
@@ -185,6 +405,237 @@ class CRMApplication {
                 item.classList.remove('active');
             }
         });
+    }
+
+    /**
+     * @description Load data for a specific page
+     * @param {string} pageId - Page ID
+     */
+    async loadPageData(pageId) {
+        try {
+            switch (pageId) {
+                case 'dashboard':
+                    await this.loadDashboardData();
+                    break;
+                case 'pcnumbers':
+                    await this.loadPcNumbersData();
+                    break;
+                case 'quotes':
+                    await this.loadQuotesData();
+                    break;
+                case 'activities':
+                    await this.loadActivitiesData();
+                    break;
+                case 'resources':
+                    await this.loadResourcesData();
+                    break;
+                case 'pricelists':
+                    await this.loadPriceListsData();
+                    break;
+                default:
+                    logDebug(`No data loading required for page: ${pageId}`);
+                    break;
+            }
+        } catch (error) {
+            logError(`Failed to load data for page ${pageId}:`, error);
+        }
+    }
+
+    /**
+     * @description Load dashboard data
+     */
+    async loadDashboardData() {
+        try {
+            const [pcNumbers, quotes, activities] = await Promise.all([
+                db.loadAll('pcNumbers'),
+                db.loadAll('quotes'),
+                db.loadAll('activities')
+            ]);
+
+            // Update dashboard stats
+            const statPc = document.getElementById('stat-pc');
+            const statQuotes = document.getElementById('stat-quotes');
+            const statActivities = document.getElementById('stat-activities');
+            const statValue = document.getElementById('stat-value');
+
+            if (statPc) statPc.textContent = pcNumbers.length;
+            if (statQuotes) statQuotes.textContent = quotes.length;
+            if (statActivities) statActivities.textContent = activities.length;
+            
+            const totalValue = quotes.reduce((sum, quote) => sum + (parseFloat(quote.totalAmount) || 0), 0);
+            if (statValue) statValue.textContent = `£${totalValue.toLocaleString()}`;
+
+            logDebug('Dashboard data loaded');
+        } catch (error) {
+            logError('Failed to load dashboard data:', error);
+        }
+    }
+
+    /**
+     * @description Load PC Numbers data
+     */
+    async loadPcNumbersData() {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            const container = document.querySelector('#pcnumbers .table-container tbody');
+            
+            if (container) {
+                if (pcNumbers.length === 0) {
+                    container.innerHTML = '<tr><td colspan="6">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
+                } else {
+                    container.innerHTML = pcNumbers.map(pc => `
+                        <tr>
+                            <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
+                            <td>${pc.company || pc.clientName || 'N/A'}</td>
+                            <td>${pc.projectTitle || 'N/A'}</td>
+                            <td>£${(pc.estimatedValue || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${pc.status || 'pending'}">${pc.status || 'pending'}</span></td>
+                            <td>
+                                <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            logDebug(`Loaded ${pcNumbers.length} PC Numbers`);
+        } catch (error) {
+            logError('Failed to load PC Numbers data:', error);
+        }
+    }
+
+    /**
+     * @description Load Quotes data
+     */
+    async loadQuotesData() {
+        try {
+            const quotes = await db.loadAll('quotes');
+            const container = document.querySelector('#quotes .table-container tbody');
+            
+            if (container) {
+                if (quotes.length === 0) {
+                    container.innerHTML = '<tr><td colspan="6">No quotes found. <button onclick="window.showNewQuoteModal()" class="button primary">Create First Quote</button></td></tr>';
+                } else {
+                    container.innerHTML = quotes.map(quote => `
+                        <tr>
+                            <td><strong>${quote.quoteNumber || 'N/A'}</strong></td>
+                            <td>${quote.clientName || 'N/A'}</td>
+                            <td>${quote.pcNumber || 'N/A'}</td>
+                            <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
+                            <td>
+                                <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            logDebug(`Loaded ${quotes.length} quotes`);
+        } catch (error) {
+            logError('Failed to load quotes data:', error);
+        }
+    }
+
+    /**
+     * @description Load Activities data
+     */
+    async loadActivitiesData() {
+        try {
+            const activities = await db.loadAll('activities');
+            const container = document.querySelector('#activities .table-container tbody');
+            
+            if (container) {
+                if (activities.length === 0) {
+                    container.innerHTML = '<tr><td colspan="6">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
+                } else {
+                    container.innerHTML = activities.map(activity => `
+                        <tr>
+                            <td><strong>${activity.title || 'N/A'}</strong></td>
+                            <td>${activity.type || 'N/A'}</td>
+                            <td>${activity.pcNumber || 'N/A'}</td>
+                            <td>${new Date(activity.scheduledDate).toLocaleDateString() || 'N/A'}</td>
+                            <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
+                            <td>
+                                <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            logDebug(`Loaded ${activities.length} activities`);
+        } catch (error) {
+            logError('Failed to load activities data:', error);
+        }
+    }
+
+    /**
+     * @description Load Resources data
+     */
+    async loadResourcesData() {
+        try {
+            const resources = await db.loadAll('resources');
+            const container = document.querySelector('#resources .table-container tbody');
+            
+            if (container) {
+                if (resources.length === 0) {
+                    container.innerHTML = '<tr><td colspan="5">No resources found. <button onclick="window.showResourceModal()" class="button primary">Create First Resource</button></td></tr>';
+                } else {
+                    container.innerHTML = resources.map(resource => `
+                        <tr>
+                            <td><strong>${resource.name || 'N/A'}</strong></td>
+                            <td>${resource.category || resource.type || 'N/A'}</td>
+                            <td>£${(resource.costPerHour || resource.costPerDay || resource.costPerUnit || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${resource.status || 'available'}">${resource.status || 'available'}</span></td>
+                            <td>
+                                <button onclick="window.editResource('${resource.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewResourceDetails('${resource.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            logDebug(`Loaded ${resources.length} resources`);
+        } catch (error) {
+            logError('Failed to load resources data:', error);
+        }
+    }
+
+    /**
+     * @description Load Price Lists data
+     */
+    async loadPriceListsData() {
+        try {
+            const priceLists = await db.loadAll('priceLists') || [];
+            const container = document.querySelector('#pricelists .table-container tbody');
+            
+            if (container) {
+                if (priceLists.length === 0) {
+                    container.innerHTML = '<tr><td colspan="4">No price lists found. <button onclick="window.createPriceList()" class="button primary">Create First Price List</button></td></tr>';
+                } else {
+                    container.innerHTML = priceLists.map(priceList => `
+                        <tr>
+                            <td><strong>${priceList.name || 'N/A'}</strong></td>
+                            <td>${priceList.description || 'N/A'}</td>
+                            <td>${(priceList.items || []).length} items</td>
+                            <td>
+                                <button onclick="window.editPriceList('${priceList.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewPriceListDetails('${priceList.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            logDebug(`Loaded ${priceLists.length} price lists`);
+        } catch (error) {
+            logError('Failed to load price lists data:', error);
+        }
     }
 
     /**
