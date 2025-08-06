@@ -2777,6 +2777,105 @@ class CRMApplication {
         }
     }
 
+    // ==================== PRICE LISTS FUNCTIONALITY ====================
+
+    /**
+     * @description Edit price list
+     */
+    async editPriceList(id) {
+        try {
+            const priceList = await db.load('pricelists', id);
+            if (!priceList) {
+                uiModals.showToast('Price list not found', 'error');
+                return;
+            }
+
+            // Populate form
+            document.getElementById('pricelist-id').value = priceList.id;
+            document.getElementById('pricelist-name').value = priceList.name || '';
+            document.getElementById('pricelist-category').value = priceList.category || '';
+            
+            document.getElementById('pricelist-modal-title').textContent = 'Edit Price List';
+            uiModals.openModal('pricelist-modal');
+            
+            logDebug('Price list edit modal opened for:', id);
+        } catch (error) {
+            logError('Failed to edit price list:', error);
+            uiModals.showToast('Failed to load price list for editing', 'error');
+        }
+    }
+
+    /**
+     * @description View price list details
+     */
+    async viewPriceListDetails(id) {
+        try {
+            const priceList = await db.load('pricelists', id);
+            if (!priceList) {
+                uiModals.showToast('Price list not found', 'error');
+                return;
+            }
+
+            // Navigate to price list detail page
+            this.currentPriceList = priceList;
+            await this.navigateToPage('pricelist-detail');
+            
+            // Update page title
+            const titleElement = document.getElementById('pricelist-title');
+            if (titleElement) {
+                titleElement.textContent = `${priceList.name} - Details`;
+            }
+            
+            // Load price list items
+            await this.loadPriceListItems(id);
+            
+            logDebug('Price list details shown for:', id);
+        } catch (error) {
+            logError('Failed to view price list details:', error);
+            uiModals.showToast('Failed to load price list details', 'error');
+        }
+    }
+
+    /**
+     * @description Load price list items
+     */
+    async loadPriceListItems(priceListId) {
+        try {
+            // For now, create placeholder items since we don't have a separate items store
+            const container = document.getElementById('pricelist-items');
+            if (!container) return;
+
+            // This would normally load from a 'pricelist-items' store
+            // For now, show placeholder
+            container.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                        No items found in this price list.<br>
+                        <button onclick="window.showAddResourceToPriceList()" style="margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Add First Item</button>
+                    </td>
+                </tr>
+            `;
+            
+            logDebug(`Price list items loaded for: ${priceListId}`);
+        } catch (error) {
+            logError('Failed to load price list items:', error);
+        }
+    }
+
+    /**
+     * @description Create new price list
+     */
+    async createPriceList() {
+        try {
+            // Navigate to new price list page
+            await this.navigateToPage('new-pricelist');
+            logDebug('New price list page opened');
+        } catch (error) {
+            logError('Failed to create new price list:', error);
+            uiModals.showToast('Failed to open new price list form', 'error');
+        }
+    }
+
     /**
      * @description Get cached activities or load fresh from database
      * @returns {Promise<Array>} Array of activities
@@ -3013,6 +3112,11 @@ function setupLegacyCompatibility() {
     window.editResource = (id) => app.editResource(id);
     window.viewResourceDetails = (id) => app.viewResourceDetails(id);
 
+    // Price Lists functions
+    window.editPriceList = (id) => app.editPriceList(id);
+    window.viewPriceListDetails = (id) => app.viewPriceListDetails(id);
+    window.createPriceList = () => app.createPriceList();
+
     window.closePcModal = () => uiModals.closeModal('pc-modal');
     window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
     
@@ -3088,8 +3192,7 @@ function setupLegacyCompatibility() {
         'editActivity', 'editQuote', 'showAddResourceToPriceList',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
-        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement',
-        'editPriceList', 'viewPriceListDetails', 'createPriceList'
+        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement'
     ];
     
     missingFunctions.forEach(funcName => {
