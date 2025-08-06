@@ -4508,7 +4508,7 @@ function setupLegacyCompatibility() {
         'editActivity', 'editQuote', 'editPriceListItem',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
-        'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement'
+        'duplicateCurrentQuote'
     ];
     
     missingFunctions.forEach(funcName => {
