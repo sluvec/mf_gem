@@ -419,6 +419,15 @@ class CRMApplication {
             });
         }
 
+        // Quote Edit form
+        const quoteEditForm = document.getElementById('quote-edit-form');
+        if (quoteEditForm) {
+            quoteEditForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.updateQuote();
+            });
+        }
+
         logDebug('Form listeners setup completed');
     }
 
@@ -1045,12 +1054,170 @@ class CRMApplication {
             }
             
             logDebug('Quote data loaded:', quoteData);
-            uiModals.showToast('Quote edit functionality will be restored soon', 'info');
+            
+            // Check if modal exists
+            const modal = document.getElementById('quote-edit-modal');
+            if (!modal) {
+                logError('Quote Edit modal not found in DOM');
+                uiModals.showToast('Edit modal not available', 'error');
+                return;
+            }
+            
+            // Populate form fields
+            const fields = [
+                { id: 'quote-edit-id', value: quoteData.id || '' },
+                { id: 'quote-edit-number', value: quoteData.quoteNumber || '' },
+                { id: 'quote-edit-status', value: quoteData.status || 'pending' },
+                { id: 'quote-edit-pc-number', value: quoteData.pcNumber || '' },
+                { id: 'quote-edit-value', value: quoteData.totalAmount || 0 },
+                { id: 'quote-edit-client-name', value: quoteData.clientName || '' },
+                { id: 'quote-edit-project-title', value: quoteData.projectTitle || '' },
+                { id: 'quote-edit-version', value: quoteData.version || 1 },
+                { id: 'quote-edit-net-total', value: quoteData.netTotal || quoteData.totalAmount || 0 },
+                { id: 'quote-edit-vat-rate', value: quoteData.vatRate || 20.00 },
+                { id: 'quote-edit-vat-amount', value: quoteData.vatAmount || 0 },
+                { id: 'quote-edit-discount', value: quoteData.discount || 0 },
+                { id: 'quote-edit-total-cost', value: quoteData.totalCost || quoteData.totalAmount || 0 }
+            ];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.value = field.value;
+                    logDebug(`Set ${field.id} = ${field.value}`);
+                } else {
+                    logError(`Field not found: ${field.id}`);
+                }
+            });
+            
+            // Make quote number and PC number non-editable
+            const quoteNumberField = document.getElementById('quote-edit-number');
+            const pcNumberField = document.getElementById('quote-edit-pc-number');
+            if (quoteNumberField) quoteNumberField.readOnly = true;
+            if (pcNumberField) pcNumberField.readOnly = true;
+            
+            // Set valid until date if exists
+            const validUntilField = document.getElementById('quote-edit-valid-until');
+            if (validUntilField && quoteData.validUntil) {
+                const date = new Date(quoteData.validUntil);
+                validUntilField.value = date.toISOString().split('T')[0];
+            }
+            
+            // Show modal using uiModals
+            await uiModals.openModal('quote-edit-modal');
+            uiModals.showToast(`Editing ${quoteData.quoteNumber}`, 'info');
+            logDebug('Quote edit modal opened successfully');
             
         } catch (error) {
             logError('Failed to open quote edit modal:', error);
             uiModals.showToast('Failed to load quote', 'error');
         }
+    }
+
+    /**
+     * @description Close Quote Edit Modal
+     */
+    closeQuoteEditModal() {
+        uiModals.closeModal('quote-edit-modal');
+    }
+
+    /**
+     * @description Update Quote
+     */
+    async updateQuote() {
+        try {
+            logDebug('Updating quote');
+            
+            const id = document.getElementById('quote-edit-id')?.value;
+            if (!id) {
+                uiModals.showToast('Quote ID not found', 'error');
+                return;
+            }
+            
+            // Load existing quote
+            const existingQuote = await db.load('quotes', id);
+            if (!existingQuote) {
+                uiModals.showToast('Quote not found', 'error');
+                return;
+            }
+            
+            // Get form data
+            const formData = this.getQuoteEditFormData();
+            if (!formData) {
+                return; // Validation failed
+            }
+            
+            // Update quote data
+            const updatedQuote = {
+                ...existingQuote,
+                ...formData,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+            
+            await db.save('quotes', updatedQuote);
+            uiModals.showToast(`Quote ${updatedQuote.quoteNumber} updated successfully!`, 'success');
+            
+            // Close modal and refresh list
+            this.closeQuoteEditModal();
+            
+            if (this.currentPage === 'quotes') {
+                await this.loadQuotesData();
+            }
+            
+            logDebug('Quote updated successfully:', updatedQuote);
+            
+        } catch (error) {
+            logError('Failed to update quote:', error);
+            uiModals.showToast('Failed to update quote', 'error');
+        }
+    }
+
+    /**
+     * @description Get Quote Edit Form Data
+     */
+    getQuoteEditFormData() {
+        const quoteNumber = document.getElementById('quote-edit-number')?.value.trim();
+        const status = document.getElementById('quote-edit-status')?.value;
+        const clientName = document.getElementById('quote-edit-client-name')?.value.trim();
+        
+        if (!quoteNumber || !status || !clientName) {
+            uiModals.showToast('Please fill in required fields (Quote Number, Status, Client Name)', 'error');
+            return null;
+        }
+        
+        // Calculate financial values
+        const netTotal = parseFloat(document.getElementById('quote-edit-net-total')?.value || 0);
+        const vatRate = parseFloat(document.getElementById('quote-edit-vat-rate')?.value || 20);
+        const discount = parseFloat(document.getElementById('quote-edit-discount')?.value || 0);
+        
+        const vatAmount = (netTotal * vatRate) / 100;
+        const totalCost = netTotal + vatAmount - discount;
+        
+        // Update calculated fields in the form
+        const vatAmountField = document.getElementById('quote-edit-vat-amount');
+        const totalCostField = document.getElementById('quote-edit-total-cost');
+        if (vatAmountField) vatAmountField.value = vatAmount.toFixed(2);
+        if (totalCostField) totalCostField.value = totalCost.toFixed(2);
+        
+        const validUntilField = document.getElementById('quote-edit-valid-until');
+        const validUntil = validUntilField?.value ? new Date(validUntilField.value).toISOString() : null;
+        
+        return {
+            quoteNumber: quoteNumber,
+            status: status,
+            pcNumber: document.getElementById('quote-edit-pc-number')?.value.trim() || '',
+            clientName: clientName,
+            projectTitle: document.getElementById('quote-edit-project-title')?.value.trim() || '',
+            version: parseInt(document.getElementById('quote-edit-version')?.value || 1),
+            netTotal: netTotal,
+            vatRate: vatRate,
+            vatAmount: vatAmount,
+            discount: discount,
+            totalCost: totalCost,
+            totalAmount: totalCost, // Keep totalAmount for backward compatibility
+            validUntil: validUntil
+        };
     }
 
     /**
@@ -1352,6 +1519,14 @@ function setupLegacyCompatibility() {
         logDebug('Clear quote filter requested');
         uiModals.showToast('Filter functionality will be restored soon', 'info');
     };
+
+    window.closeQuoteEditModal = () => {
+        app.closeQuoteEditModal();
+    };
+
+    window.updateQuote = async () => {
+        await app.updateQuote();
+    };
     
     window.showActivityModal = () => {
         logDebug('Activity modal requested');
@@ -1392,11 +1567,6 @@ function setupLegacyCompatibility() {
     
     window.clearPcFilter = () => {
         logDebug('Clear PC filter requested');
-        uiModals.showToast('Filter functionality will be restored soon', 'info');
-    };
-    
-    window.clearQuoteFilter = () => {
-        logDebug('Clear quote filter requested');
         uiModals.showToast('Filter functionality will be restored soon', 'info');
     };
     
