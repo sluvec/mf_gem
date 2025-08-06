@@ -4373,15 +4373,6 @@ function setupLegacyCompatibility() {
     
 
     
-    window.clearPcFilter = () => {
-        logDebug('Clear PC filter requested');
-        uiModals.showToast('Filter functionality will be restored soon', 'info');
-    };
-    
-    window.clearActivityFilter = () => {
-        logDebug('Clear activity filter requested');
-        uiModals.showToast('Filter functionality will be restored soon', 'info');
-    };
     
     // Activity view functions
     window.switchActivitiesView = (viewType) => app.switchActivitiesView(viewType);
