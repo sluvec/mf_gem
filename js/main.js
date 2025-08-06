@@ -128,7 +128,9 @@ class CRMApplication {
                 });
                 
                 if (!hasValidAmounts) {
-                    console.log('🔵 Quotes missing totalAmount, reloading sample data...');
+                    console.log('🔵 Quotes missing totalAmount, clearing database and reloading...');
+                    // Clear quotes store and reload sample data
+                    await db.clearStore('quotes');
                     needsReload = true;
                 }
             }
