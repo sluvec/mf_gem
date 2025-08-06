@@ -167,6 +167,12 @@ class CRMApplication {
             console.log('🔵 DB: Starting PC Numbers migration...');
             await this.migratePcNumbersToNewFormat();
             console.log('🔵 DB: PC Numbers migration completed');
+            
+            // Migrate Quote Numbers to new format QT-000001
+            logDebug('Starting Quote Numbers migration...');
+            console.log('🔵 DB: Starting Quote Numbers migration...');
+            await this.migrateQuoteNumbersToNewFormat();
+            console.log('🔵 DB: Quote Numbers migration completed');
             logDebug('PC Numbers migration completed');
             
             // Ensure all quotes are linked to PC Numbers
@@ -808,6 +814,82 @@ class CRMApplication {
         } catch (error) {
             logError('Error generating next PC Number:', error);
             return 'PC-000001'; // Fallback
+        }
+    }
+
+    /**
+     * @description Generate next Quote Number in format QT-000001
+     */
+    async getNextQuoteNumber() {
+        try {
+            const allQuotes = await db.loadAll('quotes');
+            
+            if (!allQuotes || allQuotes.length === 0) {
+                return 'QT-000001';
+            }
+            
+            // Extract numeric parts and find the highest number
+            const numbers = allQuotes
+                .map(quote => {
+                    const match = quote.quoteNumber.match(/QT-(\d{6})/);
+                    return match ? parseInt(match[1], 10) : 0;
+                })
+                .filter(num => !isNaN(num));
+            
+            const maxNumber = Math.max(...numbers, 0);
+            const nextNumber = maxNumber + 1;
+            
+            // Format with leading zeros (6 digits)
+            return `QT-${nextNumber.toString().padStart(6, '0')}`;
+        } catch (error) {
+            logError('Error generating next Quote Number:', error);
+            return 'QT-000001'; // Fallback
+        }
+    }
+
+    /**
+     * @description Migrate existing Quote Numbers to new format QT-000001
+     */
+    async migrateQuoteNumbersToNewFormat() {
+        try {
+            logInfo('Starting Quote Numbers migration to QT-000XXX format...');
+            
+            const allQuotes = await db.loadAll('quotes');
+            let migratedCount = 0;
+            
+            for (const quote of allQuotes) {
+                // Check if quote number is in old format (QT-2024-XXX or similar)
+                const oldFormatMatch = quote.quoteNumber.match(/QT-(\d{4})-(\d{3})/);
+                
+                if (oldFormatMatch) {
+                    // Extract the sequence number from old format
+                    const sequenceNumber = parseInt(oldFormatMatch[2], 10);
+                    
+                    // Create new format QT-000XXX
+                    const newQuoteNumber = `QT-${sequenceNumber.toString().padStart(6, '0')}`;
+                    
+                    // Update the quote
+                    const updatedQuote = {
+                        ...quote,
+                        quoteNumber: newQuoteNumber,
+                        lastModifiedAt: new Date().toISOString()
+                    };
+                    
+                    await db.save('quotes', updatedQuote);
+                    migratedCount++;
+                    
+                    logInfo(`Migrated quote number: ${quote.quoteNumber} → ${newQuoteNumber}`);
+                }
+            }
+            
+            if (migratedCount > 0) {
+                logInfo(`Successfully migrated ${migratedCount} quote numbers to new format`);
+            } else {
+                logInfo('No quote numbers needed migration');
+            }
+            
+        } catch (error) {
+            logError('Failed to migrate quote numbers:', error);
         }
     }
 
@@ -2017,7 +2099,7 @@ class CRMApplication {
             // Sample Quotes - Connected to Office Relocation PC Numbers
             const sampleQuotes = [
                 {
-                    quoteNumber: 'QT-2024-001',
+                    quoteNumber: 'QT-000001',
                     pcNumber: 'PC-000001',
                     clientName: 'Fintech Innovations Ltd',
                     projectTitle: 'Complete Office Relocation - City to Canary Wharf',
@@ -2083,7 +2165,7 @@ class CRMApplication {
                     lastModifiedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
                 },
                 {
-                    quoteNumber: 'QT-2024-002',
+                    quoteNumber: 'QT-000002',
                     pcNumber: 'PC-000002',
                     clientName: 'Chambers & Associates',
                     projectTitle: 'Barrister Chambers Relocation',
@@ -2094,7 +2176,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-003',
+                    quoteNumber: 'QT-000003',
                     pcNumber: 'PC-000003',
                     clientName: 'TechStart Solutions',
                     projectTitle: 'Emergency Office Move - Lease Termination',
@@ -2105,7 +2187,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-004',
+                    quoteNumber: 'QT-000004',
                     pcNumber: 'PC-000004',
                     clientName: 'Industrial Manufacturing UK',
                     projectTitle: 'Manufacturing HQ Office Consolidation',
@@ -2116,7 +2198,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-005',
+                    quoteNumber: 'QT-000005',
                     pcNumber: 'PC-000005',
                     clientName: 'Creative Media Agency',
                     projectTitle: 'Creative Studio & Office Move',
@@ -2127,7 +2209,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-006',
+                    quoteNumber: 'QT-000006',
                     pcNumber: 'PC-000006',
                     clientName: 'Global Consulting Partners',
                     projectTitle: 'Large Corporate Office Relocation',
@@ -2138,7 +2220,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-007',
+                    quoteNumber: 'QT-000007',
                     pcNumber: 'PC-000007',
                     clientName: 'Boutique Investments Ltd',
                     projectTitle: 'Premium Investment Office Fitout',
@@ -2149,7 +2231,7 @@ class CRMApplication {
                     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
                 },
                 {
-                    quoteNumber: 'QT-2024-008',
+                    quoteNumber: 'QT-000008',
                     pcNumber: 'PC-000008',
                     clientName: 'NHS Trust Admin',
                     projectTitle: 'NHS Administrative Office Move',
@@ -2161,7 +2243,7 @@ class CRMApplication {
                 },
                 // Additional quotes for some projects (multiple quotes per project)
                 {
-                    quoteNumber: 'QT-2024-009',
+                    quoteNumber: 'QT-000009',
                     pcNumber: 'PC-000001',
                     clientName: 'Fintech Innovations Ltd',
                     projectTitle: 'Canary Wharf Move - IT Only Package',
@@ -5057,10 +5139,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'PC-2024-008': 'PC-000008'  // NHS Trust Admin
             };
             
-            // Quotes from db.json with corrected PC Number references
+            // Quotes from db.json with corrected PC Number references and new QT-XXXXXX format
             const quotesToImport = [
                 {
-                    "quoteNumber": "QT-2024-001",
+                    "quoteNumber": "QT-000001",
                     "pcNumber": "PC-000001", // Was PC-2024-001
                     "clientName": "Fintech Innovations Ltd",
                     "projectTitle": "Complete Office Relocation - City to Canary Wharf",
@@ -5072,7 +5154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "2d1377a8-8932-4a5c-8780-b411a9635f50"
                 },
                 {
-                    "quoteNumber": "QT-2024-007",
+                    "quoteNumber": "QT-000007",
                     "pcNumber": "PC-000007", // Was PC-2024-007
                     "clientName": "Boutique Investments Ltd",
                     "projectTitle": "Premium Investment Office Fitout",
@@ -5084,7 +5166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "625fb1e3-48e3-4164-bcac-614e7a986f57"
                 },
                 {
-                    "quoteNumber": "QT-2024-002",
+                    "quoteNumber": "QT-000002",
                     "pcNumber": "PC-000002", // Was PC-2024-002
                     "clientName": "Chambers & Associates",
                     "projectTitle": "Barrister Chambers Relocation",
@@ -5096,7 +5178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "69b3de76-8cb4-4704-8c6c-ab2196ee1c3f"
                 },
                 {
-                    "quoteNumber": "QT-2024-003",
+                    "quoteNumber": "QT-000003",
                     "pcNumber": "PC-000003", // Was PC-2024-003
                     "clientName": "TechStart Solutions",
                     "projectTitle": "Emergency Office Move - Lease Termination",
@@ -5108,7 +5190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "88523cb8-1c08-403c-8ec1-e824ef731d19"
                 },
                 {
-                    "quoteNumber": "QT-2024-005",
+                    "quoteNumber": "QT-000005",
                     "pcNumber": "PC-000005", // Was PC-2024-005
                     "clientName": "Creative Media Agency",
                     "projectTitle": "Creative Studio & Office Move",
@@ -5120,7 +5202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "8885e2fd-031e-43a3-9a8c-38dc04495709"
                 },
                 {
-                    "quoteNumber": "QT-2024-004",
+                    "quoteNumber": "QT-000004",
                     "pcNumber": "PC-000004", // Was PC-2024-004
                     "clientName": "Industrial Manufacturing UK",
                     "projectTitle": "Manufacturing HQ Office Consolidation",
@@ -5132,7 +5214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "9645840a-55de-46ed-9727-7c4f35856af3"
                 },
                 {
-                    "quoteNumber": "QT-2024-009",
+                    "quoteNumber": "QT-000009",
                     "pcNumber": "PC-000001", // Was PC-2024-001 (second quote for Fintech)
                     "clientName": "Fintech Innovations Ltd",
                     "projectTitle": "Canary Wharf Move - IT Only Package",
@@ -5144,7 +5226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "a00888ec-099a-4b3e-a94e-561561e713e8"
                 },
                 {
-                    "quoteNumber": "QT-2024-008",
+                    "quoteNumber": "QT-000008",
                     "pcNumber": "PC-000008", // Was PC-2024-008
                     "clientName": "NHS Trust Admin",
                     "projectTitle": "NHS Administrative Office Move",
@@ -5156,7 +5238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     "id": "a4abfcf2-6031-4b64-8ed5-2ffa96c5eac9"
                 },
                 {
-                    "quoteNumber": "QT-2024-006",
+                    "quoteNumber": "QT-000006",
                     "pcNumber": "PC-000006", // Was PC-2024-006
                     "clientName": "Global Consulting Partners",
                     "projectTitle": "Large Corporate Office Relocation",
