@@ -716,21 +716,35 @@ class CRMApplication {
             
             if (container) {
                 if (activities.length === 0) {
-                    container.innerHTML = '<tr><td colspan="6">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="8">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
                 } else {
-                    container.innerHTML = activities.map(activity => `
+                    container.innerHTML = activities.map(activity => {
+                        // Get scheduled date safely
+                        let scheduledDisplay = 'Not scheduled';
+                        if (activity.scheduledDate) {
+                            try {
+                                scheduledDisplay = new Date(activity.scheduledDate).toLocaleDateString();
+                            } catch (e) {
+                                scheduledDisplay = 'Invalid date';
+                            }
+                        }
+
+                        return `
                         <tr>
                             <td><strong>${activity.title || 'N/A'}</strong></td>
-                            <td>${activity.type || 'N/A'}</td>
                             <td>${activity.pcNumber || 'N/A'}</td>
-                            <td>${new Date(activity.scheduledDate).toLocaleDateString() || 'N/A'}</td>
+                            <td>${activity.companyName || 'N/A'}</td>
+                            <td>${activity.type || 'N/A'}</td>
+                            <td>${scheduledDisplay}</td>
+                            <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
                             <td>
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
                             </td>
                         </tr>
-                    `).join('');
+                        `;
+                    }).join('');
                 }
             } else {
                 logError('Activities container not found: #activities-list');
@@ -1307,18 +1321,117 @@ class CRMApplication {
         try {
             logDebug(`Opening activity details for ID: ${id}`);
             
-            const activityData = await db.load('activities', id);
-            if (!activityData) {
+            const activity = await db.load('activities', id);
+            if (!activity) {
                 logError(`Activity not found: ${id}`);
                 uiModals.showToast('Activity not found', 'error');
                 return;
             }
             
-            // Store current activity in global state
-            window.currentActivity = activityData;
+            // Get related data
+            const pcNumber = activity.pcNumber ? await db.load('pcNumbers', activity.pcNumber) : null;
+            const quote = activity.quoteId ? await db.load('quotes', activity.quoteId) : null;
             
-            logDebug('Activity details functionality will be restored soon');
-            uiModals.showToast('Activity details functionality will be restored soon', 'info');
+            // Format dates
+            const scheduledDate = activity.scheduledDate ? new Date(activity.scheduledDate).toLocaleDateString() : 'Not scheduled';
+            const completedDate = activity.completedDate ? new Date(activity.completedDate).toLocaleDateString() : null;
+            const createdDate = activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : 'Unknown';
+            
+            // Format status with appropriate styling
+            const statusColors = {
+                'pending': '#d97706',
+                'in-progress': '#3b82f6', 
+                'completed': '#059669',
+                'cancelled': '#dc2626'
+            };
+            const statusColor = statusColors[activity.status] || '#6b7280';
+            
+            // Create detailed HTML
+            const detailsHtml = `
+                <div style="padding: 1rem;">
+                    <h3 style="margin: 0 0 1rem 0; color: #374151;">${activity.title}</h3>
+                    
+                    <!-- Basic Information -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div><strong>Type:</strong> ${activity.type || 'N/A'}</div>
+                        <div><strong>Priority:</strong> ${activity.priority || 'Medium'}</div>
+                        <div><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: 600;">${activity.status || 'pending'}</span></div>
+                        <div><strong>Assigned To:</strong> ${activity.assignedTo || 'Unassigned'}</div>
+                    </div>
+                    
+                    <!-- Scheduling Information -->
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Scheduling</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div><strong>Scheduled Date:</strong> ${scheduledDate}</div>
+                            <div><strong>Duration:</strong> ${activity.duration || 'Not specified'}</div>
+                            ${completedDate ? `<div><strong>Completed:</strong> ${completedDate}</div>` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- Project Links -->
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Project Links</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div><strong>PC Number:</strong> ${pcNumber ? `<a href="#" onclick="window.navigateToPage('pc-detail')" style="color: #3b82f6;">${pcNumber.pcNumber}</a>` : 'None'}</div>
+                            <div><strong>Quote:</strong> ${quote ? `<a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.id}</a>` : 'None'}</div>
+                        </div>
+                        ${pcNumber ? `<div style="margin-top: 0.5rem; color: #6b7280; font-size: 0.875rem;">Company: ${pcNumber.companyName}</div>` : ''}
+                    </div>
+                    
+                    <!-- Description -->
+                    ${activity.description ? `
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Description</h4>
+                        <p style="margin: 0; color: #6b7280; background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem;">${activity.description}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Notes -->
+                    ${activity.notes ? `
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Notes</h4>
+                        <p style="margin: 0; color: #6b7280; background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem;">${activity.notes}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Completion Notes (if completed) -->
+                    ${activity.completionNotes && activity.status === 'completed' ? `
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Completion Notes</h4>
+                        <p style="margin: 0; color: #6b7280; background: #f0f9ff; padding: 0.75rem; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">${activity.completionNotes}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Metadata -->
+                    <div style="font-size: 0.875rem; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                        <div>Created: ${createdDate} by ${activity.createdBy || 'Unknown'}</div>
+                        ${activity.lastModifiedAt ? `<div>Modified: ${new Date(activity.lastModifiedAt).toLocaleDateString()} by ${activity.editedBy || 'Unknown'}</div>` : ''}
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div style="text-align: right; margin-top: 1rem;">
+                        <button onclick="window.editActivity('${activity.id}')" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; margin-right: 0.5rem;">Edit Activity</button>
+                        <button onclick="window.closeActivityDetailsModal()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Close</button>
+                    </div>
+                </div>
+            `;
+
+            // Create or update details modal
+            let modal = document.getElementById('activity-details-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'activity-details-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-content" style="max-width: 700px;">${detailsHtml}</div>`;
+                document.body.appendChild(modal);
+            } else {
+                modal.querySelector('.modal-content').innerHTML = detailsHtml;
+            }
+
+            uiModals.openModal('activity-details-modal');
+            
+            logDebug('Activity details shown for:', id);
             
         } catch (error) {
             logError('Failed to open activity details:', error);
@@ -3532,6 +3645,8 @@ function setupLegacyCompatibility() {
     window.viewActivityDetails = async (id) => {
         await app.viewActivityDetails(id);
     };
+
+    window.closeActivityDetailsModal = () => uiModals.closeModal('activity-details-modal');
     
     window.showPriceListModal = () => {
         logDebug('Price List modal requested');
