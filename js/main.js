@@ -3898,10 +3898,10 @@ class CRMApplication {
                 case 'quotes':
                     container.innerHTML = filteredData.map(quote => `
                         <tr>
-                            <td><strong><a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.id}</a></strong></td>
-                            <td>${quote.companyName || 'N/A'}</td>
+                            <td><strong><a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.quoteNumber || quote.id}</a></strong></td>
+                            <td>${quote.clientName || quote.companyName || 'N/A'}</td>
                             <td>${quote.pcNumber || 'N/A'}</td>
-                            <td>£${(quote.totalValue || 0).toLocaleString()}</td>
+                            <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
                             <td>${new Date(quote.createdAt).toLocaleDateString() || 'N/A'}</td>
                             <td><span class="status-badge ${quote.status || 'draft'}">${quote.status || 'draft'}</span></td>
                             <td>
