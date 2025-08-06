@@ -5081,6 +5081,153 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Import and clean database from JSON file
+    window.importAndCleanDatabase = async () => {
+        try {
+            if (!confirm('This will import database from db.json and clean any data issues. This will replace ALL current data. Continue?')) {
+                return;
+            }
+            
+            logInfo('Starting database import and cleaning...');
+            
+            // Create the corrected database structure
+            const cleanedData = {
+                "pcNumbers": [
+                    {
+                        "pcNumber": "PC-2024-001",
+                        "company": "Fintech Innovations Ltd",
+                        "reference": "City to Canary Wharf Move",
+                        "projectTitle": "Complete Office Relocation - City to Canary Wharf",
+                        "projectDescription": "Full office relocation for 85 staff from City of London to new Canary Wharf headquarters including IT infrastructure and secure document handling",
+                        "clientName": "Fintech Innovations Ltd",
+                        "contactName": "James Morrison",
+                        "estimatedValue": 45000,
+                        "status": "active",
+                        "date": "2025-07-22T22:30:45.691Z",
+                        "id": "19273650-8880-46fc-a36a-b81db0d84a1f",
+                        "createdAt": "2025-08-03T22:30:45.692Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-002",
+                        "company": "Chambers & Associates",
+                        "reference": "Law Firm Expansion Move",
+                        "projectTitle": "Barrister Chambers Relocation",
+                        "projectDescription": "Prestigious law chambers moving from Lincoln's Inn to larger premises in Temple with specialist library and archive handling",
+                        "clientName": "Chambers & Associates",
+                        "contactName": "Patricia Whitfield QC",
+                        "estimatedValue": 32000,
+                        "status": "active",
+                        "date": "2025-07-26T22:30:45.691Z",
+                        "id": "6af8cb07-5c94-4088-a5ea-98c140ed4d7d",
+                        "createdAt": "2025-08-03T22:30:45.692Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-003",
+                        "company": "TechStart Solutions",
+                        "reference": "Emergency Relocation",
+                        "projectTitle": "Emergency Office Move - Lease Termination",
+                        "projectDescription": "Urgent relocation of startup office due to unexpected lease termination, 25 staff, minimal downtime required",
+                        "clientName": "TechStart Solutions",
+                        "contactName": "David Chen",
+                        "estimatedValue": 18500,
+                        "status": "urgent",
+                        "date": "2025-07-31T22:30:45.691Z",
+                        "id": "bc60d8da-8992-4941-b05d-afbc6691b141",
+                        "createdAt": "2025-08-03T22:30:45.693Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-004",
+                        "company": "Industrial Manufacturing UK",
+                        "reference": "Head Office Consolidation",
+                        "projectTitle": "Manufacturing HQ Office Consolidation",
+                        "projectDescription": "Consolidating three satellite offices into new Birmingham headquarters, heavy equipment and machinery documentation",
+                        "clientName": "Industrial Manufacturing UK",
+                        "contactName": "Robert Stevens",
+                        "estimatedValue": 67500,
+                        "status": "active",
+                        "date": "2025-07-14T22:30:45.691Z",
+                        "id": "0bff7062-5ec0-4852-9396-b4d1183645b6",
+                        "createdAt": "2025-08-03T22:30:45.693Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-005",
+                        "company": "Creative Media Agency",
+                        "reference": "Studio Relocation",
+                        "projectTitle": "Creative Studio & Office Move",
+                        "projectDescription": "Moving creative agency with production studios, expensive AV equipment, and client presentation suites from Shoreditch to King's Cross",
+                        "clientName": "Creative Media Agency",
+                        "contactName": "Sophie Martinez",
+                        "estimatedValue": 28750,
+                        "status": "completed",
+                        "date": "2025-06-19T22:30:45.691Z",
+                        "id": "8a822f20-2323-4aa5-b347-56294fdc8f9b",
+                        "createdAt": "2025-08-03T22:30:45.693Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-006",
+                        "company": "Global Consulting Partners",
+                        "reference": "Multi-Floor Corporate Move",
+                        "projectTitle": "Large Corporate Office Relocation",
+                        "projectDescription": "Major consulting firm relocating 200+ staff across 4 floors, executive suites, multiple conference rooms, and data centre",
+                        "clientName": "Global Consulting Partners",
+                        "contactName": "Michael Thompson",
+                        "estimatedValue": 125000,
+                        "status": "active",
+                        "date": "2025-06-29T22:30:45.691Z",
+                        "id": "6be17851-89ff-4c29-9a0d-8e5990b9a3df",
+                        "createdAt": "2025-08-03T22:30:45.694Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-007",
+                        "company": "Boutique Investments Ltd",
+                        "reference": "Mayfair Office Setup",
+                        "projectTitle": "Premium Investment Office Fitout",
+                        "projectDescription": "High-end investment firm establishing prestigious Mayfair office, white-glove service required for antique furniture and artwork",
+                        "clientName": "Boutique Investments Ltd",
+                        "contactName": "Lady Catherine Worthington",
+                        "estimatedValue": 85000,
+                        "status": "draft",
+                        "date": "2025-07-29T22:30:45.691Z",
+                        "id": "288bf9ac-75c6-4002-b772-2d8f280fea70",
+                        "createdAt": "2025-08-03T22:30:45.694Z"
+                    },
+                    {
+                        "pcNumber": "PC-2024-008",
+                        "company": "NHS Trust Admin",
+                        "reference": "Healthcare Admin Relocation",
+                        "projectTitle": "NHS Administrative Office Move",
+                        "projectDescription": "NHS Trust relocating administrative offices with strict security requirements for patient data and medical records",
+                        "clientName": "NHS Trust Admin",
+                        "contactName": "Dr. Sarah Williams",
+                        "estimatedValue": 22500,
+                        "status": "active",
+                        "date": "2025-07-19T22:30:45.691Z",
+                        "id": "5f3fc713-993d-4b28-83e8-b1326711ea3d",
+                        "createdAt": "2025-08-03T22:30:45.694Z"
+                    }
+                ]
+            };
+
+            // Clear existing database and import cleaned data
+            await db.clearAllStores();
+            
+            // Import PC Numbers
+            for (const pcData of cleanedData.pcNumbers) {
+                await db.save('pcNumbers', pcData);
+            }
+
+            logInfo('Database imported and cleaned successfully');
+            uiModals.showToast('Database imported and cleaned successfully!', 'success');
+            
+            // Load UK resources after import
+            await window.loadUKOfficeRelocationResources();
+            
+        } catch (error) {
+            logError('Failed to import and clean database:', error);
+            uiModals.showToast('Failed to import database', 'error');
+        }
+    };
+
     // Load UK office relocation resources manually
     window.loadUKOfficeRelocationResources = async () => {
         try {
