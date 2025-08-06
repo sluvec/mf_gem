@@ -1633,6 +1633,7 @@
                     <div><strong>PC Number:</strong> <span id="quote-detail-pc-number"></span></div>
                     <div><strong>Client Name:</strong> <span id="quote-detail-client-name"></span></div>
                     <div><strong>Project Title:</strong> <span id="quote-detail-project-title"></span></div>
+                    <div><strong>Account Manager:</strong> <span id="quote-detail-account-manager"></span></div>
                     <div><strong>Value:</strong> <span id="quote-detail-value"></span></div>
                     <div><strong>Status:</strong> <span id="quote-detail-status"></span></div>
                     <div><strong>Valid Until:</strong> <span id="quote-detail-valid-until"></span></div>
@@ -2034,6 +2035,23 @@
                 </div>
             </div>
 
+            <!-- Step 4: Account Manager -->
+            <div class="form-section">
+                <h3>Step 4: Account Manager</h3>
+                <div>
+                    <label>Account Manager *</label>
+                    <select id="quote-modal-account-manager" required>
+                        <option value="">Select Account Manager...</option>
+                        <option value="John Smith">John Smith</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="Mike Wilson">Mike Wilson</option>
+                        <option value="Emma Brown">Emma Brown</option>
+                        <option value="David Lee">David Lee</option>
+                    </select>
+                    <small style="color: #6b7280;">Choose the account manager for this quote</small>
+                </div>
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="primary">Create Quote</button>
                 <button type="button" onclick="window.closeQuoteModal()" class="secondary">Cancel</button>
@@ -2090,9 +2108,22 @@
                         <label>Project Title *</label>
                         <input type="text" id="quote-edit-project-title" required placeholder="Project title">
                     </div>
-                    <div>
-                        <label>Valid Until</label>
-                        <input type="date" id="quote-edit-valid-until">
+                    <div class="form-grid">
+                        <div>
+                            <label>Valid Until</label>
+                            <input type="date" id="quote-edit-valid-until">
+                        </div>
+                        <div>
+                            <label>Account Manager *</label>
+                            <select id="quote-edit-account-manager" required>
+                                <option value="">Select Account Manager...</option>
+                                <option value="John Smith">John Smith</option>
+                                <option value="Sarah Johnson">Sarah Johnson</option>
+                                <option value="Mike Wilson">Mike Wilson</option>
+                                <option value="Emma Brown">Emma Brown</option>
+                                <option value="David Lee">David Lee</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 

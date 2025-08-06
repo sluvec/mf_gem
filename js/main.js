@@ -218,6 +218,7 @@ class CRMApplication {
                     pcId: 'pc-1',
                     pcNumber: 'PC-000001',
                     clientName: 'Fintech Innovations Ltd',
+                    accountManager: 'John Smith',
                     totalAmount: 42500,
                     status: 'approved',
                     createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
@@ -232,6 +233,7 @@ class CRMApplication {
                     pcId: 'pc-2',
                     pcNumber: 'PC-000002',
                     clientName: 'Chambers & Associates',
+                    accountManager: 'Sarah Johnson',
                     totalAmount: 26800,
                     status: 'pending',
                     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
@@ -741,6 +743,7 @@ class CRMApplication {
                 { id: 'quote-detail-pc-number', value: quoteData.pcNumber || 'N/A' },
                 { id: 'quote-detail-client-name', value: quoteData.clientName || quoteData.companyName || 'N/A' },
                 { id: 'quote-detail-project-title', value: quoteData.projectTitle || 'N/A' },
+                { id: 'quote-detail-account-manager', value: quoteData.accountManager || 'N/A' },
                 { id: 'quote-detail-value', value: quoteData.totalAmount ? `£${quoteData.totalAmount.toLocaleString()}` : 'N/A' },
                 { id: 'quote-detail-status', value: quoteData.status || 'draft' },
                 { id: 'quote-detail-valid-until', value: quoteData.validUntil ? new Date(quoteData.validUntil).toLocaleDateString() : 'N/A' },
@@ -1796,6 +1799,7 @@ class CRMApplication {
                 pcId: formData.pcId,
                 pcNumber: formData.pcNumber,
                 clientName: clientName,
+                accountManager: formData.accountManager,
                 totalAmount: 0, // Will be calculated when items are added
                 status: 'pending',
                 priceListId: formData.priceListId,
@@ -1837,6 +1841,7 @@ class CRMApplication {
     getQuoteFormData() {
         const pcSelect = document.getElementById('quote-modal-pc');
         const priceListSelect = document.getElementById('quote-modal-pricelist');
+        const accountManagerSelect = document.getElementById('quote-modal-account-manager');
         
         if (!pcSelect?.value) {
             uiModals.showToast('Please select a PC Number', 'error');
@@ -1848,13 +1853,19 @@ class CRMApplication {
             return null;
         }
         
+        if (!accountManagerSelect?.value) {
+            uiModals.showToast('Please select an Account Manager', 'error');
+            return null;
+        }
+        
         const selectedOption = pcSelect.options[pcSelect.selectedIndex];
         const pcNumber = selectedOption?.getAttribute('data-pc-number') || '';
         
         return {
             pcId: pcSelect.value,
             pcNumber: pcNumber,
-            priceListId: priceListSelect.value
+            priceListId: priceListSelect.value,
+            accountManager: accountManagerSelect.value
         };
     }
 
@@ -2018,6 +2029,7 @@ class CRMApplication {
                 { id: 'quote-edit-value', value: quoteData.totalAmount || 0 },
                 { id: 'quote-edit-client-name', value: quoteData.clientName || '' },
                 { id: 'quote-edit-project-title', value: quoteData.projectTitle || '' },
+                { id: 'quote-edit-account-manager', value: quoteData.accountManager || '' },
                 { id: 'quote-edit-version', value: quoteData.version || 1 },
                 { id: 'quote-edit-net-total', value: quoteData.netTotal || quoteData.totalAmount || 0 },
                 { id: 'quote-edit-vat-rate', value: quoteData.vatRate || 20.00 },
@@ -2126,9 +2138,10 @@ class CRMApplication {
         const quoteNumber = document.getElementById('quote-edit-number')?.value.trim();
         const status = document.getElementById('quote-edit-status')?.value;
         const clientName = document.getElementById('quote-edit-client-name')?.value.trim();
+        const accountManager = document.getElementById('quote-edit-account-manager')?.value;
         
-        if (!quoteNumber || !status || !clientName) {
-            uiModals.showToast('Please fill in required fields (Quote Number, Status, Client Name)', 'error');
+        if (!quoteNumber || !status || !clientName || !accountManager) {
+            uiModals.showToast('Please fill in required fields (Quote Number, Status, Client Name, Account Manager)', 'error');
             return null;
         }
         
@@ -2154,6 +2167,7 @@ class CRMApplication {
             status: status,
             pcNumber: document.getElementById('quote-edit-pc-number')?.value.trim() || '',
             clientName: clientName,
+            accountManager: accountManager,
             projectTitle: document.getElementById('quote-edit-project-title')?.value.trim() || '',
             version: parseInt(document.getElementById('quote-edit-version')?.value || 1),
             netTotal: netTotal,
