@@ -5084,147 +5084,162 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Import and clean database from JSON file
     window.importAndCleanDatabase = async () => {
         try {
-            if (!confirm('This will import database from db.json and clean any data issues. This will replace ALL current data. Continue?')) {
+            if (!confirm('This will fix quote-PC number linkages by mapping quotes from db.json to existing PC Numbers (PC-000001 to PC-000008). Continue?')) {
                 return;
             }
             
-            logInfo('Starting database import and cleaning...');
+            logInfo('Starting database import and fixing quote linkages...');
             
-            // Create the corrected database structure
-            const cleanedData = {
-                "pcNumbers": [
-                    {
-                        "pcNumber": "PC-2024-001",
-                        "company": "Fintech Innovations Ltd",
-                        "reference": "City to Canary Wharf Move",
-                        "projectTitle": "Complete Office Relocation - City to Canary Wharf",
-                        "projectDescription": "Full office relocation for 85 staff from City of London to new Canary Wharf headquarters including IT infrastructure and secure document handling",
-                        "clientName": "Fintech Innovations Ltd",
-                        "contactName": "James Morrison",
-                        "estimatedValue": 45000,
-                        "status": "active",
-                        "date": "2025-07-22T22:30:45.691Z",
-                        "id": "19273650-8880-46fc-a36a-b81db0d84a1f",
-                        "createdAt": "2025-08-03T22:30:45.692Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-002",
-                        "company": "Chambers & Associates",
-                        "reference": "Law Firm Expansion Move",
-                        "projectTitle": "Barrister Chambers Relocation",
-                        "projectDescription": "Prestigious law chambers moving from Lincoln's Inn to larger premises in Temple with specialist library and archive handling",
-                        "clientName": "Chambers & Associates",
-                        "contactName": "Patricia Whitfield QC",
-                        "estimatedValue": 32000,
-                        "status": "active",
-                        "date": "2025-07-26T22:30:45.691Z",
-                        "id": "6af8cb07-5c94-4088-a5ea-98c140ed4d7d",
-                        "createdAt": "2025-08-03T22:30:45.692Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-003",
-                        "company": "TechStart Solutions",
-                        "reference": "Emergency Relocation",
-                        "projectTitle": "Emergency Office Move - Lease Termination",
-                        "projectDescription": "Urgent relocation of startup office due to unexpected lease termination, 25 staff, minimal downtime required",
-                        "clientName": "TechStart Solutions",
-                        "contactName": "David Chen",
-                        "estimatedValue": 18500,
-                        "status": "urgent",
-                        "date": "2025-07-31T22:30:45.691Z",
-                        "id": "bc60d8da-8992-4941-b05d-afbc6691b141",
-                        "createdAt": "2025-08-03T22:30:45.693Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-004",
-                        "company": "Industrial Manufacturing UK",
-                        "reference": "Head Office Consolidation",
-                        "projectTitle": "Manufacturing HQ Office Consolidation",
-                        "projectDescription": "Consolidating three satellite offices into new Birmingham headquarters, heavy equipment and machinery documentation",
-                        "clientName": "Industrial Manufacturing UK",
-                        "contactName": "Robert Stevens",
-                        "estimatedValue": 67500,
-                        "status": "active",
-                        "date": "2025-07-14T22:30:45.691Z",
-                        "id": "0bff7062-5ec0-4852-9396-b4d1183645b6",
-                        "createdAt": "2025-08-03T22:30:45.693Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-005",
-                        "company": "Creative Media Agency",
-                        "reference": "Studio Relocation",
-                        "projectTitle": "Creative Studio & Office Move",
-                        "projectDescription": "Moving creative agency with production studios, expensive AV equipment, and client presentation suites from Shoreditch to King's Cross",
-                        "clientName": "Creative Media Agency",
-                        "contactName": "Sophie Martinez",
-                        "estimatedValue": 28750,
-                        "status": "completed",
-                        "date": "2025-06-19T22:30:45.691Z",
-                        "id": "8a822f20-2323-4aa5-b347-56294fdc8f9b",
-                        "createdAt": "2025-08-03T22:30:45.693Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-006",
-                        "company": "Global Consulting Partners",
-                        "reference": "Multi-Floor Corporate Move",
-                        "projectTitle": "Large Corporate Office Relocation",
-                        "projectDescription": "Major consulting firm relocating 200+ staff across 4 floors, executive suites, multiple conference rooms, and data centre",
-                        "clientName": "Global Consulting Partners",
-                        "contactName": "Michael Thompson",
-                        "estimatedValue": 125000,
-                        "status": "active",
-                        "date": "2025-06-29T22:30:45.691Z",
-                        "id": "6be17851-89ff-4c29-9a0d-8e5990b9a3df",
-                        "createdAt": "2025-08-03T22:30:45.694Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-007",
-                        "company": "Boutique Investments Ltd",
-                        "reference": "Mayfair Office Setup",
-                        "projectTitle": "Premium Investment Office Fitout",
-                        "projectDescription": "High-end investment firm establishing prestigious Mayfair office, white-glove service required for antique furniture and artwork",
-                        "clientName": "Boutique Investments Ltd",
-                        "contactName": "Lady Catherine Worthington",
-                        "estimatedValue": 85000,
-                        "status": "draft",
-                        "date": "2025-07-29T22:30:45.691Z",
-                        "id": "288bf9ac-75c6-4002-b772-2d8f280fea70",
-                        "createdAt": "2025-08-03T22:30:45.694Z"
-                    },
-                    {
-                        "pcNumber": "PC-2024-008",
-                        "company": "NHS Trust Admin",
-                        "reference": "Healthcare Admin Relocation",
-                        "projectTitle": "NHS Administrative Office Move",
-                        "projectDescription": "NHS Trust relocating administrative offices with strict security requirements for patient data and medical records",
-                        "clientName": "NHS Trust Admin",
-                        "contactName": "Dr. Sarah Williams",
-                        "estimatedValue": 22500,
-                        "status": "active",
-                        "date": "2025-07-19T22:30:45.691Z",
-                        "id": "5f3fc713-993d-4b28-83e8-b1326711ea3d",
-                        "createdAt": "2025-08-03T22:30:45.694Z"
-                    }
-                ]
+            // Load current PC Numbers (should be PC-000001 to PC-000008)
+            const existingPcNumbers = await db.loadAll('pcNumbers');
+            logInfo('Found existing PC Numbers:', existingPcNumbers.map(pc => pc.pcNumber));
+            
+            // Create mapping from db.json format (PC-2024-XXX) to application format (PC-000XXX)
+            const pcMapping = {
+                'PC-2024-001': 'PC-000001', // Fintech Innovations Ltd
+                'PC-2024-002': 'PC-000002', // Chambers & Associates  
+                'PC-2024-003': 'PC-000003', // TechStart Solutions
+                'PC-2024-004': 'PC-000004', // Industrial Manufacturing UK
+                'PC-2024-005': 'PC-000005', // Creative Media Agency
+                'PC-2024-006': 'PC-000006', // Global Consulting Partners
+                'PC-2024-007': 'PC-000007', // Boutique Investments Ltd
+                'PC-2024-008': 'PC-000008'  // NHS Trust Admin
             };
-
-            // Clear existing database and import cleaned data
-            await db.clearAllStores();
             
-            // Import PC Numbers
-            for (const pcData of cleanedData.pcNumbers) {
-                await db.save('pcNumbers', pcData);
+            // Quotes from db.json with corrected PC Number references
+            const quotesToImport = [
+                {
+                    "quoteNumber": "QT-2024-001",
+                    "pcNumber": "PC-000001", // Was PC-2024-001
+                    "clientName": "Fintech Innovations Ltd",
+                    "projectTitle": "Complete Office Relocation - City to Canary Wharf",
+                    "value": 47500,
+                    "status": "pending",
+                    "validUntil": "2025-09-02T22:30:45.701Z",
+                    "description": "Full office relocation for 85 staff including IT infrastructure, secure document handling, and executive furniture",
+                    "createdAt": "2025-07-29T22:30:45.701Z",
+                    "id": "2d1377a8-8932-4a5c-8780-b411a9635f50"
+                },
+                {
+                    "quoteNumber": "QT-2024-007",
+                    "pcNumber": "PC-000007", // Was PC-2024-007
+                    "clientName": "Boutique Investments Ltd",
+                    "projectTitle": "Premium Investment Office Fitout",
+                    "value": 92700,
+                    "status": "pending",
+                    "validUntil": "2025-08-24T22:30:45.701Z",
+                    "description": "High-end Mayfair office with white-glove service for antique furniture and artwork collection",
+                    "createdAt": "2025-07-31T22:30:45.701Z",
+                    "id": "625fb1e3-48e3-4164-bcac-614e7a986f57"
+                },
+                {
+                    "quoteNumber": "QT-2024-002",
+                    "pcNumber": "PC-000002", // Was PC-2024-002
+                    "clientName": "Chambers & Associates",
+                    "projectTitle": "Barrister Chambers Relocation",
+                    "value": 34200,
+                    "status": "approved",
+                    "validUntil": "2025-09-17T22:30:45.701Z",
+                    "description": "Prestigious law chambers with specialist library and archive handling, white-glove service for antique furniture",
+                    "createdAt": "2025-07-31T22:30:45.701Z",
+                    "id": "69b3de76-8cb4-4704-8c6c-ab2196ee1c3f"
+                },
+                {
+                    "quoteNumber": "QT-2024-003",
+                    "pcNumber": "PC-000003", // Was PC-2024-003
+                    "clientName": "TechStart Solutions",
+                    "projectTitle": "Emergency Office Move - Lease Termination",
+                    "value": 19750,
+                    "status": "approved",
+                    "validUntil": "2025-08-10T22:30:45.701Z",
+                    "description": "Urgent relocation with emergency premiums, 25 staff, minimal downtime weekend service",
+                    "createdAt": "2025-08-01T22:30:45.701Z",
+                    "id": "88523cb8-1c08-403c-8ec1-e824ef731d19"
+                },
+                {
+                    "quoteNumber": "QT-2024-005",
+                    "pcNumber": "PC-000005", // Was PC-2024-005
+                    "clientName": "Creative Media Agency",
+                    "projectTitle": "Creative Studio & Office Move",
+                    "value": 31250,
+                    "status": "completed",
+                    "validUntil": "2025-07-19T22:30:45.701Z",
+                    "description": "Successfully completed: Creative agency with production studios and expensive AV equipment",
+                    "createdAt": "2025-06-14T22:30:45.701Z",
+                    "id": "8885e2fd-031e-43a3-9a8c-38dc04495709"
+                },
+                {
+                    "quoteNumber": "QT-2024-004",
+                    "pcNumber": "PC-000004", // Was PC-2024-004
+                    "clientName": "Industrial Manufacturing UK",
+                    "projectTitle": "Manufacturing HQ Office Consolidation",
+                    "value": 72800,
+                    "status": "pending",
+                    "validUntil": "2025-10-02T22:30:45.701Z",
+                    "description": "Consolidating three satellite offices with heavy machinery documentation and compliance records",
+                    "createdAt": "2025-07-26T22:30:45.701Z",
+                    "id": "9645840a-55de-46ed-9727-7c4f35856af3"
+                },
+                {
+                    "quoteNumber": "QT-2024-009",
+                    "pcNumber": "PC-000001", // Was PC-2024-001 (second quote for Fintech)
+                    "clientName": "Fintech Innovations Ltd",
+                    "projectTitle": "Canary Wharf Move - IT Only Package",
+                    "value": 15750,
+                    "status": "declined",
+                    "validUntil": "2025-07-24T22:30:45.701Z",
+                    "description": "Alternative quote for IT infrastructure only (client chose full service)",
+                    "createdAt": "2025-07-22T22:30:45.701Z",
+                    "id": "a00888ec-099a-4b3e-a94e-561561e713e8"
+                },
+                {
+                    "quoteNumber": "QT-2024-008",
+                    "pcNumber": "PC-000008", // Was PC-2024-008
+                    "clientName": "NHS Trust Admin",
+                    "projectTitle": "NHS Administrative Office Move",
+                    "value": 24800,
+                    "status": "pending",
+                    "validUntil": "2025-09-17T22:30:45.701Z",
+                    "description": "NHS Trust with strict security requirements for patient data and medical records compliance",
+                    "createdAt": "2025-07-27T22:30:45.701Z",
+                    "id": "a4abfcf2-6031-4b64-8ed5-2ffa96c5eac9"
+                },
+                {
+                    "quoteNumber": "QT-2024-006",
+                    "pcNumber": "PC-000006", // Was PC-2024-006
+                    "clientName": "Global Consulting Partners",
+                    "projectTitle": "Large Corporate Office Relocation",
+                    "value": 132500,
+                    "status": "draft",
+                    "validUntil": "2025-11-01T22:30:45.701Z",
+                    "description": "Major consulting firm 200+ staff across 4 floors with executive suites and data centre",
+                    "createdAt": "2025-08-02T22:30:45.701Z",
+                    "id": "b0f8c81a-a8c4-437f-8453-ba22291ce132"
+                }
+            ];
+
+            // Clear existing quotes first
+            await db.clearStore('quotes');
+            
+            // Import corrected quotes
+            let importedCount = 0;
+            for (const quoteData of quotesToImport) {
+                await db.save('quotes', quoteData);
+                importedCount++;
+                logInfo(`Imported quote ${quoteData.quoteNumber} -> ${quoteData.pcNumber}`);
             }
 
-            logInfo('Database imported and cleaned successfully');
-            uiModals.showToast('Database imported and cleaned successfully!', 'success');
+            logInfo(`Successfully imported ${importedCount} quotes with corrected PC Number linkages`);
+            uiModals.showToast(`Fixed ${importedCount} quote-PC number linkages!`, 'success');
             
-            // Load UK resources after import
-            await window.loadUKOfficeRelocationResources();
+            // Refresh current page if it's quotes
+            if (window.app && window.app.currentPage === 'quotes') {
+                await window.app.showPage('quotes');
+            }
             
         } catch (error) {
-            logError('Failed to import and clean database:', error);
-            uiModals.showToast('Failed to import database', 'error');
+            logError('Failed to import and fix quotes:', error);
+            uiModals.showToast('Failed to fix quote linkages', 'error');
         }
     };
 
