@@ -1167,10 +1167,7 @@ function setupLegacyCompatibility() {
         window.location.reload();
     };
     
-    window.editPC = (id) => {
-        logDebug('Edit PC requested for ID:', id);
-        uiModals.showToast('Edit PC functionality will be restored soon', 'info');
-    };
+
     
     window.clearPcFilter = () => {
         logDebug('Clear PC filter requested');
