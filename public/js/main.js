@@ -265,6 +265,42 @@ class CRMApplication {
                 }
             ];
             
+            // Load sample price lists
+            const samplePriceLists = [
+                {
+                    id: 'pricelist-1',
+                    name: 'Standard Office Relocation Rates',
+                    description: 'Standard pricing for office relocations up to 50 staff',
+                    currency: 'GBP',
+                    status: 'active',
+                    markup: 25,
+                    discount: 0,
+                    effectiveFrom: new Date().toISOString(),
+                    isDefault: true,
+                    items: [],
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Slav',
+                    editedBy: 'Slav'
+                },
+                {
+                    id: 'pricelist-2',
+                    name: 'Premium Commercial Rates',
+                    description: 'Premium pricing for large commercial relocations',
+                    currency: 'GBP',
+                    status: 'active',
+                    markup: 30,
+                    discount: 5,
+                    effectiveFrom: new Date().toISOString(),
+                    isDefault: false,
+                    items: [],
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: 'Rob',
+                    editedBy: 'Rob'
+                }
+            ];
+            
             // Save to database
             for (const pcNumber of samplePCNumbers) {
                 await db.save('pcNumbers', pcNumber);
@@ -282,7 +318,11 @@ class CRMApplication {
                 await db.save('resources', resource);
             }
             
-            logInfo(`Sample data loaded: ${samplePCNumbers.length} PC Numbers, ${sampleQuotes.length} Quotes, ${sampleActivities.length} Activities, ${sampleResources.length} Resources`);
+            for (const priceList of samplePriceLists) {
+                await db.save('priceLists', priceList);
+            }
+            
+            logInfo(`Sample data loaded: ${samplePCNumbers.length} PC Numbers, ${sampleQuotes.length} Quotes, ${sampleActivities.length} Activities, ${sampleResources.length} Resources, ${samplePriceLists.length} Price Lists`);
             
         } catch (error) {
             logError('Failed to load sample data:', error);
@@ -620,7 +660,7 @@ class CRMApplication {
     async loadPriceListsData() {
         try {
             const priceLists = await db.loadAll('priceLists') || [];
-            const container = document.querySelector('#pricelists .table-container tbody');
+            const container = document.getElementById('pricelist-table');
             
             if (container) {
                 if (priceLists.length === 0) {
@@ -638,6 +678,8 @@ class CRMApplication {
                         </tr>
                     `).join('');
                 }
+            } else {
+                logError('Price Lists container not found: #pricelist-table');
             }
             
             logDebug(`Loaded ${priceLists.length} price lists`);
