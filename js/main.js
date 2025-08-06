@@ -2850,22 +2850,51 @@ class CRMApplication {
      */
     async loadPriceListItems(priceListId) {
         try {
-            // For now, create placeholder items since we don't have a separate items store
             const container = document.getElementById('pricelist-items');
             if (!container) return;
 
-            // This would normally load from a 'pricelist-items' store
-            // For now, show placeholder
-            container.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
-                        No items found in this price list.<br>
-                        <button onclick="window.showAddResourceToPriceList()" style="margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Add First Item</button>
-                    </td>
-                </tr>
-            `;
+            // Get current price list with items
+            const priceList = this.currentPriceList || await db.load('priceLists', priceListId);
+            const items = priceList?.items || [];
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                            No items found in this price list.<br>
+                            <button onclick="window.showAddResourceToPriceList()" style="margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Add First Item</button>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = items.map(item => {
+                    const profit = item.clientPrice - item.netCost;
+                    const marginColor = item.margin >= 20 ? '#059669' : item.margin >= 10 ? '#d97706' : '#dc2626';
+                    
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${item.resourceName}</strong><br>
+                                <small style="color: #6b7280;">${item.resourceCategory} • ${item.unit}</small>
+                            </td>
+                            <td>£${item.netCost.toLocaleString()}</td>
+                            <td>£${item.clientPrice.toLocaleString()}</td>
+                            <td>
+                                <span style="color: ${marginColor}; font-weight: 600;">
+                                    ${item.margin.toFixed(1)}%
+                                </span><br>
+                                <small style="color: #6b7280;">+£${profit.toFixed(2)}</small>
+                            </td>
+                            <td>
+                                <button onclick="window.editPriceListItem('${item.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.removePriceListItem('${item.id}')" class="button danger small">Remove</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
             
-            logDebug(`Price list items loaded for: ${priceListId}`);
+            logDebug(`Price list items loaded for: ${priceListId} (${items.length} items)`);
         } catch (error) {
             logError('Failed to load price list items:', error);
         }
@@ -3025,6 +3054,266 @@ class CRMApplication {
             }
         } catch (error) {
             logError('Failed to clear price list form:', error);
+        }
+    }
+
+    // ==================== PRICE LIST ITEMS FUNCTIONALITY ====================
+
+    /**
+     * @description Show add resource to price list modal
+     */
+    async showAddResourceToPriceList() {
+        try {
+            if (!this.currentPriceList) {
+                uiModals.showToast('No price list selected', 'error');
+                return;
+            }
+
+            // Load available resources
+            await this.loadResourcesForPriceList();
+            
+            // Clear form
+            document.getElementById('modal-client-price').value = '';
+            document.getElementById('resource-info').innerHTML = '';
+            document.getElementById('margin-info').innerHTML = '';
+
+            uiModals.openModal('add-resource-modal');
+            logDebug('Add resource to price list modal opened');
+        } catch (error) {
+            logError('Failed to show add resource modal:', error);
+            uiModals.showToast('Failed to open add resource modal', 'error');
+        }
+    }
+
+    /**
+     * @description Load resources for price list dropdown
+     */
+    async loadResourcesForPriceList() {
+        try {
+            const resources = await db.loadAll('resources');
+            const select = document.getElementById('modal-resource-item-select');
+            
+            if (!select) return;
+
+            select.innerHTML = '<option value="">Select a resource...</option>';
+            
+            resources.forEach(resource => {
+                const option = document.createElement('option');
+                option.value = resource.id;
+                option.textContent = `${resource.name} (${resource.category}) - £${(resource.costPerUnit || 0).toLocaleString()}`;
+                option.dataset.cost = resource.costPerUnit || 0;
+                option.dataset.unit = resource.unit || 'each';
+                select.appendChild(option);
+            });
+
+            // Add change event listener
+            select.onchange = () => this.updateResourceInfo();
+            
+            logDebug(`Loaded ${resources.length} resources for price list`);
+        } catch (error) {
+            logError('Failed to load resources for price list:', error);
+        }
+    }
+
+    /**
+     * @description Update resource info when resource is selected
+     */
+    updateResourceInfo() {
+        try {
+            const select = document.getElementById('modal-resource-item-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const resourceInfo = document.getElementById('resource-info');
+            
+            if (!selectedOption || !selectedOption.value) {
+                resourceInfo.innerHTML = '';
+                return;
+            }
+
+            const cost = parseFloat(selectedOption.dataset.cost || 0);
+            const unit = selectedOption.dataset.unit || 'each';
+            
+            resourceInfo.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><strong>Net Cost:</strong> £${cost.toLocaleString()}</div>
+                    <div><strong>Unit:</strong> ${unit}</div>
+                </div>
+            `;
+
+            // Auto-calculate suggested client price (with default 25% markup)
+            const suggestedPrice = cost * 1.25;
+            document.getElementById('modal-client-price').value = suggestedPrice.toFixed(2);
+            this.calculateMargin();
+
+        } catch (error) {
+            logError('Failed to update resource info:', error);
+        }
+    }
+
+    /**
+     * @description Calculate margin percentage
+     */
+    calculateMargin() {
+        try {
+            const select = document.getElementById('modal-resource-item-select');
+            const selectedOption = select.options[select.selectedIndex];
+            const clientPriceInput = document.getElementById('modal-client-price');
+            const marginInfo = document.getElementById('margin-info');
+            
+            if (!selectedOption || !selectedOption.value || !clientPriceInput.value) {
+                marginInfo.innerHTML = '';
+                return;
+            }
+
+            const netCost = parseFloat(selectedOption.dataset.cost || 0);
+            const clientPrice = parseFloat(clientPriceInput.value || 0);
+            
+            if (netCost === 0) {
+                marginInfo.innerHTML = '<span style="color: #dc2626;">Invalid net cost</span>';
+                return;
+            }
+
+            const margin = ((clientPrice - netCost) / netCost) * 100;
+            const profit = clientPrice - netCost;
+            
+            let color = '#059669'; // green
+            if (margin < 10) color = '#dc2626'; // red
+            else if (margin < 20) color = '#d97706'; // orange
+            
+            marginInfo.innerHTML = `
+                <div style="color: ${color}; font-weight: 600;">
+                    Margin: ${margin.toFixed(1)}% | Profit: £${profit.toFixed(2)}
+                </div>
+            `;
+
+        } catch (error) {
+            logError('Failed to calculate margin:', error);
+        }
+    }
+
+    /**
+     * @description Add resource to price list
+     */
+    async addResourceToPriceList() {
+        try {
+            if (!this.currentPriceList) {
+                uiModals.showToast('No price list selected', 'error');
+                return;
+            }
+
+            const resourceSelect = document.getElementById('modal-resource-item-select');
+            const clientPriceInput = document.getElementById('modal-client-price');
+            
+            const resourceId = resourceSelect.value;
+            const clientPrice = parseFloat(clientPriceInput.value || 0);
+            
+            if (!resourceId) {
+                uiModals.showToast('Please select a resource', 'error');
+                return;
+            }
+            
+            if (clientPrice <= 0) {
+                uiModals.showToast('Please enter a valid client price', 'error');
+                return;
+            }
+
+            // Get resource details
+            const resource = await db.load('resources', resourceId);
+            if (!resource) {
+                uiModals.showToast('Resource not found', 'error');
+                return;
+            }
+
+            // Create price list item
+            const itemId = `PLI-${Date.now()}`;
+            const netCost = resource.costPerUnit || 0;
+            const margin = netCost > 0 ? ((clientPrice - netCost) / netCost) * 100 : 0;
+
+            const priceListItem = {
+                id: itemId,
+                priceListId: this.currentPriceList.id,
+                resourceId: resourceId,
+                resourceName: resource.name,
+                resourceCategory: resource.category,
+                netCost: netCost,
+                clientPrice: clientPrice,
+                margin: margin,
+                unit: resource.unit || 'each',
+                createdAt: new Date().toISOString(),
+                createdBy: this.currentUser || 'User'
+            };
+
+            // Update price list items array
+            const updatedPriceList = {
+                ...this.currentPriceList,
+                items: [...(this.currentPriceList.items || []), priceListItem],
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+
+            await db.save('priceLists', updatedPriceList);
+            this.currentPriceList = updatedPriceList;
+
+            uiModals.showToast(`"${resource.name}" added to price list successfully!`, 'success');
+            
+            this.closeAddResourceModal();
+            
+            // Refresh price list items
+            await this.loadPriceListItems(this.currentPriceList.id);
+            
+            logDebug('Resource added to price list:', priceListItem);
+        } catch (error) {
+            logError('Failed to add resource to price list:', error);
+            uiModals.showToast('Failed to add resource to price list', 'error');
+        }
+    }
+
+    /**
+     * @description Close add resource modal
+     */
+    closeAddResourceModal() {
+        try {
+            uiModals.closeModal('add-resource-modal');
+            logDebug('Add resource modal closed');
+        } catch (error) {
+            logError('Failed to close add resource modal:', error);
+        }
+    }
+
+    /**
+     * @description Remove item from price list
+     */
+    async removePriceListItem(itemId) {
+        try {
+            if (!this.currentPriceList) {
+                uiModals.showToast('No price list selected', 'error');
+                return;
+            }
+
+            const confirmRemove = confirm('Are you sure you want to remove this item from the price list?');
+            if (!confirmRemove) return;
+
+            // Remove item from price list
+            const updatedItems = (this.currentPriceList.items || []).filter(item => item.id !== itemId);
+            
+            const updatedPriceList = {
+                ...this.currentPriceList,
+                items: updatedItems,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+
+            await db.save('priceLists', updatedPriceList);
+            this.currentPriceList = updatedPriceList;
+
+            uiModals.showToast('Item removed from price list successfully!', 'success');
+            
+            // Refresh price list items
+            await this.loadPriceListItems(this.currentPriceList.id);
+            
+            logDebug('Item removed from price list:', itemId);
+        } catch (error) {
+            logError('Failed to remove item from price list:', error);
+            uiModals.showToast('Failed to remove item from price list', 'error');
         }
     }
 
@@ -3265,6 +3554,13 @@ function setupLegacyCompatibility() {
     window.viewPriceListDetails = (id) => app.viewPriceListDetails(id);
     window.createPriceList = () => app.createPriceList();
 
+    // Price List Items functions
+    window.showAddResourceToPriceList = () => app.showAddResourceToPriceList();
+    window.addResourceToPriceList = () => app.addResourceToPriceList();
+    window.closeAddResourceModal = () => app.closeAddResourceModal();
+    window.calculateMargin = () => app.calculateMargin();
+    window.removePriceListItem = (id) => app.removePriceListItem(id);
+
     window.closePcModal = () => uiModals.closeModal('pc-modal');
     window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
     
@@ -3337,7 +3633,7 @@ function setupLegacyCompatibility() {
     
     // Add common missing functions
     const missingFunctions = [
-        'editActivity', 'editQuote', 'showAddResourceToPriceList',
+        'editActivity', 'editQuote', 'editPriceListItem',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
         'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement'
