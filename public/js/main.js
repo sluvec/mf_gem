@@ -53,10 +53,10 @@ class CRMApplication {
 
         try {
             logInfo('Initializing CRM Application...');
-            console.log('🚀 INIT: Starting CRM Application initialization...');
+            logInfo('🚀 INIT: Starting CRM Application initialization...');
             this.showLoadingOverlay('Initializing application...');
             logDebug('Loading overlay shown, updating progress to 20%');
-            console.log('🚀 INIT: Loading overlay shown, progress updating to 20%');
+            logInfo('🚀 INIT: Loading overlay shown, progress updating to 20%');
             
             // Force show loading overlay if showLoadingOverlay failed
             const overlay = document.getElementById('loading-overlay');
@@ -68,7 +68,7 @@ class CRMApplication {
 
             // Initialize core systems
             this.updateProgress(20, 'Connecting to database...');
-            console.log('🚀 INIT: Progress updated to 20%, starting database init...');
+            logInfo('🚀 INIT: Progress updated to 20%, starting database init...');
             logDebug('Starting database initialization...');
             await this.initializeDatabase();
             logDebug('Database initialization completed');
@@ -133,9 +133,9 @@ class CRMApplication {
     async initializeDatabase() {
         try {
             logDebug('Calling db.initialize()...');
-            console.log('🔵 DB: Starting db.initialize()...');
+            logInfo('🔵 DB: Starting db.initialize()...');
             await db.initialize();
-            console.log('🔵 DB: db.initialize() completed');
+            logInfo('🔵 DB: db.initialize() completed');
             logDebug('db.initialize() completed');
             
             // Load sample data if database is empty
