@@ -15,6 +15,33 @@ class CRMApplication {
         this.initialized = false;
         this.currentPage = 'dashboard';
         this.currentUser = null;
+        
+        // Constants for cleaner code
+        this.ACTIVITY_VIEWS = ['list', 'calendar'];
+        this.CALENDAR_VIEWS = ['month', 'week'];
+        this.ACTIVITY_STATUSES = ['pending', 'in-progress', 'completed', 'cancelled'];
+        
+        // UI Colors
+        this.COLORS = {
+            primary: '#3b82f6',
+            secondary: '#6b7280',
+            neutral: '#374151',
+            transparent: 'transparent',
+            white: 'white'
+        };
+        
+        // Display values
+        this.DISPLAY = {
+            none: 'none',
+            block: 'block',
+            flex: 'flex'
+        };
+        
+        // Performance optimization - caching
+        this.calendarCache = new Map();
+        this.activitiesCache = null;
+        this.lastActivitiesLoad = null;
+        this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
     }
 
     /**
@@ -1025,6 +1052,9 @@ class CRMApplication {
             await db.save('activities', activityData);
             uiModals.showToast(`Activity "${activityData.title}" created successfully!`, 'success');
             
+            // Clear cache since activities were modified
+            this.clearActivitiesCache();
+            
             // Clear form and close modal
             this.clearActivityForm();
             this.closeActivityModal();
@@ -1231,6 +1261,9 @@ class CRMApplication {
             
             await db.save('activities', updatedActivity);
             uiModals.showToast(`Activity "${updatedActivity.title}" updated successfully!`, 'success');
+            
+            // Clear cache since activities were modified
+            this.clearActivitiesCache();
             
             // Clear form and close modal
             this.clearActivityForm();
@@ -2013,59 +2046,62 @@ class CRMApplication {
     }
 
     /**
-     * @description Switch activities view between list, calendar, and workflow
+     * @description Switch between Activities List and Calendar views
+     * @param {string} viewType - Either 'list' or 'calendar'
      */
     switchActivitiesView(viewType) {
         try {
             logDebug('Switching activities view to:', viewType);
             
-            // Hide all views
-            const listView = document.getElementById('activities-list-view');
-            const calendarView = document.getElementById('activities-calendar-view');
+            // Define views and buttons mapping for cleaner code
+            const views = {
+                list: document.getElementById('activities-list-view'),
+                calendar: document.getElementById('activities-calendar-view')
+            };
+            
+            const buttons = {
+                list: document.getElementById('activities-list-view-btn'),
+                calendar: document.getElementById('activities-calendar-view-btn')
+            };
+            
             const calendarNavigation = document.getElementById('calendar-navigation');
             
-            if (listView) listView.style.display = 'none';
-            if (calendarView) calendarView.style.display = 'none';
-            if (calendarNavigation) calendarNavigation.style.display = 'none';
+            // Validate view type
+            if (!this.ACTIVITY_VIEWS.includes(viewType)) {
+                logError('Unknown view type:', viewType);
+                uiModals.showToast('Invalid view type', 'error');
+                return;
+            }
             
-            // Update button styles
-            const listBtn = document.getElementById('activities-list-view-btn');
-            const calendarBtn = document.getElementById('activities-calendar-view-btn');
+            // Hide all views and reset button styles
+            Object.values(views).forEach(view => {
+                if (view) view.style.display = this.DISPLAY.none;
+            });
             
-            // Reset button styles
-            [listBtn, calendarBtn].forEach(btn => {
+            Object.values(buttons).forEach(btn => {
                 if (btn) {
-                    btn.style.background = 'transparent';
-                    btn.style.color = '#374151';
+                    btn.style.background = this.COLORS.transparent;
+                    btn.style.color = this.COLORS.neutral;
                 }
             });
             
-            // Show selected view and update button
-            switch (viewType) {
-                case 'list':
-                    if (listView) listView.style.display = 'block';
-                    if (listBtn) {
-                        listBtn.style.background = '#3b82f6';
-                        listBtn.style.color = 'white';
-                    }
-                    break;
-                    
-                case 'calendar':
-                    if (calendarView) calendarView.style.display = 'block';
-                    if (calendarNavigation) calendarNavigation.style.display = 'flex';
-                    if (calendarBtn) {
-                        calendarBtn.style.background = '#3b82f6';
-                        calendarBtn.style.color = 'white';
-                    }
-                    // Initialize calendar
-                    this.initializeCalendar();
-                    break;
-                    
-
-                    
-                default:
-                    logError('Unknown view type:', viewType);
-                    return;
+            // Hide calendar navigation by default
+            if (calendarNavigation) calendarNavigation.style.display = this.DISPLAY.none;
+            
+            // Show selected view and activate button
+            const selectedView = views[viewType];
+            const selectedButton = buttons[viewType];
+            
+            if (selectedView) selectedView.style.display = this.DISPLAY.block;
+            if (selectedButton) {
+                selectedButton.style.background = this.COLORS.primary;
+                selectedButton.style.color = this.COLORS.white;
+            }
+            
+            // Handle calendar-specific logic
+            if (viewType === 'calendar') {
+                if (calendarNavigation) calendarNavigation.style.display = this.DISPLAY.flex;
+                this.initializeCalendar();
             }
             
             // Store current view
@@ -2091,34 +2127,40 @@ class CRMApplication {
             const monthBtn = document.getElementById('calendar-month-btn');
             const weekBtn = document.getElementById('calendar-week-btn');
             
+            // Validate calendar view type
+            if (!this.CALENDAR_VIEWS.includes(viewType)) {
+                logError('Unknown calendar view type:', viewType);
+                return;
+            }
+            
             // Hide all calendar views
-            if (monthView) monthView.style.display = 'none';
-            if (weekView) weekView.style.display = 'none';
+            if (monthView) monthView.style.display = this.DISPLAY.none;
+            if (weekView) weekView.style.display = this.DISPLAY.none;
             
             // Reset button styles
             [monthBtn, weekBtn].forEach(btn => {
                 if (btn) {
-                    btn.style.background = 'transparent';
-                    btn.style.color = '#374151';
+                    btn.style.background = this.COLORS.transparent;
+                    btn.style.color = this.COLORS.neutral;
                 }
             });
             
             // Show selected view and update button
             switch (viewType) {
                 case 'month':
-                    if (monthView) monthView.style.display = 'block';
+                    if (monthView) monthView.style.display = this.DISPLAY.block;
                     if (monthBtn) {
-                        monthBtn.style.background = '#3b82f6';
-                        monthBtn.style.color = 'white';
+                        monthBtn.style.background = this.COLORS.primary;
+                        monthBtn.style.color = this.COLORS.white;
                     }
                     this.generateMonthCalendar();
                     break;
                     
                 case 'week':
-                    if (weekView) weekView.style.display = 'block';
+                    if (weekView) weekView.style.display = this.DISPLAY.block;
                     if (weekBtn) {
-                        weekBtn.style.background = '#3b82f6';
-                        weekBtn.style.color = 'white';
+                        weekBtn.style.background = this.COLORS.primary;
+                        weekBtn.style.color = this.COLORS.white;
                     }
                     uiModals.showToast('Week view coming soon', 'info');
                     break;
@@ -2187,33 +2229,61 @@ class CRMApplication {
     }
 
     /**
-     * @description Initialize calendar
+     * @description Initialize calendar with error handling and validation
+     * @returns {boolean} True if initialization successful, false otherwise
      */
     initializeCalendar() {
         try {
+            // Set default values if not present
             if (!this.currentCalendarDate) {
                 this.currentCalendarDate = new Date();
+                logDebug('Set default calendar date to current date');
             }
             
-            if (!this.currentCalendarView) {
+            if (!this.currentCalendarView || !this.CALENDAR_VIEWS.includes(this.currentCalendarView)) {
                 this.currentCalendarView = 'month';
+                logDebug('Set default calendar view to month');
+            }
+            
+            // Validate date is valid
+            if (isNaN(this.currentCalendarDate.getTime())) {
+                this.currentCalendarDate = new Date();
+                logError('Invalid calendar date detected, reset to current date');
             }
             
             this.updateCalendarTitle();
             this.setCalendarView(this.currentCalendarView);
             
+            logDebug('Calendar initialized successfully');
+            return true;
+            
         } catch (error) {
             logError('Failed to initialize calendar:', error);
+            uiModals.showToast('Failed to initialize calendar', 'error');
+            return false;
         }
     }
 
     /**
-     * @description Update calendar title
+     * @description Update calendar title with graceful error handling
+     * @returns {boolean} True if title updated successfully, false otherwise
      */
     updateCalendarTitle() {
         try {
             const titleElement = document.getElementById('calendar-title');
-            if (!titleElement || !this.currentCalendarDate) return;
+            
+            // Graceful degradation if element not found
+            if (!titleElement) {
+                logError('Calendar title element not found');
+                return false;
+            }
+            
+            // Validate calendar date
+            if (!this.currentCalendarDate || isNaN(this.currentCalendarDate.getTime())) {
+                logError('Invalid calendar date for title update');
+                titleElement.textContent = 'Invalid Date';
+                return false;
+            }
             
             const date = new Date(this.currentCalendarDate);
             const options = { 
@@ -2221,19 +2291,29 @@ class CRMApplication {
                 month: 'long' 
             };
             
-            if (this.currentCalendarView === 'week') {
-                const weekStart = new Date(date);
-                weekStart.setDate(date.getDate() - date.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekStart.getDate() + 6);
+            try {
+                if (this.currentCalendarView === 'week') {
+                    const weekStart = new Date(date);
+                    weekStart.setDate(date.getDate() - date.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    
+                    titleElement.textContent = `Week of ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+                } else {
+                    titleElement.textContent = date.toLocaleDateString('en-US', options);
+                }
                 
-                titleElement.textContent = `Week of ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
-            } else {
-                titleElement.textContent = date.toLocaleDateString('en-US', options);
+                return true;
+                
+            } catch (dateError) {
+                logError('Date formatting error:', dateError);
+                titleElement.textContent = 'Date Error';
+                return false;
             }
             
         } catch (error) {
             logError('Failed to update calendar title:', error);
+            return false;
         }
     }
 
@@ -2253,16 +2333,31 @@ class CRMApplication {
     }
 
     /**
-     * @description Generate month calendar
+     * @description Generate month calendar with caching and performance optimization
+     * @returns {boolean} True if calendar generated successfully, false otherwise
      */
     async generateMonthCalendar() {
         try {
             const calendarGrid = document.getElementById('calendar-grid');
-            if (!calendarGrid) return;
+            if (!calendarGrid) {
+                logError('Calendar grid element not found');
+                return false;
+            }
             
             const date = new Date(this.currentCalendarDate);
             const year = date.getFullYear();
             const month = date.getMonth();
+            const cacheKey = `${year}-${month}`;
+            
+            // Check cache first
+            if (this.calendarCache.has(cacheKey)) {
+                const cachedData = this.calendarCache.get(cacheKey);
+                if (Date.now() - cachedData.timestamp < this.CACHE_DURATION) {
+                    logDebug('Using cached calendar data for:', cacheKey);
+                    this.renderCalendarGrid(calendarGrid, cachedData.data);
+                    return true;
+                }
+            }
             
             // Get first day of month and number of days
             const firstDay = new Date(year, month, 1);
@@ -2270,12 +2365,17 @@ class CRMApplication {
             const daysInMonth = lastDay.getDate();
             const startDay = firstDay.getDay(); // 0 = Sunday
             
-            // Load activities for this month
-            const activities = await db.loadAll('activities');
+            // Load activities with caching
+            const activities = await this.getCachedActivities();
             const monthActivities = activities.filter(activity => {
                 if (!activity.scheduledDate) return false;
-                const activityDate = new Date(activity.scheduledDate);
-                return activityDate.getFullYear() === year && activityDate.getMonth() === month;
+                try {
+                    const activityDate = new Date(activity.scheduledDate);
+                    return activityDate.getFullYear() === year && activityDate.getMonth() === month;
+                } catch (error) {
+                    logError('Invalid activity date:', activity.scheduledDate);
+                    return false;
+                }
             });
             
             // Clear calendar
@@ -2408,6 +2508,71 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to close calendar sidebar:', error);
         }
+    }
+
+    /**
+     * @description Get cached activities or load fresh from database
+     * @returns {Promise<Array>} Array of activities
+     */
+    async getCachedActivities() {
+        try {
+            // Check if cache is still valid
+            if (this.activitiesCache && this.lastActivitiesLoad && 
+                (Date.now() - this.lastActivitiesLoad < this.CACHE_DURATION)) {
+                logDebug('Using cached activities data');
+                return this.activitiesCache;
+            }
+            
+            // Load fresh data
+            logDebug('Loading fresh activities data');
+            const activities = await db.loadAll('activities');
+            
+            // Update cache
+            this.activitiesCache = activities;
+            this.lastActivitiesLoad = Date.now();
+            
+            return activities;
+            
+        } catch (error) {
+            logError('Failed to get activities:', error);
+            return this.activitiesCache || []; // Fallback to cached data or empty array
+        }
+    }
+
+    /**
+     * @description Render calendar grid with provided data
+     * @param {HTMLElement} calendarGrid - Calendar grid element
+     * @param {Object} calendarData - Calendar data to render
+     */
+    renderCalendarGrid(calendarGrid, calendarData) {
+        try {
+            calendarGrid.innerHTML = calendarData.html;
+            
+            // Re-attach event listeners for activities
+            const activityElements = calendarGrid.querySelectorAll('[data-activity-id]');
+            activityElements.forEach(element => {
+                const activityId = element.dataset.activityId;
+                element.onclick = (e) => {
+                    e.stopPropagation();
+                    this.showActivityDetails(activityId);
+                };
+            });
+            
+            logDebug('Calendar grid rendered from cache');
+            
+        } catch (error) {
+            logError('Failed to render calendar grid:', error);
+        }
+    }
+
+    /**
+     * @description Clear cache when activities are modified
+     */
+    clearActivitiesCache() {
+        this.activitiesCache = null;
+        this.lastActivitiesLoad = null;
+        this.calendarCache.clear();
+        logDebug('Activities cache cleared');
     }
 }
 
