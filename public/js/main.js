@@ -384,8 +384,30 @@ class CRMApplication {
         // Setup form listeners
         this.setupFormListeners();
         
+        // Setup import file listener
+        this.setupImportFileListener();
+        
         // Additional event listeners can be added here
         logDebug('Event listeners setup completed');
+    }
+
+    /**
+     * @description Setup import file listener
+     */
+    setupImportFileListener() {
+        const importFileInput = document.getElementById('import-file');
+        const importButton = document.getElementById('import-button');
+        
+        if (importFileInput && importButton) {
+            importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                importButton.disabled = !file;
+                
+                if (file) {
+                    logDebug('File selected for import:', file.name);
+                }
+            });
+        }
     }
 
     /**
@@ -1897,6 +1919,98 @@ class CRMApplication {
             uiModals.showToast('Failed to load PC details', 'error');
         }
     }
+
+    /**
+     * @description Export all data as JSON file
+     */
+    async exportData() {
+        try {
+            logDebug('Starting data export');
+            
+            // Show loading toast
+            uiModals.showToast('Exporting data...', 'info');
+            
+            // Get backup data from database
+            const backup = await db.exportBackup();
+            
+            // Create download link
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mf_gem_backup_${new Date().toISOString().split('T')[0]}.json`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+            
+            uiModals.showToast('Data exported successfully!', 'success');
+            logInfo('Data export completed');
+            
+        } catch (error) {
+            logError('Failed to export data:', error);
+            uiModals.showToast('Failed to export data', 'error');
+        }
+    }
+
+    /**
+     * @description Import data from JSON file
+     */
+    async importData() {
+        try {
+            const fileInput = document.getElementById('import-file');
+            const file = fileInput?.files[0];
+            
+            if (!file) {
+                uiModals.showToast('Please select a file first', 'error');
+                return;
+            }
+            
+            logDebug('Starting data import');
+            uiModals.showToast('Importing data...', 'info');
+            
+            // Read file
+            const text = await file.text();
+            const backup = JSON.parse(text);
+            
+            // Validate backup structure
+            if (!backup.data || typeof backup.data !== 'object') {
+                throw new Error('Invalid backup file format');
+            }
+            
+            // Import data using database method
+            await db.importBackup(backup);
+            
+            // Clear file input
+            if (fileInput) fileInput.value = '';
+            
+            // Refresh current page data
+            if (this.currentPage) {
+                await this.loadPageData(this.currentPage);
+            }
+            
+            uiModals.showToast('Data imported successfully!', 'success');
+            logInfo('Data import completed');
+            
+        } catch (error) {
+            logError('Failed to import data:', error);
+            
+            let errorMessage = 'Failed to import data';
+            if (error.message.includes('Invalid backup')) {
+                errorMessage = 'Invalid backup file format';
+            } else if (error.message.includes('JSON')) {
+                errorMessage = 'Invalid JSON file';
+            }
+            
+            uiModals.showToast(errorMessage, 'error');
+        }
+    }
 }
 
 /**
@@ -2108,15 +2222,8 @@ function setupLegacyCompatibility() {
     };
     
     // Data export/import functions
-    window.exportData = () => {
-        logDebug('Export data requested');
-        uiModals.showToast('Data export will be restored soon', 'info');
-    };
-    
-    window.importData = () => {
-        logDebug('Import data requested');
-        uiModals.showToast('Data import will be restored soon', 'info');
-    };
+    window.exportData = () => app.exportData();
+    window.importData = () => app.importData();
     
     // Quote builder functions
     
