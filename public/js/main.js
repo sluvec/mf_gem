@@ -813,31 +813,52 @@ class CRMApplication {
      */
     async openPcEditModal(id) {
         try {
+            logDebug(`Opening PC edit modal for ID: ${id}`);
+            
             const pcData = await db.load('pcNumbers', id);
             if (!pcData) {
+                logError(`PC Number not found: ${id}`);
                 uiModals.showToast('PC Number not found', 'error');
                 return;
             }
             
-            // Populate basic fields
-            document.getElementById('pc-edit-id').value = pcData.id || '';
-            document.getElementById('pc-edit-number').value = pcData.pcNumber || '';
-            document.getElementById('pc-edit-company').value = pcData.company || pcData.clientName || '';
-            document.getElementById('pc-edit-title').value = pcData.projectTitle || '';
-            document.getElementById('pc-edit-description').value = pcData.projectDescription || '';
-            document.getElementById('pc-edit-status').value = pcData.status || 'active';
+            logDebug('PC data loaded:', pcData);
             
-            // Contact Information
-            document.getElementById('pc-edit-contact-name').value = pcData.contactName || '';
-            document.getElementById('pc-edit-contact-phone').value = pcData.contactPhone || '';
-            document.getElementById('pc-edit-contact-email').value = pcData.contactEmail || '';
+            // Check if modal exists
+            const modal = document.getElementById('pc-edit-modal');
+            if (!modal) {
+                logError('PC Edit modal not found in DOM');
+                uiModals.showToast('Edit modal not available', 'error');
+                return;
+            }
+            
+            // Populate basic fields - with error checking
+            const fields = [
+                { id: 'pc-edit-id', value: pcData.id || '' },
+                { id: 'pc-edit-number', value: pcData.pcNumber || '' },
+                { id: 'pc-edit-company', value: pcData.company || pcData.clientName || '' },
+                { id: 'pc-edit-title', value: pcData.projectTitle || '' },
+                { id: 'pc-edit-description', value: pcData.projectDescription || '' },
+                { id: 'pc-edit-status', value: pcData.status || 'active' },
+                { id: 'pc-edit-contact-name', value: pcData.contactName || '' },
+                { id: 'pc-edit-contact-phone', value: pcData.contactPhone || '' },
+                { id: 'pc-edit-contact-email', value: pcData.contactEmail || '' }
+            ];
+            
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    element.value = field.value;
+                    logDebug(`Set ${field.id} = ${field.value}`);
+                } else {
+                    logError(`Field not found: ${field.id}`);
+                }
+            });
             
             // Show modal
-            const modal = document.getElementById('pc-edit-modal');
-            if (modal) {
-                modal.style.display = 'block';
-                uiModals.showToast(`Editing ${pcData.pcNumber}`, 'info');
-            }
+            modal.style.display = 'block';
+            uiModals.showToast(`Editing ${pcData.pcNumber}`, 'info');
+            logDebug('PC edit modal opened successfully');
             
         } catch (error) {
             logError('Failed to open PC edit modal:', error);
@@ -905,37 +926,62 @@ class CRMApplication {
      */
     async updatePcNumber() {
         try {
-            const id = document.getElementById('pc-edit-id').value;
+            logDebug('Starting PC Number update...');
+            
+            const id = document.getElementById('pc-edit-id')?.value;
             if (!id) {
+                logError('No PC ID found for editing');
                 uiModals.showToast('No PC Number selected for editing', 'error');
                 return;
             }
             
+            logDebug(`Updating PC Number ID: ${id}`);
+            
             const existingPc = await db.load('pcNumbers', id);
             if (!existingPc) {
+                logError(`PC Number not found in database: ${id}`);
                 uiModals.showToast('PC Number not found', 'error');
                 return;
             }
             
-            // Get updated data
+            // Get updated data with error checking
+            const company = document.getElementById('pc-edit-company')?.value || '';
+            const projectTitle = document.getElementById('pc-edit-title')?.value || '';
+            const projectDescription = document.getElementById('pc-edit-description')?.value || '';
+            const status = document.getElementById('pc-edit-status')?.value || 'active';
+            const contactName = document.getElementById('pc-edit-contact-name')?.value || '';
+            const contactEmail = document.getElementById('pc-edit-contact-email')?.value || '';
+            const contactPhone = document.getElementById('pc-edit-contact-phone')?.value || '';
+            
+            // Validation
+            if (!company.trim() || !projectTitle.trim() || !contactName.trim()) {
+                uiModals.showToast('Please fill in required fields (Company, Project Title, Contact Name)', 'error');
+                return;
+            }
+            
             const updatedData = {
                 ...existingPc,
-                company: document.getElementById('pc-edit-company').value,
-                projectTitle: document.getElementById('pc-edit-title').value,
-                projectDescription: document.getElementById('pc-edit-description').value,
-                status: document.getElementById('pc-edit-status').value,
-                contactName: document.getElementById('pc-edit-contact-name').value,
-                contactEmail: document.getElementById('pc-edit-contact-email').value,
-                contactPhone: document.getElementById('pc-edit-contact-phone').value,
+                company: company.trim(),
+                clientName: company.trim(), // Keep both for compatibility
+                projectTitle: projectTitle.trim(),
+                projectDescription: projectDescription.trim(),
+                status: status,
+                contactName: contactName.trim(),
+                contactEmail: contactEmail.trim(),
+                contactPhone: contactPhone.trim(),
                 lastModifiedAt: new Date().toISOString(),
                 editedBy: this.currentUser || 'User'
             };
+            
+            logDebug('Saving updated PC data:', updatedData);
             
             await db.save('pcNumbers', updatedData);
             uiModals.showToast(`PC Number ${existingPc.pcNumber} updated successfully!`, 'success');
             
             this.closePcEditModal();
             await this.loadPcNumbersData(); // Refresh the list
+            
+            logDebug('PC Number update completed successfully');
             
         } catch (error) {
             logError('Failed to update PC Number:', error);
