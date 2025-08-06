@@ -101,7 +101,7 @@ class CRMApplication {
         if (savedUser && userSelect) {
             userSelect.value = savedUser;
             this.setCurrentUser(savedUser);
-        } else {
+            } else {
             this.showLoginModal();
         }
     }
@@ -110,14 +110,14 @@ class CRMApplication {
      * @description Setup navigation
      */
     setupNavigation() {
-        const navItems = document.querySelectorAll('[data-page]');
+        const navItems = document.querySelectorAll('[data-show-page]');
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
-                const page = item.getAttribute('data-page');
-                    this.navigateToPage(page);
-                });
+                const page = item.getAttribute('data-show-page');
+                this.navigateToPage(page);
             });
+        });
     }
 
     /**
@@ -133,22 +133,39 @@ class CRMApplication {
      */
     navigateToPage(pageName) {
         try {
+            logDebug(`Attempting to navigate to: ${pageName}`);
+            
             // Hide all pages
             const pages = document.querySelectorAll('.page');
             pages.forEach(page => page.style.display = 'none');
 
-            // Show target page
-            const targetPage = document.getElementById(pageName);
+            // Map page names if needed (for compatibility)
+            const pageMap = {
+                'pcnumbers': 'pcnumbers',
+                'pc-numbers': 'pcnumbers',
+                'quotes': 'quotes', 
+                'activities': 'activities',
+                'resources': 'resources',
+                'pricelists': 'pricelists',
+                'price-lists': 'pricelists',
+                'dashboard': 'dashboard',
+                'settings': 'settings'
+            };
+            
+            const targetPageId = pageMap[pageName] || pageName;
+            const targetPage = document.getElementById(targetPageId);
+            
             if (targetPage) {
                 targetPage.style.display = 'block';
-                this.currentPage = pageName;
+                this.currentPage = targetPageId;
 
-                // Update navigation state
+                // Update navigation state (use original pageName for button highlighting)
                 this.updateNavigationState(pageName);
 
-                logDebug(`Navigated to page: ${pageName}`);
+                logDebug(`Successfully navigated to page: ${targetPageId}`);
             } else {
-                logError(`Page not found: ${pageName}`);
+                logError(`Page not found: ${pageName} (mapped to: ${targetPageId})`);
+                logDebug('Available pages:', Array.from(document.querySelectorAll('.page')).map(p => p.id));
             }
         } catch (error) {
             logError('Navigation error:', error);
@@ -159,9 +176,9 @@ class CRMApplication {
      * @description Update navigation state
      */
     updateNavigationState(activePageId) {
-        const navItems = document.querySelectorAll('[data-page]');
+        const navItems = document.querySelectorAll('[data-show-page]');
         navItems.forEach(item => {
-            const pageId = item.getAttribute('data-page');
+            const pageId = item.getAttribute('data-show-page');
             if (pageId === activePageId) {
                 item.classList.add('active');
             } else {
