@@ -428,6 +428,15 @@ class CRMApplication {
             });
         }
 
+        // Activity form
+        const activityForm = document.getElementById('activity-form');
+        if (activityForm) {
+            activityForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.saveActivity();
+            });
+        }
+
         logDebug('Form listeners setup completed');
     }
 
@@ -889,6 +898,168 @@ class CRMApplication {
      */
     closePcEditModal() {
         uiModals.closeModal('pc-edit-modal');
+    }
+
+    // ===== ACTIVITIES FUNCTIONALITY =====
+    
+    /**
+     * @description Open Activity Modal for creating new activity
+     */
+    async openActivityModal() {
+        try {
+            logDebug('Opening new activity modal');
+            
+            // Load Quotes for dropdown (activities are linked to quotes)
+            const quotes = await db.loadAll('quotes');
+            const quoteSelect = document.getElementById('activity-quote-select');
+            
+            if (quoteSelect) {
+                quoteSelect.innerHTML = '<option value="">Select Quote</option>';
+                quotes.forEach(quote => {
+                    quoteSelect.innerHTML += `<option value="${quote.id}" data-quote-number="${quote.quoteNumber}">${quote.quoteNumber} - ${quote.clientName}</option>`;
+                });
+            }
+            
+            // Clear form
+            this.clearActivityForm();
+            
+            // Set modal title
+            const modalTitle = document.getElementById('activity-modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = 'New Activity';
+            }
+            
+            // Open modal
+            await uiModals.openModal('activity-modal');
+            logDebug('Activity modal opened successfully');
+            
+        } catch (error) {
+            logError('Failed to open activity modal:', error);
+            uiModals.showToast('Failed to open activity modal', 'error');
+        }
+    }
+
+    /**
+     * @description Close Activity Modal
+     */
+    closeActivityModal() {
+        uiModals.closeModal('activity-modal');
+    }
+
+    /**
+     * @description Save new activity
+     */
+    async saveActivity() {
+        try {
+            logDebug('Saving new activity');
+            
+            const formData = this.getActivityFormData();
+            if (!formData) {
+                return; // Validation failed
+            }
+            
+            // Generate activity ID
+            const activities = await db.loadAll('activities');
+            const activityId = `activity-${Date.now()}`;
+            
+            // Get quote data for PC Number
+            let pcId = null;
+            let pcNumber = null;
+            if (formData.quoteId) {
+                const quoteData = await db.load('quotes', formData.quoteId);
+                if (quoteData) {
+                    pcId = quoteData.pcId;
+                    pcNumber = quoteData.pcNumber;
+                }
+            }
+            
+            const activityData = {
+                id: activityId,
+                title: formData.title,
+                type: formData.type,
+                quoteId: formData.quoteId || null,
+                pcId: pcId,
+                pcNumber: pcNumber,
+                scheduledDate: formData.scheduledDate,
+                duration: formData.duration || 60,
+                status: formData.status || 'pending',
+                priority: formData.priority || 'medium',
+                assignedTo: formData.assignedTo || 'Unassigned',
+                description: formData.description || '',
+                createdAt: new Date().toISOString(),
+                lastModifiedAt: new Date().toISOString(),
+                createdBy: this.currentUser || 'User',
+                editedBy: this.currentUser || 'User'
+            };
+            
+            await db.save('activities', activityData);
+            uiModals.showToast(`Activity "${activityData.title}" created successfully!`, 'success');
+            
+            // Clear form and close modal
+            this.clearActivityForm();
+            this.closeActivityModal();
+            
+            // Refresh activities list if we're on activities page
+            if (this.currentPage === 'activities') {
+                await this.loadActivitiesData();
+            }
+            
+            logDebug('Activity saved successfully:', activityData);
+            
+        } catch (error) {
+            logError('Failed to save activity:', error);
+            uiModals.showToast('Failed to save activity', 'error');
+        }
+    }
+
+    /**
+     * @description Get form data from activity form
+     */
+    getActivityFormData() {
+        const title = document.getElementById('activity-title')?.value.trim();
+        const type = document.getElementById('activity-type')?.value.trim();
+        const quoteSelect = document.getElementById('activity-quote-select');
+        
+        if (!title || !type) {
+            uiModals.showToast('Please fill in required fields (Title, Type)', 'error');
+            return null;
+        }
+        
+        const scheduledDateField = document.getElementById('activity-scheduled-date');
+        const scheduledTimeField = document.getElementById('activity-scheduled-time');
+        
+        let scheduledDate = null;
+        if (scheduledDateField?.value && scheduledTimeField?.value) {
+            scheduledDate = new Date(`${scheduledDateField.value}T${scheduledTimeField.value}`).toISOString();
+        }
+        
+        return {
+            title: title,
+            type: type,
+            quoteId: quoteSelect?.value || null,
+            scheduledDate: scheduledDate,
+            duration: parseInt(document.getElementById('activity-duration')?.value || 60),
+            status: document.getElementById('activity-status')?.value || 'pending',
+            priority: document.getElementById('activity-priority')?.value || 'medium',
+            assignedTo: document.getElementById('activity-assigned-to-name')?.value.trim() || 'Unassigned',
+            description: document.getElementById('activity-description')?.value.trim() || ''
+        };
+    }
+
+    /**
+     * @description Clear activity form
+     */
+    clearActivityForm() {
+        const form = document.getElementById('activity-form');
+        if (form) {
+            form.reset();
+        }
+        
+        // Reset to default values
+        const statusField = document.getElementById('activity-status');
+        const priorityField = document.getElementById('activity-priority');
+        if (statusField) statusField.value = 'pending';
+        if (priorityField) priorityField.value = 'medium';
     }
 
     // ===== QUOTES FUNCTIONALITY =====
@@ -1667,9 +1838,16 @@ function setupLegacyCompatibility() {
         await app.selectCompany(companyName);
     };
     
-    window.showActivityModal = () => {
-        logDebug('Activity modal requested');
-        uiModals.showToast('Activity functionality will be restored soon', 'info');
+    window.showActivityModal = async () => {
+        await app.openActivityModal();
+    };
+
+    window.closeActivityModal = () => {
+        app.closeActivityModal();
+    };
+
+    window.saveActivity = async () => {
+        await app.saveActivity();
     };
     
     window.showResourceModal = () => {
