@@ -96,6 +96,9 @@ class CRMApplication {
             
             // Load sample data if database is empty
             await this.loadSampleDataIfNeeded();
+            
+            // Run Account Manager migration for existing PC Numbers
+            await this.migrateAccountManagerToPcNumbers();
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
@@ -134,6 +137,7 @@ class CRMApplication {
                     company: 'Fintech Innovations Ltd',
                     projectTitle: 'Complete Office Relocation - City to Canary Wharf',
                     projectDescription: 'Full office relocation for 85 staff',
+                    accountManager: 'John Smith',
                     clientName: 'Fintech Innovations Ltd',
                     contactName: 'James Morrison',
                     contactEmail: 'james.morrison@fintech-innovations.co.uk',
@@ -151,6 +155,7 @@ class CRMApplication {
                     company: 'Chambers & Associates',
                     projectTitle: 'Law Firm Relocation - Fleet Street to Temple',
                     projectDescription: 'Traditional law firm moving offices',
+                    accountManager: 'Sarah Johnson',
                     clientName: 'Chambers & Associates',
                     contactName: 'Victoria Chambers',
                     contactEmail: 'v.chambers@chamberslaw.co.uk',
@@ -168,6 +173,7 @@ class CRMApplication {
                     company: 'TechStart Solutions',
                     projectTitle: 'Startup Office Setup - Shoreditch Hub',
                     projectDescription: 'New tech startup office setup',
+                    accountManager: 'Mike Wilson',
                     clientName: 'TechStart Solutions',
                     contactName: 'Alex Chen',
                     contactEmail: 'alex@techstart.io',
@@ -687,6 +693,52 @@ class CRMApplication {
 
         } catch (error) {
             logError('Failed to load PC detail data:', error);
+        }
+    }
+
+    /**
+     * @description Add Account Manager to existing PC Numbers that don't have it
+     */
+    async migrateAccountManagerToPcNumbers() {
+        try {
+            logInfo('Starting Account Manager migration for PC Numbers...');
+            
+            const accountManagers = ['John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emma Brown', 'David Lee'];
+            
+            const pcNumbers = await db.loadAll('pcNumbers');
+            let updatedCount = 0;
+            
+            for (const pc of pcNumbers) {
+                if (!pc.accountManager) {
+                    // Assign random account manager
+                    const randomAccountManager = accountManagers[Math.floor(Math.random() * accountManagers.length)];
+                    
+                    pc.accountManager = randomAccountManager;
+                    pc.lastModifiedAt = new Date().toISOString();
+                    pc.editedBy = this.currentUser || 'System Migration';
+                    
+                    await db.save('pcNumbers', pc);
+                    updatedCount++;
+                    
+                    logDebug(`Added Account Manager "${randomAccountManager}" to PC Number: ${pc.pcNumber}`);
+                }
+            }
+            
+            if (updatedCount > 0) {
+                logInfo(`Successfully migrated ${updatedCount} PC Numbers with Account Manager`);
+                uiModals.showToast(`Migrated ${updatedCount} PC Numbers with Account Manager`, 'success');
+                
+                // Refresh the PC Numbers list if we're on that page
+                if (this.currentPage === 'pcnumbers') {
+                    await this.loadPcNumbersData();
+                }
+            } else {
+                logInfo('No PC Numbers needed Account Manager migration');
+            }
+            
+        } catch (error) {
+            logError('Failed to migrate Account Manager to PC Numbers:', error);
+            uiModals.showToast('Failed to migrate Account Manager data', 'error');
         }
     }
 
