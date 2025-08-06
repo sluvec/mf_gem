@@ -108,21 +108,38 @@ class CRMApplication {
     async loadSampleDataIfNeeded() {
         try {
             const stats = await db.getStats();
-            logDebug('Database stats:', stats);
-            if (stats.pcNumbers === 0) {
-                logInfo('🔵 Database is empty, loading sample data...');
+            console.log('🔍 Database stats:', stats);
+            
+            // Check if quotes exist and have proper totalAmount
+            const quotes = await db.loadAll('quotes');
+            console.log('🔍 Existing quotes in database:', quotes.length, 'quotes');
+            
+            let needsReload = false;
+            if (stats.pcNumbers === 0 || quotes.length === 0) {
+                console.log('🔵 Database is empty, loading sample data...');
+                needsReload = true;
+            } else {
+                // Check if quotes have totalAmount field
+                const hasValidAmounts = quotes.every(quote => quote.totalAmount && quote.totalAmount > 0);
+                console.log('🔍 Quotes have valid totalAmount:', hasValidAmounts);
+                
+                quotes.forEach(quote => {
+                    console.log(`🔍 Quote ${quote.id}: totalAmount=${quote.totalAmount}, clientName=${quote.clientName}`);
+                });
+                
+                if (!hasValidAmounts) {
+                    console.log('🔵 Quotes missing totalAmount, reloading sample data...');
+                    needsReload = true;
+                }
+            }
+            
+            if (needsReload) {
                 await this.loadSampleData();
             } else {
-                logDebug('Database contains data, skipping sample data load');
-                // Debug: Check if quotes have totalAmount
-                const quotes = await db.loadAll('quotes');
-                logDebug('Existing quotes in database:', quotes);
-                quotes.forEach(quote => {
-                    logDebug(`Quote ${quote.id}: totalAmount=${quote.totalAmount}, clientName=${quote.clientName}`);
-                });
+                console.log('🔍 Database contains valid data, skipping sample data load');
             }
         } catch (error) {
-            logError('Failed to check/load sample data:', error);
+            console.error('❌ Failed to check/load sample data:', error);
         }
     }
     
@@ -952,10 +969,10 @@ class CRMApplication {
                 logError('Quotes container not found: #quotes-list');
             }
             
-            logDebug(`Loaded ${quotes.length} quotes`);
+            console.log(`🔍 Loaded ${quotes.length} quotes for display`);
             // Debug: Log quote data to see what we actually have
             quotes.forEach(quote => {
-                logDebug(`Quote ${quote.id}: totalAmount=${quote.totalAmount}, clientName=${quote.clientName}`);
+                console.log(`🔍 Quote ${quote.id}: totalAmount=${quote.totalAmount}, clientName=${quote.clientName}`);
             });
         } catch (error) {
             logError('Failed to load quotes data:', error);
@@ -4278,7 +4295,7 @@ function setupLegacyCompatibility() {
     window.viewActivityDetails = async (id) => {
         await app.viewActivityDetails(id);
     };
-
+    
     window.closeActivityDetailsModal = () => uiModals.closeModal('activity-details-modal');
     
     window.showPriceListModal = () => {
