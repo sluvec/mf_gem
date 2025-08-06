@@ -486,6 +486,15 @@ class CRMApplication {
             });
         }
 
+        // Resource form
+        const resourceForm = document.getElementById('resource-form');
+        if (resourceForm) {
+            resourceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.saveResource();
+            });
+        }
+
         logDebug('Form listeners setup completed');
     }
 
@@ -2510,6 +2519,264 @@ class CRMApplication {
         }
     }
 
+    // ==================== RESOURCES FUNCTIONALITY ====================
+
+    /**
+     * @description Show new resource modal
+     */
+    showResourceModal() {
+        try {
+            this.clearResourceForm();
+            document.getElementById('resource-modal-title').textContent = 'New Resource';
+            uiModals.openModal('resource-modal');
+            logDebug('Resource modal opened for new resource');
+        } catch (error) {
+            logError('Failed to show resource modal:', error);
+            uiModals.showToast('Failed to open resource modal', 'error');
+        }
+    }
+
+    /**
+     * @description Close resource modal
+     */
+    closeResourceModal() {
+        try {
+            uiModals.closeModal('resource-modal');
+            this.clearResourceForm();
+            logDebug('Resource modal closed');
+        } catch (error) {
+            logError('Failed to close resource modal:', error);
+        }
+    }
+
+    /**
+     * @description Clear resource form
+     */
+    clearResourceForm() {
+        try {
+            const form = document.getElementById('resource-form');
+            if (form) {
+                form.reset();
+                document.getElementById('resource-id').value = '';
+            }
+        } catch (error) {
+            logError('Failed to clear resource form:', error);
+        }
+    }
+
+    /**
+     * @description Save resource (create or update)
+     */
+    async saveResource() {
+        try {
+            const formData = this.getResourceFormData();
+            if (!formData) return;
+
+            const existingId = document.getElementById('resource-id')?.value;
+            
+            if (existingId) {
+                // Update existing resource
+                await this.updateResource();
+            } else {
+                // Create new resource
+                const resourceId = `RES-${Date.now()}`;
+                
+                const resourceData = {
+                    id: resourceId,
+                    name: formData.name,
+                    category: formData.category,
+                    costPerUnit: parseFloat(formData.cost),
+                    unit: formData.unit,
+                    status: formData.status,
+                    createdAt: new Date().toISOString(),
+                    lastModifiedAt: new Date().toISOString(),
+                    createdBy: this.currentUser || 'User'
+                };
+
+                await db.save('resources', resourceData);
+                uiModals.showToast(`Resource "${resourceData.name}" created successfully!`, 'success');
+                
+                this.closeResourceModal();
+                
+                // Refresh resources list if we're on resources page
+                if (this.currentPage === 'resources') {
+                    await this.loadResourcesData();
+                }
+                
+                logDebug('Resource created successfully:', resourceData);
+            }
+        } catch (error) {
+            logError('Failed to save resource:', error);
+            uiModals.showToast('Failed to save resource', 'error');
+        }
+    }
+
+    /**
+     * @description Get resource form data
+     */
+    getResourceFormData() {
+        try {
+            const name = document.getElementById('resource-name')?.value?.trim();
+            const category = document.getElementById('resource-category')?.value;
+            const cost = document.getElementById('resource-cost')?.value;
+            const unit = document.getElementById('resource-unit')?.value;
+            const status = document.getElementById('resource-status')?.value;
+
+            if (!name || !category || !cost || !unit || !status) {
+                uiModals.showToast('Please fill in all required fields', 'error');
+                return null;
+            }
+
+            if (isNaN(cost) || parseFloat(cost) < 0) {
+                uiModals.showToast('Please enter a valid cost', 'error');
+                return null;
+            }
+
+            return { name, category, cost, unit, status };
+        } catch (error) {
+            logError('Failed to get resource form data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * @description Edit resource
+     */
+    async editResource(id) {
+        try {
+            const resource = await db.load('resources', id);
+            if (!resource) {
+                uiModals.showToast('Resource not found', 'error');
+                return;
+            }
+
+            // Populate form
+            document.getElementById('resource-id').value = resource.id;
+            document.getElementById('resource-name').value = resource.name || '';
+            document.getElementById('resource-category').value = resource.category || '';
+            document.getElementById('resource-cost').value = resource.costPerUnit || resource.costPerHour || resource.costPerDay || '';
+            document.getElementById('resource-unit').value = resource.unit || '';
+            document.getElementById('resource-status').value = resource.status || 'available';
+
+            document.getElementById('resource-modal-title').textContent = 'Edit Resource';
+            uiModals.openModal('resource-modal');
+            
+            logDebug('Resource edit modal opened for:', id);
+        } catch (error) {
+            logError('Failed to edit resource:', error);
+            uiModals.showToast('Failed to load resource for editing', 'error');
+        }
+    }
+
+    /**
+     * @description Update resource
+     */
+    async updateResource() {
+        try {
+            const formData = this.getResourceFormData();
+            if (!formData) return;
+
+            const resourceId = document.getElementById('resource-id').value;
+            const existingResource = await db.load('resources', resourceId);
+            
+            if (!existingResource) {
+                uiModals.showToast('Resource not found', 'error');
+                return;
+            }
+
+            const updatedResource = {
+                ...existingResource,
+                name: formData.name,
+                category: formData.category,
+                costPerUnit: parseFloat(formData.cost),
+                unit: formData.unit,
+                status: formData.status,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+
+            await db.save('resources', updatedResource);
+            uiModals.showToast(`Resource "${updatedResource.name}" updated successfully!`, 'success');
+            
+            this.closeResourceModal();
+            
+            // Refresh resources list if we're on resources page
+            if (this.currentPage === 'resources') {
+                await this.loadResourcesData();
+            }
+            
+            logDebug('Resource updated successfully:', updatedResource);
+        } catch (error) {
+            logError('Failed to update resource:', error);
+            uiModals.showToast('Failed to update resource', 'error');
+        }
+    }
+
+    /**
+     * @description View resource details
+     */
+    async viewResourceDetails(id) {
+        try {
+            const resource = await db.load('resources', id);
+            if (!resource) {
+                uiModals.showToast('Resource not found', 'error');
+                return;
+            }
+
+            const cost = resource.costPerUnit || resource.costPerHour || resource.costPerDay || 0;
+            const unit = resource.unit || 'unit';
+            
+            const detailsHtml = `
+                <div style="padding: 1rem;">
+                    <h3 style="margin: 0 0 1rem 0; color: #374151;">${resource.name}</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div><strong>Category:</strong> ${resource.category || 'N/A'}</div>
+                        <div><strong>Status:</strong> <span class="status-badge ${resource.status || 'available'}">${resource.status || 'available'}</span></div>
+                        <div><strong>Cost:</strong> £${cost.toLocaleString()} per ${unit}</div>
+                        <div><strong>Unit:</strong> ${unit}</div>
+                    </div>
+                    
+                    ${resource.description ? `
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Description:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #6b7280;">${resource.description}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="font-size: 0.875rem; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                        <div>Created: ${new Date(resource.createdAt).toLocaleDateString()} by ${resource.createdBy || 'Unknown'}</div>
+                        ${resource.lastModifiedAt ? `<div>Modified: ${new Date(resource.lastModifiedAt).toLocaleDateString()} by ${resource.editedBy || 'Unknown'}</div>` : ''}
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 1rem;">
+                        <button onclick="window.editResource('${resource.id}')" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; margin-right: 0.5rem;">Edit</button>
+                        <button onclick="uiModals.closeModal('resource-details-modal')" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Close</button>
+                    </div>
+                </div>
+            `;
+
+            // Create or update details modal
+            let modal = document.getElementById('resource-details-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'resource-details-modal';
+                modal.className = 'modal';
+                modal.innerHTML = `<div class="modal-content" style="max-width: 600px;">${detailsHtml}</div>`;
+                document.body.appendChild(modal);
+            } else {
+                modal.querySelector('.modal-content').innerHTML = detailsHtml;
+            }
+
+            uiModals.openModal('resource-details-modal');
+            
+            logDebug('Resource details shown for:', id);
+        } catch (error) {
+            logError('Failed to view resource details:', error);
+            uiModals.showToast('Failed to load resource details', 'error');
+        }
+    }
+
     /**
      * @description Get cached activities or load fresh from database
      * @returns {Promise<Array>} Array of activities
@@ -2737,9 +3004,14 @@ function setupLegacyCompatibility() {
     };
     
     // Close modal functions
-    window.closeActivityModal = () => uiModals.closeModal('activity-modal');
-    window.closeResourceModal = () => uiModals.closeModal('resource-modal');
+    window.closeActivityModal = () => app.closeActivityModal();
+    window.closeResourceModal = () => app.closeResourceModal();
     window.closePriceListModal = () => uiModals.closeModal('pricelist-modal');
+
+    // Resources functions
+    window.showResourceModal = () => app.showResourceModal();
+    window.editResource = (id) => app.editResource(id);
+    window.viewResourceDetails = (id) => app.viewResourceDetails(id);
 
     window.closePcModal = () => uiModals.closeModal('pc-modal');
     window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
@@ -2817,8 +3089,7 @@ function setupLegacyCompatibility() {
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
         'duplicateCurrentQuote', 'toggleWorkloadPanel', 'showTeamManagement',
-        'editResource', 'viewResourceDetails', 'editPriceList', 'viewPriceListDetails',
-        'showResourceModal', 'createPriceList'
+        'editPriceList', 'viewPriceListDetails', 'createPriceList'
     ];
     
     missingFunctions.forEach(funcName => {
