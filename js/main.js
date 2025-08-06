@@ -42,6 +42,15 @@ class CRMApplication {
         this.activitiesCache = null;
         this.lastActivitiesLoad = null;
         this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        
+        // Smart filters state
+        this.activeFilters = {
+            activities: {
+                company: '',
+                accountManager: '',
+                pcNumber: ''
+            }
+        };
     }
 
     /**
@@ -2793,8 +2802,8 @@ class CRMApplication {
             const daysInMonth = lastDay.getDate();
             const startDay = firstDay.getDay(); // 0 = Sunday
             
-            // Load activities with caching
-            const activities = await this.getCachedActivities();
+            // Load activities with filtering and caching
+            const activities = await this.getFilteredActivitiesForCalendar();
             const monthActivities = activities.filter(activity => {
                 if (!activity.scheduledDate) return false;
                 try {
@@ -3833,6 +3842,11 @@ class CRMApplication {
      */
     async applySmartFilter(dataType, filterField, query, resultsElementId) {
         try {
+            // Store filter state
+            if (this.activeFilters[dataType]) {
+                this.activeFilters[dataType][filterField] = query || '';
+            }
+            
             // Clear filter if query is empty
             if (!query || query.trim() === '') {
                 await this.clearSmartFilter(dataType, resultsElementId);
@@ -3894,6 +3908,12 @@ class CRMApplication {
 
             // Update results info
             this.updateFilterResults(resultsElementId, filteredData.length, allData.length, query, filterField);
+
+            // If activities filter and calendar view is active, clear cache and regenerate calendar
+            if (dataType === 'activities' && this.currentActivitiesView === 'calendar') {
+                this.calendarCache.clear(); // Clear cache to force regeneration with new filters
+                await this.generateMonthCalendar();
+            }
 
             logDebug(`Filtered ${dataType} by ${filterField}: ${filteredData.length}/${allData.length} results`);
 
@@ -4080,7 +4100,21 @@ class CRMApplication {
             document.getElementById('activity-filter-company').value = '';
             document.getElementById('activity-filter-account-manager').value = '';
             document.getElementById('activity-filter-pc-number').value = '';
+            
+            // Clear filter state
+            this.activeFilters.activities = {
+                company: '',
+                accountManager: '',
+                pcNumber: ''
+            };
+            
             await this.clearSmartFilter('activities', 'activity-filter-results');
+            
+            // If calendar view is active, clear cache and regenerate calendar with cleared filters
+            if (this.currentActivitiesView === 'calendar') {
+                this.calendarCache.clear(); // Clear cache to force regeneration without filters
+                await this.generateMonthCalendar();
+            }
         } catch (error) {
             logError('Failed to clear activity filter:', error);
         }
@@ -4112,6 +4146,58 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to get activities:', error);
             return this.activitiesCache || []; // Fallback to cached data or empty array
+        }
+    }
+
+    /**
+     * @description Get filtered activities for calendar view
+     * @returns {Promise<Array>} Array of filtered activities
+     */
+    async getFilteredActivitiesForCalendar() {
+        try {
+            // Get all activities
+            const allActivities = await this.getCachedActivities();
+            
+            // Check if any filters are active
+            const filters = this.activeFilters.activities;
+            const hasActiveFilters = filters.company || filters.accountManager || filters.pcNumber;
+            
+            if (!hasActiveFilters) {
+                logDebug('No active filters, returning all activities for calendar');
+                return allActivities;
+            }
+            
+            // Apply filters
+            const filteredActivities = allActivities.filter(activity => {
+                let matches = true;
+                
+                // Company filter
+                if (filters.company) {
+                    const searchValue = activity.companyName || activity.company || activity.clientName || '';
+                    matches = matches && searchValue.toLowerCase().includes(filters.company.toLowerCase());
+                }
+                
+                // Account Manager filter
+                if (filters.accountManager) {
+                    const searchValue = activity.accountManager || activity.assignedTo || '';
+                    matches = matches && searchValue.toLowerCase().includes(filters.accountManager.toLowerCase());
+                }
+                
+                // PC Number filter
+                if (filters.pcNumber) {
+                    const searchValue = activity.pcNumber || activity.id || '';
+                    matches = matches && searchValue.toLowerCase().includes(filters.pcNumber.toLowerCase());
+                }
+                
+                return matches;
+            });
+            
+            logDebug(`Filtered activities for calendar: ${filteredActivities.length}/${allActivities.length} activities`);
+            return filteredActivities;
+            
+        } catch (error) {
+            logError('Failed to get filtered activities for calendar:', error);
+            return [];
         }
     }
 
