@@ -2011,6 +2011,414 @@ class CRMApplication {
             uiModals.showToast(errorMessage, 'error');
         }
     }
+
+    /**
+     * @description Switch activities view between list, calendar, and workflow
+     */
+    switchActivitiesView(viewType) {
+        try {
+            logDebug('Switching activities view to:', viewType);
+            
+            // Hide all views
+            const listView = document.getElementById('activities-list-view');
+            const calendarView = document.getElementById('activities-calendar-view');
+            const workflowView = document.getElementById('activities-workflow-view');
+            const calendarNavigation = document.getElementById('calendar-navigation');
+            
+            if (listView) listView.style.display = 'none';
+            if (calendarView) calendarView.style.display = 'none';
+            if (workflowView) workflowView.style.display = 'none';
+            if (calendarNavigation) calendarNavigation.style.display = 'none';
+            
+            // Update button styles
+            const listBtn = document.getElementById('activities-list-view-btn');
+            const calendarBtn = document.getElementById('activities-calendar-view-btn');
+            const workflowBtn = document.getElementById('activities-workflow-view-btn');
+            
+            // Reset button styles
+            [listBtn, calendarBtn, workflowBtn].forEach(btn => {
+                if (btn) {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#374151';
+                }
+            });
+            
+            // Show selected view and update button
+            switch (viewType) {
+                case 'list':
+                    if (listView) listView.style.display = 'block';
+                    if (listBtn) {
+                        listBtn.style.background = '#3b82f6';
+                        listBtn.style.color = 'white';
+                    }
+                    break;
+                    
+                case 'calendar':
+                    if (calendarView) calendarView.style.display = 'block';
+                    if (calendarNavigation) calendarNavigation.style.display = 'flex';
+                    if (calendarBtn) {
+                        calendarBtn.style.background = '#3b82f6';
+                        calendarBtn.style.color = 'white';
+                    }
+                    // Initialize calendar
+                    this.initializeCalendar();
+                    break;
+                    
+                case 'workflow':
+                    if (workflowView) workflowView.style.display = 'block';
+                    if (workflowBtn) {
+                        workflowBtn.style.background = '#3b82f6';
+                        workflowBtn.style.color = 'white';
+                    }
+                    uiModals.showToast('Workflow view coming soon', 'info');
+                    break;
+                    
+                default:
+                    logError('Unknown view type:', viewType);
+                    return;
+            }
+            
+            // Store current view
+            this.currentActivitiesView = viewType;
+            
+            logDebug('Activities view switched to:', viewType);
+            
+        } catch (error) {
+            logError('Failed to switch activities view:', error);
+            uiModals.showToast('Failed to switch view', 'error');
+        }
+    }
+
+    /**
+     * @description Set calendar view type (month/week)
+     */
+    setCalendarView(viewType) {
+        try {
+            logDebug('Setting calendar view to:', viewType);
+            
+            const monthView = document.getElementById('calendar-month-view');
+            const weekView = document.getElementById('calendar-week-view');
+            const monthBtn = document.getElementById('calendar-month-btn');
+            const weekBtn = document.getElementById('calendar-week-btn');
+            
+            // Hide all calendar views
+            if (monthView) monthView.style.display = 'none';
+            if (weekView) weekView.style.display = 'none';
+            
+            // Reset button styles
+            [monthBtn, weekBtn].forEach(btn => {
+                if (btn) {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#374151';
+                }
+            });
+            
+            // Show selected view and update button
+            switch (viewType) {
+                case 'month':
+                    if (monthView) monthView.style.display = 'block';
+                    if (monthBtn) {
+                        monthBtn.style.background = '#3b82f6';
+                        monthBtn.style.color = 'white';
+                    }
+                    this.generateMonthCalendar();
+                    break;
+                    
+                case 'week':
+                    if (weekView) weekView.style.display = 'block';
+                    if (weekBtn) {
+                        weekBtn.style.background = '#3b82f6';
+                        weekBtn.style.color = 'white';
+                    }
+                    uiModals.showToast('Week view coming soon', 'info');
+                    break;
+                    
+                default:
+                    logError('Unknown calendar view type:', viewType);
+                    return;
+            }
+            
+            // Store current calendar view
+            this.currentCalendarView = viewType;
+            
+        } catch (error) {
+            logError('Failed to set calendar view:', error);
+            uiModals.showToast('Failed to set calendar view', 'error');
+        }
+    }
+
+    /**
+     * @description Navigate calendar (prev/next/today)
+     */
+    navigateCalendar(direction) {
+        try {
+            if (!this.currentCalendarDate) {
+                this.currentCalendarDate = new Date();
+            }
+            
+            const currentDate = new Date(this.currentCalendarDate);
+            
+            switch (direction) {
+                case 'prev':
+                    if (this.currentCalendarView === 'week') {
+                        currentDate.setDate(currentDate.getDate() - 7);
+                    } else {
+                        currentDate.setMonth(currentDate.getMonth() - 1);
+                    }
+                    break;
+                    
+                case 'next':
+                    if (this.currentCalendarView === 'week') {
+                        currentDate.setDate(currentDate.getDate() + 7);
+                    } else {
+                        currentDate.setMonth(currentDate.getMonth() + 1);
+                    }
+                    break;
+                    
+                case 'today':
+                    this.currentCalendarDate = new Date();
+                    this.updateCalendarTitle();
+                    this.refreshCalendarView();
+                    return;
+                    
+                default:
+                    logError('Unknown navigation direction:', direction);
+                    return;
+            }
+            
+            this.currentCalendarDate = currentDate;
+            this.updateCalendarTitle();
+            this.refreshCalendarView();
+            
+        } catch (error) {
+            logError('Failed to navigate calendar:', error);
+            uiModals.showToast('Failed to navigate calendar', 'error');
+        }
+    }
+
+    /**
+     * @description Initialize calendar
+     */
+    initializeCalendar() {
+        try {
+            if (!this.currentCalendarDate) {
+                this.currentCalendarDate = new Date();
+            }
+            
+            if (!this.currentCalendarView) {
+                this.currentCalendarView = 'month';
+            }
+            
+            this.updateCalendarTitle();
+            this.setCalendarView(this.currentCalendarView);
+            
+        } catch (error) {
+            logError('Failed to initialize calendar:', error);
+        }
+    }
+
+    /**
+     * @description Update calendar title
+     */
+    updateCalendarTitle() {
+        try {
+            const titleElement = document.getElementById('calendar-title');
+            if (!titleElement || !this.currentCalendarDate) return;
+            
+            const date = new Date(this.currentCalendarDate);
+            const options = { 
+                year: 'numeric', 
+                month: 'long' 
+            };
+            
+            if (this.currentCalendarView === 'week') {
+                const weekStart = new Date(date);
+                weekStart.setDate(date.getDate() - date.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                titleElement.textContent = `Week of ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+            } else {
+                titleElement.textContent = date.toLocaleDateString('en-US', options);
+            }
+            
+        } catch (error) {
+            logError('Failed to update calendar title:', error);
+        }
+    }
+
+    /**
+     * @description Refresh current calendar view
+     */
+    refreshCalendarView() {
+        try {
+            if (this.currentCalendarView === 'week') {
+                uiModals.showToast('Week view coming soon', 'info');
+            } else {
+                this.generateMonthCalendar();
+            }
+        } catch (error) {
+            logError('Failed to refresh calendar view:', error);
+        }
+    }
+
+    /**
+     * @description Generate month calendar
+     */
+    async generateMonthCalendar() {
+        try {
+            const calendarGrid = document.getElementById('calendar-grid');
+            if (!calendarGrid) return;
+            
+            const date = new Date(this.currentCalendarDate);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDay = firstDay.getDay(); // 0 = Sunday
+            
+            // Load activities for this month
+            const activities = await db.loadAll('activities');
+            const monthActivities = activities.filter(activity => {
+                if (!activity.scheduledDate) return false;
+                const activityDate = new Date(activity.scheduledDate);
+                return activityDate.getFullYear() === year && activityDate.getMonth() === month;
+            });
+            
+            // Clear calendar
+            calendarGrid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = 'background: #f8fafc; padding: 0.75rem; font-weight: 600; text-align: center; border-bottom: 1px solid #e5e7eb;';
+                headerDiv.textContent = day;
+                calendarGrid.appendChild(headerDiv);
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.cssText = 'background: #f9fafb; min-height: 100px; border: 1px solid #e5e7eb;';
+                calendarGrid.appendChild(emptyDiv);
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.style.cssText = 'background: white; min-height: 100px; border: 1px solid #e5e7eb; padding: 0.5rem; position: relative; cursor: pointer;';
+                
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.style.cssText = 'font-weight: 600; margin-bottom: 0.25rem;';
+                dayNumber.textContent = day;
+                dayDiv.appendChild(dayNumber);
+                
+                // Add activities for this day
+                const dayActivities = monthActivities.filter(activity => {
+                    const activityDate = new Date(activity.scheduledDate);
+                    return activityDate.getDate() === day;
+                });
+                
+                dayActivities.forEach(activity => {
+                    const activityDiv = document.createElement('div');
+                    activityDiv.style.cssText = 'background: #3b82f6; color: white; padding: 0.125rem 0.25rem; margin-bottom: 0.125rem; border-radius: 0.25rem; font-size: 0.75rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    activityDiv.textContent = activity.title;
+                    activityDiv.title = `${activity.title} - ${activity.status}`;
+                    activityDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        this.showActivityDetails(activity.id);
+                    };
+                    dayDiv.appendChild(activityDiv);
+                });
+                
+                calendarGrid.appendChild(dayDiv);
+            }
+            
+        } catch (error) {
+            logError('Failed to generate month calendar:', error);
+            uiModals.showToast('Failed to generate calendar', 'error');
+        }
+    }
+
+    /**
+     * @description Show activity details in sidebar
+     */
+    async showActivityDetails(activityId) {
+        try {
+            const activity = await db.load('activities', activityId);
+            if (!activity) {
+                uiModals.showToast('Activity not found', 'error');
+                return;
+            }
+            
+            const sidebar = document.getElementById('calendar-activity-sidebar');
+            const content = document.getElementById('calendar-activity-content');
+            
+            if (!sidebar || !content) return;
+            
+            // Format date
+            const scheduledDate = activity.scheduledDate 
+                ? new Date(activity.scheduledDate).toLocaleDateString()
+                : 'Not scheduled';
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="margin: 0 0 0.5rem 0;">${activity.title}</h4>
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${activity.type}</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="margin-bottom: 0.5rem;"><strong>Status:</strong> ${activity.status}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Priority:</strong> ${activity.priority}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Assigned to:</strong> ${activity.assignedTo || 'Unassigned'}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Scheduled:</strong> ${scheduledDate}</div>
+                </div>
+                
+                ${activity.description ? `
+                <div style="margin-bottom: 1rem;">
+                    <strong>Description:</strong>
+                    <p style="margin: 0.5rem 0 0 0; color: #6b7280; font-size: 0.875rem;">${activity.description}</p>
+                </div>
+                ` : ''}
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button onclick="window.editActivity('${activity.id}')" 
+                            style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem;">
+                        Edit
+                    </button>
+                    <button onclick="window.closeCalendarSidebar()" 
+                            style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; font-size: 0.875rem;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            sidebar.style.display = 'block';
+            
+        } catch (error) {
+            logError('Failed to show activity details:', error);
+            uiModals.showToast('Failed to load activity details', 'error');
+        }
+    }
+
+    /**
+     * @description Close calendar sidebar
+     */
+    closeCalendarSidebar() {
+        try {
+            const sidebar = document.getElementById('calendar-activity-sidebar');
+            if (sidebar) {
+                sidebar.style.display = 'none';
+            }
+        } catch (error) {
+            logError('Failed to close calendar sidebar:', error);
+        }
+    }
 }
 
 /**
@@ -2206,20 +2614,10 @@ function setupLegacyCompatibility() {
     };
     
     // Activity view functions
-    window.switchActivitiesView = (viewType) => {
-        logDebug('Switch activities view requested:', viewType);
-        uiModals.showToast('Activities view switching will be restored soon', 'info');
-    };
-    
-    window.setCalendarView = (viewType) => {
-        logDebug('Set calendar view requested:', viewType);
-        uiModals.showToast('Calendar view functionality will be restored soon', 'info');
-    };
-    
-    window.navigateCalendar = (direction) => {
-        logDebug('Navigate calendar requested:', direction);
-        uiModals.showToast('Calendar navigation will be restored soon', 'info');
-    };
+    window.switchActivitiesView = (viewType) => app.switchActivitiesView(viewType);
+    window.setCalendarView = (viewType) => app.setCalendarView(viewType);
+    window.navigateCalendar = (direction) => app.navigateCalendar(direction);
+    window.closeCalendarSidebar = () => app.closeCalendarSidebar();
     
     // Data export/import functions
     window.exportData = () => app.exportData();
