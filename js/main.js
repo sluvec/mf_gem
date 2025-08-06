@@ -736,6 +736,53 @@ class CRMApplication {
     }
 
     /**
+     * @description Add Activity for specific Quote
+     * @param {string} quoteId - Quote ID
+     */
+    async addActivityForQuote(quoteId) {
+        try {
+            logDebug(`Opening Activity modal for Quote ID: ${quoteId}`);
+            
+            // Load Quote data to get details
+            const quoteData = await db.load('quotes', quoteId);
+            if (!quoteData) {
+                uiModals.showToast('Quote not found', 'error');
+                return;
+            }
+            
+            // Open activity modal
+            await this.openActivityModal();
+            
+            // Pre-fill the Quote dropdown
+            const quoteSelect = document.getElementById('activity-quote-id');
+            if (quoteSelect) {
+                quoteSelect.value = quoteData.quoteNumber || quoteData.id;
+                logDebug(`Pre-selected Quote: ${quoteData.quoteNumber || quoteData.id}`);
+            }
+            
+            // Pre-fill the PC Number dropdown if quote has one
+            const pcSelect = document.getElementById('activity-pc-number');
+            if (pcSelect && quoteData.pcNumber) {
+                pcSelect.value = quoteData.pcNumber;
+                logDebug(`Pre-selected PC Number: ${quoteData.pcNumber}`);
+            }
+            
+            // Pre-fill activity title with quote reference
+            const titleInput = document.getElementById('activity-title');
+            if (titleInput) {
+                titleInput.value = `Activity for Quote ${quoteData.quoteNumber || quoteData.id}`;
+                logDebug(`Pre-filled title: Activity for Quote ${quoteData.quoteNumber || quoteData.id}`);
+            }
+            
+            uiModals.showToast(`Creating activity for Quote ${quoteData.quoteNumber || quoteData.id}`, 'info');
+            
+        } catch (error) {
+            logError('Failed to add activity for Quote:', error);
+            uiModals.showToast('Failed to open activity form', 'error');
+        }
+    }
+
+    /**
      * @description Load PC Numbers data
      */
     async loadPcNumbersData() {
@@ -793,6 +840,7 @@ class CRMApplication {
                             <td>
                                 <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
+                                <button onclick="window.addActivityForQuote('${quote.id}')" class="button info small">Add Activity</button>
                             </td>
                         </tr>
                     `).join('');
@@ -3761,6 +3809,7 @@ class CRMApplication {
                             <td>
                                 <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
+                                <button onclick="window.addActivityForQuote('${quote.id}')" class="button info small">Add Activity</button>
                             </td>
                         </tr>
                     `).join('');
@@ -4034,6 +4083,11 @@ function setupLegacyCompatibility() {
     window.addQuoteForPc = async (id) => {
         logDebug('Add Quote for PC requested for ID:', id);
         await app.addQuoteForPc(id);
+    };
+    
+    window.addActivityForQuote = async (id) => {
+        logDebug('Add Activity for Quote requested for ID:', id);
+        await app.addActivityForQuote(id);
     };
     
     window.savePc = async () => {
