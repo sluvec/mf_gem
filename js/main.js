@@ -3430,6 +3430,344 @@ class CRMApplication {
         }
     }
 
+    // ==================== SMART FILTERS FUNCTIONALITY ====================
+
+    /**
+     * @description Filter PC Numbers by company name
+     */
+    async filterPcNumbersByCompany(query) {
+        try {
+            await this.applySmartFilter('pcNumbers', 'company', query, 'pc-filter-results');
+        } catch (error) {
+            logError('Failed to filter PC Numbers by company:', error);
+        }
+    }
+
+    /**
+     * @description Filter PC Numbers by account manager
+     */
+    async filterPcNumbersByAccountManager(query) {
+        try {
+            await this.applySmartFilter('pcNumbers', 'accountManager', query, 'pc-filter-results');
+        } catch (error) {
+            logError('Failed to filter PC Numbers by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter PC Numbers by PC number
+     */
+    async filterPcNumbersByPcNumber(query) {
+        try {
+            await this.applySmartFilter('pcNumbers', 'pcNumber', query, 'pc-filter-results');
+        } catch (error) {
+            logError('Failed to filter PC Numbers by PC number:', error);
+        }
+    }
+
+    /**
+     * @description Filter Quotes by company name
+     */
+    async filterQuotesByCompany(query) {
+        try {
+            await this.applySmartFilter('quotes', 'company', query, 'quote-filter-results');
+        } catch (error) {
+            logError('Failed to filter Quotes by company:', error);
+        }
+    }
+
+    /**
+     * @description Filter Quotes by account manager
+     */
+    async filterQuotesByAccountManager(query) {
+        try {
+            await this.applySmartFilter('quotes', 'accountManager', query, 'quote-filter-results');
+        } catch (error) {
+            logError('Failed to filter Quotes by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by company name
+     */
+    async filterActivitiesByCompany(query) {
+        try {
+            await this.applySmartFilter('activities', 'company', query, 'activity-filter-results');
+        } catch (error) {
+            logError('Failed to filter Activities by company:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by account manager
+     */
+    async filterActivitiesByAccountManager(query) {
+        try {
+            await this.applySmartFilter('activities', 'accountManager', query, 'activity-filter-results');
+        } catch (error) {
+            logError('Failed to filter Activities by account manager:', error);
+        }
+    }
+
+    /**
+     * @description Filter Activities by PC number
+     */
+    async filterActivitiesByPcNumber(query) {
+        try {
+            await this.applySmartFilter('activities', 'pcNumber', query, 'activity-filter-results');
+        } catch (error) {
+            logError('Failed to filter Activities by PC number:', error);
+        }
+    }
+
+    /**
+     * @description Generic smart filter implementation
+     */
+    async applySmartFilter(dataType, filterField, query, resultsElementId) {
+        try {
+            // Clear filter if query is empty
+            if (!query || query.trim() === '') {
+                await this.clearSmartFilter(dataType, resultsElementId);
+                return;
+            }
+
+            // Get all data
+            let allData = [];
+            let containerSelector = '';
+            let loadDataMethod = '';
+
+            switch (dataType) {
+                case 'pcNumbers':
+                    allData = await db.loadAll('pcNumbers');
+                    containerSelector = '#pc-numbers-list';
+                    loadDataMethod = 'loadPcNumbersData';
+                    break;
+                case 'quotes':
+                    allData = await db.loadAll('quotes');
+                    containerSelector = '#quotes-list';
+                    loadDataMethod = 'loadQuotesData';
+                    break;
+                case 'activities':
+                    allData = await db.loadAll('activities');
+                    containerSelector = '#activities-list';
+                    loadDataMethod = 'loadActivitiesData';
+                    break;
+                default:
+                    throw new Error(`Unknown data type: ${dataType}`);
+            }
+
+            // Filter data based on query
+            const filteredData = allData.filter(item => {
+                let searchValue = '';
+                
+                switch (filterField) {
+                    case 'company':
+                        searchValue = item.companyName || item.company || '';
+                        break;
+                    case 'accountManager':
+                        searchValue = item.accountManager || item.assignedTo || '';
+                        break;
+                    case 'pcNumber':
+                        searchValue = item.pcNumber || item.id || '';
+                        break;
+                    default:
+                        searchValue = '';
+                }
+                
+                return searchValue.toLowerCase().includes(query.toLowerCase());
+            });
+
+            // Update the display
+            await this.updateFilteredDisplay(dataType, filteredData, containerSelector);
+
+            // Update results info
+            this.updateFilterResults(resultsElementId, filteredData.length, allData.length, query, filterField);
+
+            logDebug(`Filtered ${dataType} by ${filterField}: ${filteredData.length}/${allData.length} results`);
+
+        } catch (error) {
+            logError('Failed to apply smart filter:', error);
+            uiModals.showToast('Failed to apply filter', 'error');
+        }
+    }
+
+    /**
+     * @description Update filtered display
+     */
+    async updateFilteredDisplay(dataType, filteredData, containerSelector) {
+        try {
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+
+            if (filteredData.length === 0) {
+                container.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem; color: #6b7280;">No results found for current filter.</td></tr>`;
+                return;
+            }
+
+            // Generate filtered rows based on data type
+            switch (dataType) {
+                case 'pcNumbers':
+                    container.innerHTML = filteredData.map(pc => `
+                        <tr>
+                            <td><strong><a href="#" onclick="window.viewPcDetails('${pc.id}')" style="color: #3b82f6;">${pc.pcNumber}</a></strong></td>
+                            <td>${pc.companyName || 'N/A'}</td>
+                            <td>${pc.project || 'N/A'}</td>
+                            <td>${pc.accountManager || 'N/A'}</td>
+                            <td>${new Date(pc.createdAt).toLocaleDateString() || 'N/A'}</td>
+                            <td><span class="status-badge ${pc.status || 'active'}">${pc.status || 'active'}</span></td>
+                            <td>
+                                <button onclick="window.editPc('${pc.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    break;
+
+                case 'quotes':
+                    container.innerHTML = filteredData.map(quote => `
+                        <tr>
+                            <td><strong><a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.id}</a></strong></td>
+                            <td>${quote.companyName || 'N/A'}</td>
+                            <td>${quote.pcNumber || 'N/A'}</td>
+                            <td>£${(quote.totalValue || 0).toLocaleString()}</td>
+                            <td>${new Date(quote.createdAt).toLocaleDateString() || 'N/A'}</td>
+                            <td><span class="status-badge ${quote.status || 'draft'}">${quote.status || 'draft'}</span></td>
+                            <td>
+                                <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    break;
+
+                case 'activities':
+                    container.innerHTML = filteredData.map(activity => {
+                        let scheduledDisplay = 'Not scheduled';
+                        if (activity.scheduledDate) {
+                            try {
+                                scheduledDisplay = new Date(activity.scheduledDate).toLocaleDateString();
+                            } catch (e) {
+                                scheduledDisplay = 'Invalid date';
+                            }
+                        }
+
+                        return `
+                        <tr>
+                            <td><strong>${activity.title || 'N/A'}</strong></td>
+                            <td>${activity.pcNumber || 'N/A'}</td>
+                            <td>${activity.companyName || 'N/A'}</td>
+                            <td>${activity.type || 'N/A'}</td>
+                            <td>${scheduledDisplay}</td>
+                            <td>${activity.priority || 'Medium'}</td>
+                            <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
+                            <td>
+                                <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
+                            </td>
+                        </tr>
+                        `;
+                    }).join('');
+                    break;
+            }
+
+        } catch (error) {
+            logError('Failed to update filtered display:', error);
+        }
+    }
+
+    /**
+     * @description Update filter results info
+     */
+    updateFilterResults(resultsElementId, filteredCount, totalCount, query, filterField) {
+        try {
+            const resultsElement = document.getElementById(resultsElementId);
+            if (!resultsElement) return;
+
+            const fieldDisplay = {
+                'company': 'Company Name',
+                'accountManager': 'Account Manager', 
+                'pcNumber': 'PC Number'
+            };
+
+            resultsElement.innerHTML = `
+                Showing ${filteredCount} of ${totalCount} results for "${query}" in ${fieldDisplay[filterField] || filterField}
+            `;
+        } catch (error) {
+            logError('Failed to update filter results:', error);
+        }
+    }
+
+    /**
+     * @description Clear smart filter
+     */
+    async clearSmartFilter(dataType, resultsElementId) {
+        try {
+            // Reload original data
+            switch (dataType) {
+                case 'pcNumbers':
+                    await this.loadPcNumbersData();
+                    break;
+                case 'quotes':
+                    await this.loadQuotesData();
+                    break;
+                case 'activities':
+                    await this.loadActivitiesData();
+                    break;
+            }
+
+            // Clear results info
+            const resultsElement = document.getElementById(resultsElementId);
+            if (resultsElement) {
+                resultsElement.innerHTML = '';
+            }
+
+            logDebug(`Cleared ${dataType} filter`);
+        } catch (error) {
+            logError('Failed to clear smart filter:', error);
+        }
+    }
+
+    /**
+     * @description Clear PC Numbers filter
+     */
+    async clearPcFilter() {
+        try {
+            document.getElementById('pc-filter-company').value = '';
+            document.getElementById('pc-filter-account-manager').value = '';
+            document.getElementById('pc-filter-pc-number').value = '';
+            await this.clearSmartFilter('pcNumbers', 'pc-filter-results');
+        } catch (error) {
+            logError('Failed to clear PC filter:', error);
+        }
+    }
+
+    /**
+     * @description Clear Quotes filter
+     */
+    async clearQuoteFilter() {
+        try {
+            document.getElementById('quote-filter-company').value = '';
+            document.getElementById('quote-filter-account-manager').value = '';
+            await this.clearSmartFilter('quotes', 'quote-filter-results');
+        } catch (error) {
+            logError('Failed to clear quote filter:', error);
+        }
+    }
+
+    /**
+     * @description Clear Activities filter
+     */
+    async clearActivityFilter() {
+        try {
+            document.getElementById('activity-filter-company').value = '';
+            document.getElementById('activity-filter-account-manager').value = '';
+            document.getElementById('activity-filter-pc-number').value = '';
+            await this.clearSmartFilter('activities', 'activity-filter-results');
+        } catch (error) {
+            logError('Failed to clear activity filter:', error);
+        }
+    }
+
     /**
      * @description Get cached activities or load fresh from database
      * @returns {Promise<Array>} Array of activities
@@ -3675,6 +4013,19 @@ function setupLegacyCompatibility() {
     window.closeAddResourceModal = () => app.closeAddResourceModal();
     window.calculateMargin = () => app.calculateMargin();
     window.removePriceListItem = (id) => app.removePriceListItem(id);
+
+    // Smart Filters functions
+    window.filterPcNumbersByCompany = (query) => app.filterPcNumbersByCompany(query);
+    window.filterPcNumbersByAccountManager = (query) => app.filterPcNumbersByAccountManager(query);
+    window.filterPcNumbersByPcNumber = (query) => app.filterPcNumbersByPcNumber(query);
+    window.filterQuotesByCompany = (query) => app.filterQuotesByCompany(query);
+    window.filterQuotesByAccountManager = (query) => app.filterQuotesByAccountManager(query);
+    window.filterActivitiesByCompany = (query) => app.filterActivitiesByCompany(query);
+    window.filterActivitiesByAccountManager = (query) => app.filterActivitiesByAccountManager(query);
+    window.filterActivitiesByPcNumber = (query) => app.filterActivitiesByPcNumber(query);
+    window.clearPcFilter = () => app.clearPcFilter();
+    window.clearQuoteFilter = () => app.clearQuoteFilter();
+    window.clearActivityFilter = () => app.clearActivityFilter();
 
     window.closePcModal = () => uiModals.closeModal('pc-modal');
     window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
