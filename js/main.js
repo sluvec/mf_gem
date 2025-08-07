@@ -1091,11 +1091,11 @@ class CRMApplication {
                     container.innerHTML = '<tr><td colspan="4">No price lists found. <button onclick="window.createPriceList()" class="button primary">Create First Price List</button></td></tr>';
                 } else {
                     container.innerHTML = priceLists.map(priceList => `
-                        <tr>
+                        <tr onclick="window.viewPriceListDetails('${priceList.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${priceList.name || 'N/A'}</strong></td>
                             <td>${priceList.description || 'N/A'}</td>
                             <td>${(priceList.items || []).length} items</td>
-                            <td>
+                            <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPriceList('${priceList.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPriceListDetails('${priceList.id}')" class="button primary small">View</button>
                             </td>
