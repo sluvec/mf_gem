@@ -3267,6 +3267,8 @@ class CRMApplication {
             }
             
             // Load price list items
+            console.log('viewPriceListDetails - Fresh data from DB:', priceList);
+            console.log('viewPriceListDetails - this.currentPriceList:', this.currentPriceList);
             await this.loadPriceListItems(id);
             
             logDebug('Price list details shown for:', id);
@@ -3284,11 +3286,12 @@ class CRMApplication {
             const container = document.getElementById('pricelist-items');
             if (!container) return;
 
-            // Get current price list with items
-            const priceList = this.currentPriceList || await db.load('priceLists', priceListId);
+            // Get current price list with items - ALWAYS fetch fresh data from DB
+            const priceList = await db.load('priceLists', priceListId);
             const items = priceList?.items || [];
             
-            console.log('loadPriceListItems - Price List:', priceList);
+            console.log('loadPriceListItems - Fresh Price List from DB:', priceList);
+            console.log('loadPriceListItems - this.currentPriceList was:', this.currentPriceList);
             console.log('loadPriceListItems - Items array:', items);
             console.log('loadPriceListItems - Items length:', items.length);
 
