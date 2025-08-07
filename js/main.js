@@ -930,7 +930,7 @@ class CRMApplication {
                 } else {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr>
-                            <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
+                            <td><strong><a href="#" onclick="window.viewPcDetails('${pc.id}')" style="color: #3b82f6; text-decoration: none;">${pc.pcNumber || 'N/A'}</a></strong></td>
                             <td>${pc.company || pc.clientName || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${pc.contactName || 'N/A'}</td>
@@ -966,7 +966,7 @@ class CRMApplication {
                 } else {
                     container.innerHTML = quotes.map(quote => `
                         <tr>
-                            <td><strong>${quote.quoteNumber || 'N/A'}</strong></td>
+                            <td><strong><a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6; text-decoration: none;">${quote.quoteNumber || 'N/A'}</a></strong></td>
                             <td>${quote.clientName || 'N/A'}</td>
                             <td>${quote.pcNumber || 'N/A'}</td>
                             <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
@@ -1018,7 +1018,7 @@ class CRMApplication {
 
                         return `
                         <tr>
-                            <td><strong>${activity.title || 'N/A'}</strong></td>
+                            <td><strong><a href="#" onclick="window.viewActivityDetails('${activity.id}')" style="color: #3b82f6; text-decoration: none;">${activity.title || 'N/A'}</a></strong></td>
                             <td>${activity.pcNumber || 'N/A'}</td>
                             <td>${activity.companyName || 'N/A'}</td>
                             <td>${activity.type || 'N/A'}</td>
@@ -4000,7 +4000,7 @@ class CRMApplication {
 
                         return `
                         <tr>
-                            <td><strong>${activity.title || 'N/A'}</strong></td>
+                            <td><strong><a href="#" onclick="window.viewActivityDetails('${activity.id}')" style="color: #3b82f6; text-decoration: none;">${activity.title || 'N/A'}</a></strong></td>
                             <td>${activity.pcNumber || 'N/A'}</td>
                             <td>${activity.companyName || 'N/A'}</td>
                             <td>${activity.type || 'N/A'}</td>
