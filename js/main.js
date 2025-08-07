@@ -1084,6 +1084,8 @@ class CRMApplication {
     async loadPriceListsData() {
         try {
             const priceLists = await db.loadAll('priceLists') || [];
+            console.log('loadPriceListsData - All Price Lists:', priceLists);
+            priceLists.forEach(pl => console.log(`Price List "${pl.name}" has ${(pl.items || []).length} items:`, pl.items));
             const container = document.getElementById('pricelist-table');
             
             if (container) {
@@ -3285,6 +3287,10 @@ class CRMApplication {
             // Get current price list with items
             const priceList = this.currentPriceList || await db.load('priceLists', priceListId);
             const items = priceList?.items || [];
+            
+            console.log('loadPriceListItems - Price List:', priceList);
+            console.log('loadPriceListItems - Items array:', items);
+            console.log('loadPriceListItems - Items length:', items.length);
 
             if (items.length === 0) {
                 container.innerHTML = `
