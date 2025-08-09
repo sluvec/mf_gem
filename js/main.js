@@ -14,7 +14,7 @@ class CRMApplication {
     constructor() {
         this.initialized = false;
         this.currentPage = null;
-        this.builderContext = { pcId: null };
+        this.builderContext = { pcId: null, editingQuoteId: null };
         this.builderState = {
             priceListId: '', currency: 'GBP', vatRate: 20,
             plItems: [], recyclingItems: [], rebateItems: [], otherCosts: [],
@@ -73,6 +73,9 @@ class CRMApplication {
             this.currentPage = 'quote-builder';
 
             // Prefill PC if provided
+            // not editing mode
+            this.builderContext.editingQuoteId = null;
+
             if (pcId) {
                 const pc = await db.load('pcNumbers', pcId);
                 if (pc) {
@@ -126,6 +129,107 @@ class CRMApplication {
 
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
+            uiModals.showToast('Failed to open Quote Builder', 'error');
+        }
+    }
+
+    /**
+     * @description Open Quote Builder in edit mode for an existing quote
+     */
+    async openQuoteBuilderForEdit(quoteId) {
+        try {
+            const quote = await db.load('quotes', quoteId);
+            if (!quote) {
+                uiModals.showToast('Quote not found', 'error');
+                return;
+            }
+            await this.navigateToPage('quote-builder');
+            this.currentPage = 'quote-builder';
+            this.builderContext.editingQuoteId = quoteId;
+            this.builderContext.pcId = quote.pcId || null;
+
+            // Title
+            const titleEl = document.getElementById('quote-builder-title');
+            if (titleEl) titleEl.textContent = `Edit Quote ${quote.quoteNumber || quote.id}`;
+
+            // Prefill client & AM & property
+            const setVal = (id,val)=>{const el=document.getElementById(id); if(el) el.value = val || '';};
+            setVal('builder-client-name', quote.clientName || '');
+            setVal('builder-account-manager', quote.accountManager || '');
+            setVal('builder-property-type', quote.propertyType || '');
+
+            // VAT
+            const vatInput = document.getElementById('quote-vat-rate');
+            if (vatInput) vatInput.value = (quote.vatRate ?? 20).toString();
+
+            // Discount UI
+            const discType = document.getElementById('quote-discount-type');
+            const discVal = document.getElementById('quote-discount-value');
+            if (discType) discType.value = (quote.discount?.type) || 'percent';
+            if (discVal) discVal.value = (quote.discount?.value ?? 0);
+
+            // Addresses
+            const fillAddr = (prefix, obj)=>{
+                setVal(`${prefix}-name`, obj?.contactName||'');
+                setVal(`${prefix}-phone`, obj?.phone||'');
+                setVal(`${prefix}-email`, obj?.email||'');
+                if (obj?.date) setVal(`${prefix}-date`, obj.date.split('T')[0]);
+                setVal(`${prefix}-address1`, obj?.address1||'');
+                setVal(`${prefix}-address2`, obj?.address2||'');
+                setVal(`${prefix}-city`, obj?.city||'');
+                setVal(`${prefix}-county`, obj?.county||'');
+                setVal(`${prefix}-postcode`, obj?.postcode||'');
+            };
+            fillAddr('quote-collection', quote.collectionAddress || {});
+            fillAddr('quote-delivery', quote.deliveryAddress || {});
+
+            // PCs dropdown / hint
+            await this.builderUpdatePcDropdown();
+            const pcSelect = document.getElementById('builder-pc-select');
+            const pcHint = document.getElementById('builder-pc-hint');
+            const pcManual = document.getElementById('builder-pc-number-manual');
+            if (quote.pcId && pcSelect) pcSelect.value = quote.pcId;
+            if (pcHint) pcHint.textContent = quote.pcNumber ? `Selected: ${quote.pcNumber} — ${quote.clientName||''}` : 'No PC selected';
+            if (pcManual) pcManual.value = quote.pcNumber || '';
+
+            // State
+            this.builderState = {
+                priceListId: quote.priceListId || '',
+                currency: quote.currency || 'GBP',
+                vatRate: quote.vatRate ?? 20,
+                plItems: quote.itemsPriceList || quote.items || [],
+                recyclingItems: quote.recyclingItems || [],
+                rebateItems: quote.rebateItems || [],
+                otherCosts: quote.otherCostsManual || quote.otherCosts || [],
+                categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
+            };
+
+            // PL select and categories
+            const priceListSelect = document.getElementById('quote-price-list');
+            if (priceListSelect) {
+                const priceLists = await db.loadAll('priceLists');
+                priceListSelect.innerHTML = '<option value="">Select Price List...</option>';
+                priceLists.forEach(pl => {
+                    const opt = document.createElement('option');
+                    opt.value = pl.id; opt.textContent = pl.name || pl.id; priceListSelect.appendChild(opt);
+                });
+                priceListSelect.value = this.builderState.priceListId;
+                const pl = this.builderState.priceListId ? await db.load('priceLists', this.builderState.priceListId) : null;
+                await this.loadBuilderCategoryOptions(pl);
+                this.renderBuilderCategory('labour', 'quote-human');
+                this.renderBuilderCategory('vehicles', 'quote-vehicles');
+                this.renderBuilderCategory('materials', 'quote-materials');
+                this.renderBuilderCategory('other', 'quote-other');
+            }
+
+            // Render recycling/rebates/other cost tables
+            if (this.renderRecyclingTable) this.renderRecyclingTable();
+            if (this.renderRebatesTable) this.renderRebatesTable();
+            if (this.renderOtherCostsTable) this.renderOtherCostsTable();
+
+            this.recalcBuilderTotals();
+        } catch (e) {
+            logError('openQuoteBuilderForEdit error:', e);
             uiModals.showToast('Failed to open Quote Builder', 'error');
         }
     }
@@ -593,10 +697,13 @@ class CRMApplication {
             const vatAmount = netAfterDiscount * vatRateEffective / 100;
             const totalCost = netAfterDiscount + vatAmount;
 
+            const editingId = this.builderContext.editingQuoteId || null;
+            const baseId = editingId || `quote-${Date.now()}`;
+            const baseNumber = editingId ? (await db.load('quotes', editingId))?.quoteNumber || quoteNumber : quoteNumber;
             const draft = {
-                id: `quote-${Date.now()}`,
-                quoteNumber,
-                status: 'draft',
+                id: baseId,
+                quoteNumber: baseNumber,
+                status: (editingId ? (await db.load('quotes', editingId))?.status || 'draft' : 'draft'),
                 priceListId,
                 vatRate,
                 currency,
@@ -663,15 +770,17 @@ class CRMApplication {
                 return;
             }
 
-            // Save draft first
+            // Save
             await this.saveQuoteFromBuilder();
-            // Update latest to pending
-            const quotes = await db.loadAll('quotes');
-            const latest = quotes.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''))[0];
-            if (latest) {
-                latest.status = 'pending';
-                latest.lastModifiedAt = new Date().toISOString();
-                await db.save('quotes', latest);
+            // Set status to pending on the correct record
+            const editingId = this.builderContext.editingQuoteId || null;
+            if (editingId) {
+                const q = await db.load('quotes', editingId);
+                if (q) { q.status = 'pending'; q.lastModifiedAt = new Date().toISOString(); await db.save('quotes', q); }
+            } else {
+                const quotes = await db.loadAll('quotes');
+                const latest = quotes.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''))[0];
+                if (latest) { latest.status = 'pending'; latest.lastModifiedAt = new Date().toISOString(); await db.save('quotes', latest); }
             }
             uiModals.showToast('Quote sent to customer (awaiting approval)', 'success');
             await this.navigateToPage('quotes');
@@ -5939,7 +6048,11 @@ function setupLegacyCompatibility() {
     };
 
     window.editQuote = async (id) => {
-        await app.openQuoteEditModal(id);
+        if (app.openQuoteBuilderForEdit) {
+            await app.openQuoteBuilderForEdit(id);
+        } else {
+            await app.openQuoteEditModal(id);
+        }
     };
 
     window.viewQuoteDetails = async (id) => {
