@@ -2580,6 +2580,68 @@ class CRMApplication {
                     changed = true;
                 }
 
+                // Client Category mapping (old -> new enum)
+                if (!pc.clientCategory && pc.clientCategoryOld) {
+                    const mapCat = {
+                        'Corporate': 'private',
+                        'SME': 'private',
+                        'Small/Medium Enterprise': 'private',
+                        'Individual': 'private',
+                        'Government': 'public',
+                        'Non-Profit': 'non-profit',
+                        'Non-profit': 'non-profit'
+                    };
+                    const mapped = mapCat[pc.clientCategoryOld];
+                    if (mapped) { pc.clientCategory = mapped; changed = true; }
+                }
+
+                // Try alternative legacy fields for category
+                if (!pc.clientCategory && pc.clientCategory) {
+                    const mapCat2 = {
+                        'Corporate': 'private', 'SME': 'private', 'Individual': 'private',
+                        'Government': 'public', 'Non-Profit': 'non-profit', 'Non-profit': 'non-profit'
+                    };
+                    const mapped = mapCat2[pc.clientCategory];
+                    if (mapped) { pc.clientCategory = mapped; changed = true; }
+                }
+
+                // Client Source mapping to new enum
+                if (!pc.clientSource && pc.clientSourceOld) {
+                    // Internal vs External - all legacy values mapped to External unless explicitly internal
+                    const internalSet = new Set(['Internal Workspace','Internal Crown UK','Internal Crown EMEA','Internal Crown APAC']);
+                    pc.clientSource = internalSet.has(pc.clientSourceOld) ? pc.clientSourceOld : 'External';
+                    changed = true;
+                }
+                if (!pc.clientSource && pc.clientSource) {
+                    const internalSet = new Set(['Internal Workspace','Internal Crown UK','Internal Crown EMEA','Internal Crown APAC']);
+                    if (!internalSet.has(pc.clientSource)) { pc.clientSource = 'External'; changed = true; }
+                }
+
+                // Client Source Detail mapping from various legacy wordings
+                if (!pc.clientSourceDetail) {
+                    const legacyDetail = pc.clientSourceDetailOld || pc.clientSource || pc.howFound || '';
+                    const mapDetail = [
+                        [/Existing client referral|Repeat business|Repeat Customer/i, 'Existing Client'],
+                        [/Personal network/i, 'Networking Event'],
+                        [/Website\/?Online|Google|Search|Website Inquiry/i, 'Web Enquiry'],
+                        [/Trade directory|Marketplace|Directory/i, 'Online Marketplace/Directory'],
+                        [/Cold outreach/i, 'Cold Outreach'],
+                        [/Trade show|Event/i, 'Trade Show/Exhibition'],
+                        [/Phone Inquiry/i, 'Direct Enquiry'],
+                        [/Email|Email Campaign/i, 'Email Campaign'],
+                        [/Referral/i, 'Referral Partner'],
+                        [/LinkedIn|Social/i, 'Social Media'],
+                        [/Marketing Campaign|PPC|Ads/i, 'PPC/Ads']
+                    ];
+                    for (const [re, val] of mapDetail) {
+                        if (legacyDetail && re.test(String(legacyDetail))) {
+                            pc.clientSourceDetail = val;
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+
                 // Contact split
                 if (!pc.contactFirstName && pc.contactName) {
                     pc.contactFirstName = pc.contactName;
