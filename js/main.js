@@ -1109,15 +1109,8 @@ class CRMApplication {
                 return;
             }
             
-            // Open quote modal
-            await this.openQuoteModal();
-            
-            // Pre-fill the PC Number dropdown
-            const pcSelect = document.getElementById('quote-modal-pc');
-            if (pcSelect) {
-                pcSelect.value = pcData.pcNumber;
-                logDebug(`Pre-selected PC Number: ${pcData.pcNumber}`);
-            }
+            // Open quote modal with PC ID to disable dropdown
+            await this.openQuoteModal(pcId);
             
             // Pre-fill company name if it exists
             const companyInput = document.getElementById('quote-modal-company');
@@ -2049,10 +2042,11 @@ class CRMApplication {
     
     /**
      * @description Open Quote Modal for creating new quote
+     * @param {string} pcId - Optional PC ID to pre-select and disable PC dropdown
      */
-    async openQuoteModal() {
+    async openQuoteModal(pcId = null) {
         try {
-            logDebug('Opening new quote modal');
+            logDebug('Opening new quote modal', pcId ? `with PC ID: ${pcId}` : '');
             
             // Load PC Numbers for dropdown
             const pcNumbers = await db.loadAll('pcNumbers');
@@ -2063,6 +2057,32 @@ class CRMApplication {
                 pcNumbers.forEach(pc => {
                     pcSelect.innerHTML += `<option value="${pc.id}" data-pc-number="${pc.pcNumber}">${pc.pcNumber} - ${pc.company}</option>`;
                 });
+                
+                // If pcId provided, pre-select and disable
+                if (pcId) {
+                    pcSelect.value = pcId;
+                    pcSelect.disabled = true;
+                    pcSelect.style.backgroundColor = '#f3f4f6'; // Gray background
+                    pcSelect.style.cursor = 'not-allowed';
+                    logDebug(`PC Number dropdown disabled and set to PC ID: ${pcId}`);
+                    
+                    // Show locked message
+                    const helpText = document.getElementById('pc-select-help');
+                    const lockedText = document.getElementById('pc-select-locked');
+                    if (helpText) helpText.style.display = 'none';
+                    if (lockedText) lockedText.style.display = 'block';
+                } else {
+                    // Enable dropdown for manual selection
+                    pcSelect.disabled = false;
+                    pcSelect.style.backgroundColor = '';
+                    pcSelect.style.cursor = '';
+                    
+                    // Show help message
+                    const helpText = document.getElementById('pc-select-help');
+                    const lockedText = document.getElementById('pc-select-locked');
+                    if (helpText) helpText.style.display = 'block';
+                    if (lockedText) lockedText.style.display = 'none';
+                }
             }
             
             // Load Price Lists for dropdown
@@ -2076,9 +2096,9 @@ class CRMApplication {
                 });
             }
             
-            // Clear company field
+            // Clear company field only if not coming from PC
             const companyField = document.getElementById('quote-modal-company');
-            if (companyField) {
+            if (companyField && !pcId) {
                 companyField.value = '';
             }
             
@@ -2096,6 +2116,20 @@ class CRMApplication {
      * @description Close Quote Modal
      */
     closeQuoteModal() {
+        // Re-enable PC Number dropdown in case it was disabled
+        const pcSelect = document.getElementById('quote-modal-pc');
+        if (pcSelect) {
+            pcSelect.disabled = false;
+            pcSelect.style.backgroundColor = '';
+            pcSelect.style.cursor = '';
+        }
+        
+        // Reset help text
+        const helpText = document.getElementById('pc-select-help');
+        const lockedText = document.getElementById('pc-select-locked');
+        if (helpText) helpText.style.display = 'block';
+        if (lockedText) lockedText.style.display = 'none';
+        
         uiModals.closeModal('quote-modal');
     }
 
