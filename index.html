@@ -338,7 +338,15 @@
             <div class="card">
                 <h2>PC Numbers List</h2>
                 <table>
-                    <thead><tr><th>PC Number</th><th>Company</th><th>Reference</th><th>Contact</th><th>Account Manager</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="sortable" data-sort="pcNumber">PC Number ↕</th>
+                        <th class="sortable" data-sort="company">Company ↕</th>
+                        <th class="sortable" data-sort="projectTitle">Reference ↕</th>
+                        <th class="sortable" data-sort="contactName">Contact ↕</th>
+                        <th class="sortable" data-sort="accountManager">Account Manager ↕</th>
+                        <th class="sortable" data-sort="lastModifiedAt">Date Modified ↕</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="pc-list"></tbody>
                 </table>
             </div>
@@ -671,7 +679,16 @@
             <div class="card">
                 <h2>Quote List</h2>
                 <table>
-                    <thead><tr><th>Quote Number</th><th>PC Number</th><th>Company</th><th>Value</th><th>Status</th><th>Account Manager</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="sortable" data-sort="quoteNumber">Quote Number ↕</th>
+                        <th class="sortable" data-sort="pcNumber">PC Number ↕</th>
+                        <th class="sortable" data-sort="clientName">Company ↕</th>
+                        <th class="sortable" data-sort="totalAmount">Value ↕</th>
+                        <th class="sortable" data-sort="status">Status ↕</th>
+                        <th class="sortable" data-sort="accountManager">Account Manager ↕</th>
+                        <th class="sortable" data-sort="lastModifiedAt">Date Modified ↕</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="quotes-list"></tbody>
                 </table>
             </div>
@@ -982,7 +999,18 @@
             <div id="activities-list-view" class="card">
                 <h2>Activity List</h2>
                 <table>
-                    <thead><tr><th>Title</th><th>PC Number</th><th>Company</th><th>Type</th><th>Scheduled</th><th>Priority</th><th>Status</th><th>Account Manager</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="sortable" data-sort="title">Title ↕</th>
+                        <th class="sortable" data-sort="pcNumber">PC Number ↕</th>
+                        <th class="sortable" data-sort="company">Company ↕</th>
+                        <th class="sortable" data-sort="type">Type ↕</th>
+                        <th class="sortable" data-sort="scheduledDate">Scheduled ↕</th>
+                        <th class="sortable" data-sort="priority">Priority ↕</th>
+                        <th class="sortable" data-sort="status">Status ↕</th>
+                        <th class="sortable" data-sort="accountManager">Account Manager ↕</th>
+                        <th class="sortable" data-sort="lastModifiedAt">Date Modified ↕</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="activities-list"></tbody>
                 </table>
             </div>
@@ -1485,7 +1513,16 @@
             <div class="card">
                 <h2>Available Price Lists</h2>
                 <table>
-                    <thead><tr><th>Name</th><th>Version</th><th>Currency</th><th>Effective Period</th><th>Default</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="sortable" data-sort="name">Name ↕</th>
+                        <th class="sortable" data-sort="version">Version ↕</th>
+                        <th class="sortable" data-sort="currency">Currency ↕</th>
+                        <th class="sortable" data-sort="effectivePeriod">Effective Period ↕</th>
+                        <th class="sortable" data-sort="isDefault">Default ↕</th>
+                        <th class="sortable" data-sort="status">Status ↕</th>
+                        <th class="sortable" data-sort="lastModifiedAt">Date Modified ↕</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="pricelist-table"></tbody>
                 </table>
             </div>

@@ -556,7 +556,131 @@ class CRMApplication {
         // Setup dynamic field indicator updates
         this.setupFieldIndicatorListeners();
 
+        // Setup table sorting
+        this.setupTableSorting();
+
         logDebug('Form listeners setup completed');
+    }
+
+    /**
+     * @description Setup table sorting functionality
+     */
+    setupTableSorting() {
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('sortable')) {
+                const column = e.target.getAttribute('data-sort');
+                const table = e.target.closest('table');
+                const tbody = table.querySelector('tbody');
+                
+                this.sortTable(tbody, column, e.target);
+            }
+        });
+    }
+
+    /**
+     * @description Sort table by column
+     */
+    sortTable(tbody, column, headerElement) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isCurrentlySorted = headerElement.classList.contains('sorted-asc');
+        const isDesc = headerElement.classList.contains('sorted-desc');
+        
+        // Clear all sorted indicators
+        const table = headerElement.closest('table');
+        table.querySelectorAll('.sortable').forEach(th => {
+            th.classList.remove('sorted-asc', 'sorted-desc');
+        });
+        
+        // Determine sort direction
+        let ascending = true;
+        if (isCurrentlySorted) {
+            ascending = false;
+            headerElement.classList.add('sorted-desc');
+        } else {
+            headerElement.classList.add('sorted-asc');
+        }
+        
+        // Sort rows
+        rows.sort((a, b) => {
+            const aValue = this.getCellValue(a, column);
+            const bValue = this.getCellValue(b, column);
+            
+            // Handle different data types
+            if (this.isDate(aValue) && this.isDate(bValue)) {
+                const aDate = new Date(aValue);
+                const bDate = new Date(bValue);
+                return ascending ? aDate - bDate : bDate - aDate;
+            } else if (this.isNumber(aValue) && this.isNumber(bValue)) {
+                const aNum = parseFloat(aValue);
+                const bNum = parseFloat(bValue);
+                return ascending ? aNum - bNum : bNum - aNum;
+            } else {
+                // String comparison
+                const aStr = aValue.toString().toLowerCase();
+                const bStr = bValue.toString().toLowerCase();
+                if (ascending) {
+                    return aStr.localeCompare(bStr);
+                } else {
+                    return bStr.localeCompare(aStr);
+                }
+            }
+        });
+        
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    /**
+     * @description Get cell value based on column name and row data
+     */
+    getCellValue(row, column) {
+        // This will be overridden to get actual data values
+        // For now, get text content from the appropriate cell
+        const cells = row.querySelectorAll('td');
+        const headers = row.closest('table').querySelectorAll('th');
+        
+        let columnIndex = -1;
+        headers.forEach((header, index) => {
+            if (header.getAttribute('data-sort') === column) {
+                columnIndex = index;
+            }
+        });
+        
+        return columnIndex >= 0 && cells[columnIndex] ? cells[columnIndex].textContent.trim() : '';
+    }
+
+    /**
+     * @description Check if value is a date
+     */
+    isDate(value) {
+        return !isNaN(Date.parse(value)) && value.includes('-');
+    }
+
+    /**
+     * @description Check if value is a number
+     */
+    isNumber(value) {
+        return !isNaN(value) && !isNaN(parseFloat(value));
+    }
+
+    /**
+     * @description Format date for display
+     */
+    formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit', 
+                year: 'numeric'
+            }) + ' ' + date.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'N/A';
+        }
     }
 
     /**
@@ -1069,15 +1193,16 @@ class CRMApplication {
             
             if (container) {
                 if (pcNumbers.length === 0) {
-                    container.innerHTML = '<tr><td colspan="6">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="7">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
                 } else {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
                             <td>${pc.company || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
-                            <td>${pc.contactName || 'N/A'}</td>
+                            <td>${(pc.contactFirstName || '') + ' ' + (pc.contactLastName || '') || pc.contactName || 'N/A'}</td>
                             <td>${pc.accountManager || 'N/A'}</td>
+                            <td>${this.formatDate(pc.lastModifiedAt || pc.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
@@ -1106,16 +1231,17 @@ class CRMApplication {
             
             if (container) {
                 if (quotes.length === 0) {
-                    container.innerHTML = '<tr><td colspan="7">No quotes found. <button onclick="window.showNewQuoteModal()" class="button primary">Create First Quote</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="8">No quotes found. <button onclick="window.showNewQuoteModal()" class="button primary">Create First Quote</button></td></tr>';
                 } else {
                     container.innerHTML = quotes.map(quote => `
                         <tr onclick="window.viewQuoteDetails('${quote.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${quote.quoteNumber || 'N/A'}</strong></td>
-                            <td>${quote.clientName || 'N/A'}</td>
                             <td>${quote.pcNumber || 'N/A'}</td>
+                            <td>${quote.clientName || 'N/A'}</td>
                             <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
                             <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
                             <td>${quote.accountManager || 'N/A'}</td>
+                            <td>${this.formatDate(quote.lastModifiedAt || quote.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
@@ -1148,7 +1274,7 @@ class CRMApplication {
             
             if (container) {
                 if (activities.length === 0) {
-                    container.innerHTML = '<tr><td colspan="9">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="10">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
                 } else {
                     container.innerHTML = activities.map(activity => {
                         // Get scheduled date safely
@@ -1171,6 +1297,7 @@ class CRMApplication {
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
                             <td>${activity.accountManager || 'N/A'}</td>
+                            <td>${this.formatDate(activity.lastModifiedAt || activity.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
@@ -1236,13 +1363,17 @@ class CRMApplication {
             
             if (container) {
                 if (priceLists.length === 0) {
-                    container.innerHTML = '<tr><td colspan="4">No price lists found. <button onclick="window.createPriceList()" class="button primary">Create First Price List</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="8">No price lists found. <button onclick="window.createPriceList()" class="button primary">Create First Price List</button></td></tr>';
                 } else {
                     container.innerHTML = priceLists.map(priceList => `
                         <tr onclick="window.viewPriceListDetails('${priceList.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${priceList.name || 'N/A'}</strong></td>
-                            <td>${priceList.description || 'N/A'}</td>
-                            <td>${(priceList.items || []).length} items</td>
+                            <td>${priceList.version || '1.0'}</td>
+                            <td>${priceList.currency || 'GBP'}</td>
+                            <td>${priceList.effectivePeriod || 'N/A'}</td>
+                            <td>${priceList.isDefault ? 'Yes' : 'No'}</td>
+                            <td><span class="status-badge ${priceList.status || 'active'}">${priceList.status || 'active'}</span></td>
+                            <td>${this.formatDate(priceList.lastModifiedAt || priceList.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPriceList('${priceList.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPriceListDetails('${priceList.id}')" class="button primary small">View</button>

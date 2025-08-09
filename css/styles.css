@@ -130,6 +130,29 @@ th, td { padding: var(--space-md); text-align: left; border-bottom: 1px solid va
 th { background: var(--neutral-100); font-weight: 600; color: var(--neutral-700); font-size: 0.875rem; text-transform: uppercase; }
 tr:hover td { background: var(--primary-50); }
 
+/* Sortable table headers */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.sortable:hover {
+    background-color: var(--neutral-200) !important;
+}
+
+.sortable.sorted-asc::after {
+    content: " ↑";
+    color: var(--primary-500);
+    font-weight: bold;
+}
+
+.sortable.sorted-desc::after {
+    content: " ↓";
+    color: var(--primary-500);
+    font-weight: bold;
+}
+
 /* PC Number form field indicators */
 .pc-field-required {
     border: 2px solid var(--error-500) !important;
