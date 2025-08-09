@@ -938,9 +938,8 @@ class CRMApplication {
             // Validate PC Number has required fields for Quote creation
             const validation = this.validatePcForQuoteCreation(pcData);
             if (!validation.isValid) {
-                const missingFieldsList = validation.missingFields.join(', ');
                 uiModals.showToast(
-                    `Cannot create Quote. PC Number ${pcData.pcNumber} is missing required fields: ${missingFieldsList}. Please edit the PC Number first.`, 
+                    `⚠️ Cannot create Quote from PC Number ${pcData.pcNumber}!\n\nMissing required fields:\n• ${validation.missingFields.join('\n• ')}\n\nPlease edit the PC Number and fill in these fields first.`, 
                     'error'
                 );
                 return;
@@ -2018,7 +2017,7 @@ class CRMApplication {
             if (!validation.isValid) {
                 const missingFieldsList = validation.missingFields.join(', ');
                 uiModals.showToast(
-                    `Cannot create Quote. PC Number ${pcData.pcNumber} is missing required fields: ${missingFieldsList}. Please edit the PC Number first.`, 
+                    `⚠️ Cannot create Quote from PC Number ${pcData.pcNumber}!\n\nMissing required fields:\n• ${validation.missingFields.join('\n• ')}\n\nPlease edit the PC Number and fill in these fields first.`, 
                     'error'
                 );
                 return null;
@@ -2608,25 +2607,26 @@ class CRMApplication {
 
     /**
      * @description Validate PC Number for Quote creation - requires additional fields
+     * These fields are optional for PC Number creation but required for Quote creation
      */
     validatePcForQuoteCreation(pcData) {
         const missingFields = [];
         
-        // Check required fields for Quote creation
+        // Check required fields for Quote creation (optional for PC Number)
         if (!pcData.industry) {
-            missingFields.push('Industry');
+            missingFields.push('Industry (from Classification & Management section)');
         }
         if (!pcData.clientCategory) {
-            missingFields.push('Client Category');
+            missingFields.push('Client Category (from Classification & Management section)');
         }
         if (!pcData.clientSource) {
-            missingFields.push('Client Source');
+            missingFields.push('Client Source (from Classification & Management section)');
         }
         if (!pcData.clientSourceDetail) {
-            missingFields.push('Client Source Detail');
+            missingFields.push('Client Source Detail (from Classification & Management section)');
         }
         if (!pcData.sicCode1) {
-            missingFields.push('SIC Code 1');
+            missingFields.push('SIC Code 1 (from Classification & Management section)');
         }
         
         // Check for at least one contact method (email or phone)
@@ -2634,7 +2634,7 @@ class CRMApplication {
         const hasContactPhone = pcData.contactPhone && pcData.contactPhone.trim();
         
         if (!hasContactEmail && !hasContactPhone) {
-            missingFields.push('Contact Email or Phone Number');
+            missingFields.push('Contact Email or Phone Number (from Contact & Address section)');
         }
         
         return {
