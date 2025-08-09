@@ -523,6 +523,24 @@ class CRMApplication {
             const accountManager = document.getElementById('builder-account-manager')?.value || '';
             const propertyType = document.getElementById('builder-property-type')?.value || '';
 
+            // Compute financial snapshot
+            const sumCat = cat => (this.builderState.plItems || []).filter(i => i.category === cat).reduce((a,b)=>a+(b.quantity*b.unitPrice),0);
+            const subtotalPL = sumCat('labour') + sumCat('vehicles') + sumCat('materials') + sumCat('other');
+            const discTypeEl = document.getElementById('quote-discount-type');
+            const discValEl = document.getElementById('quote-discount-value');
+            const discountType = discTypeEl ? discTypeEl.value : 'percent';
+            const discountValue = discValEl ? parseFloat(discValEl.value || '0') || 0 : 0;
+            let discountAmount = 0;
+            if (discountType === 'percent') discountAmount = Math.min(100, Math.max(0, discountValue)) * subtotalPL / 100;
+            else discountAmount = Math.min(subtotalPL, Math.max(0, discountValue));
+            const recyclingTotal = (this.builderState.recyclingItems||[]).reduce((a,b)=>a+(b.amount||0),0);
+            const otherCostsTotal = (this.builderState.otherCosts||[]).reduce((a,b)=>a+(b.amount||0),0);
+            const rebatesTotal = (this.builderState.rebateItems||[]).reduce((a,b)=>a+(b.amount||0),0);
+            const netAfterDiscount = Math.max(0, subtotalPL - discountAmount) + recyclingTotal + otherCostsTotal + rebatesTotal;
+            const vatRateEffective = Math.max(0, Math.min(100, vatRate));
+            const vatAmount = netAfterDiscount * vatRateEffective / 100;
+            const totalCost = netAfterDiscount + vatAmount;
+
             const draft = {
                 id: `quote-${Date.now()}`,
                 quoteNumber,
@@ -540,9 +558,18 @@ class CRMApplication {
                 recyclingItems: this.builderState.recyclingItems || [],
                 rebateItems: this.builderState.rebateItems || [],
                 otherCostsManual: this.builderState.otherCosts || [],
-                discount: { type: 'percent', value: 0 },
+                discount: { type: discountType, value: discountValue, amount: discountAmount },
                 collectionAddress,
                 deliveryAddress,
+                // Snapshot totals for detail view
+                subtotalPL,
+                recyclingTotal,
+                rebatesTotal,
+                otherCostsTotal,
+                netTotal: netAfterDiscount,
+                vatAmount,
+                totalCost,
+                totalAmount: totalCost,
                 createdAt: now,
                 lastModifiedAt: now,
                 createdBy: this.currentUser || 'User',
@@ -1596,14 +1623,15 @@ class CRMApplication {
                 titleElement.textContent = `Quote Details - ${quoteData.quoteNumber || quoteData.id || 'Unknown'}`;
             }
 
-            // Handle quote items display
+            // Handle PL items display (new structure)
             const itemsContainer = document.getElementById('quote-detail-items');
             if (itemsContainer) {
-                if (quoteData.items && quoteData.items.length > 0) {
-                    itemsContainer.innerHTML = quoteData.items.map(item => `
+                const plItems = quoteData.itemsPriceList || quoteData.items || [];
+                if (plItems.length > 0) {
+                    itemsContainer.innerHTML = plItems.map(item => `
                         <div style="padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb;">
-                            <strong>${item.name || 'Item'}</strong> - ${item.description || 'No description'}<br>
-                            <small>Quantity: ${item.quantity || 1} | Unit Price: £${(item.unitPrice || 0).toFixed(2)} | Total: £${((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)}</small>
+                            <strong>${item.name || 'Item'}</strong><br>
+                            <small>Category: ${item.category || '-'} | Qty: ${item.quantity || 1} ${item.unit || ''} | Unit: £${(item.unitPrice || 0).toFixed(2)} | Line: £${((item.quantity || 1) * (item.unitPrice || 0)).toFixed(2)}</small>
                         </div>
                     `).join('');
                 } else {
@@ -1611,21 +1639,24 @@ class CRMApplication {
                 }
             }
 
-            // Handle other costs section
+            // Handle other manual costs
             const otherCostsSection = document.getElementById('quote-detail-other-costs-section');
             const otherCostsContainer = document.getElementById('quote-detail-other-costs');
-            if (quoteData.otherCosts && quoteData.otherCosts.length > 0) {
+            const otherCosts = quoteData.otherCostsManual || quoteData.otherCosts || [];
+            if (otherCosts.length > 0) {
                 if (otherCostsSection) otherCostsSection.style.display = 'block';
                 if (otherCostsContainer) {
-                    otherCostsContainer.innerHTML = quoteData.otherCosts.map(cost => `
+                    otherCostsContainer.innerHTML = otherCosts.map(cost => `
                         <div style="padding: 0.25rem 0;">
-                            ${cost.description}: £${cost.amount.toFixed(2)}
+                            ${cost.description}: £${(cost.amount||0).toFixed(2)}
                         </div>
                     `).join('');
                 }
             } else {
                 if (otherCostsSection) otherCostsSection.style.display = 'none';
             }
+
+            // TODO: optionally render recycling and rebates breakdown in details later
 
             logDebug('Quote detail data loaded successfully');
 
