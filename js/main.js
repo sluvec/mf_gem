@@ -2446,7 +2446,7 @@ class CRMApplication {
             const address2 = document.getElementById('pc-edit-address-2')?.value ?? existingPc.address2 ?? '';
             const address3 = document.getElementById('pc-edit-address-3')?.value ?? existingPc.address3 ?? '';
             const address4 = document.getElementById('pc-edit-address-4')?.value ?? existingPc.address4 ?? '';
-            const addressCountry = document.getElementById('pc-edit-address-country')?.value ?? existingPc.addressCountry ?? '';
+            const addressCountry = document.getElementById('pc-edit-address-country')?.value ?? existingPc.addressCountry ?? 'United Kingdom';
             const industry = document.getElementById('pc-edit-client-industry')?.value ?? existingPc.industry ?? existingPc.clientIndustry ?? '';
             const clientCategory = document.getElementById('pc-edit-client-category')?.value ?? existingPc.clientCategory ?? '';
             const clientSource = document.getElementById('pc-edit-client-source')?.value ?? existingPc.clientSource ?? '';
@@ -2458,7 +2458,7 @@ class CRMApplication {
             const tempForm = {
                 company, accountManager, contactFirstName, contactLastName, addressPostcode
             };
-
+            
             const updatedData = {
                 ...existingPc,
                 company: (company || '').trim(),
@@ -2511,7 +2511,7 @@ class CRMApplication {
         const company = document.getElementById('pc-company-name')?.value.trim();
         const projectTitle = document.getElementById('pc-project-name')?.value.trim() || '';
         const accountManager = document.getElementById('pc-account-manager')?.value.trim();
-
+        
         // Contact split
         const contactFirstName = document.getElementById('pc-contact-first-name')?.value.trim();
         const contactLastName = document.getElementById('pc-contact-last-name')?.value.trim();
@@ -2525,7 +2525,7 @@ class CRMApplication {
         const address2 = document.getElementById('pc-address-2')?.value.trim() || '';
         const address3 = document.getElementById('pc-address-3')?.value.trim() || '';
         const address4 = document.getElementById('pc-address-4')?.value.trim() || '';
-        const addressCountry = document.getElementById('pc-address-country')?.value.trim() || '';
+        const addressCountry = document.getElementById('pc-address-country')?.value.trim() || 'United Kingdom';
 
         // Classification
         const industry = document.getElementById('pc-industry')?.value || '';
@@ -2546,7 +2546,7 @@ class CRMApplication {
             uiModals.showToast('Please fill in required fields (Company, Account Manager, Contact First/Last Name, Postcode)', 'error');
             return null;
         }
-
+        
         return {
             company,
             projectTitle,
@@ -2699,6 +2699,20 @@ class CRMApplication {
                 );
                 const newStatus = isComplete ? 'Complete' : 'Draft';
                 if (pc.status !== newStatus) { pc.status = newStatus; changed = true; }
+
+                // Default country if missing
+                if (!pc.addressCountry) { pc.addressCountry = 'United Kingdom'; changed = true; }
+
+                // Remove legacy keys to avoid confusion
+                const legacyKeys = [
+                    'clientName','clientIndustry','postcode',
+                    'collectionAddress1','collectionAddress2','collectionAddress3','collectionAddress4','collectionPostcode','collectionCountry',
+                    'deliveryAddress1','deliveryAddress2','deliveryAddress3','deliveryAddress4','deliveryPostcode','deliveryCountry',
+                    'referralType','propertyType','budgetRange','quoteLimit','estimatedValue','surveyor','contactName'
+                ];
+                for (const key of legacyKeys) {
+                    if (key in pc) { delete pc[key]; changed = true; }
+                }
 
                 if (changed) {
                     pc.lastModifiedAt = new Date().toISOString();
