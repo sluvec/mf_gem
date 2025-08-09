@@ -13,6 +13,8 @@ import { uiModals } from './ui-modals.js';
 class CRMApplication {
     constructor() {
         this.initialized = false;
+        this.currentPage = null;
+        this.builderContext = { pcId: null };
         this.currentPage = 'dashboard';
         this.currentUser = null;
         
@@ -62,18 +64,24 @@ class CRMApplication {
             // Navigate to builder page
             await this.navigateToPage('quote-builder');
 
+            // Track current page
+            this.currentPage = 'quote-builder';
+
             // Prefill PC if provided
             if (pcId) {
                 const pc = await db.load('pcNumbers', pcId);
                 if (pc) {
+                    this.builderContext.pcId = pcId;
                     // Populate company + load activities list (placeholder)
                     const titleEl = document.getElementById('quote-builder-title');
                     if (titleEl) titleEl.textContent = `New Quote for ${pc.pcNumber} — ${pc.company || ''}`;
-                    // Later: prefill collection address from PC
+                    // Prefill Collection address/contact from PC
+                    this.prefillCollectionFromPc(pc);
                 }
             } else {
                 const titleEl = document.getElementById('quote-builder-title');
                 if (titleEl) titleEl.textContent = 'New Quote';
+                this.builderContext.pcId = null;
             }
 
             // Initialize default VAT
@@ -89,6 +97,162 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
             uiModals.showToast('Failed to open Quote Builder', 'error');
+        }
+    }
+
+    /**
+     * @description Prefill collection address from PC record
+     */
+    prefillCollectionFromPc(pc) {
+        try {
+            const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+            const contactName = [pc.contactFirstName, pc.contactLastName].filter(Boolean).join(' ').trim();
+            set('quote-collection-name', contactName);
+            set('quote-collection-phone', pc.contactPhone || '');
+            set('quote-collection-email', pc.contactEmail || '');
+            set('quote-collection-address1', pc.address1 || '');
+            set('quote-collection-address2', pc.address2 || '');
+            set('quote-collection-city', pc.address3 || '');
+            set('quote-collection-county', pc.address4 || '');
+            set('quote-collection-postcode', pc.addressPostcode || '');
+        } catch (e) {
+            logError('Failed to prefill collection from PC:', e);
+        }
+    }
+
+    /**
+     * @description Handle price list selection change in builder
+     */
+    async handlePriceListChange() {
+        try {
+            const select = document.getElementById('quote-price-list');
+            const itemsSection = document.getElementById('quote-items-section');
+            if (select && select.value) {
+                if (itemsSection) itemsSection.style.display = '';
+            } else {
+                if (itemsSection) itemsSection.style.display = 'none';
+            }
+        } catch (e) {
+            logError('handlePriceListChange error:', e);
+        }
+    }
+
+    /**
+     * @description Toggle address sections visibility based on move type
+     */
+    toggleAddressSections() {
+        const moveType = document.getElementById('quote-move-type')?.value || '';
+        const col = document.getElementById('collection-section');
+        const del = document.getElementById('delivery-section');
+        if (!col || !del) return;
+        if (moveType === 'Collection Only') { col.style.display = ''; del.style.display = 'none'; }
+        else if (moveType === 'Delivery Only') { col.style.display = 'none'; del.style.display = ''; }
+        else if (moveType === 'Collection + Delivery') { col.style.display = ''; del.style.display = ''; }
+        else { col.style.display = 'none'; del.style.display = 'none'; }
+    }
+
+    /**
+     * @description Copy collection address to delivery
+     */
+    copyCollectionToDelivery() {
+        const checked = document.getElementById('quote-same-address')?.checked;
+        if (!checked) return;
+        const copy = (src, dst) => {
+            const s = document.getElementById(src); const d = document.getElementById(dst);
+            if (s && d) d.value = s.value;
+        };
+        copy('quote-collection-name', 'quote-delivery-name');
+        copy('quote-collection-phone', 'quote-delivery-phone');
+        copy('quote-collection-email', 'quote-delivery-email');
+        copy('quote-collection-address1', 'quote-delivery-address1');
+        copy('quote-collection-address2', 'quote-delivery-address2');
+        copy('quote-collection-city', 'quote-delivery-city');
+        copy('quote-collection-county', 'quote-delivery-county');
+        copy('quote-collection-postcode', 'quote-delivery-postcode');
+    }
+
+    /**
+     * @description Save Quote from full-screen builder as Draft
+     */
+    async saveQuoteFromBuilder() {
+        try {
+            // Generate quote number
+            const quotes = await db.loadAll('quotes');
+            const nextNumber = String(quotes.length + 1).padStart(6, '0');
+            const quoteNumber = `QT-${nextNumber}`;
+
+            // Read basic fields
+            const priceListId = document.getElementById('quote-price-list')?.value || '';
+            const vatRateStr = document.getElementById('quote-vat-rate')?.value || '20';
+            const vatRate = Math.max(0, Math.min(100, parseFloat(vatRateStr) || 20));
+
+            // Addresses
+            const readAddr = (prefix) => ({
+                contactName: document.getElementById(`${prefix}-name`)?.value || '',
+                phone: document.getElementById(`${prefix}-phone`)?.value || '',
+                email: document.getElementById(`${prefix}-email`)?.value || '',
+                date: document.getElementById(`${prefix}-date`)?.value || '',
+                address1: document.getElementById(`${prefix}-address1`)?.value || '',
+                address2: document.getElementById(`${prefix}-address2`)?.value || '',
+                city: document.getElementById(`${prefix}-city`)?.value || '',
+                county: document.getElementById(`${prefix}-county`)?.value || '',
+                postcode: document.getElementById(`${prefix}-postcode`)?.value || '',
+            });
+            const collectionAddress = readAddr('quote-collection');
+            const deliveryAddress = readAddr('quote-delivery');
+
+            // Currency from price list (if selected)
+            let currency = 'GBP';
+            if (priceListId) {
+                const pl = await db.load('priceLists', priceListId);
+                if (pl?.currency) currency = pl.currency;
+            }
+
+            // Optional PC linkage
+            const pcId = this.builderContext.pcId || null;
+            let pcNumber = '';
+            if (pcId) {
+                const pc = await db.load('pcNumbers', pcId);
+                pcNumber = pc?.pcNumber || '';
+            }
+
+            const now = new Date().toISOString();
+            const draft = {
+                id: `quote-${Date.now()}`,
+                quoteNumber,
+                status: 'draft',
+                priceListId,
+                vatRate,
+                currency,
+                pcId: pcId || undefined,
+                pcNumber,
+                clientName: '',
+                accountManager: '',
+                propertyType: '',
+                bulkProvisionalValue: null,
+                itemsPriceList: [],
+                recyclingItems: [],
+                rebateItems: [],
+                otherCostsManual: [],
+                discount: { type: 'percent', value: 0 },
+                collectionAddress,
+                deliveryAddress,
+                createdAt: now,
+                lastModifiedAt: now,
+                createdBy: this.currentUser || 'User',
+                editedBy: this.currentUser || 'User'
+            };
+
+            await db.save('quotes', draft);
+            uiModals.showToast(`Draft ${quoteNumber} saved`, 'success');
+
+            // Go to quotes list
+            await this.navigateToPage('quotes');
+            await this.loadQuotesData();
+
+        } catch (e) {
+            logError('Failed to save draft from builder:', e);
+            uiModals.showToast('Failed to save draft', 'error');
         }
     }
 

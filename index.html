@@ -699,7 +699,7 @@
             <div class="card" id="price-list-selector">
                 <h2>Step 1: Select Price List</h2>
                 <label>Available Price Lists *</label>
-                <select id="quote-price-list" onchange="window.handlePriceListChange()"></select>
+                <select id="quote-price-list" onchange="window.app && window.app.handlePriceListChange && window.app.handlePriceListChange()"></select>
             </div>
             <div class="quote-builder" id="quote-items-section" style="display: none;">
                 <div class="card">
@@ -805,7 +805,7 @@
                         <!-- Move Type Selection -->
                         <div style="margin-bottom: 1rem;">
                             <label>Move Type *</label>
-                            <select id="quote-move-type" onchange="window.toggleAddressSections()" required>
+                            <select id="quote-move-type" onchange="window.app && window.app.toggleAddressSections && window.app.toggleAddressSections()" required>
                                 <option value="">Select move type...</option>
                                 <option value="Collection Only">Collection Only</option>
                                 <option value="Delivery Only">Delivery Only</option>
@@ -836,7 +836,7 @@
                             <h4 style="margin-top: 0; margin-bottom: 1rem;">🚚 Delivery Address</h4>
                             <div style="margin-bottom: 1rem;">
                                 <label style="display: inline-flex; align-items: center; cursor: pointer;">
-                                    <input type="checkbox" id="quote-same-address" onchange="window.copyCollectionToDelivery()" style="margin-right: 0.5rem;">
+                                    <input type="checkbox" id="quote-same-address" onchange="window.app && window.app.copyCollectionToDelivery && window.app.copyCollectionToDelivery()" style="margin-right: 0.5rem;">
                                     Same as collection address
                                 </label>
                             </div>
@@ -900,7 +900,7 @@
                     </div>
                     
                     <div class="form-actions" style="text-align: center;">
-                        <button onclick="window.saveQuote()">Save Quote</button>
+                        <button onclick="window.app && window.app.saveQuoteFromBuilder ? window.app.saveQuoteFromBuilder() : window.saveQuote()">Save Quote</button>
                         <button onclick="window.saveQuoteAsTemplate()" style="background: #8b5cf6; color: white;">📄 Save as Template</button>
                         <button onclick="window.duplicateCurrentQuote()" style="background: #06b6d4; color: white;">📋 Duplicate Quote</button>
                         <button onclick="window.cancelQuote()" class="secondary">Cancel</button>
