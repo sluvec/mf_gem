@@ -2377,7 +2377,8 @@ class CRMApplication {
                 // Contact
                 contactFirstName: formData.contactFirstName,
                 contactLastName: formData.contactLastName,
-                contactTitle: formData.contactTitle || '',
+                clientTitle: formData.clientTitle || '',
+                clientJobTitle: formData.clientJobTitle || '',
                 contactEmail: formData.contactEmail || '',
                 contactPhone: formData.contactPhone || '',
                 // Address
@@ -2438,7 +2439,8 @@ class CRMApplication {
             const accountManager = document.getElementById('pc-edit-account-manager')?.value ?? existingPc.accountManager ?? '';
             const contactFirstName = document.getElementById('pc-edit-contact-first-name')?.value ?? existingPc.contactFirstName ?? '';
             const contactLastName = document.getElementById('pc-edit-contact-last-name')?.value ?? existingPc.contactLastName ?? '';
-            const contactTitle = document.getElementById('pc-edit-contact-title')?.value ?? existingPc.contactTitle ?? '';
+            const clientTitle = document.getElementById('pc-edit-contact-client-title')?.value ?? existingPc.clientTitle ?? '';
+            const clientJobTitle = document.getElementById('pc-edit-contact-job-title')?.value ?? existingPc.clientJobTitle ?? '';
             const contactEmail = document.getElementById('pc-edit-contact-email')?.value ?? existingPc.contactEmail ?? '';
             const contactPhone = document.getElementById('pc-edit-contact-phone')?.value ?? existingPc.contactPhone ?? '';
             const addressPostcode = document.getElementById('pc-edit-postcode')?.value ?? existingPc.addressPostcode ?? existingPc.postcode ?? '';
@@ -2474,7 +2476,8 @@ class CRMApplication {
                 sicCode3: this.normalizeSic(sicCode3) || '',
                 contactFirstName: (contactFirstName || '').trim(),
                 contactLastName: (contactLastName || '').trim(),
-                contactTitle: (contactTitle || '').trim(),
+                clientTitle: (clientTitle || '').trim(),
+                clientJobTitle: (clientJobTitle || '').trim(),
                 contactEmail: (contactEmail || '').trim(),
                 contactPhone: (contactPhone || '').trim(),
                 addressPostcode: (addressPostcode || '').trim(),
@@ -2515,7 +2518,8 @@ class CRMApplication {
         // Contact split
         const contactFirstName = document.getElementById('pc-contact-first-name')?.value.trim();
         const contactLastName = document.getElementById('pc-contact-last-name')?.value.trim();
-        const contactTitle = document.getElementById('pc-contact-title')?.value.trim() || '';
+        const clientTitle = document.getElementById('pc-contact-client-title')?.value.trim() || '';
+        const clientJobTitle = document.getElementById('pc-contact-job-title')?.value.trim() || '';
         const contactEmail = document.getElementById('pc-contact-email')?.value.trim() || '';
         const contactPhone = document.getElementById('pc-contact-phone')?.value.trim() || '';
 
@@ -2563,7 +2567,8 @@ class CRMApplication {
             // Contact
             contactFirstName,
             contactLastName,
-            contactTitle,
+            clientTitle,
+            clientJobTitle,
             contactEmail,
             contactPhone,
             // Address
@@ -2665,9 +2670,10 @@ class CRMApplication {
                 if (!pc.contactFirstName && pc.contactName) {
                     pc.contactFirstName = pc.contactName;
                     pc.contactLastName = pc.contactLastName || '';
-                    pc.contactTitle = pc.contactTitle || '';
                     changed = true;
                 }
+                // Move legacy contactTitle to clientJobTitle
+                if (pc.contactTitle && !pc.clientJobTitle) { pc.clientJobTitle = pc.contactTitle; changed = true; }
 
                 // Address migration (prefer existing addressPostcode, then postcode)
                 if (!pc.addressPostcode && (pc.postcode || pc.collectionPostcode || pc.deliveryPostcode)) {

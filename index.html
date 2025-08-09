@@ -383,6 +383,9 @@
                                 <label>Account Manager *</label>
                                 <input type="text" id="pc-account-manager" required placeholder="Account manager name">
                             </div>
+                        </div>
+
+                        <div class="form-grid">
                             <div>
                                 <label>Industry</label>
                                 <select id="pc-industry">
@@ -425,32 +428,32 @@
                             <div>
                                 <label>Client Source</label>
                                 <select id="pc-client-source">
-                                    <option value="">Select source...</option>
-                                    <option value="Internal Workspace">Internal Workspace</option>
-                                    <option value="Internal Crown UK">Internal Crown UK</option>
-                                    <option value="Internal Crown EMEA">Internal Crown EMEA</option>
-                                    <option value="Internal Crown APAC">Internal Crown APAC</option>
                                     <option value="External">External</option>
+                                    <option value="Internal Crown APAC">Internal Crown APAC</option>
+                                    <option value="Internal Crown EMEA">Internal Crown EMEA</option>
+                                    <option value="Internal Crown IT Renew">Internal CWS IT Renew</option>
+                                    <option value="Internal Crown Office Resale">Internal CWS Office Resale</option>
+                                    <option value="Internal Crown UK">Internal Crown UK</option>
+                                    <option value="Internal CWS interiors">Internal CWS interiors</option>
                                 </select>
                             </div>
                             <div>
                                 <label>Client Source Detail</label>
                                 <select id="pc-client-source-detail">
                                     <option value="">Select detail...</option>
-                                    <option value="Web Enquiry">Web Enquiry</option>
-                                    <option value="Direct Enquiry">Direct Enquiry</option>
-                                    <option value="Networking Event">Networking Event</option>
-                                    <option value="Referral Partner">Referral Partner</option>
-                                    <option value="Social Media">Social Media</option>
-                                    <option value="Email Campaign">Email Campaign</option>
-                                    <option value="PPC/Ads">PPC/Ads</option>
-                                    <option value="Trade Show/Exhibition">Trade Show/Exhibition</option>
                                     <option value="Cold Outreach">Cold Outreach</option>
+                                    <option value="Direct Enquiry">Direct Enquiry</option>
+                                    <option value="Email Campaign">Email Campaign</option>
                                     <option value="Existing Client">Existing Client</option>
-                                    <option value="RFP/Tender Portal">RFP/Tender Portal</option>
-                                    <option value="Online Marketplace/Directory">Online Marketplace/Directory</option>
                                     <option value="Media/PR">Media/PR</option>
+                                    <option value="Networking Event">Networking Event</option>
+                                    <option value="Online Marketplace/Directory">Online Marketplace/Directory</option>
                                     <option value="Partner/Reseller">Partner/Reseller</option>
+                                    <option value="PPC/Ads">PPC/Ads</option>
+                                    <option value="RFP/Tender Portal">RFP/Tender Portal</option>
+                                    <option value="Social Media">Social Media</option>
+                                    <option value="Trade Show/Exhibition">Trade Show/Exhibition</option>
+                                    <option value="Web Enquiry">Web Enquiry</option>
                                 </select>
                             </div>
                         </div>
@@ -500,8 +503,12 @@
                                 <input type="text" id="pc-contact-last-name" required placeholder="Last name">
                             </div>
                             <div>
-                                <label>Title</label>
-                                <input type="text" id="pc-contact-title" placeholder="Job title">
+                                <label>Client Title</label>
+                                <input type="text" id="pc-contact-client-title" placeholder="e.g. Mr, Ms, Dr, ...">
+                            </div>
+                            <div>
+                                <label>Client Job Title</label>
+                                <input type="text" id="pc-contact-job-title" placeholder="e.g. Operations Manager">
                             </div>
                             <div>
                                 <label>Phone Number</label>
@@ -2066,9 +2073,12 @@
                             <label>Account Manager *</label>
                             <input type="text" id="pc-edit-account-manager" placeholder="Account manager name">
                         </div>
-                        <div>
-                            <label>Industry</label>
-                            <select id="pc-edit-industry">
+                        </div>
+
+                        <div class="form-grid">
+                            <div>
+                                <label>Industry</label>
+                                <select id="pc-edit-industry">
                                 <option value="">Select industry...</option>
                                 <option value="Government / Public Administration">Government / Public Administration</option>
                                 <option value="Police & Emergency Services">Police & Emergency Services</option>
@@ -2087,7 +2097,7 @@
                                 <option value="Construction & Real Estate">Construction & Real Estate</option>
                                 <option value="Charities & Non-Profit">Charities & Non-Profit</option>
                             </select>
-                        </div>
+                            </div>
                     </div>
                 </div>
                 
@@ -2106,34 +2116,34 @@
                         </div>
                         <div>
                             <label>Client Source</label>
-                            <select id="pc-edit-client-source">
-                                <option value="">Select source...</option>
-                                <option value="Internal Workspace">Internal Workspace</option>
-                                <option value="Internal Crown UK">Internal Crown UK</option>
-                                <option value="Internal Crown EMEA">Internal Crown EMEA</option>
-                                <option value="Internal Crown APAC">Internal Crown APAC</option>
-                                <option value="External">External</option>
-                            </select>
+                                <select id="pc-edit-client-source">
+                                    <option value="External">External</option>
+                                    <option value="Internal Crown APAC">Internal Crown APAC</option>
+                                    <option value="Internal Crown EMEA">Internal Crown EMEA</option>
+                                    <option value="Internal CWS IT Renew">Internal CWS IT Renew</option>
+                                    <option value="Internal CWS Office Resale">Internal CWS Office Resale</option>
+                                    <option value="Internal Crown UK">Internal Crown UK</option>
+                                    <option value="Internal CWS interiors">Internal CWS interiors</option>
+                                </select>
                         </div>
                         <div>
                             <label>Client Source Detail</label>
-                            <select id="pc-edit-client-source-detail">
-                                <option value="">Select detail...</option>
-                                <option value="Web Enquiry">Web Enquiry</option>
-                                <option value="Direct Enquiry">Direct Enquiry</option>
-                                <option value="Networking Event">Networking Event</option>
-                                <option value="Referral Partner">Referral Partner</option>
-                                <option value="Social Media">Social Media</option>
-                                <option value="Email Campaign">Email Campaign</option>
-                                <option value="PPC/Ads">PPC/Ads</option>
-                                <option value="Trade Show/Exhibition">Trade Show/Exhibition</option>
-                                <option value="Cold Outreach">Cold Outreach</option>
-                                <option value="Existing Client">Existing Client</option>
-                                <option value="RFP/Tender Portal">RFP/Tender Portal</option>
-                                <option value="Online Marketplace/Directory">Online Marketplace/Directory</option>
-                                <option value="Media/PR">Media/PR</option>
-                                <option value="Partner/Reseller">Partner/Reseller</option>
-                            </select>
+                                <select id="pc-edit-client-source-detail">
+                                    <option value="">Select detail...</option>
+                                    <option value="Cold Outreach">Cold Outreach</option>
+                                    <option value="Direct Enquiry">Direct Enquiry</option>
+                                    <option value="Email Campaign">Email Campaign</option>
+                                    <option value="Existing Client">Existing Client</option>
+                                    <option value="Media/PR">Media/PR</option>
+                                    <option value="Networking Event">Networking Event</option>
+                                    <option value="Online Marketplace/Directory">Online Marketplace/Directory</option>
+                                    <option value="Partner/Reseller">Partner/Reseller</option>
+                                    <option value="PPC/Ads">PPC/Ads</option>
+                                    <option value="RFP/Tender Portal">RFP/Tender Portal</option>
+                                    <option value="Social Media">Social Media</option>
+                                    <option value="Trade Show/Exhibition">Trade Show/Exhibition</option>
+                                    <option value="Web Enquiry">Web Enquiry</option>
+                                </select>
                         </div>
                     </div>
 
@@ -2167,8 +2177,12 @@
                             <input type="text" id="pc-edit-contact-last-name" placeholder="Last name">
                         </div>
                         <div>
-                            <label>Title</label>
-                            <input type="text" id="pc-edit-contact-title" placeholder="Job title">
+                            <label>Client Title</label>
+                            <input type="text" id="pc-edit-contact-client-title" placeholder="e.g. Mr, Ms, Dr, ...">
+                        </div>
+                        <div>
+                            <label>Client Job Title</label>
+                            <input type="text" id="pc-edit-contact-job-title" placeholder="e.g. Operations Manager">
                         </div>
                         <div>
                             <label>Phone Number</label>
