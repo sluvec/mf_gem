@@ -2058,6 +2058,33 @@ class CRMApplication {
                     pcSelect.innerHTML += `<option value="${pc.id}" data-pc-number="${pc.pcNumber}">${pc.pcNumber} - ${pc.company}</option>`;
                 });
                 
+                // Attach immediate validation on selection (only when not locked)
+                pcSelect.onchange = async () => {
+                    try {
+                        if (pcSelect.disabled) return;
+                        const selectedId = pcSelect.value;
+                        if (!selectedId) return;
+                        const pcData = await db.load('pcNumbers', selectedId);
+                        if (!pcData) return;
+                        const validation = this.validatePcForQuoteCreation(pcData);
+                        if (!validation.isValid) {
+                            uiModals.showToast(
+                                `⚠️ This PC Number ("${pcData.pcNumber}") cannot be used to create a Quote.\n\nMissing required fields:\n• ${validation.missingFields.join('\n• ')}\n\nPlease edit the PC Number first.`,
+                                'error'
+                            );
+                            pcSelect.value = '';
+                        } else {
+                            // Prefill company if available
+                            const companyField = document.getElementById('quote-modal-company');
+                            if (companyField && pcData.company) {
+                                companyField.value = pcData.company;
+                            }
+                        }
+                    } catch (e) {
+                        logError('PC selection validation failed:', e);
+                    }
+                };
+
                 // If pcId provided, pre-select and disable
                 if (pcId) {
                     pcSelect.value = pcId;
