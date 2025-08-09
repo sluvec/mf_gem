@@ -1106,7 +1106,7 @@ class CRMApplication {
                             <td>${scheduledDisplay}</td>
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
-                            <td>${activity.accountManager || 'N/A'}</td>
+                            <td>${activity.assignedTo || activity.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
@@ -3990,9 +3990,13 @@ class CRMApplication {
                         searchValue = item.companyName || item.company || item.clientName || '';
                         break;
                     case 'accountManager':
-                        // For PC Numbers: not applicable (they don't have accountManager)
-                        // For Quotes/Activities: use accountManager or assignedTo
-                        searchValue = item.accountManager || item.assignedTo || '';
+                        // For PC Numbers & Quotes: use accountManager
+                        // For Activities: use assignedTo as primary, accountManager as fallback
+                        if (dataType === 'activities') {
+                            searchValue = item.assignedTo || item.accountManager || '';
+                        } else {
+                            searchValue = item.accountManager || item.assignedTo || '';
+                        }
                         break;
                     case 'pcNumber':
                         searchValue = item.pcNumber || item.id || '';
@@ -4280,7 +4284,7 @@ class CRMApplication {
                 
                 // Account Manager filter
                 if (filters.accountManager) {
-                    const searchValue = activity.accountManager || activity.assignedTo || '';
+                    const searchValue = activity.assignedTo || activity.accountManager || '';
                     matches = matches && searchValue.toLowerCase().includes(filters.accountManager.toLowerCase());
                 }
                 
