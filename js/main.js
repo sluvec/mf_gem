@@ -105,6 +105,11 @@ class CRMApplication {
             
             // Load sample data if database is empty
             await this.loadSampleDataIfNeeded();
+
+            // Migrate existing PC Numbers to the new schema
+            if (typeof this.migratePcNumbersToNewSchema === 'function') {
+                await this.migratePcNumbersToNewSchema();
+            }
         } catch (error) {
             logError('Database initialization failed:', error);
             throw error;
@@ -772,21 +777,21 @@ class CRMApplication {
             const pcData = window.currentPC;
             logDebug('Loading PC detail data:', pcData);
 
-            // Populate main data fields
+            // Populate main data fields (normalized schema)
             const fields = [
                 { id: 'pc-detail-number', value: pcData.pcNumber || 'N/A' },
-                { id: 'pc-detail-company-name', value: pcData.company || pcData.clientName || 'N/A' },
+                { id: 'pc-detail-company-name', value: pcData.company || 'N/A' },
                 { id: 'pc-detail-project-name', value: pcData.projectTitle || 'N/A' },
                 { id: 'pc-detail-account-manager', value: pcData.accountManager || 'N/A' },
-                { id: 'pc-detail-client-industry', value: pcData.clientIndustry || 'N/A' },
+                { id: 'pc-detail-client-industry', value: pcData.industry || pcData.clientIndustry || 'N/A' },
                 { id: 'pc-detail-client-source', value: pcData.clientSource || 'N/A' },
-                { id: 'pc-detail-quote-limit', value: pcData.quoteLimit || 'N/A' },
-                { id: 'pc-detail-status', value: pcData.status || 'active' },
+                { id: 'pc-detail-quote-limit', value: 'N/A' },
+                { id: 'pc-detail-status', value: pcData.status || 'Draft' },
                 { id: 'pc-detail-project-description', value: pcData.projectDescription || 'No description available' },
-                { id: 'pc-detail-contact-name', value: pcData.contactName || 'N/A' },
+                { id: 'pc-detail-contact-name', value: ((pcData.contactFirstName || '') + (pcData.contactLastName ? ' ' + pcData.contactLastName : '')).trim() || 'N/A' },
                 { id: 'pc-detail-contact-phone', value: pcData.contactPhone || 'N/A' },
                 { id: 'pc-detail-contact-email', value: pcData.contactEmail || 'N/A' },
-                { id: 'pc-detail-postcode', value: pcData.postcode || 'N/A' }
+                { id: 'pc-detail-postcode', value: pcData.addressPostcode || pcData.postcode || 'N/A' }
             ];
 
             fields.forEach(field => {
@@ -2334,16 +2339,32 @@ class CRMApplication {
                 id: `pc-${Date.now()}`,
                 pcNumber: pcNumber,
                 company: formData.company,
-                projectTitle: formData.projectTitle,
-                projectDescription: formData.projectDescription,
+                projectTitle: formData.projectTitle || '',
+                projectDescription: formData.projectDescription || '',
                 accountManager: formData.accountManager,
-                clientName: formData.company,
-                contactName: formData.contactName,
-                contactEmail: formData.contactEmail,
-                contactPhone: formData.contactPhone,
-                postcode: formData.postcode,
-                estimatedValue: 0, // Default value
-                status: 'active',
+                // Classification
+                clientCategory: formData.clientCategory || '',
+                clientSource: formData.clientSource || '',
+                clientSourceDetail: formData.clientSourceDetail || '',
+                industry: formData.industry || '',
+                sicCode1: formData.sicCode1,
+                sicCode2: formData.sicCode2 || '',
+                sicCode3: formData.sicCode3 || '',
+                // Contact
+                contactFirstName: formData.contactFirstName,
+                contactLastName: formData.contactLastName,
+                contactTitle: formData.contactTitle || '',
+                contactEmail: formData.contactEmail || '',
+                contactPhone: formData.contactPhone || '',
+                // Address
+                addressPostcode: formData.addressPostcode,
+                address1: formData.address1 || '',
+                address2: formData.address2 || '',
+                address3: formData.address3 || '',
+                address4: formData.address4 || '',
+                addressCountry: formData.addressCountry || '',
+                // Status
+                status: this.isPcComplete(formData) ? 'Complete' : 'Draft',
                 createdAt: new Date().toISOString(),
                 lastModifiedAt: new Date().toISOString(),
                 createdBy: this.currentUser || 'User',
@@ -2386,33 +2407,59 @@ class CRMApplication {
                 return;
             }
             
-            // Get updated data with error checking
-            const company = document.getElementById('pc-edit-company')?.value || '';
-            const projectTitle = document.getElementById('pc-edit-title')?.value || '';
-            const projectDescription = document.getElementById('pc-edit-description')?.value || '';
-            const accountManager = document.getElementById('pc-edit-account-manager')?.value || '';
-            const status = document.getElementById('pc-edit-status')?.value || 'active';
-            const contactName = document.getElementById('pc-edit-contact-name')?.value || '';
-            const contactEmail = document.getElementById('pc-edit-contact-email')?.value || '';
-            const contactPhone = document.getElementById('pc-edit-contact-phone')?.value || '';
-            
-            // Validation
-            if (!company.trim() || !projectTitle.trim() || !contactName.trim() || !accountManager.trim()) {
-                uiModals.showToast('Please fill in required fields (Company, Project Title, Contact Name, Account Manager)', 'error');
-                return;
-            }
-            
+            // New edit model (use existing values if edit fields not present)
+            const company = document.getElementById('pc-edit-company')?.value ?? existingPc.company ?? '';
+            const projectTitle = document.getElementById('pc-edit-title')?.value ?? existingPc.projectTitle ?? '';
+            const projectDescription = document.getElementById('pc-edit-description')?.value ?? existingPc.projectDescription ?? '';
+            const accountManager = document.getElementById('pc-edit-account-manager')?.value ?? existingPc.accountManager ?? '';
+            const contactFirstName = document.getElementById('pc-edit-contact-first-name')?.value ?? existingPc.contactFirstName ?? '';
+            const contactLastName = document.getElementById('pc-edit-contact-last-name')?.value ?? existingPc.contactLastName ?? '';
+            const contactTitle = document.getElementById('pc-edit-contact-title')?.value ?? existingPc.contactTitle ?? '';
+            const contactEmail = document.getElementById('pc-edit-contact-email')?.value ?? existingPc.contactEmail ?? '';
+            const contactPhone = document.getElementById('pc-edit-contact-phone')?.value ?? existingPc.contactPhone ?? '';
+            const addressPostcode = document.getElementById('pc-edit-postcode')?.value ?? existingPc.addressPostcode ?? existingPc.postcode ?? '';
+            const address1 = document.getElementById('pc-edit-address-1')?.value ?? existingPc.address1 ?? '';
+            const address2 = document.getElementById('pc-edit-address-2')?.value ?? existingPc.address2 ?? '';
+            const address3 = document.getElementById('pc-edit-address-3')?.value ?? existingPc.address3 ?? '';
+            const address4 = document.getElementById('pc-edit-address-4')?.value ?? existingPc.address4 ?? '';
+            const addressCountry = document.getElementById('pc-edit-address-country')?.value ?? existingPc.addressCountry ?? '';
+            const industry = document.getElementById('pc-edit-client-industry')?.value ?? existingPc.industry ?? existingPc.clientIndustry ?? '';
+            const clientCategory = document.getElementById('pc-edit-client-category')?.value ?? existingPc.clientCategory ?? '';
+            const clientSource = document.getElementById('pc-edit-client-source')?.value ?? existingPc.clientSource ?? '';
+            const clientSourceDetail = document.getElementById('pc-edit-client-source-new')?.value ?? existingPc.clientSourceDetail ?? '';
+            const sicCode1 = document.getElementById('pc-edit-sic-code-1')?.value ?? existingPc.sicCode1 ?? '';
+            const sicCode2 = document.getElementById('pc-edit-sic-code-2')?.value ?? existingPc.sicCode2 ?? '';
+            const sicCode3 = document.getElementById('pc-edit-sic-code-3')?.value ?? existingPc.sicCode3 ?? '';
+
+            const tempForm = {
+                company, accountManager, contactFirstName, contactLastName, addressPostcode
+            };
+
             const updatedData = {
                 ...existingPc,
-                company: company.trim(),
-                clientName: company.trim(), // Keep both for compatibility
-                projectTitle: projectTitle.trim(),
-                projectDescription: projectDescription.trim(),
-                accountManager: accountManager.trim(),
-                status: status,
-                contactName: contactName.trim(),
-                contactEmail: contactEmail.trim(),
-                contactPhone: contactPhone.trim(),
+                company: (company || '').trim(),
+                projectTitle: (projectTitle || '').trim(),
+                projectDescription: (projectDescription || '').trim(),
+                accountManager: (accountManager || '').trim(),
+                industry: industry || '',
+                clientCategory: clientCategory || '',
+                clientSource: clientSource || '',
+                clientSourceDetail: clientSourceDetail || '',
+                sicCode1: this.normalizeSic(sicCode1) || '70100',
+                sicCode2: this.normalizeSic(sicCode2) || '',
+                sicCode3: this.normalizeSic(sicCode3) || '',
+                contactFirstName: (contactFirstName || '').trim(),
+                contactLastName: (contactLastName || '').trim(),
+                contactTitle: (contactTitle || '').trim(),
+                contactEmail: (contactEmail || '').trim(),
+                contactPhone: (contactPhone || '').trim(),
+                addressPostcode: (addressPostcode || '').trim(),
+                address1: (address1 || '').trim(),
+                address2: (address2 || '').trim(),
+                address3: (address3 || '').trim(),
+                address4: (address4 || '').trim(),
+                addressCountry: (addressCountry || '').trim(),
+                status: this.isPcComplete(tempForm) ? 'Complete' : 'Draft',
                 lastModifiedAt: new Date().toISOString(),
                 editedBy: this.currentUser || 'User'
             };
@@ -2438,24 +2485,70 @@ class CRMApplication {
      */
     getPcFormData() {
         const company = document.getElementById('pc-company-name')?.value.trim();
-        const projectTitle = document.getElementById('pc-project-name')?.value.trim();
-        const contactName = document.getElementById('pc-contact-name')?.value.trim();
+        const projectTitle = document.getElementById('pc-project-name')?.value.trim() || '';
         const accountManager = document.getElementById('pc-account-manager')?.value.trim();
-        
-        if (!company || !projectTitle || !contactName || !accountManager) {
-            uiModals.showToast('Please fill in required fields (Company Name, Project Name, Contact Name, Account Manager)', 'error');
+
+        // Contact split
+        const contactFirstName = document.getElementById('pc-contact-first-name')?.value.trim();
+        const contactLastName = document.getElementById('pc-contact-last-name')?.value.trim();
+        const contactTitle = document.getElementById('pc-contact-title')?.value.trim() || '';
+        const contactEmail = document.getElementById('pc-contact-email')?.value.trim() || '';
+        const contactPhone = document.getElementById('pc-contact-phone')?.value.trim() || '';
+
+        // Address
+        const addressPostcode = document.getElementById('pc-address-postcode')?.value.trim();
+        const address1 = document.getElementById('pc-address-1')?.value.trim() || '';
+        const address2 = document.getElementById('pc-address-2')?.value.trim() || '';
+        const address3 = document.getElementById('pc-address-3')?.value.trim() || '';
+        const address4 = document.getElementById('pc-address-4')?.value.trim() || '';
+        const addressCountry = document.getElementById('pc-address-country')?.value.trim() || '';
+
+        // Classification
+        const industry = document.getElementById('pc-industry')?.value || '';
+        const clientCategory = document.getElementById('pc-client-category')?.value || '';
+        const clientSource = document.getElementById('pc-client-source')?.value || '';
+        const clientSourceDetail = document.getElementById('pc-client-source-detail')?.value || '';
+
+        // SIC with defaults and validation
+        const sic1Raw = document.getElementById('pc-sic-code-1')?.value.trim() || '';
+        const sic2Raw = document.getElementById('pc-sic-code-2')?.value.trim() || '';
+        const sic3Raw = document.getElementById('pc-sic-code-3')?.value.trim() || '';
+        const sicCode1 = this.normalizeSic(sic1Raw) || '70100';
+        const sicCode2 = this.normalizeSic(sic2Raw) || '';
+        const sicCode3 = this.normalizeSic(sic3Raw) || '';
+
+        // Required minimal validation
+        if (!company || !accountManager || !contactFirstName || !contactLastName || !addressPostcode) {
+            uiModals.showToast('Please fill in required fields (Company, Account Manager, Contact First/Last Name, Postcode)', 'error');
             return null;
         }
-        
+
         return {
-            company: company,
-            projectTitle: projectTitle,
+            company,
+            projectTitle,
             projectDescription: document.getElementById('pc-project-description')?.value.trim() || '',
-            accountManager: accountManager,
-            contactName: contactName,
-            contactEmail: document.getElementById('pc-contact-email')?.value.trim() || '',
-            contactPhone: document.getElementById('pc-contact-phone')?.value.trim() || '',
-            postcode: document.getElementById('pc-postcode')?.value.trim() || ''
+            accountManager,
+            // Classification
+            industry,
+            clientCategory,
+            clientSource,
+            clientSourceDetail,
+            sicCode1,
+            sicCode2,
+            sicCode3,
+            // Contact
+            contactFirstName,
+            contactLastName,
+            contactTitle,
+            contactEmail,
+            contactPhone,
+            // Address
+            addressPostcode,
+            address1,
+            address2,
+            address3,
+            address4,
+            addressCountry
         };
     }
 
