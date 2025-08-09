@@ -553,7 +553,41 @@ class CRMApplication {
             });
         }
 
+        // Setup dynamic field indicator updates
+        this.setupFieldIndicatorListeners();
+
         logDebug('Form listeners setup completed');
+    }
+
+    /**
+     * @description Setup listeners for dynamic field indicator updates
+     */
+    setupFieldIndicatorListeners() {
+        const allPcFields = [
+            // New form fields
+            'pc-company-name', 'pc-account-manager', 'pc-contact-first-name',
+            'pc-contact-last-name', 'pc-address-postcode', 'pc-industry', 
+            'pc-client-category', 'pc-client-source', 'pc-client-source-detail', 
+            'pc-sic-code-1', 'pc-contact-email', 'pc-contact-phone',
+            // Edit form fields
+            'pc-edit-company', 'pc-edit-account-manager', 'pc-edit-contact-first-name',
+            'pc-edit-contact-last-name', 'pc-edit-address-postcode', 'pc-edit-industry',
+            'pc-edit-client-category', 'pc-edit-client-source', 'pc-edit-client-source-detail',
+            'pc-edit-sic-code-1', 'pc-edit-contact-email', 'pc-edit-contact-phone'
+        ];
+
+        allPcFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                // Update indicators when user types or changes selection
+                field.addEventListener('input', () => {
+                    setTimeout(() => this.applyPcFieldIndicators(), 50);
+                });
+                field.addEventListener('change', () => {
+                    setTimeout(() => this.applyPcFieldIndicators(), 50);
+                });
+            }
+        });
     }
 
     /**
@@ -2617,6 +2651,7 @@ class CRMApplication {
 
     /**
      * @description Apply visual indicators to PC Number form fields
+     * Only highlights empty fields that are required
      */
     applyPcFieldIndicators() {
         // Required fields for PC Number creation (red border)
@@ -2628,7 +2663,7 @@ class CRMApplication {
             'pc-edit-contact-last-name', 'pc-edit-address-postcode'
         ];
 
-        // Required fields for Quote creation (dark yellow border)
+        // Required fields for Quote creation (orange border)
         const quoteRequiredFields = [
             'pc-industry', 'pc-client-category', 'pc-client-source',
             'pc-client-source-detail', 'pc-sic-code-1', 'pc-contact-email', 'pc-contact-phone',
@@ -2637,20 +2672,60 @@ class CRMApplication {
             'pc-edit-client-source-detail', 'pc-edit-sic-code-1', 'pc-edit-contact-email', 'pc-edit-contact-phone'
         ];
 
-        // Apply red borders to PC required fields
+        // Clear all existing indicators first
+        this.clearPcFieldIndicators();
+
+        // Apply red borders to empty PC required fields
         pcRequiredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field) {
+            if (field && this.isFieldEmpty(field)) {
                 field.classList.add('pc-field-required');
             }
         });
 
-        // Apply dark yellow borders to Quote required fields
+        // Apply orange borders to empty Quote required fields
         quoteRequiredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field) {
-                field.classList.add('pc-field-quote-required');
+            if (field && this.isFieldEmpty(field)) {
+                // Special handling for contact email/phone - only highlight if both are empty
+                if (fieldId.includes('contact-email') || fieldId.includes('contact-phone')) {
+                    const emailFieldId = fieldId.includes('edit') ? 'pc-edit-contact-email' : 'pc-contact-email';
+                    const phoneFieldId = fieldId.includes('edit') ? 'pc-edit-contact-phone' : 'pc-contact-phone';
+                    
+                    const emailField = document.getElementById(emailFieldId);
+                    const phoneField = document.getElementById(phoneFieldId);
+                    
+                    // Only highlight if both email and phone are empty
+                    if (this.isFieldEmpty(emailField) && this.isFieldEmpty(phoneField)) {
+                        field.classList.add('pc-field-quote-required');
+                    }
+                } else {
+                    field.classList.add('pc-field-quote-required');
+                }
             }
+        });
+    }
+
+    /**
+     * @description Check if field is empty (considering both input and select elements)
+     */
+    isFieldEmpty(field) {
+        if (!field) return true;
+        
+        if (field.tagName === 'SELECT') {
+            return !field.value || field.value === '';
+        } else {
+            return !field.value || field.value.trim() === '';
+        }
+    }
+
+    /**
+     * @description Clear all PC field indicators
+     */
+    clearPcFieldIndicators() {
+        const allFields = document.querySelectorAll('.pc-field-required, .pc-field-quote-required');
+        allFields.forEach(field => {
+            field.classList.remove('pc-field-required', 'pc-field-quote-required');
         });
     }
 

@@ -138,9 +138,9 @@ tr:hover td { background: var(--primary-50); }
 }
 
 .pc-field-quote-required {
-    border: 2px solid #b45309 !important; /* Dark yellow/amber-700 */
+    border: 2px solid #ea580c !important; /* Orange-600 */
     border-radius: var(--radius-md);
-    background-color: #fffbeb !important; /* Very light yellow */
+    background-color: #fff7ed !important; /* Very light orange */
 }
 
 .pc-field-required::placeholder,
