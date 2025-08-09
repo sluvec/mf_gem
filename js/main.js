@@ -2541,10 +2541,8 @@ class CRMApplication {
      * @description Highlight missing required field with red border and background
      */
     highlightMissingField(fieldId) {
-        console.log('Attempting to highlight field:', fieldId);
         const field = document.getElementById(fieldId);
         if (field) {
-            console.log('Field found, applying highlighting:', field);
             field.style.border = '2px solid #ef4444';
             field.style.backgroundColor = '#fef2f2';
             field.style.transition = 'all 0.3s ease';
@@ -2559,8 +2557,6 @@ class CRMApplication {
             
             field.addEventListener('focus', clearHighlighting);
             field.addEventListener('input', clearHighlighting);
-        } else {
-            console.error('Field not found with ID:', fieldId);
         }
     }
 
@@ -2672,40 +2668,32 @@ class CRMApplication {
         // Required minimal validation with visual feedback
         const missingFields = [];
         
-        console.log('Form validation - values:', { company, accountManager, contactFirstName, contactLastName, addressPostcode });
-        
         // Clear any previous highlighting
         this.clearFieldHighlighting();
         
         // Check each required field and highlight if missing
         if (!company) {
-            console.log('Company missing, highlighting pc-company-name');
             this.highlightMissingField('pc-company-name');
             missingFields.push('Company Name');
         }
         if (!accountManager) {
-            console.log('Account Manager missing, highlighting pc-account-manager');
             this.highlightMissingField('pc-account-manager');
             missingFields.push('Account Manager');
         }
         if (!contactFirstName) {
-            console.log('Contact First Name missing, highlighting pc-contact-first-name');
             this.highlightMissingField('pc-contact-first-name');
             missingFields.push('Contact First Name');
         }
         if (!contactLastName) {
-            console.log('Contact Last Name missing, highlighting pc-contact-last-name');
             this.highlightMissingField('pc-contact-last-name');
             missingFields.push('Contact Last Name');
         }
         if (!addressPostcode) {
-            console.log('Postcode missing, highlighting pc-address-postcode');
             this.highlightMissingField('pc-address-postcode');
             missingFields.push('Postcode');
         }
         
         if (missingFields.length > 0) {
-            console.log('Validation failed, missing fields:', missingFields);
             uiModals.showToast(`Please fill in required fields: ${missingFields.join(', ')}`, 'error');
             return null;
         }
