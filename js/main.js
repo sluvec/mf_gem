@@ -111,6 +111,10 @@ class CRMApplication {
                 await this.migratePcNumbersToNewSchema();
             }
         } catch (error) {
+            // Friendly guidance if blocked/version issues
+            if (String(error).toLowerCase().includes('version') || String(error).toLowerCase().includes('blocked')) {
+                uiModals.showToast('App is open in another tab. Please close other tabs and reload.', 'warning', 10000);
+            }
             logError('Database initialization failed:', error);
             throw error;
         }
