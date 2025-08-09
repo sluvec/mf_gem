@@ -696,14 +696,48 @@
         
         <div id="quote-builder" class="page">
             <h1 id="quote-builder-title">New Quote</h1>
+            <div class="card" id="builder-step-client">
+                <h2>Step 1: Client & Project</h2>
+                <div class="form-grid">
+                    <div>
+                        <label>Client Name *</label>
+                        <input type="text" id="builder-client-name" placeholder="Client company name">
+                    </div>
+                    <div>
+                        <label>Account Manager *</label>
+                        <select id="builder-account-manager">
+                            <option value="">Select Account Manager...</option>
+                            <option value="John Smith">John Smith</option>
+                            <option value="Sarah Johnson">Sarah Johnson</option>
+                            <option value="Mike Wilson">Mike Wilson</option>
+                            <option value="Emma Brown">Emma Brown</option>
+                            <option value="David Lee">David Lee</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Property Type</label>
+                        <select id="builder-property-type">
+                            <option value="">Select Property Type...</option>
+                            <option>Office with IT equipment</option>
+                            <option>Office without IT equipment</option>
+                            <option>Museum</option>
+                            <option>Warehouse</option>
+                            <option>Laboratory</option>
+                            <option>Domestic - Individual</option>
+                            <option>Library</option>
+                            <option>Gallery</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div class="card" id="price-list-selector">
-                <h2>Step 1: Select Price List</h2>
+                <h2>Step 2: Select Price List</h2>
                 <label>Available Price Lists *</label>
                 <select id="quote-price-list" onchange="window.app && window.app.handlePriceListChange && window.app.handlePriceListChange()"></select>
             </div>
             <div class="quote-builder" id="quote-items-section" style="display: none;">
                 <div class="card">
-                    <h2>Step 2: Build Quote</h2>
+                    <h2>Step 3: Build Quote</h2>
                     
 
                     
@@ -1042,8 +1076,9 @@
                         </div>
                     </div>
                     
-                    <div class="form-actions" style="text-align: center;">
-                        <button onclick="window.app && window.app.saveQuoteFromBuilder ? window.app.saveQuoteFromBuilder() : window.saveQuote()">Save Quote</button>
+                    <div class="form-actions" style="text-align: center; display:flex; gap:0.5rem; justify-content:center;">
+                        <button onclick="window.app && window.app.saveQuoteFromBuilder ? window.app.saveQuoteFromBuilder() : window.saveQuote()">Save Draft</button>
+                        <button style="background:#16a34a;" onclick="window.app && window.app.sendQuoteFromBuilder && window.app.sendQuoteFromBuilder()">Send to Customer</button>
                         <button onclick="window.saveQuoteAsTemplate()" style="background: #8b5cf6; color: white;">📄 Save as Template</button>
                         <button onclick="window.duplicateCurrentQuote()" style="background: #06b6d4; color: white;">📋 Duplicate Quote</button>
                         <button onclick="window.cancelQuote()" class="secondary">Cancel</button>

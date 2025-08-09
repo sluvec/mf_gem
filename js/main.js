@@ -518,6 +518,11 @@ class CRMApplication {
             }
 
             const now = new Date().toISOString();
+            // Client & AM
+            const clientName = document.getElementById('builder-client-name')?.value || '';
+            const accountManager = document.getElementById('builder-account-manager')?.value || '';
+            const propertyType = document.getElementById('builder-property-type')?.value || '';
+
             const draft = {
                 id: `quote-${Date.now()}`,
                 quoteNumber,
@@ -527,14 +532,14 @@ class CRMApplication {
                 currency,
                 pcId: pcId || undefined,
                 pcNumber,
-                clientName: '',
-                accountManager: '',
-                propertyType: '',
+                clientName,
+                accountManager,
+                propertyType,
                 bulkProvisionalValue: null,
-                itemsPriceList: [],
-                recyclingItems: [],
-                rebateItems: [],
-                otherCostsManual: [],
+                itemsPriceList: this.builderState.plItems || [],
+                recyclingItems: this.builderState.recyclingItems || [],
+                rebateItems: this.builderState.rebateItems || [],
+                otherCostsManual: this.builderState.otherCosts || [],
                 discount: { type: 'percent', value: 0 },
                 collectionAddress,
                 deliveryAddress,
@@ -554,6 +559,47 @@ class CRMApplication {
         } catch (e) {
             logError('Failed to save draft from builder:', e);
             uiModals.showToast('Failed to save draft', 'error');
+        }
+    }
+
+    /**
+     * @description Validate and send quote to customer (status: pending)
+     */
+    async sendQuoteFromBuilder() {
+        try {
+            const plId = document.getElementById('quote-price-list')?.value;
+            const clientName = document.getElementById('builder-client-name')?.value?.trim();
+            const accountManager = document.getElementById('builder-account-manager')?.value?.trim();
+            const cPost = document.getElementById('quote-collection-postcode')?.value?.trim();
+            const dPost = document.getElementById('quote-delivery-postcode')?.value?.trim();
+            if (!clientName || !accountManager || !plId || !cPost || !dPost) {
+                uiModals.showToast('Please fill in Client, Account Manager, Price List, and both postcodes', 'error');
+                return;
+            }
+            this.recalcBuilderTotals();
+            const totalStr = document.getElementById('sum-total')?.textContent || '£0.00';
+            const total = parseFloat(totalStr.replace(/[^0-9\.\-]/g,''))||0;
+            if (total <= 0) {
+                uiModals.showToast('Total must be greater than 0 to send to customer', 'error');
+                return;
+            }
+
+            // Save draft first
+            await this.saveQuoteFromBuilder();
+            // Update latest to pending
+            const quotes = await db.loadAll('quotes');
+            const latest = quotes.sort((a,b)=> (b.createdAt||'').localeCompare(a.createdAt||''))[0];
+            if (latest) {
+                latest.status = 'pending';
+                latest.lastModifiedAt = new Date().toISOString();
+                await db.save('quotes', latest);
+            }
+            uiModals.showToast('Quote sent to customer (awaiting approval)', 'success');
+            await this.navigateToPage('quotes');
+            await this.loadQuotesData();
+        } catch (e) {
+            logError('sendQuoteFromBuilder error:', e);
+            uiModals.showToast('Failed to send quote', 'error');
         }
     }
 
