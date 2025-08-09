@@ -54,6 +54,45 @@ class CRMApplication {
     }
 
     /**
+     * @description Open full-screen Quote Builder
+     * @param {string|null} pcId Optional PC ID to prefill
+     */
+    async openQuoteBuilder(pcId = null) {
+        try {
+            // Navigate to builder page
+            await this.navigateToPage('quote-builder');
+
+            // Prefill PC if provided
+            if (pcId) {
+                const pc = await db.load('pcNumbers', pcId);
+                if (pc) {
+                    // Populate company + load activities list (placeholder)
+                    const titleEl = document.getElementById('quote-builder-title');
+                    if (titleEl) titleEl.textContent = `New Quote for ${pc.pcNumber} — ${pc.company || ''}`;
+                    // Later: prefill collection address from PC
+                }
+            } else {
+                const titleEl = document.getElementById('quote-builder-title');
+                if (titleEl) titleEl.textContent = 'New Quote';
+            }
+
+            // Initialize default VAT
+            const vatInput = document.getElementById('quote-vat-rate');
+            if (vatInput && !vatInput.value) vatInput.value = '20.00';
+
+            // Ensure PL selector is visible; items section hidden until PL selected
+            const plSelector = document.getElementById('price-list-selector');
+            const itemsSection = document.getElementById('quote-items-section');
+            if (plSelector) plSelector.style.display = '';
+            if (itemsSection) itemsSection.style.display = 'none';
+
+        } catch (error) {
+            logError('Failed to open Quote Builder:', error);
+            uiModals.showToast('Failed to open Quote Builder', 'error');
+        }
+    }
+
+    /**
      * @description Initialize the application
      */
     async initialize() {
@@ -5267,7 +5306,11 @@ function setupLegacyCompatibility() {
     
     window.addQuoteForPc = async (id) => {
         logDebug('Add Quote for PC requested for ID:', id);
-        await app.addQuoteForPc(id);
+        if (app.openQuoteBuilder) {
+            await app.openQuoteBuilder(id);
+        } else {
+            await app.addQuoteForPc(id); // fallback
+        }
     };
     
     window.addActivityForQuote = async (id) => {
@@ -5286,7 +5329,11 @@ function setupLegacyCompatibility() {
 
     
     window.showNewQuoteModal = async () => {
+        if (app.openQuoteBuilder) {
+            await app.openQuoteBuilder();
+        } else {
         await app.openQuoteModal();
+        }
     };
 
     window.closeQuoteModal = () => {
