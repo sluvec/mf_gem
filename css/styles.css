@@ -122,6 +122,12 @@ input, select, textarea {
     font-size: 0.875rem;
     transition: all 0.2s ease-in-out;
 }
+/* Readonly/Disabled look */
+input[readonly], select[disabled] {
+    background-color: var(--neutral-100);
+    color: var(--neutral-600);
+    cursor: not-allowed;
+}
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-500); box-shadow: 0 0 0 2px var(--primary-100); }
 label { display: block; margin-bottom: var(--space-xs); font-weight: 600; color: var(--neutral-700); }
 .input-error { border-color: var(--error-500) !important; }

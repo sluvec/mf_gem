@@ -1856,13 +1856,13 @@
                     <div class="form-grid">
                         <div>
                             <label>Quote Number *</label>
-                            <input type="text" id="quote-edit-number" required placeholder="QT-2024-001">
+                            <input type="text" id="quote-edit-number" required placeholder="QT-2024-001" readonly>
                         </div>
                         <div>
                             <label>Status *</label>
                             <select id="quote-edit-status" required>
                                 <option value="draft">Draft</option>
-                                <option value="pending">Pending</option>
+                                <option value="pending">Send to Customer, awaiting approval</option>
                                 <option value="approved">Approved</option>
                                 <option value="declined">Declined</option>
                                 <option value="completed">Completed</option>
@@ -1877,6 +1877,7 @@
                         <div>
                             <label>Value (£) *</label>
                             <input type="number" id="quote-edit-value" required min="0" step="0.01" placeholder="0.00">
+                            <small class="field-note">Bulk value: use only when individual quote line details are not provided.</small>
                         </div>
                     </div>
                 </div>
@@ -1891,6 +1892,20 @@
                     <div>
                         <label>Project Title *</label>
                         <input type="text" id="quote-edit-project-title" required placeholder="Project title">
+                    </div>
+                    <div>
+                        <label>Property Type</label>
+                        <select id="quote-edit-property-type">
+                            <option value="">Select Property Type...</option>
+                            <option>Office with IT equipment</option>
+                            <option>Office without IT equipment</option>
+                            <option>Museum</option>
+                            <option>Warehouse</option>
+                            <option>Laboratory</option>
+                            <option>Domestic - Individual</option>
+                            <option>Library</option>
+                            <option>Gallery</option>
+                        </select>
                     </div>
                     <div class="form-grid">
                         <div>

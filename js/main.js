@@ -884,7 +884,7 @@ class CRMApplication {
                             <td>${quote.pcNumber || 'N/A'}</td>
                             <td>${quote.clientName || 'N/A'}</td>
                             <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
-                            <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
+                            <td><span class="status-badge ${quote.status || 'pending'}">${(quote.status === 'pending') ? 'Send to Customer, awaiting approval' : (quote.status || 'pending')}</span></td>
                             <td>${quote.createdAt ? new Date(quote.createdAt).toLocaleDateString() : 'N/A'}</td>
                         </tr>
                     `).join('');
@@ -2154,7 +2154,7 @@ class CRMApplication {
             const pcData = await db.load('pcNumbers', formData.pcId);
             const clientName = pcData ? pcData.company : 'Unknown Client';
             
-            const quoteData = {
+                const quoteData = {
                 id: `quote-${Date.now()}`,
                 quoteNumber: quoteNumber,
                 pcId: formData.pcId,
@@ -2162,7 +2162,8 @@ class CRMApplication {
                 clientName: clientName,
                 accountManager: formData.accountManager,
                 totalAmount: 0, // Will be calculated when items are added
-                status: 'pending',
+                    status: 'pending',
+                    propertyType: formData.propertyType || '',
                 priceListId: formData.priceListId,
                 createdAt: new Date().toISOString(),
                 lastModifiedAt: new Date().toISOString(),
@@ -2203,6 +2204,7 @@ class CRMApplication {
         const pcSelect = document.getElementById('quote-modal-pc');
         const priceListSelect = document.getElementById('quote-modal-pricelist');
         const accountManagerSelect = document.getElementById('quote-modal-account-manager');
+        const propertyTypeSelect = document.getElementById('quote-edit-property-type');
         
         if (!pcSelect?.value) {
             uiModals.showToast('Please select a PC Number', 'error');
@@ -2240,7 +2242,8 @@ class CRMApplication {
             pcId: pcSelect.value,
             pcNumber: pcNumber,
             priceListId: priceListSelect.value,
-            accountManager: accountManagerSelect.value
+            accountManager: accountManagerSelect.value,
+            propertyType: propertyTypeSelect ? propertyTypeSelect.value : ''
         };
     }
 
@@ -2428,6 +2431,15 @@ class CRMApplication {
             const pcNumberField = document.getElementById('quote-edit-pc-number');
             if (quoteNumberField) quoteNumberField.readOnly = true;
             if (pcNumberField) pcNumberField.readOnly = true;
+            // Lock style hint
+            if (quoteNumberField) quoteNumberField.classList.add('readonly');
+            if (pcNumberField) pcNumberField.classList.add('readonly');
+
+            // Set property type if exists
+            const propertyTypeField = document.getElementById('quote-edit-property-type');
+            if (propertyTypeField && typeof quoteData.propertyType === 'string') {
+                propertyTypeField.value = quoteData.propertyType;
+            }
             
             // Set valid until date if exists
             const validUntilField = document.getElementById('quote-edit-valid-until');
@@ -2514,6 +2526,7 @@ class CRMApplication {
         const status = document.getElementById('quote-edit-status')?.value;
         const clientName = document.getElementById('quote-edit-client-name')?.value.trim();
         const accountManager = document.getElementById('quote-edit-account-manager')?.value;
+        const propertyType = document.getElementById('quote-edit-property-type')?.value || '';
         
         if (!quoteNumber || !status || !clientName || !accountManager) {
             uiModals.showToast('Please fill in required fields (Quote Number, Status, Client Name, Account Manager)', 'error');
@@ -2551,6 +2564,7 @@ class CRMApplication {
             discount: discount,
             totalCost: totalCost,
             totalAmount: totalCost, // Keep totalAmount for backward compatibility
+            propertyType: propertyType,
             validUntil: validUntil
         };
     }
