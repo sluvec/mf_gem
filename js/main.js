@@ -1005,7 +1005,7 @@ class CRMApplication {
             
             if (container) {
                 if (pcNumbers.length === 0) {
-                    container.innerHTML = '<tr><td colspan="5">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="6">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
                 } else {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
@@ -1013,6 +1013,7 @@ class CRMApplication {
                             <td>${pc.company || pc.clientName || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${pc.contactName || 'N/A'}</td>
+                            <td>${pc.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
@@ -1041,7 +1042,7 @@ class CRMApplication {
             
             if (container) {
                 if (quotes.length === 0) {
-                    container.innerHTML = '<tr><td colspan="6">No quotes found. <button onclick="window.showNewQuoteModal()" class="button primary">Create First Quote</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="7">No quotes found. <button onclick="window.showNewQuoteModal()" class="button primary">Create First Quote</button></td></tr>';
                 } else {
                     container.innerHTML = quotes.map(quote => `
                         <tr onclick="window.viewQuoteDetails('${quote.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
@@ -1050,6 +1051,7 @@ class CRMApplication {
                             <td>${quote.pcNumber || 'N/A'}</td>
                             <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
                             <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
+                            <td>${quote.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
@@ -1082,7 +1084,7 @@ class CRMApplication {
             
             if (container) {
                 if (activities.length === 0) {
-                    container.innerHTML = '<tr><td colspan="8">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="9">No activities found. <button onclick="window.showActivityModal()" class="button primary">Create First Activity</button></td></tr>';
                 } else {
                     container.innerHTML = activities.map(activity => {
                         // Get scheduled date safely
@@ -1104,6 +1106,7 @@ class CRMApplication {
                             <td>${scheduledDisplay}</td>
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
+                            <td>${activity.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
