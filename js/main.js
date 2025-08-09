@@ -2512,6 +2512,27 @@ class CRMApplication {
     }
 
     /**
+     * @description Normalize SIC code to 5 digits or empty string
+     */
+    normalizeSic(value) {
+        const s = (value || '').toString().replace(/\D/g, '');
+        return /^\d{5}$/.test(s) ? s : '';
+    }
+
+    /**
+     * @description Check if PC Number record is complete (has required fields)
+     */
+    isPcComplete(formData) {
+        return Boolean(
+            formData.company && 
+            formData.accountManager && 
+            formData.contactFirstName && 
+            formData.contactLastName && 
+            formData.addressPostcode
+        );
+    }
+
+    /**
      * @description Get PC form data
      */
     getPcFormData() {
