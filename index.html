@@ -587,10 +587,8 @@
                 <h2>Classification & Management</h2>
                 <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                     <div><strong>Client Category:</strong> <span id="pc-detail-client-category"></span></div>
-                    <div><strong>Client Source:</strong> <span id="pc-detail-client-source-new"></span></div>
-                    <div><strong>Referral Type:</strong> <span id="pc-detail-referral-type"></span></div>
-                    <div><strong>Property Type:</strong> <span id="pc-detail-property-type"></span></div>
-                    <div style="grid-column: span 2;"></div>
+                    <div><strong>Client Source:</strong> <span id="pc-detail-client-source"></span></div>
+                    <div><strong>Client Source Detail:</strong> <span id="pc-detail-client-source-detail"></span></div>
                 </div>
                 <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
                     <div><strong>SIC Code 1:</strong> <span id="pc-detail-sic-code-1"></span></div>
@@ -599,49 +597,16 @@
                 </div>
             </div>
 
-            <!-- Collection Address -->
+            <!-- Address -->
             <div class="card">
-                <h2>Collection Address (Current Location)</h2>
-                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    <div><strong>Contact:</strong> <span id="pc-detail-collection-title"></span> <span id="pc-detail-collection-first-name"></span> <span id="pc-detail-collection-surname"></span></div>
-                    <div><strong>Position:</strong> <span id="pc-detail-collection-position"></span></div>
-                    <div><strong>Collection Date:</strong> <span id="pc-detail-collection-date"></span></div>
-                </div>
-                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                    <div><strong>Email:</strong> <span id="pc-detail-collection-email"></span></div>
-                    <div><strong>Phone:</strong> <span id="pc-detail-collection-phone"></span></div>
-                    <div><strong>Mobile:</strong> <span id="pc-detail-collection-mobile"></span></div>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <strong>Address:</strong><br>
-                    <span id="pc-detail-collection-address-1"></span><br>
-                    <span id="pc-detail-collection-address-2"></span><br>
-                    <span id="pc-detail-collection-address-3"></span><br>
-                    <span id="pc-detail-collection-address-4"></span><br>
-                    <span id="pc-detail-collection-postcode"></span>, <span id="pc-detail-collection-country"></span>
-                </div>
-            </div>
-
-            <!-- Delivery Address -->
-            <div class="card">
-                <h2>Delivery Address (New Location)</h2>
-                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    <div><strong>Contact:</strong> <span id="pc-detail-delivery-title"></span> <span id="pc-detail-delivery-first-name"></span> <span id="pc-detail-delivery-surname"></span></div>
-                    <div><strong>Position:</strong> <span id="pc-detail-delivery-position"></span></div>
-                    <div><strong>Delivery Date:</strong> <span id="pc-detail-delivery-date"></span></div>
-                </div>
-                <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                    <div><strong>Email:</strong> <span id="pc-detail-delivery-email"></span></div>
-                    <div><strong>Phone:</strong> <span id="pc-detail-delivery-phone"></span></div>
-                    <div><strong>Mobile:</strong> <span id="pc-detail-delivery-mobile"></span></div>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <strong>Address:</strong><br>
-                    <span id="pc-detail-delivery-address-1"></span><br>
-                    <span id="pc-detail-delivery-address-2"></span><br>
-                    <span id="pc-detail-delivery-address-3"></span><br>
-                    <span id="pc-detail-delivery-address-4"></span><br>
-                    <span id="pc-detail-delivery-postcode"></span>, <span id="pc-detail-delivery-country"></span>
+                <h2>Address</h2>
+                <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div><strong>Postcode:</strong> <span id="pc-detail-address-postcode"></span></div>
+                    <div><strong>Address Line 1:</strong> <span id="pc-detail-address-1"></span></div>
+                    <div><strong>Address Line 2:</strong> <span id="pc-detail-address-2"></span></div>
+                    <div><strong>Address Line 3:</strong> <span id="pc-detail-address-3"></span></div>
+                    <div><strong>Address Line 4:</strong> <span id="pc-detail-address-4"></span></div>
+                    <div><strong>Country:</strong> <span id="pc-detail-address-country"></span></div>
                 </div>
             </div>
 

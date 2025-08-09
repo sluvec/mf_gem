@@ -785,13 +785,18 @@ class CRMApplication {
                 { id: 'pc-detail-account-manager', value: pcData.accountManager || 'N/A' },
                 { id: 'pc-detail-client-industry', value: pcData.industry || pcData.clientIndustry || 'N/A' },
                 { id: 'pc-detail-client-source', value: pcData.clientSource || 'N/A' },
-                { id: 'pc-detail-quote-limit', value: 'N/A' },
+                { id: 'pc-detail-client-source-detail', value: pcData.clientSourceDetail || 'N/A' },
                 { id: 'pc-detail-status', value: pcData.status || 'Draft' },
                 { id: 'pc-detail-project-description', value: pcData.projectDescription || 'No description available' },
                 { id: 'pc-detail-contact-name', value: ((pcData.contactFirstName || '') + (pcData.contactLastName ? ' ' + pcData.contactLastName : '')).trim() || 'N/A' },
                 { id: 'pc-detail-contact-phone', value: pcData.contactPhone || 'N/A' },
                 { id: 'pc-detail-contact-email', value: pcData.contactEmail || 'N/A' },
-                { id: 'pc-detail-postcode', value: pcData.addressPostcode || pcData.postcode || 'N/A' }
+                { id: 'pc-detail-address-postcode', value: pcData.addressPostcode || pcData.postcode || 'N/A' },
+                { id: 'pc-detail-address-1', value: pcData.address1 || '' },
+                { id: 'pc-detail-address-2', value: pcData.address2 || '' },
+                { id: 'pc-detail-address-3', value: pcData.address3 || '' },
+                { id: 'pc-detail-address-4', value: pcData.address4 || '' },
+                { id: 'pc-detail-address-country', value: pcData.addressCountry || '' }
             ];
 
             fields.forEach(field => {
