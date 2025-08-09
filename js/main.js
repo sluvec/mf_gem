@@ -94,6 +94,28 @@ class CRMApplication {
             if (plSelector) plSelector.style.display = '';
             if (itemsSection) itemsSection.style.display = 'none';
 
+            // Initialize builder state
+            this.builderState = {
+                priceListId: '',
+                currency: 'GBP',
+                vatRate: parseFloat(document.getElementById('quote-vat-rate')?.value || '20') || 20,
+                plItems: [],
+                categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
+            };
+
+            // Populate price lists selector
+            const priceListSelect = document.getElementById('quote-price-list');
+            if (priceListSelect) {
+                const priceLists = await db.loadAll('priceLists');
+                priceListSelect.innerHTML = '<option value="">Select Price List...</option>';
+                priceLists.forEach(pl => {
+                    const opt = document.createElement('option');
+                    opt.value = pl.id;
+                    opt.textContent = pl.name || pl.id;
+                    priceListSelect.appendChild(opt);
+                });
+            }
+
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
             uiModals.showToast('Failed to open Quote Builder', 'error');
@@ -129,12 +151,179 @@ class CRMApplication {
             const itemsSection = document.getElementById('quote-items-section');
             if (select && select.value) {
                 if (itemsSection) itemsSection.style.display = '';
+                // Load PL and build options per category
+                const pl = await db.load('priceLists', select.value);
+                this.builderState.priceListId = pl?.id || '';
+                this.builderState.currency = pl?.currency || 'GBP';
+                await this.loadBuilderCategoryOptions(pl);
+                this.renderBuilderCategory('labour', 'quote-human');
+                this.renderBuilderCategory('vehicles', 'quote-vehicles');
+                this.renderBuilderCategory('materials', 'quote-materials');
+                this.renderBuilderCategory('other', 'quote-other');
+                this.recalcBuilderTotals();
             } else {
                 if (itemsSection) itemsSection.style.display = 'none';
             }
         } catch (e) {
             logError('handlePriceListChange error:', e);
         }
+    }
+
+    /**
+     * @description Build category options from Price List or fallback to Resources
+     */
+    async loadBuilderCategoryOptions(priceList) {
+        const byCat = { labour: [], vehicles: [], materials: [], other: [] };
+        try {
+            const items = Array.isArray(priceList?.items) ? priceList.items : [];
+            if (items.length > 0) {
+                // Assume price list item shape: { id,name,category,unit,unitPrice }
+                items.forEach(it => {
+                    const category = (it.category || it.type || 'other').toLowerCase();
+                    const cat = ['labour','vehicles','materials','other'].includes(category) ? category : 'other';
+                    byCat[cat].push({
+                        id: it.id || `${cat}-${it.name}`,
+                        name: it.name || 'Item',
+                        unit: it.unit || 'unit',
+                        unitPrice: parseFloat(it.unitPrice || 0)
+                    });
+                });
+            } else {
+                // Fallback: use resources DB to compose options
+                const resources = await db.loadAll('resources');
+                resources.forEach(r => {
+                    const category = (r.category || r.type || 'other').toLowerCase();
+                    const cat = ['labour','vehicles','materials','other'].includes(category) ? category : 'other';
+                    const unit = r.unit || (r.costPerHour ? 'hour' : r.costPerDay ? 'day' : 'unit');
+                    const unitPrice = parseFloat(r.costPerUnit || r.costPerHour || r.costPerDay || 0) || 0;
+                    byCat[cat].push({ id: r.id, name: r.name || r.id, unit, unitPrice });
+                });
+            }
+        } catch (e) {
+            logError('Failed to load category options:', e);
+        }
+        this.builderState.categoryOptions = byCat;
+    }
+
+    /**
+     * @description Render UI for category add/select and list
+     */
+    renderBuilderCategory(category, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const options = this.builderState.categoryOptions[category] || [];
+        const selectId = `builder-${category}-select`;
+        const qtyId = `builder-${category}-qty`;
+        const tableId = `builder-${category}-table`;
+        container.innerHTML = `
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+                <select id="${selectId}" style="min-width:260px;">
+                    ${options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}">${o.name} — £${o.unitPrice.toFixed(2)}/${o.unit}</option>`).join('')}
+                </select>
+                <label style="font-size:0.875rem; color:#374151;">Qty</label>
+                <input id="${qtyId}" type="number" value="1" min="0" step="0.01" style="width:90px;" />
+                <button id="btn-add-${category}" class="secondary">+ Add</button>
+            </div>
+            <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
+                <thead><tr><th style="width:40%">Item</th><th>Unit</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th></th></tr></thead>
+                <tbody id="${tableId}"></tbody>
+            </table>
+        `;
+        const addBtn = document.getElementById(`btn-add-${category}`);
+        if (addBtn) {
+            addBtn.onclick = () => this.addPlItemFromSelect(category, selectId, qtyId, tableId);
+        }
+        // Render existing items of this category
+        this.renderPlItemsTable(category, tableId);
+    }
+
+    addPlItemFromSelect(category, selectId, qtyId, tableId) {
+        const sel = document.getElementById(selectId);
+        const qtyEl = document.getElementById(qtyId);
+        if (!sel || !qtyEl) return;
+        const selectedId = sel.value;
+        const opt = sel.selectedOptions[0];
+        const name = opt?.textContent?.split(' — ')[0] || 'Item';
+        const unit = opt?.dataset?.unit || 'unit';
+        const unitPrice = parseFloat(opt?.dataset?.price || '0') || 0;
+        const quantity = parseFloat(qtyEl.value || '1') || 1;
+        const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+        this.builderState.plItems.push({ id, category, name, unit, quantity, unitPrice, lineDiscount: 0, lineTotal: quantity * unitPrice });
+        this.renderPlItemsTable(category, tableId);
+        this.recalcBuilderTotals();
+    }
+
+    renderPlItemsTable(category, tableId) {
+        const tbody = document.getElementById(tableId);
+        if (!tbody) return;
+        const rows = this.builderState.plItems.filter(i => i.category === category).map(i => `
+            <tr>
+                <td>${i.name}</td>
+                <td>${i.unit}</td>
+                <td><input type="number" value="${i.quantity}" min="0" step="0.01" style="width:90px" onchange="window.app.updatePlItemQty('${i.id}', this.value)"></td>
+                <td>£${i.unitPrice.toFixed(2)}</td>
+                <td>£${(i.quantity * i.unitPrice).toFixed(2)}</td>
+                <td><button class="danger small" onclick="window.app.removePlItem('${i.id}')">Remove</button></td>
+            </tr>
+        `).join('');
+        tbody.innerHTML = rows || `<tr><td colspan="6" style="text-align:center; color:#6b7280;">No items added</td></tr>`;
+    }
+
+    updatePlItemQty(itemId, newQty) {
+        const item = (this.builderState.plItems || []).find(x => x.id === itemId);
+        if (!item) return;
+        const q = parseFloat(newQty || '0') || 0;
+        item.quantity = q;
+        item.lineTotal = q * item.unitPrice;
+        // Re-render category table
+        const tableId = `builder-${item.category}-table`;
+        this.renderPlItemsTable(item.category, tableId);
+        this.recalcBuilderTotals();
+    }
+
+    removePlItem(itemId) {
+        const idx = (this.builderState.plItems || []).findIndex(x => x.id === itemId);
+        if (idx >= 0) {
+            const cat = this.builderState.plItems[idx].category;
+            this.builderState.plItems.splice(idx, 1);
+            this.renderPlItemsTable(cat, `builder-${cat}-table`);
+            this.recalcBuilderTotals();
+        }
+    }
+
+    recalcBuilderTotals() {
+        const sumCat = cat => (this.builderState.plItems || []).filter(i => i.category === cat).reduce((a,b)=>a+(b.quantity*b.unitPrice),0);
+        const human = sumCat('labour');
+        const vehicles = sumCat('vehicles');
+        const materials = sumCat('materials');
+        const other = sumCat('other');
+        const subtotal = human + vehicles + materials + other;
+
+        // Discount from UI
+        const typeEl = document.getElementById('quote-discount-type');
+        const valEl = document.getElementById('quote-discount-value');
+        let discountAmount = 0;
+        if (typeEl && valEl) {
+            const t = typeEl.value || 'percent';
+            const v = parseFloat(valEl.value || '0') || 0;
+            if (t === 'percent') discountAmount = Math.min(100, Math.max(0, v)) * subtotal / 100;
+            else discountAmount = Math.min(subtotal, Math.max(0, v));
+        }
+        const netAfterDiscount = Math.max(0, subtotal - discountAmount);
+        const vatRate = parseFloat(document.getElementById('quote-vat-rate')?.value || `${this.builderState.vatRate}`) || 20;
+        const vat = netAfterDiscount * vatRate / 100;
+        const total = netAfterDiscount + vat;
+
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = `£${val.toFixed(2)}`; };
+        setText('sum-human', human);
+        setText('sum-vehicles', vehicles);
+        setText('sum-materials', materials);
+        setText('sum-other', other);
+        setText('sum-subtotal', subtotal);
+        setText('sum-discount', discountAmount);
+        setText('sum-net', netAfterDiscount);
+        setText('sum-vat', vat);
+        setText('sum-total', total);
     }
 
     /**

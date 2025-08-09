@@ -789,11 +789,24 @@
                     <div class="summary-line"><span>Vehicles:</span><span id="sum-vehicles">£0.00</span></div>
                     <div class="summary-line"><span>Materials:</span><span id="sum-materials">£0.00</span></div>
                     <div class="summary-line"><span>Other:</span><span id="sum-other">£0.00</span></div>
-                    <div class="summary-line"><span>Net Total:</span><span id="sum-subtotal">£0.00</span></div>
+                        <div class="summary-line"><span>Subtotal (PL):</span><span id="sum-subtotal">£0.00</span></div>
+                        <div class="summary-line">
+                            <span>Discount:</span>
+                            <span>
+                                <select id="quote-discount-type" onchange="window.app && window.app.recalcBuilderTotals && window.app.recalcBuilderTotals()" style="margin-right: 0.25rem;">
+                                    <option value="percent">%</option>
+                                    <option value="amount">£</option>
+                                </select>
+                                <input id="quote-discount-value" type="number" value="0" min="0" step="0.01" style="width: 90px;" oninput="window.app && window.app.recalcBuilderTotals && window.app.recalcBuilderTotals()" />
+                                <span style="margin-left:0.5rem; color:#6b7280;">Only for PL items</span>
+                            </span>
+                        </div>
+                        <div class="summary-line"><span>Discount Amount:</span><span id="sum-discount">£0.00</span></div>
+                        <div class="summary-line"><span>Net After Discount:</span><span id="sum-net">£0.00</span></div>
                     <div class="summary-line">
                         <span>VAT Rate:</span>
                         <input type="number" id="quote-vat-rate" value="20.00" step="0.01" min="0" max="100" 
-                               style="width: 60px; margin: 0; padding: 0.25rem;" onchange="window.calculateTotal()">%
+                               style="width: 60px; margin: 0; padding: 0.25rem;" onchange="window.app && window.app.recalcBuilderTotals && window.app.recalcBuilderTotals()">%
                     </div>
                     <div class="summary-line"><span>VAT Amount:</span><span id="sum-vat">£0.00</span></div>
                     <div class="summary-total"><span>Total (inc VAT):</span><span id="sum-total">£0.00</span></div>
