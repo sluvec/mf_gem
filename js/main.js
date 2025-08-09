@@ -2553,6 +2553,95 @@ class CRMApplication {
     }
 
     /**
+     * @description Migrate existing PC Numbers to the new normalized schema
+     */
+    async migratePcNumbersToNewSchema() {
+        try {
+            const pcNumbers = await db.loadAll('pcNumbers');
+            let updatedCount = 0;
+
+            for (const pc of pcNumbers) {
+                let changed = false;
+
+                // Company normalization
+                if (!pc.company && pc.clientName) {
+                    pc.company = pc.clientName;
+                    changed = true;
+                }
+
+                // Industry normalization
+                if (!pc.industry && pc.clientIndustry) {
+                    pc.industry = pc.clientIndustry;
+                    changed = true;
+                }
+
+                // Contact split
+                if (!pc.contactFirstName && pc.contactName) {
+                    pc.contactFirstName = pc.contactName;
+                    pc.contactLastName = pc.contactLastName || '';
+                    pc.contactTitle = pc.contactTitle || '';
+                    changed = true;
+                }
+
+                // Address migration (prefer existing addressPostcode, then postcode)
+                if (!pc.addressPostcode && (pc.postcode || pc.collectionPostcode || pc.deliveryPostcode)) {
+                    pc.addressPostcode = pc.postcode || pc.collectionPostcode || pc.deliveryPostcode || '';
+                    // Best-effort map known variants if present
+                    pc.address1 = pc.address1 || pc.collectionAddress1 || pc.deliveryAddress1 || '';
+                    pc.address2 = pc.address2 || pc.collectionAddress2 || pc.deliveryAddress2 || '';
+                    pc.address3 = pc.address3 || pc.collectionAddress3 || pc.deliveryAddress3 || '';
+                    pc.address4 = pc.address4 || pc.collectionAddress4 || pc.deliveryAddress4 || '';
+                    pc.addressCountry = pc.addressCountry || pc.collectionCountry || pc.deliveryCountry || '';
+                    changed = true;
+                }
+
+                // SIC normalization (5 digits, default 70100)
+                const normalize = (v) => {
+                    const s = (v || '').toString().replace(/\D/g, '');
+                    return /^\d{5}$/.test(s) ? s : '';
+                };
+                const sic1 = normalize(pc.sicCode1);
+                const sic2 = normalize(pc.sicCode2);
+                const sic3 = normalize(pc.sicCode3);
+                if (pc.sicCode1 !== (sic1 || '70100')) { pc.sicCode1 = sic1 || '70100'; changed = true; }
+                if ((pc.sicCode2 || '') !== (sic2 || '')) { pc.sicCode2 = sic2 || ''; changed = true; }
+                if ((pc.sicCode3 || '') !== (sic3 || '')) { pc.sicCode3 = sic3 || ''; changed = true; }
+
+                // Status recompute: company, accountManager, contactFirst/Last, addressPostcode
+                const isComplete = Boolean(
+                    (pc.company && pc.accountManager && pc.contactFirstName && pc.contactLastName && pc.addressPostcode)
+                );
+                const newStatus = isComplete ? 'Complete' : 'Draft';
+                if (pc.status !== newStatus) { pc.status = newStatus; changed = true; }
+
+                if (changed) {
+                    pc.lastModifiedAt = new Date().toISOString();
+                    pc.editedBy = this.currentUser || 'User';
+                    await db.save('pcNumbers', pc);
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0) {
+                logInfo(`PC migration finished: ${updatedCount} records updated`);
+            } else {
+                logInfo('PC migration finished: no records required updates');
+            }
+
+            // Expose a manual trigger for convenience
+            window.runPcMigration = async () => {
+                await this.migratePcNumbersToNewSchema();
+                uiModals.showToast('PC migration executed', 'success');
+                if (this.currentPage === 'pcnumbers') {
+                    await this.loadPcNumbersData();
+                }
+            };
+        } catch (error) {
+            logError('PC migration error:', error);
+        }
+    }
+
+    /**
      * @description Clear PC form
      */
     clearPcForm() {
