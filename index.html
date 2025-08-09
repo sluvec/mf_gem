@@ -367,6 +367,10 @@
                                 <label>Project Name</label>
                                 <input type="text" id="pc-project-name" placeholder="Enter project name">
                             </div>
+                            <div>
+                                <label>Account Manager *</label>
+                                <input type="text" id="pc-account-manager" required placeholder="Account manager name">
+                            </div>
                         </div>
 
                         <div>
@@ -375,47 +379,35 @@
                         </div>
                     </div>
                     
-                    <!-- Client Details -->
-                    <div class="form-section">
-                        <h3>Client Details</h3>
-                        <div class="form-grid">
-                            <div>
-                                <label>Account Manager *</label>
-                                <input type="text" id="pc-account-manager" required placeholder="Account manager name">
-                            </div>
-                        </div>
-
-                        <div class="form-grid">
-                            <div>
-                                <label>Industry</label>
-                                <select id="pc-industry">
-                                    <option value="">Select industry...</option>
-                                    <option value="Government / Public Administration">Government / Public Administration</option>
-                                    <option value="Police & Emergency Services">Police & Emergency Services</option>
-                                    <option value="Defence">Defence</option>
-                                    <option value="Healthcare & NHS">Healthcare & NHS</option>
-                                    <option value="Life Sciences & Pharmaceuticals">Life Sciences & Pharmaceuticals</option>
-                                    <option value="Legal">Legal</option>
-                                    <option value="Business Services (Consulting & Accounting)">Business Services (Consulting & Accounting)</option>
-                                    <option value="Financial Services">Financial Services</option>
-                                    <option value="Technology & Software">Technology & Software</option>
-                                    <option value="Media & Entertainment">Media & Entertainment</option>
-                                    <option value="Telecommunications">Telecommunications</option>
-                                    <option value="Manufacturing & Engineering">Manufacturing & Engineering</option>
-                                    <option value="Retail & E-commerce">Retail & E-commerce</option>
-                                    <option value="Logistics & Transportation">Logistics & Transportation</option>
-                                    <option value="Construction & Real Estate">Construction & Real Estate</option>
-                                    <option value="Charities & Non-Profit">Charities & Non-Profit</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                    </div>
+                    <!-- Client Details (Account Manager moved to Basic Info; Industry moved to Classification) -->
+                    <div class="form-section" style="display:none;"></div>
                     
                     <!-- Classification & Management -->
                     <div class="form-section">
                         <h3>Classification & Management</h3>
                         <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div>
+                                <label>Industry</label>
+                                <select id="pc-industry">
+                                    <option value="">Select industry...</option>
+                                    <option value="Business Services (Consulting & Accounting)">Business Services (Consulting & Accounting)</option>
+                                    <option value="Charities & Non-Profit">Charities & Non-Profit</option>
+                                    <option value="Construction & Real Estate">Construction & Real Estate</option>
+                                    <option value="Defence">Defence</option>
+                                    <option value="Financial Services">Financial Services</option>
+                                    <option value="Government / Public Administration">Government / Public Administration</option>
+                                    <option value="Healthcare & NHS">Healthcare & NHS</option>
+                                    <option value="Legal">Legal</option>
+                                    <option value="Life Sciences & Pharmaceuticals">Life Sciences & Pharmaceuticals</option>
+                                    <option value="Logistics & Transportation">Logistics & Transportation</option>
+                                    <option value="Manufacturing & Engineering">Manufacturing & Engineering</option>
+                                    <option value="Media & Entertainment">Media & Entertainment</option>
+                                    <option value="Police & Emergency Services">Police & Emergency Services</option>
+                                    <option value="Retail & E-commerce">Retail & E-commerce</option>
+                                    <option value="Technology & Software">Technology & Software</option>
+                                    <option value="Telecommunications">Telecommunications</option>
+                                </select>
+                            </div>
                             <div>
                                 <label>Client Category</label>
                                 <select id="pc-client-category">
@@ -2058,6 +2050,10 @@
                                 <label>Project Name</label>
                                 <input type="text" id="pc-edit-title" placeholder="Enter project name">
                         </div>
+                        <div>
+                            <label>Account Manager *</label>
+                            <input type="text" id="pc-edit-account-manager" placeholder="Account manager name">
+                        </div>
                     </div>
                     <div>
                         <label>Project Description</label>
@@ -2065,46 +2061,35 @@
                     </div>
                 </div>
                 
-                <!-- Client Details -->
-                <div class="form-section">
-                    <h3>Client Details</h3>
-                    <div class="form-grid">
-                        <div>
-                            <label>Account Manager *</label>
-                            <input type="text" id="pc-edit-account-manager" placeholder="Account manager name">
-                        </div>
-                        </div>
-
-                        <div class="form-grid">
-                            <div>
-                                <label>Industry</label>
-                                <select id="pc-edit-industry">
-                                <option value="">Select industry...</option>
-                                <option value="Government / Public Administration">Government / Public Administration</option>
-                                <option value="Police & Emergency Services">Police & Emergency Services</option>
-                                <option value="Defence">Defence</option>
-                                <option value="Healthcare & NHS">Healthcare & NHS</option>
-                                <option value="Life Sciences & Pharmaceuticals">Life Sciences & Pharmaceuticals</option>
-                                <option value="Legal">Legal</option>
-                                <option value="Business Services (Consulting & Accounting)">Business Services (Consulting & Accounting)</option>
-                                <option value="Financial Services">Financial Services</option>
-                                <option value="Technology & Software">Technology & Software</option>
-                                <option value="Media & Entertainment">Media & Entertainment</option>
-                                <option value="Telecommunications">Telecommunications</option>
-                                <option value="Manufacturing & Engineering">Manufacturing & Engineering</option>
-                                <option value="Retail & E-commerce">Retail & E-commerce</option>
-                                <option value="Logistics & Transportation">Logistics & Transportation</option>
-                                <option value="Construction & Real Estate">Construction & Real Estate</option>
-                                <option value="Charities & Non-Profit">Charities & Non-Profit</option>
-                            </select>
-                            </div>
-                    </div>
-                </div>
+                <!-- Client Details (Account Manager moved to Basic Information) -->
+                <div class="form-section" style="display:none;"></div>
                 
                 <!-- Classification & Management -->
                 <div class="form-section">
                     <h3>Classification & Management</h3>
                     <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div>
+                            <label>Industry</label>
+                            <select id="pc-edit-industry">
+                                <option value="">Select industry...</option>
+                                <option value="Business Services (Consulting & Accounting)">Business Services (Consulting & Accounting)</option>
+                                <option value="Charities & Non-Profit">Charities & Non-Profit</option>
+                                <option value="Construction & Real Estate">Construction & Real Estate</option>
+                                <option value="Defence">Defence</option>
+                                <option value="Financial Services">Financial Services</option>
+                                <option value="Government / Public Administration">Government / Public Administration</option>
+                                <option value="Healthcare & NHS">Healthcare & NHS</option>
+                                <option value="Legal">Legal</option>
+                                <option value="Life Sciences & Pharmaceuticals">Life Sciences & Pharmaceuticals</option>
+                                <option value="Logistics & Transportation">Logistics & Transportation</option>
+                                <option value="Manufacturing & Engineering">Manufacturing & Engineering</option>
+                                <option value="Media & Entertainment">Media & Entertainment</option>
+                                <option value="Police & Emergency Services">Police & Emergency Services</option>
+                                <option value="Retail & E-commerce">Retail & E-commerce</option>
+                                <option value="Technology & Software">Technology & Software</option>
+                                <option value="Telecommunications">Telecommunications</option>
+                            </select>
+                        </div>
                         <div>
                             <label>Client Category</label>
                             <select id="pc-edit-client-category">
@@ -3179,5 +3164,5 @@ Next steps:
     </div>
 
     <script type="module" src="js/main.js"></script>
-</body>
+  </body>
 </html>
