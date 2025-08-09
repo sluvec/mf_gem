@@ -1325,14 +1325,32 @@ class CRMApplication {
             const fields = [
                 { id: 'pc-edit-id', value: pcData.id || '' },
                 { id: 'pc-edit-number', value: pcData.pcNumber || '' },
-                { id: 'pc-edit-company', value: pcData.company || pcData.clientName || '' },
+                { id: 'pc-edit-company', value: pcData.company || '' },
                 { id: 'pc-edit-title', value: pcData.projectTitle || '' },
                 { id: 'pc-edit-description', value: pcData.projectDescription || '' },
                 { id: 'pc-edit-account-manager', value: pcData.accountManager || '' },
-                { id: 'pc-edit-status', value: pcData.status || 'active' },
-                { id: 'pc-edit-contact-name', value: pcData.contactName || '' },
+                // Classification
+                { id: 'pc-edit-industry', value: pcData.industry || '' },
+                { id: 'pc-edit-client-category', value: pcData.clientCategory || '' },
+                { id: 'pc-edit-client-source', value: pcData.clientSource || '' },
+                { id: 'pc-edit-client-source-detail', value: pcData.clientSourceDetail || '' },
+                // Contact
+                { id: 'pc-edit-contact-first-name', value: pcData.contactFirstName || '' },
+                { id: 'pc-edit-contact-last-name', value: pcData.contactLastName || '' },
+                { id: 'pc-edit-contact-title', value: pcData.contactTitle || '' },
                 { id: 'pc-edit-contact-phone', value: pcData.contactPhone || '' },
-                { id: 'pc-edit-contact-email', value: pcData.contactEmail || '' }
+                { id: 'pc-edit-contact-email', value: pcData.contactEmail || '' },
+                // Address
+                { id: 'pc-edit-address-postcode', value: pcData.addressPostcode || pcData.postcode || '' },
+                { id: 'pc-edit-address-1', value: pcData.address1 || '' },
+                { id: 'pc-edit-address-2', value: pcData.address2 || '' },
+                { id: 'pc-edit-address-3', value: pcData.address3 || '' },
+                { id: 'pc-edit-address-4', value: pcData.address4 || '' },
+                { id: 'pc-edit-address-country', value: pcData.addressCountry || '' },
+                // SIC
+                { id: 'pc-edit-sic-code-1', value: pcData.sicCode1 || '70100' },
+                { id: 'pc-edit-sic-code-2', value: pcData.sicCode2 || '' },
+                { id: 'pc-edit-sic-code-3', value: pcData.sicCode3 || '' }
             ];
             
             fields.forEach(field => {
