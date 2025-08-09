@@ -2436,6 +2436,11 @@ class CRMApplication {
                 return;
             }
             
+            // Validate required fields with visual feedback
+            if (!this.validatePcEditForm(existingPc)) {
+                return; // Stop if validation fails
+            }
+            
             // New edit model (use existing values if edit fields not present)
             const company = document.getElementById('pc-edit-company')?.value ?? existingPc.company ?? '';
             const projectTitle = document.getElementById('pc-edit-title')?.value ?? existingPc.projectTitle ?? '';
@@ -2447,16 +2452,16 @@ class CRMApplication {
             const clientJobTitle = document.getElementById('pc-edit-contact-job-title')?.value ?? existingPc.clientJobTitle ?? '';
             const contactEmail = document.getElementById('pc-edit-contact-email')?.value ?? existingPc.contactEmail ?? '';
             const contactPhone = document.getElementById('pc-edit-contact-phone')?.value ?? existingPc.contactPhone ?? '';
-            const addressPostcode = document.getElementById('pc-edit-postcode')?.value ?? existingPc.addressPostcode ?? existingPc.postcode ?? '';
+            const addressPostcode = document.getElementById('pc-edit-address-postcode')?.value ?? existingPc.addressPostcode ?? existingPc.postcode ?? '';
             const address1 = document.getElementById('pc-edit-address-1')?.value ?? existingPc.address1 ?? '';
             const address2 = document.getElementById('pc-edit-address-2')?.value ?? existingPc.address2 ?? '';
             const address3 = document.getElementById('pc-edit-address-3')?.value ?? existingPc.address3 ?? '';
             const address4 = document.getElementById('pc-edit-address-4')?.value ?? existingPc.address4 ?? '';
             const addressCountry = document.getElementById('pc-edit-address-country')?.value ?? existingPc.addressCountry ?? 'United Kingdom';
-            const industry = document.getElementById('pc-edit-client-industry')?.value ?? existingPc.industry ?? existingPc.clientIndustry ?? '';
+            const industry = document.getElementById('pc-edit-industry')?.value ?? existingPc.industry ?? existingPc.clientIndustry ?? '';
             const clientCategory = document.getElementById('pc-edit-client-category')?.value ?? existingPc.clientCategory ?? '';
             const clientSource = document.getElementById('pc-edit-client-source')?.value ?? existingPc.clientSource ?? '';
-            const clientSourceDetail = document.getElementById('pc-edit-client-source-new')?.value ?? existingPc.clientSourceDetail ?? '';
+            const clientSourceDetail = document.getElementById('pc-edit-client-source-detail')?.value ?? existingPc.clientSourceDetail ?? '';
             const sicCode1 = document.getElementById('pc-edit-sic-code-1')?.value ?? existingPc.sicCode1 ?? '';
             const sicCode2 = document.getElementById('pc-edit-sic-code-2')?.value ?? existingPc.sicCode2 ?? '';
             const sicCode3 = document.getElementById('pc-edit-sic-code-3')?.value ?? existingPc.sicCode3 ?? '';
@@ -2533,6 +2538,96 @@ class CRMApplication {
     }
 
     /**
+     * @description Highlight missing required field with red border and background
+     */
+    highlightMissingField(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.style.border = '2px solid #ef4444';
+            field.style.backgroundColor = '#fef2f2';
+            field.style.transition = 'all 0.3s ease';
+            
+            // Add focus event to clear highlighting when user starts typing
+            const clearHighlighting = () => {
+                field.style.border = '';
+                field.style.backgroundColor = '';
+                field.removeEventListener('focus', clearHighlighting);
+                field.removeEventListener('input', clearHighlighting);
+            };
+            
+            field.addEventListener('focus', clearHighlighting);
+            field.addEventListener('input', clearHighlighting);
+        }
+    }
+
+    /**
+     * @description Clear all field highlighting
+     */
+    clearFieldHighlighting() {
+        const fieldIds = [
+            'pc-company-name', 'pc-account-manager', 'pc-contact-first-name', 
+            'pc-contact-last-name', 'pc-address-postcode',
+            // Edit form fields
+            'pc-edit-company', 'pc-edit-account-manager', 'pc-edit-contact-first-name',
+            'pc-edit-contact-last-name', 'pc-edit-address-postcode'
+        ];
+        
+        fieldIds.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.style.border = '';
+                field.style.backgroundColor = '';
+            }
+        });
+    }
+
+    /**
+     * @description Validate PC edit form data with visual feedback
+     */
+    validatePcEditForm(existingPc) {
+        const missingFields = [];
+        
+        // Clear any previous highlighting
+        this.clearFieldHighlighting();
+        
+        // Get form values with fallbacks to existing data
+        const company = document.getElementById('pc-edit-company')?.value?.trim() || existingPc.company || '';
+        const accountManager = document.getElementById('pc-edit-account-manager')?.value?.trim() || existingPc.accountManager || '';
+        const contactFirstName = document.getElementById('pc-edit-contact-first-name')?.value?.trim() || existingPc.contactFirstName || '';
+        const contactLastName = document.getElementById('pc-edit-contact-last-name')?.value?.trim() || existingPc.contactLastName || '';
+        const addressPostcode = document.getElementById('pc-edit-address-postcode')?.value?.trim() || existingPc.addressPostcode || existingPc.postcode || '';
+        
+        // Check each required field and highlight if missing
+        if (!company) {
+            this.highlightMissingField('pc-edit-company');
+            missingFields.push('Company Name');
+        }
+        if (!accountManager) {
+            this.highlightMissingField('pc-edit-account-manager');
+            missingFields.push('Account Manager');
+        }
+        if (!contactFirstName) {
+            this.highlightMissingField('pc-edit-contact-first-name');
+            missingFields.push('Contact First Name');
+        }
+        if (!contactLastName) {
+            this.highlightMissingField('pc-edit-contact-last-name');
+            missingFields.push('Contact Last Name');
+        }
+        if (!addressPostcode) {
+            this.highlightMissingField('pc-edit-address-postcode');
+            missingFields.push('Postcode');
+        }
+        
+        if (missingFields.length > 0) {
+            uiModals.showToast(`Please fill in required fields: ${missingFields.join(', ')}`, 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
      * @description Get PC form data
      */
     getPcFormData() {
@@ -2570,9 +2665,36 @@ class CRMApplication {
         const sicCode2 = this.normalizeSic(sic2Raw) || '';
         const sicCode3 = this.normalizeSic(sic3Raw) || '';
 
-        // Required minimal validation
-        if (!company || !accountManager || !contactFirstName || !contactLastName || !addressPostcode) {
-            uiModals.showToast('Please fill in required fields (Company, Account Manager, Contact First/Last Name, Postcode)', 'error');
+        // Required minimal validation with visual feedback
+        const missingFields = [];
+        
+        // Clear any previous highlighting
+        this.clearFieldHighlighting();
+        
+        // Check each required field and highlight if missing
+        if (!company) {
+            this.highlightMissingField('pc-company-name');
+            missingFields.push('Company Name');
+        }
+        if (!accountManager) {
+            this.highlightMissingField('pc-account-manager');
+            missingFields.push('Account Manager');
+        }
+        if (!contactFirstName) {
+            this.highlightMissingField('pc-contact-first-name');
+            missingFields.push('Contact First Name');
+        }
+        if (!contactLastName) {
+            this.highlightMissingField('pc-contact-last-name');
+            missingFields.push('Contact Last Name');
+        }
+        if (!addressPostcode) {
+            this.highlightMissingField('pc-address-postcode');
+            missingFields.push('Postcode');
+        }
+        
+        if (missingFields.length > 0) {
+            uiModals.showToast(`Please fill in required fields: ${missingFields.join(', ')}`, 'error');
             return null;
         }
         
