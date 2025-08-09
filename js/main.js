@@ -1106,7 +1106,7 @@ class CRMApplication {
                             <td>${scheduledDisplay}</td>
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
-                            <td>${activity.assignedTo || activity.accountManager || 'N/A'}</td>
+                            <td>${activity.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
@@ -1426,11 +1426,13 @@ class CRMApplication {
             // Get quote data for PC Number
             let pcId = null;
             let pcNumber = null;
+            let inheritedAccountManager = null;
             if (formData.quoteId) {
                 const quoteData = await db.load('quotes', formData.quoteId);
                 if (quoteData) {
                     pcId = quoteData.pcId;
                     pcNumber = quoteData.pcNumber;
+                    inheritedAccountManager = quoteData.accountManager || null;
                 }
             }
             
@@ -1446,6 +1448,7 @@ class CRMApplication {
                 status: formData.status || 'pending',
                 priority: formData.priority || 'medium',
                 assignedTo: formData.assignedTo || 'Unassigned',
+                accountManager: inheritedAccountManager,
                 description: formData.description || '',
                 createdAt: new Date().toISOString(),
                 lastModifiedAt: new Date().toISOString(),
@@ -1647,11 +1650,13 @@ class CRMApplication {
             // Get PC Number from quote if quote is selected
             let pcId = null;
             let pcNumber = null;
+            let inheritedAccountManager = existingActivity.accountManager || null;
             if (formData.quoteId) {
                 const quoteData = await db.load('quotes', formData.quoteId);
                 if (quoteData) {
                     pcId = quoteData.pcId;
                     pcNumber = quoteData.pcNumber;
+                    inheritedAccountManager = quoteData.accountManager || inheritedAccountManager;
                 }
             }
             
@@ -1668,6 +1673,7 @@ class CRMApplication {
                 status: formData.status,
                 priority: formData.priority,
                 assignedTo: formData.assignedTo,
+                accountManager: inheritedAccountManager,
                 description: formData.description,
                 lastModifiedAt: new Date().toISOString(),
                 editedBy: this.currentUser || 'User'
@@ -3991,11 +3997,11 @@ class CRMApplication {
                         break;
                     case 'accountManager':
                         // For PC Numbers & Quotes: use accountManager
-                        // For Activities: use assignedTo as primary, accountManager as fallback
+                        // For Activities: now strictly use activity.accountManager (inherited from Quote)
                         if (dataType === 'activities') {
-                            searchValue = item.assignedTo || item.accountManager || '';
+                            searchValue = item.accountManager || '';
                         } else {
-                            searchValue = item.accountManager || item.assignedTo || '';
+                            searchValue = item.accountManager || '';
                         }
                         break;
                     case 'pcNumber':
@@ -4103,7 +4109,7 @@ class CRMApplication {
                             <td>${scheduledDisplay}</td>
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
-                            <td>${activity.assignedTo || activity.accountManager || 'N/A'}</td>
+                            <td>${activity.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
