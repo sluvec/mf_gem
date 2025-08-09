@@ -4038,9 +4038,9 @@ class CRMApplication {
 
             if (filteredData.length === 0) {
                 // Use appropriate colspan based on data type
-                let colspan = 8; // default for Activities
-                if (dataType === 'pcNumbers') colspan = 5;
-                if (dataType === 'quotes') colspan = 6;
+                let colspan = 9; // default for Activities (includes Account Manager + Actions)
+                if (dataType === 'pcNumbers') colspan = 6; // includes Account Manager + Actions
+                if (dataType === 'quotes') colspan = 7; // includes Account Manager + Actions
                 
                 container.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: #6b7280;">No results found for current filter.</td></tr>`;
                 return;
@@ -4050,12 +4050,13 @@ class CRMApplication {
             switch (dataType) {
                 case 'pcNumbers':
                     container.innerHTML = filteredData.map(pc => `
-                        <tr>
-                            <td><strong><a href="#" onclick="window.viewPcDetails('${pc.id}')" style="color: #3b82f6;">${pc.pcNumber || 'N/A'}</a></strong></td>
+                        <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                            <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
                             <td>${pc.company || pc.clientName || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${pc.contactName || 'N/A'}</td>
-                            <td>
+                            <td>${pc.accountManager || 'N/A'}</td>
+                            <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
                                 <button onclick="window.addQuoteForPc('${pc.id}')" class="button success small">Add Quote</button>
@@ -4066,14 +4067,14 @@ class CRMApplication {
 
                 case 'quotes':
                     container.innerHTML = filteredData.map(quote => `
-                        <tr>
-                            <td><strong><a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.quoteNumber || quote.id}</a></strong></td>
+                        <tr onclick="window.viewQuoteDetails('${quote.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                            <td><strong>${quote.quoteNumber || 'N/A'}</strong></td>
                             <td>${quote.clientName || quote.companyName || 'N/A'}</td>
                             <td>${quote.pcNumber || 'N/A'}</td>
                             <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
-                            <td>${new Date(quote.createdAt).toLocaleDateString() || 'N/A'}</td>
-                            <td><span class="status-badge ${quote.status || 'draft'}">${quote.status || 'draft'}</span></td>
-                            <td>
+                            <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
+                            <td>${quote.accountManager || 'N/A'}</td>
+                            <td onclick="event.stopPropagation()">
                                 <button onclick="window.editQuote('${quote.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewQuoteDetails('${quote.id}')" class="button primary small">View</button>
                                 <button onclick="window.addActivityForQuote('${quote.id}')" class="button info small">Add Activity</button>
@@ -4102,6 +4103,7 @@ class CRMApplication {
                             <td>${scheduledDisplay}</td>
                             <td>${activity.priority || 'Medium'}</td>
                             <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
+                            <td>${activity.assignedTo || activity.accountManager || 'N/A'}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editActivity('${activity.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewActivityDetails('${activity.id}')" class="button primary small">View</button>
