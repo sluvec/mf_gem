@@ -2079,6 +2079,20 @@ class CRMApplication {
                             if (companyField && pcData.company) {
                                 companyField.value = pcData.company;
                             }
+                            // Auto-set Account Manager from PC and hide AM section
+                            const amSelect = document.getElementById('quote-modal-account-manager');
+                            const amSection = document.getElementById('quote-modal-account-manager-section');
+                            if (amSelect) {
+                                if (pcData.accountManager) {
+                                    amSelect.value = pcData.accountManager;
+                                    amSelect.required = false;
+                                    if (amSection) amSection.style.display = 'none';
+                                } else {
+                                    amSelect.value = '';
+                                    amSelect.required = true;
+                                    if (amSection) amSection.style.display = '';
+                                }
+                            }
                         }
                     } catch (e) {
                         logError('PC selection validation failed:', e);
@@ -2123,10 +2137,17 @@ class CRMApplication {
                 });
             }
             
-            // Clear company field only if not coming from PC
+            // Clear company & reset AM UI when not coming from PC
             const companyField = document.getElementById('quote-modal-company');
+            const amSection = document.getElementById('quote-modal-account-manager-section');
+            const amSelect = document.getElementById('quote-modal-account-manager');
             if (companyField && !pcId) {
                 companyField.value = '';
+            }
+            if (amSection && amSelect && !pcId) {
+                amSection.style.display = '';
+                amSelect.required = true;
+                amSelect.value = '';
             }
             
             // Open modal
@@ -2181,7 +2202,7 @@ class CRMApplication {
             const pcData = await db.load('pcNumbers', formData.pcId);
             const clientName = pcData ? pcData.company : 'Unknown Client';
             
-                const quoteData = {
+            const quoteData = {
                 id: `quote-${Date.now()}`,
                 quoteNumber: quoteNumber,
                 pcId: formData.pcId,
@@ -2189,7 +2210,7 @@ class CRMApplication {
                 clientName: clientName,
                 accountManager: formData.accountManager,
                 totalAmount: 0, // Will be calculated when items are added
-                    status: 'pending',
+                status: 'draft',
                     propertyType: formData.propertyType || '',
                 priceListId: formData.priceListId,
                 createdAt: new Date().toISOString(),
@@ -2243,10 +2264,7 @@ class CRMApplication {
             return null;
         }
         
-        if (!accountManagerSelect?.value) {
-            uiModals.showToast('Please select an Account Manager', 'error');
-            return null;
-        }
+        // Account Manager can be auto-provided from PC (then AM select may be hidden and empty)
         
         // Validate PC Number has required fields for Quote creation
         const pcData = await db.load('pcNumbers', pcSelect.value);
@@ -2258,7 +2276,7 @@ class CRMApplication {
                     `⚠️ Cannot create Quote from PC Number ${pcData.pcNumber}!\n\nMissing required fields:\n• ${validation.missingFields.join('\n• ')}\n\nPlease edit the PC Number and fill in these fields first.`, 
                     'error'
                 );
-                return null;
+            return null;
             }
         }
         
@@ -2269,7 +2287,7 @@ class CRMApplication {
             pcId: pcSelect.value,
             pcNumber: pcNumber,
             priceListId: priceListSelect.value,
-            accountManager: accountManagerSelect.value,
+            accountManager: accountManagerSelect?.value || (pcData?.accountManager || ''),
             propertyType: propertyTypeSelect ? propertyTypeSelect.value : ''
         };
     }
