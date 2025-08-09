@@ -1325,6 +1325,7 @@ class CRMApplication {
             const fields = [
                 { id: 'pc-edit-id', value: pcData.id || '' },
                 { id: 'pc-edit-number', value: pcData.pcNumber || '' },
+                { id: 'pc-edit-status-label', value: pcData.status || 'Draft' },
                 { id: 'pc-edit-company', value: pcData.company || '' },
                 { id: 'pc-edit-title', value: pcData.projectTitle || '' },
                 { id: 'pc-edit-description', value: pcData.projectDescription || '' },

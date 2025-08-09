@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 6; // Added user audit fields (createdBy, editedBy, deletedBy)
+        this.version = 7; // Schema v7: indexes for normalized PC fields
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -198,6 +198,23 @@ export class Database {
                         if (!priceListsStore.indexNames.contains('lastModifiedAt')) {
                             priceListsStore.createIndex('lastModifiedAt', 'lastModifiedAt', { unique: false });
                         }
+                    }
+                }
+
+                // Version 7 upgrades: Add indexes for normalized PC fields
+                if (event.oldVersion < 7) {
+                    logInfo('Upgrading to version 7: Adding indexes for normalized PC fields');
+                    if (db.objectStoreNames.contains('pcNumbers')) {
+                        const pcStore = event.target.transaction.objectStore('pcNumbers');
+                        const ensureIndex = (name, keyPath) => {
+                            if (!pcStore.indexNames.contains(name)) pcStore.createIndex(name, keyPath, { unique: false });
+                        };
+                        ensureIndex('company', 'company');
+                        ensureIndex('accountManager', 'accountManager');
+                        ensureIndex('clientCategory', 'clientCategory');
+                        ensureIndex('clientSource', 'clientSource');
+                        ensureIndex('industry', 'industry');
+                        ensureIndex('addressPostcode', 'addressPostcode');
                     }
                 }
 
