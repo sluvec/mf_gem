@@ -594,6 +594,12 @@ class CRMApplication {
                 // Load data for the page
                 await this.loadPageData(targetPageId);
 
+                // Apply field indicators for PC Number forms
+                if (targetPageId === 'new-pc') {
+                    // Small delay to ensure DOM is ready
+                    setTimeout(() => this.applyPcFieldIndicators(), 100);
+                }
+
                 logDebug(`Successfully navigated to page: ${targetPageId}`);
             } else {
                 logError(`Page not found: ${pageName} (mapped to: ${targetPageId})`);
@@ -1381,6 +1387,10 @@ class CRMApplication {
             // Show modal using uiModals
             await uiModals.openModal('pc-edit-modal');
             uiModals.showToast(`Editing ${pcData.pcNumber}`, 'info');
+            
+            // Apply field indicators
+            setTimeout(() => this.applyPcFieldIndicators(), 100);
+            
             logDebug('PC edit modal opened successfully');
             
         } catch (error) {
@@ -2601,6 +2611,45 @@ class CRMApplication {
             if (field) {
                 field.style.border = '';
                 field.style.backgroundColor = '';
+            }
+        });
+    }
+
+    /**
+     * @description Apply visual indicators to PC Number form fields
+     */
+    applyPcFieldIndicators() {
+        // Required fields for PC Number creation (red border)
+        const pcRequiredFields = [
+            'pc-company-name', 'pc-account-manager', 'pc-contact-first-name',
+            'pc-contact-last-name', 'pc-address-postcode',
+            // Edit form
+            'pc-edit-company', 'pc-edit-account-manager', 'pc-edit-contact-first-name',
+            'pc-edit-contact-last-name', 'pc-edit-address-postcode'
+        ];
+
+        // Required fields for Quote creation (dark yellow border)
+        const quoteRequiredFields = [
+            'pc-industry', 'pc-client-category', 'pc-client-source',
+            'pc-client-source-detail', 'pc-sic-code-1', 'pc-contact-email', 'pc-contact-phone',
+            // Edit form
+            'pc-edit-industry', 'pc-edit-client-category', 'pc-edit-client-source',
+            'pc-edit-client-source-detail', 'pc-edit-sic-code-1', 'pc-edit-contact-email', 'pc-edit-contact-phone'
+        ];
+
+        // Apply red borders to PC required fields
+        pcRequiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('pc-field-required');
+            }
+        });
+
+        // Apply dark yellow borders to Quote required fields
+        quoteRequiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('pc-field-quote-required');
             }
         });
     }

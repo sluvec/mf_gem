@@ -129,6 +129,31 @@ table { width: 100%; border-collapse: collapse; background: white; border-radius
 th, td { padding: var(--space-md); text-align: left; border-bottom: 1px solid var(--neutral-200); }
 th { background: var(--neutral-100); font-weight: 600; color: var(--neutral-700); font-size: 0.875rem; text-transform: uppercase; }
 tr:hover td { background: var(--primary-50); }
+
+/* PC Number form field indicators */
+.pc-field-required {
+    border: 2px solid var(--error-500) !important;
+    border-radius: var(--radius-md);
+    background-color: var(--error-50) !important;
+}
+
+.pc-field-quote-required {
+    border: 2px solid #b45309 !important; /* Dark yellow/amber-700 */
+    border-radius: var(--radius-md);
+    background-color: #fffbeb !important; /* Very light yellow */
+}
+
+.pc-field-required::placeholder,
+.pc-field-quote-required::placeholder {
+    color: var(--neutral-400);
+}
+
+.pc-field-required:focus,
+.pc-field-quote-required:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .modal { 
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.5); z-index: 2000;
