@@ -782,6 +782,133 @@
                             <button onclick="window.addLineItem('other')" class="secondary">+ Quick Add</button>
                         </div>
                     </div>
+
+                    <!-- Recycling Charges -->
+                    <div class="category-section" style="margin-top: 1.5rem;">
+                        <h3 style="margin: 0 0 0.75rem 0;">♻ Recycling Charges</h3>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
+                            <div>
+                                <label>Type</label>
+                                <select id="recycling-type">
+                                    <option value="general">General Recycling</option>
+                                    <option value="pops">POPS Recycling</option>
+                                    <option value="weee">WEEE Recycling</option>
+                                    <option value="other">Recycling Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Mode</label>
+                                <select id="recycling-mode" onchange="(function(s){
+                                    const m=s.value; const byW=document.getElementById('recycling-byweight'); const man=document.getElementById('recycling-manual');
+                                    if(m==='byWeight'){byW.style.display='flex'; man.style.display='none';} else {byW.style.display='none'; man.style.display='flex';}
+                                })(this)">
+                                    <option value="byWeight">By weight</option>
+                                    <option value="manual">Manual amount</option>
+                                </select>
+                            </div>
+                            <div id="recycling-byweight" style="display:flex; gap:0.5rem; align-items: end;">
+                                <div>
+                                    <label>Weight (kg)</label>
+                                    <input id="recycling-weight" type="number" min="0" step="0.01" value="0">
+                                </div>
+                                <div>
+                                    <label>Rate (£/tonne)</label>
+                                    <input id="recycling-rate" type="number" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div id="recycling-manual" style="display:none; gap:0.5rem; align-items: end;">
+                                <div>
+                                    <label>Amount (£)</label>
+                                    <input id="recycling-amount" type="number" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div>
+                                <button class="secondary" onclick="window.app && window.app.addRecyclingItem && window.app.addRecyclingItem()">+ Add</button>
+                            </div>
+                        </div>
+                        <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
+                            <thead><tr><th style="width:40%">Type</th><th>Mode</th><th>Details</th><th>Amount</th><th></th></tr></thead>
+                            <tbody id="recycling-table"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Rebates -->
+                    <div class="category-section" style="margin-top: 1.5rem;">
+                        <h3 style="margin: 0 0 0.75rem 0;">💰 Rebates</h3>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
+                            <div>
+                                <label>Type</label>
+                                <select id="rebate-type" onchange="(function(s){
+                                    const t=s.value; const mode=document.getElementById('rebate-mode-wrapper'); const desc=document.getElementById('rebate-desc-wrapper');
+                                    if(t==='furniture'){mode.style.display='none'; desc.style.display='block';} else {mode.style.display='block'; desc.style.display='none';}
+                                })(this)">
+                                    <option value="furniture">Furniture Resale</option>
+                                    <option value="it">IT Resale</option>
+                                    <option value="metal">Metal</option>
+                                    <option value="other">Rebate Other</option>
+                                </select>
+                            </div>
+                            <div id="rebate-mode-wrapper">
+                                <label>Mode</label>
+                                <select id="rebate-mode" onchange="(function(s){
+                                    const m=s.value; const byW=document.getElementById('rebate-byweight'); const man=document.getElementById('rebate-manual');
+                                    if(m==='byWeight'){byW.style.display='flex'; man.style.display='none';} else {byW.style.display='none'; man.style.display='flex';}
+                                })(this)">
+                                    <option value="byWeight">By weight</option>
+                                    <option value="manual" selected>Manual amount</option>
+                                </select>
+                            </div>
+                            <div id="rebate-desc-wrapper" style="display:block;">
+                                <label>Description</label>
+                                <input id="rebate-desc" type="text" placeholder="Description for furniture resale">
+                            </div>
+                            <div id="rebate-byweight" style="display:none; gap:0.5rem; align-items: end;">
+                                <div>
+                                    <label>Weight (kg)</label>
+                                    <input id="rebate-weight" type="number" min="0" step="0.01" value="0">
+                                </div>
+                                <div>
+                                    <label>Rate (£/tonne)</label>
+                                    <input id="rebate-rate" type="number" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div id="rebate-manual" style="display:flex; gap:0.5rem; align-items: end;">
+                                <div>
+                                    <label>Amount (£)</label>
+                                    <input id="rebate-amount" type="number" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                            <div>
+                                <button class="secondary" onclick="window.app && window.app.addRebateItem && window.app.addRebateItem()">+ Add</button>
+                            </div>
+                        </div>
+                        <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
+                            <thead><tr><th style="width:40%">Type</th><th>Mode</th><th>Details</th><th>Amount</th><th></th></tr></thead>
+                            <tbody id="rebates-table"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Other Costs (Manual) -->
+                    <div class="category-section" style="margin-top: 1.5rem;">
+                        <h3 style="margin: 0 0 0.75rem 0;">📎 Other Costs (Manual)</h3>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
+                            <div>
+                                <label>Description</label>
+                                <input id="other-desc" type="text" placeholder="e.g., Special permit fee">
+                            </div>
+                            <div>
+                                <label>Amount (£)</label>
+                                <input id="other-amount" type="number" min="0" step="0.01" value="0">
+                            </div>
+                            <div>
+                                <button class="secondary" onclick="window.app && window.app.addOtherCostManual && window.app.addOtherCostManual()">+ Add</button>
+                            </div>
+                        </div>
+                        <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
+                            <thead><tr><th style="width:60%">Description</th><th>Amount</th><th></th></tr></thead>
+                            <tbody id="othercosts-table"></tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="summary">
                     <h3>Quote Summary</h3>
@@ -803,6 +930,9 @@
                         </div>
                         <div class="summary-line"><span>Discount Amount:</span><span id="sum-discount">£0.00</span></div>
                         <div class="summary-line"><span>Net After Discount:</span><span id="sum-net">£0.00</span></div>
+                    <div class="summary-line"><span>Recycling:</span><span id="sum-recycling">£0.00</span></div>
+                    <div class="summary-line"><span>Other Costs:</span><span id="sum-other-manual">£0.00</span></div>
+                    <div class="summary-line"><span>Rebates:</span><span id="sum-rebates">£0.00</span></div>
                     <div class="summary-line">
                         <span>VAT Rate:</span>
                         <input type="number" id="quote-vat-rate" value="20.00" step="0.01" min="0" max="100" 

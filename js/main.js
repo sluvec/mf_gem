@@ -15,6 +15,11 @@ class CRMApplication {
         this.initialized = false;
         this.currentPage = null;
         this.builderContext = { pcId: null };
+        this.builderState = {
+            priceListId: '', currency: 'GBP', vatRate: 20,
+            plItems: [], recyclingItems: [], rebateItems: [], otherCosts: [],
+            categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
+        };
         this.currentPage = 'dashboard';
         this.currentUser = null;
         
@@ -309,7 +314,12 @@ class CRMApplication {
             if (t === 'percent') discountAmount = Math.min(100, Math.max(0, v)) * subtotal / 100;
             else discountAmount = Math.min(subtotal, Math.max(0, v));
         }
-        const netAfterDiscount = Math.max(0, subtotal - discountAmount);
+        // Non-discount sections
+        const recycling = (this.builderState.recyclingItems||[]).reduce((a,b)=>a+(b.amount||0),0);
+        const otherManual = (this.builderState.otherCosts||[]).reduce((a,b)=>a+(b.amount||0),0);
+        const rebates = (this.builderState.rebateItems||[]).reduce((a,b)=>a+(b.amount||0),0); // negative values expected
+
+        const netAfterDiscount = Math.max(0, subtotal - discountAmount) + recycling + otherManual + rebates;
         const vatRate = parseFloat(document.getElementById('quote-vat-rate')?.value || `${this.builderState.vatRate}`) || 20;
         const vat = netAfterDiscount * vatRate / 100;
         const total = netAfterDiscount + vat;
@@ -322,8 +332,110 @@ class CRMApplication {
         setText('sum-subtotal', subtotal);
         setText('sum-discount', discountAmount);
         setText('sum-net', netAfterDiscount);
+        const setTextPlain = (id, val) => { const el=document.getElementById(id); if (el) el.textContent = `£${val.toFixed(2)}`; };
+        setTextPlain('sum-recycling', recycling);
+        setTextPlain('sum-other-manual', otherManual);
+        setTextPlain('sum-rebates', rebates);
         setText('sum-vat', vat);
         setText('sum-total', total);
+    }
+
+    // Recycling
+    addRecyclingItem() {
+        try {
+            const type = document.getElementById('recycling-type')?.value || 'general';
+            const mode = document.getElementById('recycling-mode')?.value || 'byWeight';
+            let amount = 0; let details = '';
+            if (mode === 'byWeight') {
+                const kg = parseFloat(document.getElementById('recycling-weight')?.value || '0')||0;
+                const rate = parseFloat(document.getElementById('recycling-rate')?.value || '0')||0;
+                amount = kg * (rate/1000); details = `${kg} kg @ £${rate}/t`;
+            } else {
+                amount = parseFloat(document.getElementById('recycling-amount')?.value || '0')||0;
+                details = `Manual`;
+            }
+            const id = `rc-${Date.now()}`;
+            this.builderState.recyclingItems.push({ id, type, mode, amount, details });
+            this.renderRecyclingTable();
+            this.recalcBuilderTotals();
+        } catch(e){ logError('addRecyclingItem error:', e); }
+    }
+    renderRecyclingTable() {
+        const tbody = document.getElementById('recycling-table'); if (!tbody) return;
+        tbody.innerHTML = (this.builderState.recyclingItems||[]).map(x=>`
+            <tr>
+                <td>${x.type}</td><td>${x.mode}</td><td>${x.details||''}</td>
+                <td>£${(x.amount||0).toFixed(2)}</td>
+                <td><button class="danger small" onclick="window.app.removeRecyclingItem('${x.id}')">Remove</button></td>
+            </tr>`).join('') || `<tr><td colspan="5" style="text-align:center; color:#6b7280;">No recycling items</td></tr>`;
+    }
+    removeRecyclingItem(id) {
+        const i=(this.builderState.recyclingItems||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.recyclingItems.splice(i,1);this.renderRecyclingTable();this.recalcBuilderTotals();}
+    }
+
+    // Rebates
+    addRebateItem() {
+        try {
+            const type = document.getElementById('rebate-type')?.value || 'furniture';
+            let mode = 'manual';
+            let amount = 0; let details='';
+            if (type==='furniture') {
+                mode = 'manual';
+                details = (document.getElementById('rebate-desc')?.value || '').trim();
+                amount = parseFloat(document.getElementById('rebate-amount')?.value || '0')||0;
+            } else {
+                mode = document.getElementById('rebate-mode')?.value || 'manual';
+                if (mode==='byWeight') {
+                    const kg = parseFloat(document.getElementById('rebate-weight')?.value || '0')||0;
+                    const rate = parseFloat(document.getElementById('rebate-rate')?.value || '0')||0;
+                    amount = -(kg * (rate/1000)); details = `${kg} kg @ £${rate}/t`;
+                } else {
+                    amount = -Math.abs(parseFloat(document.getElementById('rebate-amount')?.value || '0')||0);
+                    details = 'Manual';
+                }
+            }
+            const id = `rb-${Date.now()}`;
+            this.builderState.rebateItems.push({ id, type, mode, amount, details });
+            this.renderRebatesTable();
+            this.recalcBuilderTotals();
+        } catch(e){ logError('addRebateItem error:', e); }
+    }
+    renderRebatesTable() {
+        const tbody = document.getElementById('rebates-table'); if (!tbody) return;
+        tbody.innerHTML = (this.builderState.rebateItems||[]).map(x=>`
+            <tr>
+                <td>${x.type}</td><td>${x.mode}</td><td>${x.details||''}</td>
+                <td>£${(x.amount||0).toFixed(2)}</td>
+                <td><button class="danger small" onclick="window.app.removeRebateItem('${x.id}')">Remove</button></td>
+            </tr>`).join('') || `<tr><td colspan="5" style="text-align:center; color:#6b7280;">No rebates</td></tr>`;
+    }
+    removeRebateItem(id) {
+        const i=(this.builderState.rebateItems||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.rebateItems.splice(i,1);this.renderRebatesTable();this.recalcBuilderTotals();}
+    }
+
+    // Other Costs (Manual)
+    addOtherCostManual() {
+        try {
+            const desc=(document.getElementById('other-desc')?.value||'').trim();
+            const amount=parseFloat(document.getElementById('other-amount')?.value||'0')||0;
+            if(!desc){uiModals.showToast('Please enter description for other cost','error');return;}
+            const id = `oc-${Date.now()}`;
+            this.builderState.otherCosts.push({ id, description: desc, amount });
+            this.renderOtherCostsTable();
+            this.recalcBuilderTotals();
+        } catch(e){ logError('addOtherCostManual error:', e); }
+    }
+    renderOtherCostsTable() {
+        const tbody=document.getElementById('othercosts-table'); if(!tbody) return;
+        tbody.innerHTML=(this.builderState.otherCosts||[]).map(x=>`
+            <tr>
+                <td>${x.description}</td>
+                <td>£${(x.amount||0).toFixed(2)}</td>
+                <td><button class="danger small" onclick="window.app.removeOtherCost('${x.id}')">Remove</button></td>
+            </tr>`).join('') || `<tr><td colspan="3" style="text-align:center; color:#6b7280;">No other costs</td></tr>`;
+    }
+    removeOtherCost(id){
+        const i=(this.builderState.otherCosts||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.otherCosts.splice(i,1);this.renderOtherCostsTable();this.recalcBuilderTotals();}
     }
 
     /**
