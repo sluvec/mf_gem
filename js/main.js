@@ -674,6 +674,85 @@ class CRMApplication {
             const totalValue = quotes.reduce((sum, quote) => sum + (parseFloat(quote.totalAmount) || 0), 0);
             if (statValue) statValue.textContent = `£${totalValue.toLocaleString()}`;
 
+            // Update recent PC Numbers (latest 5)
+            const recentPcContainer = document.getElementById('recent-pc');
+            if (recentPcContainer) {
+                const recentPcNumbers = pcNumbers
+                    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                    .slice(0, 5);
+                
+                if (recentPcNumbers.length === 0) {
+                    recentPcContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #6b7280; padding: 1rem;">No PC Numbers found</td></tr>';
+                } else {
+                    recentPcContainer.innerHTML = recentPcNumbers.map(pc => `
+                        <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                            <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
+                            <td>${pc.company || pc.clientName || 'N/A'}</td>
+                            <td>${pc.projectTitle || 'N/A'}</td>
+                            <td>${pc.createdAt ? new Date(pc.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Update recent Quotes (latest 5)
+            const recentQuotesContainer = document.getElementById('recent-quotes');
+            if (recentQuotesContainer) {
+                const recentQuotes = quotes
+                    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                    .slice(0, 5);
+                
+                if (recentQuotes.length === 0) {
+                    recentQuotesContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280; padding: 1rem;">No Quotes found</td></tr>';
+                } else {
+                    recentQuotesContainer.innerHTML = recentQuotes.map(quote => `
+                        <tr onclick="window.viewQuoteDetails('${quote.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                            <td><strong>${quote.quoteNumber || 'N/A'}</strong></td>
+                            <td>${quote.pcNumber || 'N/A'}</td>
+                            <td>${quote.clientName || 'N/A'}</td>
+                            <td>£${(quote.totalAmount || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${quote.status || 'pending'}">${quote.status || 'pending'}</span></td>
+                            <td>${quote.createdAt ? new Date(quote.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Update recent Activities (latest 5)
+            const recentActivitiesContainer = document.getElementById('recent-activities');
+            if (recentActivitiesContainer) {
+                const recentActivities = activities
+                    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+                    .slice(0, 5);
+                
+                if (recentActivities.length === 0) {
+                    recentActivitiesContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280; padding: 1rem;">No Activities found</td></tr>';
+                } else {
+                    recentActivitiesContainer.innerHTML = recentActivities.map(activity => {
+                        // Get scheduled date safely
+                        let scheduledDisplay = 'Not scheduled';
+                        if (activity.scheduledDate) {
+                            try {
+                                scheduledDisplay = new Date(activity.scheduledDate).toLocaleDateString();
+                            } catch (e) {
+                                scheduledDisplay = 'Invalid date';
+                            }
+                        }
+
+                        return `
+                        <tr onclick="window.viewActivityDetails('${activity.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                            <td><strong>${activity.title || 'N/A'}</strong></td>
+                            <td>${activity.type || 'N/A'}</td>
+                            <td>${activity.quoteNumber || activity.pcNumber || 'N/A'}</td>
+                            <td><span class="status-badge ${activity.status || 'pending'}">${activity.status || 'pending'}</span></td>
+                            <td>${scheduledDisplay}</td>
+                            <td>${activity.createdAt ? new Date(activity.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
             logDebug('Dashboard data loaded');
         } catch (error) {
             logError('Failed to load dashboard data:', error);
