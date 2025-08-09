@@ -692,7 +692,7 @@ class CRMApplication {
                     recentPcContainer.innerHTML = recentPcNumbers.map(pc => `
                         <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
-                            <td>${pc.company || pc.clientName || 'N/A'}</td>
+                            <td>${pc.company || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${pc.createdAt ? new Date(pc.createdAt).toLocaleDateString() : 'N/A'}</td>
                         </tr>
@@ -1020,7 +1020,7 @@ class CRMApplication {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${pc.pcNumber || 'N/A'}</strong></td>
-                            <td>${pc.company || pc.clientName || 'N/A'}</td>
+                            <td>${pc.company || 'N/A'}</td>
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${pc.contactName || 'N/A'}</td>
                             <td>${pc.accountManager || 'N/A'}</td>
@@ -1341,7 +1341,7 @@ class CRMApplication {
                 { id: 'pc-edit-contact-phone', value: pcData.contactPhone || '' },
                 { id: 'pc-edit-contact-email', value: pcData.contactEmail || '' },
                 // Address
-                { id: 'pc-edit-address-postcode', value: pcData.addressPostcode || pcData.postcode || '' },
+                { id: 'pc-edit-address-postcode', value: pcData.addressPostcode || '' },
                 { id: 'pc-edit-address-1', value: pcData.address1 || '' },
                 { id: 'pc-edit-address-2', value: pcData.address2 || '' },
                 { id: 'pc-edit-address-3', value: pcData.address3 || '' },
@@ -4258,9 +4258,8 @@ class CRMApplication {
                 
                 switch (filterField) {
                     case 'company':
-                        // For PC Numbers: use company or clientName
-                        // For Quotes/Activities: use companyName or company
-                        searchValue = item.companyName || item.company || item.clientName || '';
+                        // Prefer normalized company
+                        searchValue = item.companyName || item.company || '';
                         break;
                     case 'accountManager':
                         // For PC Numbers & Quotes: use accountManager
@@ -4553,7 +4552,7 @@ class CRMApplication {
                 
                 // Company filter
                 if (filters.company) {
-                    const searchValue = activity.companyName || activity.company || activity.clientName || '';
+                    const searchValue = activity.companyName || activity.company || '';
                     matches = matches && searchValue.toLowerCase().includes(filters.company.toLowerCase());
                 }
                 
