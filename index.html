@@ -701,7 +701,7 @@
                 <div class="form-grid">
                     <div>
                         <label>Client Name *</label>
-                        <input type="text" id="builder-client-name" placeholder="Client company name">
+                        <input type="text" id="builder-client-name" placeholder="Client company name" oninput="window.app && window.app.builderUpdatePcDropdown && window.app.builderUpdatePcDropdown()">
                     </div>
                     <div>
                         <label>Account Manager *</label>
@@ -727,6 +727,16 @@
                             <option>Library</option>
                             <option>Gallery</option>
                         </select>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label>PC Number (type or select)</label>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items:center;">
+                            <input type="text" id="builder-pc-number-manual" placeholder="e.g., PC-000123" style="max-width: 200px;" onblur="window.app && window.app.builderValidatePcManual && window.app.builderValidatePcManual()">
+                            <select id="builder-pc-select" onchange="window.app && window.app.builderSelectPcFromDropdown && window.app.builderSelectPcFromDropdown()" style="min-width: 280px;">
+                                <option value="">Select PC Number...</option>
+                            </select>
+                            <small id="builder-pc-hint" style="color:#6b7280;">No PC selected</small>
+                        </div>
                     </div>
                 </div>
             </div>

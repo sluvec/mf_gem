@@ -121,10 +121,62 @@ class CRMApplication {
                 });
             }
 
+            // Populate PC dropdown (all PCs or filtered by client)
+            await this.builderUpdatePcDropdown();
+
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
             uiModals.showToast('Failed to open Quote Builder', 'error');
         }
+    }
+
+    /**
+     * @description Update PC dropdown based on client name filter
+     */
+    async builderUpdatePcDropdown() {
+        try {
+            const client = document.getElementById('builder-client-name')?.value?.trim().toLowerCase() || '';
+            const pcs = await db.loadAll('pcNumbers');
+            const list = client ? pcs.filter(pc => (pc.company||'').toLowerCase().includes(client)) : pcs;
+            const sel = document.getElementById('builder-pc-select');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select PC Number...</option>';
+            list.forEach(pc => {
+                const opt = document.createElement('option');
+                opt.value = pc.id; opt.textContent = `${pc.pcNumber} — ${pc.company||''}`; sel.appendChild(opt);
+            });
+        } catch (e) { logError('builderUpdatePcDropdown error:', e); }
+    }
+
+    builderSelectPcFromDropdown = async () => {
+        try {
+            const sel = document.getElementById('builder-pc-select');
+            const hint = document.getElementById('builder-pc-hint');
+            const val = sel?.value || '';
+            if (!val) { if (hint) hint.textContent = 'No PC selected'; this.builderContext.pcId = null; return; }
+            const pc = await db.load('pcNumbers', val);
+            this.builderContext.pcId = val;
+            if (hint) hint.textContent = `Selected: ${pc.pcNumber} — ${pc.company||''}`;
+        } catch (e) { logError('builderSelectPcFromDropdown error:', e); }
+    }
+
+    builderValidatePcManual = async () => {
+        try {
+            const manual = document.getElementById('builder-pc-number-manual')?.value?.trim();
+            const hint = document.getElementById('builder-pc-hint');
+            if (!manual) { if (hint) hint.textContent='No PC selected'; return; }
+            const pcs = await db.loadAll('pcNumbers');
+            const match = pcs.find(pc => (pc.pcNumber||'').toLowerCase() === manual.toLowerCase());
+            if (match) {
+                this.builderContext.pcId = match.id;
+                const sel = document.getElementById('builder-pc-select');
+                if (sel) sel.value = match.id;
+                if (hint) hint.textContent = `Matched: ${match.pcNumber} — ${match.company||''}`;
+            } else {
+                this.builderContext.pcId = null;
+                if (hint) hint.textContent = 'PC not found';
+            }
+        } catch (e) { logError('builderValidatePcManual error:', e); }
     }
 
     /**
