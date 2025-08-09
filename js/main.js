@@ -935,6 +935,17 @@ class CRMApplication {
                 return;
             }
             
+            // Validate PC Number has required fields for Quote creation
+            const validation = this.validatePcForQuoteCreation(pcData);
+            if (!validation.isValid) {
+                const missingFieldsList = validation.missingFields.join(', ');
+                uiModals.showToast(
+                    `Cannot create Quote. PC Number ${pcData.pcNumber} is missing required fields: ${missingFieldsList}. Please edit the PC Number first.`, 
+                    'error'
+                );
+                return;
+            }
+            
             // Open quote modal
             await this.openQuoteModal();
             
@@ -1921,7 +1932,7 @@ class CRMApplication {
         try {
             logDebug('Saving new quote');
             
-            const formData = this.getQuoteFormData();
+            const formData = await this.getQuoteFormData();
             if (!formData) {
                 return; // Validation failed
             }
@@ -1980,7 +1991,7 @@ class CRMApplication {
     /**
      * @description Get form data from quote form
      */
-    getQuoteFormData() {
+    async getQuoteFormData() {
         const pcSelect = document.getElementById('quote-modal-pc');
         const priceListSelect = document.getElementById('quote-modal-pricelist');
         const accountManagerSelect = document.getElementById('quote-modal-account-manager');
@@ -1998,6 +2009,20 @@ class CRMApplication {
         if (!accountManagerSelect?.value) {
             uiModals.showToast('Please select an Account Manager', 'error');
             return null;
+        }
+        
+        // Validate PC Number has required fields for Quote creation
+        const pcData = await db.load('pcNumbers', pcSelect.value);
+        if (pcData) {
+            const validation = this.validatePcForQuoteCreation(pcData);
+            if (!validation.isValid) {
+                const missingFieldsList = validation.missingFields.join(', ');
+                uiModals.showToast(
+                    `Cannot create Quote. PC Number ${pcData.pcNumber} is missing required fields: ${missingFieldsList}. Please edit the PC Number first.`, 
+                    'error'
+                );
+                return null;
+            }
         }
         
         const selectedOption = pcSelect.options[pcSelect.selectedIndex];
@@ -2579,6 +2604,43 @@ class CRMApplication {
                 field.style.backgroundColor = '';
             }
         });
+    }
+
+    /**
+     * @description Validate PC Number for Quote creation - requires additional fields
+     */
+    validatePcForQuoteCreation(pcData) {
+        const missingFields = [];
+        
+        // Check required fields for Quote creation
+        if (!pcData.industry) {
+            missingFields.push('Industry');
+        }
+        if (!pcData.clientCategory) {
+            missingFields.push('Client Category');
+        }
+        if (!pcData.clientSource) {
+            missingFields.push('Client Source');
+        }
+        if (!pcData.clientSourceDetail) {
+            missingFields.push('Client Source Detail');
+        }
+        if (!pcData.sicCode1) {
+            missingFields.push('SIC Code 1');
+        }
+        
+        // Check for at least one contact method (email or phone)
+        const hasContactEmail = pcData.contactEmail && pcData.contactEmail.trim();
+        const hasContactPhone = pcData.contactPhone && pcData.contactPhone.trim();
+        
+        if (!hasContactEmail && !hasContactPhone) {
+            missingFields.push('Contact Email or Phone Number');
+        }
+        
+        return {
+            isValid: missingFields.length === 0,
+            missingFields
+        };
     }
 
     /**
