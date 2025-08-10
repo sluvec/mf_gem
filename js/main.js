@@ -127,6 +127,12 @@ class CRMApplication {
             // Populate PC dropdown (all PCs or filtered by client)
             await this.builderUpdatePcDropdown();
 
+            // Reset company search suggestions
+            const companySearch = document.getElementById('builder-company-search');
+            const sugg = document.getElementById('builder-company-suggestions');
+            if (companySearch) companySearch.value = '';
+            if (sugg) sugg.innerHTML = '';
+
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
             uiModals.showToast('Failed to open Quote Builder', 'error');
@@ -250,6 +256,86 @@ class CRMApplication {
                 opt.value = pc.id; opt.textContent = `${pc.pcNumber} — ${pc.company||''}`; sel.appendChild(opt);
             });
         } catch (e) { logError('builderUpdatePcDropdown error:', e); }
+    }
+
+    /**
+     * @description Handle company search input with suggestions (simple live list)
+     */
+    async builderOnCompanySearch(event) {
+        try {
+            const query = (event?.target?.value || '').trim().toLowerCase();
+            const container = document.getElementById('builder-company-suggestions');
+            if (!container) return;
+            if (!query) { container.innerHTML = ''; return; }
+
+            const pcs = await db.loadAll('pcNumbers');
+            const results = pcs
+                .filter(pc => (pc.company || '').toLowerCase().includes(query))
+                .sort((a,b)=> (b.lastModifiedAt||'').localeCompare(a.lastModifiedAt||''))
+                .slice(0, 12);
+
+            if (results.length === 0) {
+                container.innerHTML = '<div style="padding:0.5rem; color:#6b7280;">No PCs for this company</div>';
+                return;
+            }
+
+            const listHtml = results.map(pc => {
+                const company = pc.company || 'N/A';
+                const pcNum = pc.pcNumber || '—';
+                const am = pc.accountManager || '—';
+                const status = (pc.status || 'Draft').toLowerCase();
+                const dateStr = (pc.lastModifiedAt || pc.createdAt || '').split('T')[0] || '';
+                return `
+                    <div class="suggestion-item" data-id="${pc.id}" style="padding:0.5rem 0.75rem; cursor:pointer; display:flex; justify-content:space-between; gap:0.75rem;"
+                         onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
+                        <div>
+                            <div><strong>${pcNum}</strong> — ${company}</div>
+                            <div style=\"font-size:0.8rem; color:#6b7280;\">AM: ${am}</div>
+                        </div>
+                        <div style=\"text-align:right; white-space:nowrap;\">
+                            <span class=\"status-badge ${status}\">${status}</span>
+                            <div style=\"font-size:0.8rem; color:#6b7280;\">${dateStr}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div style="position: relative; z-index:20; background:white; border:1px solid #e5e7eb; border-radius:0.375rem; box-shadow:0 4px 10px rgba(0,0,0,0.08);">${listHtml}</div>`;
+
+            // Attach click handlers
+            for (const item of container.querySelectorAll('.suggestion-item')) {
+                item.addEventListener('click', async (e) => {
+                    const id = e.currentTarget.getAttribute('data-id');
+                    const pc = await db.load('pcNumbers', id);
+                    if (!pc) return;
+
+                    // Validate PC for quote creation
+                    const validation = this.validatePcForQuoteCreation(pc);
+                    if (!validation.isValid) {
+                        uiModals.showToast('Selected PC cannot be used. Missing: ' + validation.missingFields.join(', '), 'error');
+                        return;
+                    }
+
+                    // Select PC in builder
+                    this.builderContext.pcId = id;
+                    const sel = document.getElementById('builder-pc-select');
+                    if (sel) sel.value = id;
+                    const manual = document.getElementById('builder-pc-number-manual');
+                    if (manual) manual.value = pc.pcNumber || '';
+                    const hint = document.getElementById('builder-pc-hint');
+                    if (hint) hint.textContent = `Selected: ${pc.pcNumber} — ${pc.company||''}`;
+
+                    // Prefill client name but allow edits
+                    const clientInput = document.getElementById('builder-client-name');
+                    if (clientInput && !clientInput.value) clientInput.value = pc.company || '';
+
+                    // Clear suggestions
+                    container.innerHTML = '';
+                });
+            }
+        } catch (e) {
+            logError('builderOnCompanySearch error:', e);
+        }
     }
 
     builderSelectPcFromDropdown = async () => {

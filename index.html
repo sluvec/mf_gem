@@ -738,6 +738,11 @@
                             <small id="builder-pc-hint" style="color:#6b7280;">No PC selected</small>
                         </div>
                     </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label>Search by Company</label>
+                        <input type="text" id="builder-company-search" placeholder="Start typing company name..." oninput="window.app && window.app.builderOnCompanySearch && window.app.builderOnCompanySearch(event)" autocomplete="off">
+                        <div id="builder-company-suggestions" style="position: relative; margin-top: 0.25rem;"></div>
+                    </div>
                 </div>
             </div>
             <div class="card" id="price-list-selector">
