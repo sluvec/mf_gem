@@ -701,7 +701,7 @@
                 <div class="form-grid">
                     <div>
                         <label>Client Name *</label>
-                        <input type="text" id="builder-client-name" placeholder="Client company name">
+                        <input type="text" id="builder-client-name" placeholder="Client company name" oninput="window.app && window.app.builderUpdatePcDropdown && window.app.builderUpdatePcDropdown()">
                     </div>
                     <div>
                         <label>Account Manager *</label>
@@ -729,12 +729,13 @@
                         </select>
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <label>PC Number or Company</label>
-                        <input type="text" id="builder-pc-smart" placeholder="Type PC-000123 or Company name..." oninput="window.app && window.app.builderOnPcSmartInput && window.app.builderOnPcSmartInput(event)" autocomplete="off">
-                        <div id="builder-pc-suggestions" style="position: relative; margin-top: 0.25rem;"></div>
-                        <div id="builder-pc-selected" style="display:none; margin-top:0.5rem;">
-                            <span id="builder-pc-selected-chip" style="display:inline-flex; align-items:center; gap:0.5rem; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:0.25rem 0.5rem; border-radius:9999px;"></span>
-                            <button type="button" class="secondary" style="margin-left:0.5rem;" onclick="window.app && window.app.builderClearSelectedPc && window.app.builderClearSelectedPc()">Change</button>
+                        <label>PC Number (type or select)</label>
+                        <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items:center;">
+                            <input type="text" id="builder-pc-number-manual" placeholder="e.g., PC-000123" style="max-width: 200px;" onblur="window.app && window.app.builderValidatePcManual && window.app.builderValidatePcManual()" oninput="window.app && window.app.builderUpdatePcDropdown && window.app.builderUpdatePcDropdown()">
+                            <select id="builder-pc-select" onchange="window.app && window.app.builderSelectPcFromDropdown && window.app.builderSelectPcFromDropdown()" style="min-width: 280px;">
+                                <option value="">Select PC Number...</option>
+                            </select>
+                            <small id="builder-pc-hint" style="color:#6b7280;">No PC selected</small>
                         </div>
                     </div>
                 </div>
