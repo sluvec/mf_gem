@@ -85,6 +85,16 @@ class CRMApplication {
                     if (titleEl) titleEl.textContent = `New Quote for ${pc.pcNumber} — ${pc.company || ''}`;
                     // Prefill Collection address/contact from PC
                     this.prefillCollectionFromPc(pc);
+
+                    // Show selected PC chip in smart input
+                    const chipWrap = document.getElementById('builder-pc-selected');
+                    const chip = document.getElementById('builder-pc-selected-chip');
+                    const smart = document.getElementById('builder-pc-smart');
+                    if (chip && chipWrap) {
+                        chip.textContent = `${pc.pcNumber} — ${pc.company || ''}`;
+                        chipWrap.style.display = '';
+                    }
+                    if (smart) smart.value = pc.pcNumber || '';
                 }
             } else {
                 const titleEl = document.getElementById('quote-builder-title');
@@ -124,14 +134,15 @@ class CRMApplication {
                 });
             }
 
-            // Populate PC dropdown (all PCs or filtered by client)
-            await this.builderUpdatePcDropdown();
-
-            // Reset company search suggestions
-            const companySearch = document.getElementById('builder-company-search');
-            const sugg = document.getElementById('builder-company-suggestions');
-            if (companySearch) companySearch.value = '';
+            // Reset smart PC input
+            const smart = document.getElementById('builder-pc-smart');
+            const sugg = document.getElementById('builder-pc-suggestions');
+            const chipWrap = document.getElementById('builder-pc-selected');
+            const chip = document.getElementById('builder-pc-selected-chip');
+            if (smart) smart.value = '';
             if (sugg) sugg.innerHTML = '';
+            if (chipWrap) chipWrap.style.display = 'none';
+            if (chip) chip.textContent = '';
 
         } catch (error) {
             logError('Failed to open Quote Builder:', error);
@@ -189,14 +200,18 @@ class CRMApplication {
             fillAddr('quote-collection', quote.collectionAddress || {});
             fillAddr('quote-delivery', quote.deliveryAddress || {});
 
-            // PCs dropdown / hint
-            await this.builderUpdatePcDropdown();
-            const pcSelect = document.getElementById('builder-pc-select');
-            const pcHint = document.getElementById('builder-pc-hint');
-            const pcManual = document.getElementById('builder-pc-number-manual');
-            if (quote.pcId && pcSelect) pcSelect.value = quote.pcId;
-            if (pcHint) pcHint.textContent = quote.pcNumber ? `Selected: ${quote.pcNumber} — ${quote.clientName||''}` : 'No PC selected';
-            if (pcManual) pcManual.value = quote.pcNumber || '';
+            // Smart PC input setup for edit
+            const smart = document.getElementById('builder-pc-smart');
+            const sugg = document.getElementById('builder-pc-suggestions');
+            const chipWrap = document.getElementById('builder-pc-selected');
+            const chip = document.getElementById('builder-pc-selected-chip');
+            if (sugg) sugg.innerHTML = '';
+            if (chip && chipWrap) {
+                const txt = quote.pcNumber ? `${quote.pcNumber} — ${quote.clientName||quote.company||''}` : 'No PC selected';
+                chip.textContent = txt;
+                chipWrap.style.display = quote.pcNumber ? '' : 'none';
+            }
+            if (smart) smart.value = quote.pcNumber || '';
 
             // State
             this.builderState = {
@@ -240,134 +255,7 @@ class CRMApplication {
         }
     }
 
-    /**
-     * @description Update PC dropdown based on client name filter
-     */
-    async builderUpdatePcDropdown() {
-        try {
-            const client = document.getElementById('builder-client-name')?.value?.trim().toLowerCase() || '';
-            const pcs = await db.loadAll('pcNumbers');
-            const list = client ? pcs.filter(pc => (pc.company||'').toLowerCase().includes(client)) : pcs;
-            const sel = document.getElementById('builder-pc-select');
-            if (!sel) return;
-            sel.innerHTML = '<option value="">Select PC Number...</option>';
-            list.forEach(pc => {
-                const opt = document.createElement('option');
-                opt.value = pc.id; opt.textContent = `${pc.pcNumber} — ${pc.company||''}`; sel.appendChild(opt);
-            });
-        } catch (e) { logError('builderUpdatePcDropdown error:', e); }
-    }
-
-    /**
-     * @description Handle company search input with suggestions (simple live list)
-     */
-    async builderOnCompanySearch(event) {
-        try {
-            const query = (event?.target?.value || '').trim().toLowerCase();
-            const container = document.getElementById('builder-company-suggestions');
-            if (!container) return;
-            if (!query) { container.innerHTML = ''; return; }
-
-            const pcs = await db.loadAll('pcNumbers');
-            const results = pcs
-                .filter(pc => (pc.company || '').toLowerCase().includes(query))
-                .sort((a,b)=> (b.lastModifiedAt||'').localeCompare(a.lastModifiedAt||''))
-                .slice(0, 12);
-
-            if (results.length === 0) {
-                container.innerHTML = '<div style="padding:0.5rem; color:#6b7280;">No PCs for this company</div>';
-                return;
-            }
-
-            const listHtml = results.map(pc => {
-                const company = pc.company || 'N/A';
-                const pcNum = pc.pcNumber || '—';
-                const am = pc.accountManager || '—';
-                const status = (pc.status || 'Draft').toLowerCase();
-                const dateStr = (pc.lastModifiedAt || pc.createdAt || '').split('T')[0] || '';
-                return `
-                    <div class="suggestion-item" data-id="${pc.id}" style="padding:0.5rem 0.75rem; cursor:pointer; display:flex; justify-content:space-between; gap:0.75rem;"
-                         onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
-                        <div>
-                            <div><strong>${pcNum}</strong> — ${company}</div>
-                            <div style=\"font-size:0.8rem; color:#6b7280;\">AM: ${am}</div>
-                        </div>
-                        <div style=\"text-align:right; white-space:nowrap;\">
-                            <span class=\"status-badge ${status}\">${status}</span>
-                            <div style=\"font-size:0.8rem; color:#6b7280;\">${dateStr}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            container.innerHTML = `<div style="position: relative; z-index:20; background:white; border:1px solid #e5e7eb; border-radius:0.375rem; box-shadow:0 4px 10px rgba(0,0,0,0.08);">${listHtml}</div>`;
-
-            // Attach click handlers
-            for (const item of container.querySelectorAll('.suggestion-item')) {
-                item.addEventListener('click', async (e) => {
-                    const id = e.currentTarget.getAttribute('data-id');
-                    const pc = await db.load('pcNumbers', id);
-                    if (!pc) return;
-
-                    // Validate PC for quote creation
-                    const validation = this.validatePcForQuoteCreation(pc);
-                    if (!validation.isValid) {
-                        uiModals.showToast('Selected PC cannot be used. Missing: ' + validation.missingFields.join(', '), 'error');
-                        return;
-                    }
-
-                    // Select PC in builder
-                    this.builderContext.pcId = id;
-                    const sel = document.getElementById('builder-pc-select');
-                    if (sel) sel.value = id;
-                    const manual = document.getElementById('builder-pc-number-manual');
-                    if (manual) manual.value = pc.pcNumber || '';
-                    const hint = document.getElementById('builder-pc-hint');
-                    if (hint) hint.textContent = `Selected: ${pc.pcNumber} — ${pc.company||''}`;
-
-                    // Prefill client name but allow edits
-                    const clientInput = document.getElementById('builder-client-name');
-                    if (clientInput && !clientInput.value) clientInput.value = pc.company || '';
-
-                    // Clear suggestions
-                    container.innerHTML = '';
-                });
-            }
-        } catch (e) {
-            logError('builderOnCompanySearch error:', e);
-        }
-    }
-
-    builderSelectPcFromDropdown = async () => {
-        try {
-            const sel = document.getElementById('builder-pc-select');
-            const hint = document.getElementById('builder-pc-hint');
-            const val = sel?.value || '';
-            if (!val) { if (hint) hint.textContent = 'No PC selected'; this.builderContext.pcId = null; return; }
-            const pc = await db.load('pcNumbers', val);
-            this.builderContext.pcId = val;
-            if (hint) hint.textContent = `Selected: ${pc.pcNumber} — ${pc.company||''}`;
-        } catch (e) { logError('builderSelectPcFromDropdown error:', e); }
-    }
-
-    builderValidatePcManual = async () => {
-        try {
-            const manual = document.getElementById('builder-pc-number-manual')?.value?.trim();
-            const hint = document.getElementById('builder-pc-hint');
-            if (!manual) { if (hint) hint.textContent='No PC selected'; return; }
-            const pcs = await db.loadAll('pcNumbers');
-            const match = pcs.find(pc => (pc.pcNumber||'').toLowerCase() === manual.toLowerCase());
-            if (match) {
-                this.builderContext.pcId = match.id;
-                const sel = document.getElementById('builder-pc-select');
-                if (sel) sel.value = match.id;
-                if (hint) hint.textContent = `Matched: ${match.pcNumber} — ${match.company||''}`;
-            } else {
-                this.builderContext.pcId = null;
-                if (hint) hint.textContent = 'PC not found';
-            }
-        } catch (e) { logError('builderValidatePcManual error:', e); }
-    }
+    // Removed legacy dropdown/manual/company search (replaced by smart input)
 
     /**
      * @description Prefill collection address from PC record
