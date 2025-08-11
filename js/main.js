@@ -6241,6 +6241,8 @@ function setupLegacyCompatibility() {
     window.editPriceList = (id) => app.editPriceList(id);
     window.viewPriceListDetails = (id) => app.viewPriceListDetails(id);
     window.createPriceList = () => app.createPriceList();
+    window.savePriceList = () => app.savePriceList();
+    window.updatePriceList = () => app.updatePriceList();
 
     // Price List Items functions
     window.showAddResourceToPriceList = () => app.showAddResourceToPriceList();
