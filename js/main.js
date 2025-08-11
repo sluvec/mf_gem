@@ -5158,14 +5158,10 @@ class CRMApplication {
                 await db.save('priceLists', priceListData);
                 uiModals.showToast(`Price List "${priceListData.name}" created successfully!`, 'success');
                 
-                this.closePriceListModal();
-                
-                // Refresh price lists if we're on pricelists page
-                if (this.currentPage === 'pricelists') {
-                    await this.loadPriceListsData();
-                }
-                
-                logDebug('Price list created successfully:', priceListData);
+                // Go straight to the detail page (Step 2) to add resources
+                this.currentPriceList = priceListData;
+                await this.viewPriceListDetails(priceListId);
+                logDebug('Price list created and navigating to details:', priceListData);
             }
         } catch (error) {
             logError('Failed to save price list:', error);
