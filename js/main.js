@@ -1284,12 +1284,12 @@ class CRMApplication {
             });
         }
 
-        // Quote form
+        // Quote Step 1 modal form → proceed to full-screen builder
         const quoteForm = document.getElementById('new-quote-form');
         if (quoteForm) {
             quoteForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                await this.saveQuote();
+                await this.proceedToQuoteBuilderFromModal();
             });
         }
 
@@ -2917,13 +2917,9 @@ class CRMApplication {
                 });
             }
             
-            // Clear company & reset AM UI when not coming from PC
-            const companyField = document.getElementById('quote-modal-company');
+            // Reset AM UI when not coming from PC
             const amSection = document.getElementById('quote-modal-account-manager-section');
             const amSelect = document.getElementById('quote-modal-account-manager');
-            if (companyField && !pcId) {
-                companyField.value = '';
-            }
             if (amSection && amSelect && !pcId) {
                 amSection.style.display = '';
                 amSelect.required = true;
@@ -2937,6 +2933,40 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to open quote modal:', error);
             uiModals.showToast('Failed to open quote modal', 'error');
+        }
+    }
+
+    /**
+     * @description Step 1 submit: validate selections and open full-screen Quote Builder prefilled
+     */
+    async proceedToQuoteBuilderFromModal() {
+        try {
+            const formData = await this.getQuoteFormData();
+            if (!formData) return;
+
+            // Close modal
+            this.closeQuoteModal();
+
+            // Open builder and prefill context
+            await this.openQuoteBuilder(formData.pcId);
+
+            // Prefill builder fields: account manager, property type, and price list
+            const amEl = document.getElementById('builder-account-manager');
+            if (amEl && formData.accountManager) amEl.value = formData.accountManager;
+            const ptEl = document.getElementById('builder-property-type');
+            if (ptEl) ptEl.value = formData.propertyType || '';
+
+            // Set price list and trigger builder PL load
+            const builderPlSelect = document.getElementById('quote-price-list');
+            if (builderPlSelect) {
+                builderPlSelect.value = formData.priceListId || '';
+                await this.handlePriceListChange();
+            }
+
+            uiModals.showToast('Proceeding to Quote Builder…', 'success');
+        } catch (e) {
+            logError('Failed to proceed to builder from modal:', e);
+            uiModals.showToast('Failed to open Quote Builder', 'error');
         }
     }
 
@@ -3032,7 +3062,7 @@ class CRMApplication {
         const pcSelect = document.getElementById('quote-modal-pc');
         const priceListSelect = document.getElementById('quote-modal-pricelist');
         const accountManagerSelect = document.getElementById('quote-modal-account-manager');
-        const propertyTypeSelect = document.getElementById('quote-edit-property-type');
+        const propertyTypeSelect = document.getElementById('quote-modal-property-type');
         
         if (!pcSelect?.value) {
             uiModals.showToast('Please select a PC Number', 'error');
@@ -6047,11 +6077,8 @@ function setupLegacyCompatibility() {
     
     window.addQuoteForPc = async (id) => {
         logDebug('Add Quote for PC requested for ID:', id);
-        if (app.openQuoteBuilder) {
-            await app.openQuoteBuilder(id);
-        } else {
-            await app.addQuoteForPc(id); // fallback
-        }
+        // Always open Step 1 modal first with PC locked
+        await app.openQuoteModal(id);
     };
     
     window.addActivityForQuote = async (id) => {
@@ -6070,11 +6097,7 @@ function setupLegacyCompatibility() {
 
     
     window.showNewQuoteModal = async () => {
-        if (app.openQuoteBuilder) {
-            await app.openQuoteBuilder();
-        } else {
         await app.openQuoteModal();
-        }
     };
 
     window.closeQuoteModal = () => {

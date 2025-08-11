@@ -1965,26 +1965,9 @@
         <h2>Create New Quote</h2>
         
         <form id="new-quote-form">
-            <!-- Step 1: Company Selection (Optional) -->
+            <!-- PC Number -->
             <div class="form-section">
-                <h3>Step 1: Company Selection (Optional)</h3>
-                <div style="position: relative;">
-                    <label>Company Name</label>
-                    <input type="text" id="quote-modal-company" placeholder="Start typing company name..." 
-                           oninput="window.searchCompanies(this.value)" 
-                           onfocus="window.showCompanyDropdown()"
-                           onblur="window.hideCompanyDropdown()"
-                           autocomplete="off">
-                    <div id="company-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0.375rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 1000; max-height: 200px; overflow-y: auto;">
-                        <!-- Search results will be populated here -->
-                    </div>
-                    <small style="color: #6b7280;">Start typing to search companies, or leave blank to see all PC Numbers</small>
-                </div>
-            </div>
-
-            <!-- Step 2: PC Number Selection -->
-            <div class="form-section">
-                <h3>Step 2: PC Number Selection</h3>
+                <h3>PC Number</h3>
                 <div>
                     <label>PC Number *</label>
                     <select id="quote-modal-pc" required>
@@ -1995,21 +1978,9 @@
                 </div>
             </div>
 
-            <!-- Step 3: Price List Selection -->
-            <div class="form-section">
-                <h3>Step 3: Price List Selection</h3>
-                <div>
-                    <label>Price List *</label>
-                    <select id="quote-modal-pricelist" required>
-                        <option value="">Select Price List...</option>
-                    </select>
-                    <small style="color: #6b7280;">Choose the pricing structure for this quote</small>
-                </div>
-            </div>
-
-            <!-- Step 4: Account Manager -->
+            <!-- Account Manager -->
             <div class="form-section" id="quote-modal-account-manager-section">
-                <h3>Step 4: Account Manager</h3>
+                <h3>Account Manager</h3>
                 <div>
                     <label>Account Manager *</label>
                     <select id="quote-modal-account-manager" required>
@@ -2021,6 +1992,37 @@
                         <option value="David Lee">David Lee</option>
                     </select>
                     <small style="color: #6b7280;">Choose the account manager for this quote</small>
+                </div>
+            </div>
+
+            <!-- Property Type -->
+            <div class="form-section">
+                <h3>Property Type</h3>
+                <div>
+                    <label>Property Type</label>
+                    <select id="quote-modal-property-type">
+                        <option value="">Select Property Type...</option>
+                        <option>Office with IT equipment</option>
+                        <option>Office without IT equipment</option>
+                        <option>Museum</option>
+                        <option>Warehouse</option>
+                        <option>Laboratory</option>
+                        <option>Domestic - Individual</option>
+                        <option>Library</option>
+                        <option>Gallery</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Price List -->
+            <div class="form-section">
+                <h3>Price List</h3>
+                <div>
+                    <label>Price List *</label>
+                    <select id="quote-modal-pricelist" required>
+                        <option value="">Select Price List...</option>
+                    </select>
+                    <small style="color: #6b7280;">Choose the pricing structure for this quote</small>
                 </div>
             </div>
 
