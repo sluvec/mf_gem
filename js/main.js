@@ -106,9 +106,11 @@ class CRMApplication {
             const vatInput = document.getElementById('quote-vat-rate');
             if (vatInput && !vatInput.value) vatInput.value = '20.00';
 
-            // Ensure PL selector is visible; items section hidden until PL selected
+            // Ensure Step 1 & Step 2 are visible by default; items section hidden until PL selected
+            const step1Card = document.getElementById('builder-step-client');
             const plSelector = document.getElementById('price-list-selector');
             const itemsSection = document.getElementById('quote-items-section');
+            if (step1Card) step1Card.style.display = '';
             if (plSelector) plSelector.style.display = '';
             if (itemsSection) itemsSection.style.display = 'none';
 
@@ -2962,6 +2964,12 @@ class CRMApplication {
                 builderPlSelect.value = formData.priceListId || '';
                 await this.handlePriceListChange();
             }
+
+            // Hide Step 1 and Step 2 sections once we came from Step 1 modal
+            const step1Card = document.getElementById('builder-step-client');
+            const plSelector = document.getElementById('price-list-selector');
+            if (step1Card) step1Card.style.display = 'none';
+            if (plSelector) plSelector.style.display = 'none';
 
             uiModals.showToast('Proceeding to Quote Builder…', 'success');
         } catch (e) {
