@@ -5318,6 +5318,9 @@ class CRMApplication {
         try {
             const resources = await db.loadAll('resources');
             const select = document.getElementById('modal-resource-item-select');
+            const categorySelect = document.getElementById('modal-item-category');
+            const freeText = document.getElementById('modal-item-free-text');
+            const priceCurrency = document.getElementById('modal-price-currency');
             
             if (!select) return;
 
@@ -5334,6 +5337,15 @@ class CRMApplication {
 
             // Add change event listener
             select.onchange = () => this.updateResourceInfo();
+
+            // Reset category and item inputs
+            if (categorySelect) categorySelect.value = '';
+            if (freeText) { freeText.style.display = 'none'; freeText.value = ''; }
+
+            // Set currency symbol based on current price list
+            if (priceCurrency && this.currentPriceList?.currency) {
+                priceCurrency.textContent = this.currentPriceList.currency === 'USD' ? '$' : (this.currentPriceList.currency === 'EUR' ? '€' : '£');
+            }
             
             logDebug(`Loaded ${resources.length} resources for price list`);
         } catch (error) {
@@ -5349,6 +5361,7 @@ class CRMApplication {
             const select = document.getElementById('modal-resource-item-select');
             const selectedOption = select.options[select.selectedIndex];
             const resourceInfo = document.getElementById('resource-info');
+            const categorySelect = document.getElementById('modal-item-category');
             
             if (!selectedOption || !selectedOption.value) {
                 resourceInfo.innerHTML = '';
@@ -5369,10 +5382,41 @@ class CRMApplication {
             const suggestedPrice = cost * 1.25;
             document.getElementById('modal-client-price').value = suggestedPrice.toFixed(2);
             this.calculateMargin();
+            
+            // If user hasn't chosen category, infer from resource
+            if (categorySelect && !categorySelect.value) {
+                const inferred = (selectedOption.textContent.match(/\((.*?)\)/)?.[1] || '').toLowerCase();
+                const mapping = { labour: 'labour', vehicle: 'vehicle', materials: 'materials', crates: 'crates' };
+                categorySelect.value = mapping[inferred] || '';
+            }
 
         } catch (error) {
             logError('Failed to update resource info:', error);
         }
+    }
+
+    onModalCategoryChange = () => {
+        try {
+            const category = document.getElementById('modal-item-category')?.value;
+            const resourceSelect = document.getElementById('modal-resource-item-select');
+            const freeText = document.getElementById('modal-item-free-text');
+            if (!category) return;
+            if (category === 'other') {
+                if (resourceSelect) resourceSelect.style.display = 'none';
+                if (freeText) freeText.style.display = '';
+            } else {
+                if (resourceSelect) resourceSelect.style.display = '';
+                if (freeText) freeText.style.display = 'none';
+            }
+        } catch (e) { logError('onModalCategoryChange error:', e); }
+    }
+
+    onModalUnitChange = () => {
+        try {
+            const unit = document.getElementById('modal-item-unit')?.value;
+            const labourRates = document.getElementById('modal-labour-rates');
+            if (labourRates) labourRates.style.display = unit === 'hour' ? '' : 'none';
+        } catch (e) { logError('onModalUnitChange error:', e); }
     }
 
     /**
@@ -5428,12 +5472,25 @@ class CRMApplication {
 
             const resourceSelect = document.getElementById('modal-resource-item-select');
             const clientPriceInput = document.getElementById('modal-client-price');
-            
-            const resourceId = resourceSelect.value;
+            const category = document.getElementById('modal-item-category')?.value;
+            const freeText = document.getElementById('modal-item-free-text')?.value?.trim();
+            const unit = document.getElementById('modal-item-unit')?.value || 'each';
+            const labourRateType = document.getElementById('modal-labour-rate-type')?.value || 'standard';
+
+            const resourceId = category === 'other' ? '' : (resourceSelect?.value || '');
             const clientPrice = parseFloat(clientPriceInput.value || 0);
             
-            if (!resourceId) {
+            if (!category) {
+                uiModals.showToast('Please select category', 'error');
+                return;
+            }
+
+            if (category !== 'other' && !resourceId) {
                 uiModals.showToast('Please select a resource', 'error');
+                return;
+            }
+            if (category === 'other' && !freeText) {
+                uiModals.showToast('Please enter item name', 'error');
                 return;
             }
             
@@ -5442,28 +5499,25 @@ class CRMApplication {
                 return;
             }
 
-            // Get resource details
-            const resource = await db.load('resources', resourceId);
-            if (!resource) {
-                uiModals.showToast('Resource not found', 'error');
-                return;
-            }
+            // Get resource details if selected
+            const resource = resourceId ? await db.load('resources', resourceId) : null;
 
             // Create price list item
             const itemId = `PLI-${Date.now()}`;
-            const netCost = resource.costPerUnit || 0;
+            const netCost = resource?.costPerUnit || 0;
             const margin = netCost > 0 ? ((clientPrice - netCost) / netCost) * 100 : 0;
 
             const priceListItem = {
                 id: itemId,
                 priceListId: this.currentPriceList.id,
-                resourceId: resourceId,
-                resourceName: resource.name,
-                resourceCategory: resource.category,
+                resourceId: resourceId || null,
+                resourceName: resource ? resource.name : freeText,
+                resourceCategory: category,
                 netCost: netCost,
                 clientPrice: clientPrice,
                 margin: margin,
-                unit: resource.unit || 'each',
+                unit: unit,
+                labourRateType: unit === 'hour' ? labourRateType : undefined,
                 createdAt: new Date().toISOString(),
                 createdBy: this.currentUser || 'User'
             };
