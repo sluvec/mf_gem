@@ -114,6 +114,12 @@ class CRMApplication {
             if (plSelector) plSelector.style.display = '';
             if (itemsSection) itemsSection.style.display = 'none';
 
+            // Reset filters that affect PC dropdown so it shows all PCs by default
+            const clientInput = document.getElementById('builder-client-name');
+            if (clientInput) clientInput.value = '';
+            const manualPcInput = document.getElementById('builder-pc-number-manual');
+            if (manualPcInput) manualPcInput.value = '';
+
             // Initialize builder state
             this.builderState = {
                 priceListId: '',
@@ -2964,6 +2970,18 @@ class CRMApplication {
                 builderPlSelect.value = formData.priceListId || '';
                 await this.handlePriceListChange();
             }
+
+            // Ensure the PC dropdown contains ALL PCs by clearing any builder-side filters
+            const clientInput = document.getElementById('builder-client-name');
+            if (clientInput) clientInput.value = '';
+            const manualPcInput = document.getElementById('builder-pc-number-manual');
+            if (manualPcInput) manualPcInput.value = '';
+            await this.builderUpdatePcDropdown();
+
+            // Preselect the PC we chose in modal in the builder dropdown and chip
+            const sel = document.getElementById('builder-pc-select');
+            if (sel) sel.value = formData.pcId;
+            await this.builderSelectPcFromDropdown();
 
             // Hide Step 1 and Step 2 sections once we came from Step 1 modal
             const step1Card = document.getElementById('builder-step-client');
