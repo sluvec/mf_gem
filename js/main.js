@@ -5180,14 +5180,13 @@ class CRMApplication {
         try {
             const name = document.getElementById('pricelist-name')?.value?.trim();
             const category = document.getElementById('pricelist-category')?.value;
-            const description = document.getElementById('pricelist-description')?.value?.trim();
 
             if (!name || !category) {
                 uiModals.showToast('Please fill in all required fields', 'error');
                 return null;
             }
 
-            return { name, category, description };
+            return { name, category };
         } catch (error) {
             logError('Failed to get price list form data:', error);
             return null;
@@ -5214,7 +5213,6 @@ class CRMApplication {
                 ...existingPriceList,
                 name: formData.name,
                 category: formData.category,
-                description: formData.description,
                 lastModifiedAt: new Date().toISOString(),
                 editedBy: this.currentUser || 'User'
             };

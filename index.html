@@ -1726,7 +1726,6 @@
                     <h3>Basic Information</h3>
                     <div class="form-grid">
                         <div><label>Price List Name *</label><input type="text" id="pricelist-name" placeholder="e.g. Standard Commercial Rates 2024" required></div>
-                        <div><label>Version *</label><input type="text" id="pricelist-version" placeholder="e.g. v2.1" required></div>
                         <div><label>Currency</label><select id="pricelist-currency">
                             <option value="GBP" selected>GBP (£)</option>
                             <option value="USD">USD ($)</option>
@@ -1738,10 +1737,7 @@
                             <option value="inactive">Inactive</option>
                         </select></div>
                     </div>
-                    <div>
-                        <label>Description</label>
-                        <textarea id="pricelist-description" rows="2" placeholder="Brief description of this price list..."></textarea>
-                    </div>
+                    
                 </div>
                 
                 <!-- Pricing Configuration -->
@@ -1761,14 +1757,7 @@
                     </div>
                 </div>
                 
-                <!-- Terms & Conditions -->
-                <div class="form-section">
-                    <h3>Terms & Conditions</h3>
-                    <div>
-                        <label>Default Terms</label>
-                        <textarea id="pricelist-terms" rows="3" placeholder="Pricing terms, payment conditions, delivery notes...">Prices valid for 30 days from quote date. Payment terms: 30 days net. Delivery charges may apply.</textarea>
-                    </div>
-                </div>
+                
                 
                 <div class="form-actions">
                     <button onclick="window.createPriceList()">Create Price List</button>
