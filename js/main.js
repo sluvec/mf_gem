@@ -5142,13 +5142,13 @@ class CRMApplication {
                     id: priceListId,
                     name: formData.name,
                     category: formData.category,
-                    description: formData.description || '',
-                    currency: 'GBP',
-                    status: 'active',
-                    markup: 25,
-                    discount: 0,
-                    effectiveFrom: new Date().toISOString(),
-                    isDefault: false,
+                    currency: formData.currency || 'GBP',
+                    status: formData.status || 'active',
+                    markup: typeof formData.markup === 'number' ? formData.markup : 25,
+                    discount: typeof formData.discount === 'number' ? formData.discount : 0,
+                    effectiveFrom: formData.effectiveFrom || new Date().toISOString(),
+                    effectiveTo: formData.effectiveTo || '',
+                    isDefault: !!formData.isDefault,
                     items: [],
                     createdAt: new Date().toISOString(),
                     lastModifiedAt: new Date().toISOString(),
@@ -5179,14 +5179,39 @@ class CRMApplication {
     getPriceListFormData() {
         try {
             const name = document.getElementById('pricelist-name')?.value?.trim();
-            const category = document.getElementById('pricelist-category')?.value;
+            // Category may not exist on the New Price List page (if removed); default to 'General'
+            const categoryEl = document.getElementById('pricelist-category');
+            const category = categoryEl ? categoryEl.value : 'General';
 
-            if (!name || !category) {
-                uiModals.showToast('Please fill in all required fields', 'error');
+            // Currency and Status are present on the page
+            const currency = document.getElementById('pricelist-currency')?.value || 'GBP';
+            const status = document.getElementById('pricelist-status')?.value || 'active';
+
+            // Dates (use whichever fields exist)
+            const effectiveFrom = document.getElementById('pricelist-effective-from')?.value || document.getElementById('pricelist-valid-from')?.value || '';
+            const effectiveTo = document.getElementById('pricelist-effective-to')?.value || document.getElementById('pricelist-valid-until')?.value || '';
+
+            // Pricing configuration (may be absent on edit modal)
+            const markupStr = document.getElementById('pricelist-markup')?.value || '';
+            const discountStr = document.getElementById('pricelist-discount')?.value || '';
+            const isDefault = !!document.getElementById('pricelist-is-default')?.checked;
+
+            if (!name) {
+                uiModals.showToast('Please enter Price List Name', 'error');
                 return null;
             }
 
-            return { name, category };
+            return {
+                name,
+                category,
+                currency,
+                status,
+                effectiveFrom,
+                effectiveTo,
+                markup: markupStr !== '' ? parseFloat(markupStr) : undefined,
+                discount: discountStr !== '' ? parseFloat(discountStr) : undefined,
+                isDefault
+            };
         } catch (error) {
             logError('Failed to get price list form data:', error);
             return null;
