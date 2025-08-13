@@ -2124,8 +2124,9 @@ class CRMApplication {
                             r.costPerHour != null ? { unit: 'hour', cost: r.costPerHour } : null,
                             r.costPerDay != null ? { unit: 'day', cost: r.costPerDay } : null
                         ].filter(Boolean);
+                        const normalizedCategory = (r.category || r.type || '').toString().toLowerCase();
                         unitPrices.forEach(up => {
-                            rows.push({ id: r.id, name: r.name, category: r.category || r.type, unit: up.unit, cost: up.cost });
+                            rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: up.cost });
                         });
                     }
 
@@ -2150,10 +2151,16 @@ class CRMApplication {
                         (!usageFilter || (usageFilter === 'used' ? row.usage > 0 : row.usage === 0))
                     );
 
+                    const formatCategory = (c) => {
+                        if (!c) return 'N/A';
+                        const s = String(c);
+                        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+                    };
+
                     container.innerHTML = filteredRows.map(row => `
                         <tr>
                             <td><strong>${row.name || 'N/A'}</strong></td>
-                            <td>${row.category || 'N/A'}</td>
+                            <td>${formatCategory(row.category)}</td>
                             <td>${row.unit || '-'}</td>
                             <td>£${(row.cost || 0).toLocaleString()}</td>
                             <td>${row.usage}</td>
