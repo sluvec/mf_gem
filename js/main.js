@@ -6490,6 +6490,13 @@ function setupLegacyCompatibility() {
     window.updatePriceList = () => app.updatePriceList();
     window.deletePriceList = (id) => app.deletePriceList(id);
     window.addUnitPriceRow = () => app.addUnitPriceRow();
+    window.onResourceCategoryChange = () => {
+        try {
+            const val = document.getElementById('resource-category')?.value;
+            const warn = document.getElementById('resource-category-warning');
+            if (warn) warn.style.display = (val === 'other') ? '' : 'none';
+        } catch (e) { logError('onResourceCategoryChange error:', e); }
+    };
 
     // Price List Items functions
     window.showAddResourceToPriceList = () => app.showAddResourceToPriceList();

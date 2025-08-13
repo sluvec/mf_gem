@@ -2781,14 +2781,18 @@
         <div class="form-section">
             <h3>Basic Information</h3>
             <div class="form-grid">
-                <div><label>Category *</label><select id="resource-category" required>
+                <div><label>Category *</label><select id="resource-category" required onchange="window.onResourceCategoryChange()">
                     <option value="">Select...</option>
                     <option value="labour">Labour</option>
                     <option value="vehicles">Vehicles</option>
                     <option value="material">Material</option>
                     <option value="crates">Crates</option>
                     <option value="other">Other</option>
-                </select></div>
+                </select>
+                <div id="resource-category-warning" style="display:none; margin-top: 0.5rem; background: #FEF3C7; border: 1px solid #F59E0B; color: #92400E; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem;">
+                    Uwaga: kategoria "Other" powinna być używana tylko w wyjątkowych sytuacjach. Jeżeli to możliwe, wybierz jedną z predefiniowanych kategorii.
+                </div>
+                </div>
                 <div><label>Resource Name *</label><input type="text" id="resource-name" placeholder="e.g. Fitter, Luton Van, Protection Blankets" required></div>
             </div>
         </div>
