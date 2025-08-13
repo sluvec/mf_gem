@@ -4846,11 +4846,16 @@ class CRMApplication {
             if (form) {
                 form.reset();
                 document.getElementById('resource-id').value = '';
-                const container = document.getElementById('resource-unitprices');
-                if (container) {
-                    container.innerHTML = '';
-                    this.addUnitPriceRow();
-                }
+                // Reset hour block
+                const hourBlock = document.getElementById('hour-rates-block');
+                if (hourBlock) hourBlock.style.display = 'none';
+                const hourFields = ['hour-cost-standard','hour-cost-ot1','hour-cost-ot2','hour-cost-bank'];
+                hourFields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                // Reset other unit rows
+                const other = document.getElementById('resource-other-unitprices');
+                if (other) other.innerHTML = '';
+                // Reset unit picker
+                const picker = document.getElementById('unit-picker'); if (picker) picker.value = '';
             }
         } catch (error) {
             logError('Failed to clear resource form:', error);
@@ -6561,6 +6566,7 @@ function setupLegacyCompatibility() {
     window.updatePriceList = () => app.updatePriceList();
     window.deletePriceList = (id) => app.deletePriceList(id);
     window.addUnitPriceRow = () => app.addUnitPriceRow();
+    window.addUnitFromPicker = () => app.addUnitFromPicker();
     window.onRupUnitChange = (selectEl) => {
         try {
             const row = selectEl.closest('.resource-unitprice-row');

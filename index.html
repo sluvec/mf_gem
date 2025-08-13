@@ -2801,13 +2801,26 @@
         <!-- Pricing & Units -->
         <div class="form-section">
             <h3>Pricing & Units</h3>
-            <!-- Hour block -->
+            <!-- Unit picker and Hour block -->
             <div class="card" style="padding: 0.75rem; margin-bottom: 0.75rem;">
-                <label style="display:flex; align-items:center; gap:0.5rem;">
-                    <input type="checkbox" id="hour-provide" onchange="window.onToggleHourRates()">
-                    Provide hourly rates
-                </label>
-                <div id="hour-rates-block" style="margin-top:0.5rem; display:none;">
+                <div style="display:flex; gap:0.5rem; align-items:flex-end;">
+                    <div>
+                        <label>Unit</label>
+                        <select id="unit-picker">
+                            <option value="">Select...</option>
+                            <option value="hour">Hour</option>
+                            <option value="each">Each</option>
+                            <option value="day">Day</option>
+                            <option value="week">Week</option>
+                            <option value="month">Month</option>
+                            <option value="pack">Pack</option>
+                            <option value="roll">Roll</option>
+                            <option value="sheet">Sheet</option>
+                        </select>
+                    </div>
+                    <button type="button" class="secondary" onclick="window.addUnitFromPicker()">Add</button>
+                </div>
+                <div id="hour-rates-block" style="margin-top:0.75rem; display:none;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; align-items:end; margin-bottom:0.5rem;">
                         <div>
                             <label>Hour Type</label>
