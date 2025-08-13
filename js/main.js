@@ -4772,10 +4772,51 @@ class CRMApplication {
             if (form) {
                 form.reset();
                 document.getElementById('resource-id').value = '';
+                const container = document.getElementById('resource-unitprices');
+                if (container) {
+                    container.innerHTML = '';
+                    this.addUnitPriceRow();
+                }
             }
         } catch (error) {
             logError('Failed to clear resource form:', error);
         }
+    }
+
+    addUnitPriceRow() {
+        try {
+            const container = document.getElementById('resource-unitprices');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'resource-unitprice-row';
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '1fr 1fr auto';
+            row.style.gap = '0.75rem';
+            row.style.marginBottom = '0.5rem';
+            row.innerHTML = `
+                <div>
+                    <label>Unit *</label>
+                    <select class="rup-unit">
+                        <option value="each">Each</option>
+                        <option value="hour">Hour</option>
+                        <option value="day">Day</option>
+                        <option value="week">Week</option>
+                        <option value="month">Month</option>
+                        <option value="pack">Pack</option>
+                        <option value="roll">Roll</option>
+                        <option value="sheet">Sheet</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Net Cost (£) *</label>
+                    <input type="number" class="rup-cost" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div style="display:flex; align-items:flex-end;">
+                    <button type="button" class="secondary" onclick="this.closest('.resource-unitprice-row').remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(row);
+        } catch (e) { logError('addUnitPriceRow error:', e); }
     }
 
     /**
@@ -4799,9 +4840,11 @@ class CRMApplication {
                     id: resourceId,
                     name: formData.name,
                     category: formData.category,
-                    costPerUnit: parseFloat(formData.cost),
-                    unit: formData.unit,
-                    status: formData.status,
+                    unit: formData.unitPrices?.[0]?.unit || 'each',
+                    costPerUnit: formData.unitPrices.find(u => u.unit === 'each')?.cost ?? null,
+                    costPerHour: formData.unitPrices.find(u => u.unit === 'hour')?.cost ?? null,
+                    costPerDay: formData.unitPrices.find(u => u.unit === 'day')?.cost ?? null,
+                    unitPrices: formData.unitPrices,
                     createdAt: new Date().toISOString(),
                     lastModifiedAt: new Date().toISOString(),
                     createdBy: this.currentUser || 'User'
@@ -4832,21 +4875,22 @@ class CRMApplication {
         try {
             const name = document.getElementById('resource-name')?.value?.trim();
             const category = document.getElementById('resource-category')?.value;
-            const cost = document.getElementById('resource-cost')?.value;
-            const unit = document.getElementById('resource-unit')?.value;
-            const status = document.getElementById('resource-status')?.value;
 
-            if (!name || !category || !cost || !unit || !status) {
-                uiModals.showToast('Please fill in all required fields', 'error');
+            // Collect unit price rows
+            const rows = Array.from(document.querySelectorAll('.resource-unitprice-row'));
+            const unitPrices = rows.map(row => {
+                const unit = row.querySelector('.rup-unit')?.value;
+                const costStr = row.querySelector('.rup-cost')?.value;
+                const cost = parseFloat(costStr || '');
+                return { unit, cost };
+            }).filter(x => x.unit && !isNaN(x.cost) && x.cost >= 0);
+
+            if (!name || !category || unitPrices.length === 0) {
+                uiModals.showToast('Please fill in Name, Category, and at least one Unit price', 'error');
                 return null;
             }
 
-            if (isNaN(cost) || parseFloat(cost) < 0) {
-                uiModals.showToast('Please enter a valid cost', 'error');
-                return null;
-            }
-
-            return { name, category, cost, unit, status };
+            return { name, category, unitPrices };
         } catch (error) {
             logError('Failed to get resource form data:', error);
             return null;
@@ -4868,9 +4912,25 @@ class CRMApplication {
             document.getElementById('resource-id').value = resource.id;
             document.getElementById('resource-name').value = resource.name || '';
             document.getElementById('resource-category').value = resource.category || '';
-            document.getElementById('resource-cost').value = resource.costPerUnit || resource.costPerHour || resource.costPerDay || '';
-            document.getElementById('resource-unit').value = resource.unit || '';
-            document.getElementById('resource-status').value = resource.status || 'available';
+            // Build unit prices rows
+            const container = document.getElementById('resource-unitprices');
+            if (container) {
+                container.innerHTML = '';
+                const unitPrices = resource.unitPrices && Array.isArray(resource.unitPrices)
+                    ? resource.unitPrices
+                    : [
+                        resource.costPerUnit != null ? { unit: 'each', cost: resource.costPerUnit } : null,
+                        resource.costPerHour != null ? { unit: 'hour', cost: resource.costPerHour } : null,
+                        resource.costPerDay != null ? { unit: 'day', cost: resource.costPerDay } : null
+                    ].filter(Boolean);
+                if (unitPrices.length === 0) unitPrices.push({ unit: resource.unit || 'each', cost: 0 });
+                unitPrices.forEach(up => {
+                    this.addUnitPriceRow();
+                    const row = container.lastElementChild;
+                    row.querySelector('.rup-unit').value = up.unit;
+                    row.querySelector('.rup-cost').value = up.cost;
+                });
+            }
 
             document.getElementById('resource-modal-title').textContent = 'Edit Resource';
             uiModals.openModal('resource-modal');
@@ -4902,9 +4962,12 @@ class CRMApplication {
                 ...existingResource,
                 name: formData.name,
                 category: formData.category,
-                costPerUnit: parseFloat(formData.cost),
-                unit: formData.unit,
-                status: formData.status,
+                // Normalize unit prices into common fields for backward compatibility
+                unit: formData.unitPrices?.[0]?.unit || existingResource.unit || 'each',
+                costPerUnit: (formData.unitPrices.find(u => u.unit === 'each')?.cost) ?? existingResource.costPerUnit ?? null,
+                costPerHour: (formData.unitPrices.find(u => u.unit === 'hour')?.cost) ?? existingResource.costPerHour ?? null,
+                costPerDay: (formData.unitPrices.find(u => u.unit === 'day')?.cost) ?? existingResource.costPerDay ?? null,
+                unitPrices: formData.unitPrices,
                 lastModifiedAt: new Date().toISOString(),
                 editedBy: this.currentUser || 'User'
             };
@@ -6359,6 +6422,7 @@ function setupLegacyCompatibility() {
     window.savePriceList = () => app.savePriceList();
     window.updatePriceList = () => app.updatePriceList();
     window.deletePriceList = (id) => app.deletePriceList(id);
+    window.addUnitPriceRow = () => app.addUnitPriceRow();
 
     // Price List Items functions
     window.showAddResourceToPriceList = () => app.showAddResourceToPriceList();
