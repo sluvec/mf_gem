@@ -1706,6 +1706,13 @@
                         <option value="week">Week</option>
                         <option value="month">Month</option>
                     </select>
+                    <input type="number" id="resource-filter-cost-min" placeholder="Cost min" step="0.01" style="width: 110px;" oninput="window.filterResourcesTable()">
+                    <input type="number" id="resource-filter-cost-max" placeholder="Cost max" step="0.01" style="width: 110px;" oninput="window.filterResourcesTable()">
+                    <select id="resource-filter-usage" onchange="window.filterResourcesTable()">
+                        <option value="">All usage</option>
+                        <option value="used">Used in PL</option>
+                        <option value="unused">Not used</option>
+                    </select>
                 </div>
                 <table>
                     <thead><tr><th>Name</th><th>Category</th><th>Unit</th><th>Net Cost</th><th>Used in Price Lists</th><th>Actions</th></tr></thead>

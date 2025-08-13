@@ -2108,6 +2108,9 @@ class CRMApplication {
             const nameFilter = (document.getElementById('resource-filter-name')?.value || '').toLowerCase();
             const categoryFilter = (document.getElementById('resource-filter-category')?.value || '').toLowerCase();
             const unitFilter = (document.getElementById('resource-filter-unit')?.value || '').toLowerCase();
+            const costMin = parseFloat(document.getElementById('resource-filter-cost-min')?.value || '');
+            const costMax = parseFloat(document.getElementById('resource-filter-cost-max')?.value || '');
+            const usageFilter = (document.getElementById('resource-filter-usage')?.value || '').toLowerCase();
             
             if (container) {
                 if (resources.length === 0) {
@@ -2126,13 +2129,6 @@ class CRMApplication {
                         });
                     }
 
-                    // Apply filters
-                    const filteredRows = rows.filter(row =>
-                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter)) &&
-                        (!categoryFilter || (row.category || '').toLowerCase() === categoryFilter) &&
-                        (!unitFilter || (row.unit || '').toLowerCase() === unitFilter)
-                    );
-
                     // Usage count per resource-unit across price lists
                     const usageCountFor = (resId, unit) => {
                         let count = 0;
@@ -2143,6 +2139,16 @@ class CRMApplication {
                         }
                         return count;
                     };
+                    const enrichedRows = rows.map(r => ({...r, usage: usageCountFor(r.id, r.unit)}));
+                    // Apply filters
+                    const filteredRows = enrichedRows.filter(row =>
+                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter)) &&
+                        (!categoryFilter || (row.category || '').toLowerCase() === categoryFilter) &&
+                        (!unitFilter || (row.unit || '').toLowerCase() === unitFilter) &&
+                        (isNaN(costMin) || (row.cost ?? Infinity) >= costMin) &&
+                        (isNaN(costMax) || (row.cost ?? -Infinity) <= costMax) &&
+                        (!usageFilter || (usageFilter === 'used' ? row.usage > 0 : row.usage === 0))
+                    );
 
                     container.innerHTML = filteredRows.map(row => `
                         <tr>
@@ -2150,7 +2156,7 @@ class CRMApplication {
                             <td>${row.category || 'N/A'}</td>
                             <td>${row.unit || '-'}</td>
                             <td>£${(row.cost || 0).toLocaleString()}</td>
-                            <td>${usageCountFor(row.id, row.unit)}</td>
+                            <td>${row.usage}</td>
                             <td>
                                 <button onclick="window.editResource('${row.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewResourceDetails('${row.id}')" class="button primary small">View</button>
