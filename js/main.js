@@ -2126,7 +2126,7 @@ class CRMApplication {
                         ].filter(Boolean);
                         const normalizedCategory = (r.category || r.type || '').toString().toLowerCase();
                         unitPrices.forEach(up => {
-                            rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: up.cost });
+                            rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: up.cost, createdAt: r.createdAt });
                         });
                     }
 
@@ -2163,6 +2163,7 @@ class CRMApplication {
                             <td>${formatCategory(row.category)}</td>
                             <td>${row.unit || '-'}</td>
                             <td>£${(row.cost || 0).toLocaleString()}</td>
+                            <td>${this.formatDate(row.createdAt)}</td>
                             <td>${row.usage}</td>
                             <td>
                                 <button onclick="window.editResource('${row.id}')" class="button warning small">Edit</button>
