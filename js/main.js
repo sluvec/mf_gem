@@ -2103,21 +2103,58 @@ class CRMApplication {
     async loadResourcesData() {
         try {
             const resources = await db.loadAll('resources');
+            const priceLists = await db.loadAll('priceLists');
             const container = document.getElementById('resources-list');
+            const nameFilter = (document.getElementById('resource-filter-name')?.value || '').toLowerCase();
+            const categoryFilter = (document.getElementById('resource-filter-category')?.value || '').toLowerCase();
+            const unitFilter = (document.getElementById('resource-filter-unit')?.value || '').toLowerCase();
             
             if (container) {
                 if (resources.length === 0) {
-                    container.innerHTML = '<tr><td colspan="5">No resources found. <button onclick="window.showResourceModal()" class="button primary">Create First Resource</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="6">No resources found. <button onclick="window.showResourceModal()" class="button primary">Create First Resource</button></td></tr>';
                 } else {
-                    container.innerHTML = resources.map(resource => `
+                    // Expand resources into rows per unit price
+                    const rows = [];
+                    for (const r of resources) {
+                        const unitPrices = (r.unitPrices && Array.isArray(r.unitPrices)) ? r.unitPrices : [
+                            r.costPerUnit != null ? { unit: 'each', cost: r.costPerUnit } : null,
+                            r.costPerHour != null ? { unit: 'hour', cost: r.costPerHour } : null,
+                            r.costPerDay != null ? { unit: 'day', cost: r.costPerDay } : null
+                        ].filter(Boolean);
+                        unitPrices.forEach(up => {
+                            rows.push({ id: r.id, name: r.name, category: r.category || r.type, unit: up.unit, cost: up.cost });
+                        });
+                    }
+
+                    // Apply filters
+                    const filteredRows = rows.filter(row =>
+                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter)) &&
+                        (!categoryFilter || (row.category || '').toLowerCase() === categoryFilter) &&
+                        (!unitFilter || (row.unit || '').toLowerCase() === unitFilter)
+                    );
+
+                    // Usage count per resource-unit across price lists
+                    const usageCountFor = (resId, unit) => {
+                        let count = 0;
+                        for (const pl of priceLists) {
+                            const items = Array.isArray(pl.items) ? pl.items : [];
+                            const match = items.some(it => (it.resourceId === resId) && ((it.unit || '').toLowerCase() === (unit || '').toLowerCase()));
+                            if (match) count += 1;
+                        }
+                        return count;
+                    };
+
+                    container.innerHTML = filteredRows.map(row => `
                         <tr>
-                            <td><strong>${resource.name || 'N/A'}</strong></td>
-                            <td>${resource.category || resource.type || 'N/A'}</td>
-                            <td>£${(resource.costPerHour || resource.costPerDay || resource.costPerUnit || 0).toLocaleString()}</td>
-                            <td><span class="status-badge ${resource.status || 'available'}">${resource.status || 'available'}</span></td>
+                            <td><strong>${row.name || 'N/A'}</strong></td>
+                            <td>${row.category || 'N/A'}</td>
+                            <td>${row.unit || '-'}</td>
+                            <td>£${(row.cost || 0).toLocaleString()}</td>
+                            <td>${usageCountFor(row.id, row.unit)}</td>
                             <td>
-                                <button onclick="window.editResource('${resource.id}')" class="button warning small">Edit</button>
-                                <button onclick="window.viewResourceDetails('${resource.id}')" class="button primary small">View</button>
+                                <button onclick="window.editResource('${row.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.viewResourceDetails('${row.id}')" class="button primary small">View</button>
+                                <button onclick="window.deleteResource('${row.id}')" class="button danger small">Delete</button>
                             </td>
                         </tr>
                     `).join('');
@@ -2130,6 +2167,21 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to load resources data:', error);
         }
+    }
+
+    async deleteResource(id) {
+        try {
+            const resource = await db.load('resources', id);
+            if (!resource) { uiModals.showToast('Resource not found', 'error'); return; }
+            // Prevent deletion if used in price lists
+            const priceLists = await db.loadAll('priceLists');
+            const inUse = priceLists.some(pl => (Array.isArray(pl.items) ? pl.items : []).some(it => it.resourceId === id));
+            if (inUse) { uiModals.showToast('Cannot delete: resource is used in at least one price list', 'error'); return; }
+            if (!confirm(`Delete resource "${resource.name}"? This cannot be undone.`)) return;
+            await db.delete('resources', id);
+            uiModals.showToast('Resource deleted', 'success');
+            if (this.currentPage === 'resources') await this.loadResourcesData();
+        } catch (e) { logError('deleteResource error:', e); uiModals.showToast('Failed to delete resource', 'error'); }
     }
 
     /**
@@ -6414,6 +6466,8 @@ function setupLegacyCompatibility() {
     window.editResource = (id) => app.editResource(id);
     window.viewResourceDetails = (id) => app.viewResourceDetails(id);
     window.closeResourceDetailsModal = () => uiModals.closeModal('resource-details-modal');
+    window.deleteResource = (id) => app.deleteResource(id);
+    window.filterResourcesTable = () => app.loadResourcesData();
 
     // Price Lists functions
     window.editPriceList = (id) => app.editPriceList(id);
