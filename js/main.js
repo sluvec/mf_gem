@@ -5364,6 +5364,7 @@ class CRMApplication {
     updateResourceInfo() {
         try {
             const select = document.getElementById('modal-resource-item-select');
+            const unitSelect = document.getElementById('modal-item-unit');
             const selectedOption = select.options[select.selectedIndex];
             const resourceInfo = document.getElementById('resource-info');
             const categorySelect = document.getElementById('modal-item-category');
@@ -5395,12 +5396,18 @@ class CRMApplication {
                 categorySelect.value = mapping[inferred] || '';
             }
 
+            // Force unit select to resource's unit
+            if (unitSelect) {
+                unitSelect.value = unit;
+                this.onModalUnitChange();
+            }
+
         } catch (error) {
             logError('Failed to update resource info:', error);
         }
     }
 
-    onModalCategoryChange = () => {
+    onModalCategoryChange = async () => {
         try {
             const category = document.getElementById('modal-item-category')?.value;
             const resourceSelect = document.getElementById('modal-resource-item-select');
@@ -5412,6 +5419,20 @@ class CRMApplication {
             } else {
                 if (resourceSelect) resourceSelect.style.display = '';
                 if (freeText) freeText.style.display = 'none';
+                // Filter resources by selected category and repopulate item dropdown
+                const all = await db.loadAll('resources');
+                const filtered = all.filter(r => (r.category || r.type || '').toLowerCase() === category);
+                if (resourceSelect) {
+                    resourceSelect.innerHTML = '<option value="">Select a resource...</option>';
+                    filtered.forEach(resource => {
+                        const option = document.createElement('option');
+                        option.value = resource.id;
+                        option.textContent = `${resource.name} (${resource.category}) - £${(resource.costPerUnit || resource.costPerHour || resource.costPerDay || 0).toLocaleString()}`;
+                        option.dataset.cost = resource.costPerUnit || resource.costPerHour || resource.costPerDay || 0;
+                        option.dataset.unit = resource.unit || (resource.costPerHour ? 'hour' : resource.costPerDay ? 'day' : 'each');
+                        resourceSelect.appendChild(option);
+                    });
+                }
             }
         } catch (e) { logError('onModalCategoryChange error:', e); }
     }
@@ -5421,6 +5442,16 @@ class CRMApplication {
             const unit = document.getElementById('modal-item-unit')?.value;
             const labourRates = document.getElementById('modal-labour-rates');
             if (labourRates) labourRates.style.display = unit === 'hour' ? '' : 'none';
+            // If a resource is selected, clamp unit to the resource's unit
+            const sel = document.getElementById('modal-resource-item-select');
+            const selected = sel?.options?.[sel.selectedIndex];
+            const resUnit = selected?.dataset?.unit;
+            if (resUnit && unit !== resUnit) {
+                const unitSelect = document.getElementById('modal-item-unit');
+                if (unitSelect) unitSelect.value = resUnit;
+                if (labourRates) labourRates.style.display = resUnit === 'hour' ? '' : 'none';
+                uiModals.showToast(`Unit adjusted to match resource (${resUnit})`, 'info');
+            }
         } catch (e) { logError('onModalUnitChange error:', e); }
     }
 
