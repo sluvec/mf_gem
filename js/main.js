@@ -2119,11 +2119,19 @@ class CRMApplication {
                     // Expand resources into rows per unit price
                     const rows = [];
                     for (const r of resources) {
-                        const unitPrices = (r.unitPrices && Array.isArray(r.unitPrices)) ? r.unitPrices : [
+                const unitPricesRaw = (r.unitPrices && Array.isArray(r.unitPrices)) ? r.unitPrices : [
                             r.costPerUnit != null ? { unit: 'each', cost: r.costPerUnit } : null,
                             r.costPerHour != null ? { unit: 'hour', cost: r.costPerHour } : null,
                             r.costPerDay != null ? { unit: 'day', cost: r.costPerDay } : null
-                        ].filter(Boolean);
+                ].filter(Boolean);
+                // Merge hourly variants (standard/OT1/OT2/bank holiday) to separate lines if present
+                const unitPrices = unitPricesRaw.flatMap(up => {
+                    if (up.unit === 'hour' && Array.isArray(r.unitPrices)) {
+                        // When structured list exists, just return as-is
+                        return [up];
+                    }
+                    return [up];
+                });
                         const normalizedCategory = (r.category || r.type || '').toString().toLowerCase();
                         unitPrices.forEach(up => {
                             rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: up.cost, createdAt: r.createdAt });
@@ -4862,7 +4870,7 @@ class CRMApplication {
             row.innerHTML = `
                 <div>
                     <label>Unit *</label>
-                    <select class="rup-unit">
+                    <select class="rup-unit" onchange="window.onRupUnitChange(this)">
                         <option value="each">Each</option>
                         <option value="hour">Hour</option>
                         <option value="day">Day</option>
@@ -4872,6 +4880,15 @@ class CRMApplication {
                         <option value="roll">Roll</option>
                         <option value="sheet">Sheet</option>
                     </select>
+                    <div class="rup-hour-wrap" style="display:none; margin-top: 0.5rem;">
+                        <label>Hour Type *</label>
+                        <select class="rup-hour-type">
+                            <option value="standard" selected>Standard</option>
+                            <option value="ot1">Overtime 1 (OT1)</option>
+                            <option value="ot2">Overtime 2 (OT2)</option>
+                            <option value="bank_holiday">Bank Holiday</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label>Net Cost (£) *</label>
@@ -4948,11 +4965,20 @@ class CRMApplication {
                 const unit = row.querySelector('.rup-unit')?.value;
                 const costStr = row.querySelector('.rup-cost')?.value;
                 const cost = parseFloat(costStr || '');
-                return { unit, cost };
+                const hourType = unit === 'hour' ? (row.querySelector('.rup-hour-type')?.value || 'standard') : undefined;
+                return { unit, cost, hourType };
             }).filter(x => x.unit && !isNaN(x.cost) && x.cost >= 0);
 
             if (!name || !category || unitPrices.length === 0) {
                 uiModals.showToast('Please fill in Name, Category, and at least one Unit price', 'error');
+                return null;
+            }
+
+            // Enforce: if any hour entries exist, at least one must be 'standard'
+            const hasHour = unitPrices.some(u => u.unit === 'hour');
+            const hasStandard = unitPrices.some(u => u.unit === 'hour' && (u.hourType || 'standard') === 'standard' && u.cost >= 0);
+            if (hasHour && !hasStandard) {
+                uiModals.showToast('Please add a Standard hourly rate when using Hour unit', 'error');
                 return null;
             }
 
@@ -6491,6 +6517,13 @@ function setupLegacyCompatibility() {
     window.updatePriceList = () => app.updatePriceList();
     window.deletePriceList = (id) => app.deletePriceList(id);
     window.addUnitPriceRow = () => app.addUnitPriceRow();
+    window.onRupUnitChange = (selectEl) => {
+        try {
+            const row = selectEl.closest('.resource-unitprice-row');
+            const hourWrap = row?.querySelector('.rup-hour-wrap');
+            if (hourWrap) hourWrap.style.display = (selectEl.value === 'hour') ? '' : 'none';
+        } catch (e) { logError('onRupUnitChange error:', e); }
+    };
     window.onResourceCategoryChange = () => {
         try {
             const val = document.getElementById('resource-category')?.value;
