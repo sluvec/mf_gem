@@ -4882,23 +4882,27 @@ class CRMApplication {
                     </select>
                     <div class="rup-hour-wrap" style="display:none; margin-top: 0.5rem;">
                         <label>Hour Type *</label>
-                        <select class="rup-hour-type">
+                        <select class="rup-hour-type" onchange="window.onRupHourTypeChange(this)">
                             <option value="standard" selected>Standard</option>
                             <option value="ot1">Overtime 1 (OT1)</option>
                             <option value="ot2">Overtime 2 (OT2)</option>
                             <option value="bank_holiday">Bank Holiday</option>
                         </select>
+                        <button type="button" class="secondary" style="margin-left:0.5rem;" onclick="window.addHourRateRow(this)">+ Add another hour rate</button>
                     </div>
                 </div>
                 <div>
                     <label>Net Cost (£) *</label>
-                    <input type="number" class="rup-cost" step="0.01" min="0" placeholder="0.00">
+                    <input type="number" class="rup-cost" step="0.01" min="0" placeholder="0.00" disabled>
                 </div>
                 <div style="display:flex; align-items:flex-end;">
                     <button type="button" class="secondary" onclick="this.closest('.resource-unitprice-row').remove()">Remove</button>
                 </div>
             `;
             container.appendChild(row);
+            // Initialize state for default unit (enable cost if not hour)
+            const unitSel = row.querySelector('.rup-unit');
+            if (unitSel) window.onRupUnitChange(unitSel);
         } catch (e) { logError('addUnitPriceRow error:', e); }
     }
 
@@ -6522,7 +6526,34 @@ function setupLegacyCompatibility() {
             const row = selectEl.closest('.resource-unitprice-row');
             const hourWrap = row?.querySelector('.rup-hour-wrap');
             if (hourWrap) hourWrap.style.display = (selectEl.value === 'hour') ? '' : 'none';
+            const costInput = row?.querySelector('.rup-cost');
+            if (costInput) costInput.disabled = (selectEl.value === 'hour');
         } catch (e) { logError('onRupUnitChange error:', e); }
+    };
+
+    window.onRupHourTypeChange = (selectEl) => {
+        try {
+            const row = selectEl.closest('.resource-unitprice-row');
+            const costInput = row?.querySelector('.rup-cost');
+            if (costInput) costInput.disabled = false;
+        } catch (e) { logError('onRupHourTypeChange error:', e); }
+    };
+
+    window.addHourRateRow = (btnEl) => {
+        try {
+            // Add a new row preset to unit=hour and focus hour type
+            app.addUnitPriceRow();
+            const container = document.getElementById('resource-unitprices');
+            const newRow = container?.lastElementChild;
+            if (!newRow) return;
+            const unitSel = newRow.querySelector('.rup-unit');
+            if (unitSel) {
+                unitSel.value = 'hour';
+                window.onRupUnitChange(unitSel);
+                const ht = newRow.querySelector('.rup-hour-type');
+                if (ht) ht.focus();
+            }
+        } catch (e) { logError('addHourRateRow error:', e); }
     };
     window.onResourceCategoryChange = () => {
         try {
