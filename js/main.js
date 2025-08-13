@@ -4871,6 +4871,7 @@ class CRMApplication {
                 <div>
                     <label>Unit *</label>
                     <select class="rup-unit" onchange="window.onRupUnitChange(this)">
+                        <option value="">Select...</option>
                         <option value="each">Each</option>
                         <option value="hour">Hour</option>
                         <option value="day">Day</option>
@@ -4889,9 +4890,13 @@ class CRMApplication {
                             <option value="bank_holiday">Bank Holiday</option>
                         </select>
                         <button type="button" class="secondary" style="margin-left:0.5rem;" onclick="window.addHourRateRow(this)">+ Add another hour rate</button>
+                        <div class="rup-hour-cost-wrap" style="display:none; margin-top:0.5rem;">
+                            <label>Net Cost (£) *</label>
+                            <input type="number" class="rup-cost-hour" step="0.01" min="0" placeholder="0.00" disabled>
+                        </div>
                     </div>
                 </div>
-                <div>
+                <div class="rup-cost-wrap" style="display:none;">
                     <label>Net Cost (£) *</label>
                     <input type="number" class="rup-cost" step="0.01" min="0" placeholder="0.00" disabled>
                 </div>
@@ -4927,9 +4932,9 @@ class CRMApplication {
                     id: resourceId,
                     name: formData.name,
                     category: formData.category,
-                    unit: formData.unitPrices?.[0]?.unit || 'each',
+                    unit: (formData.unitPrices?.[0]?.unit === 'hour') ? 'hour' : (formData.unitPrices?.[0]?.unit || 'each'),
                     costPerUnit: formData.unitPrices.find(u => u.unit === 'each')?.cost ?? null,
-                    costPerHour: formData.unitPrices.find(u => u.unit === 'hour')?.cost ?? null,
+                    costPerHour: (formData.unitPrices.find(u => u.unit === 'hour' && u.rates)?.rates?.standard) ?? null,
                     costPerDay: formData.unitPrices.find(u => u.unit === 'day')?.cost ?? null,
                     unitPrices: formData.unitPrices,
                     createdAt: new Date().toISOString(),
@@ -4963,28 +4968,44 @@ class CRMApplication {
             const name = document.getElementById('resource-name')?.value?.trim();
             const category = document.getElementById('resource-category')?.value;
 
-            // Collect unit price rows
-            const rows = Array.from(document.querySelectorAll('.resource-unitprice-row'));
-            const unitPrices = rows.map(row => {
-                const unit = row.querySelector('.rup-unit')?.value;
-                const costStr = row.querySelector('.rup-cost')?.value;
-                const cost = parseFloat(costStr || '');
-                const hourType = unit === 'hour' ? (row.querySelector('.rup-hour-type')?.value || 'standard') : undefined;
-                return { unit, cost, hourType };
-            }).filter(x => x.unit && !isNaN(x.cost) && x.cost >= 0);
+            // Hour block
+            const provideHour = document.getElementById('hour-provide')?.checked;
+            let hourRates = null;
+            if (provideHour) {
+                const read = (id) => {
+                    const v = document.getElementById(id)?.value;
+                    return v === '' || v == null ? NaN : parseFloat(v);
+                };
+                const vStd = read('hour-cost-standard');
+                const vOt1 = read('hour-cost-ot1');
+                const vOt2 = read('hour-cost-ot2');
+                const vBank = read('hour-cost-bank');
+                if (isNaN(vStd)) {
+                    uiModals.showToast('Please provide Standard hourly rate', 'error');
+                    return null;
+                }
+                hourRates = {};
+                hourRates.standard = vStd;
+                if (!isNaN(vOt1)) hourRates.ot1 = vOt1;
+                if (!isNaN(vOt2)) hourRates.ot2 = vOt2;
+                if (!isNaN(vBank)) hourRates.bank_holiday = vBank;
+            }
 
-            if (!name || !category || unitPrices.length === 0) {
+            // Other units
+            const otherRows = Array.from(document.querySelectorAll('#resource-other-unitprices .resource-other-row'));
+            const otherUnits = otherRows.map(r => ({
+                unit: r.querySelector('.oru-unit')?.value,
+                cost: parseFloat(r.querySelector('.oru-cost')?.value || '')
+            })).filter(x => x.unit && !isNaN(x.cost) && x.cost >= 0);
+
+            if (!name || !category || (!provideHour && otherUnits.length === 0)) {
                 uiModals.showToast('Please fill in Name, Category, and at least one Unit price', 'error');
                 return null;
             }
 
-            // Enforce: if any hour entries exist, at least one must be 'standard'
-            const hasHour = unitPrices.some(u => u.unit === 'hour');
-            const hasStandard = unitPrices.some(u => u.unit === 'hour' && (u.hourType || 'standard') === 'standard' && u.cost >= 0);
-            if (hasHour && !hasStandard) {
-                uiModals.showToast('Please add a Standard hourly rate when using Hour unit', 'error');
-                return null;
-            }
+            const unitPrices = [];
+            if (provideHour) unitPrices.push({ unit: 'hour', rates: hourRates });
+            unitPrices.push(...otherUnits);
 
             return { name, category, unitPrices };
         } catch (error) {
@@ -5008,23 +5029,42 @@ class CRMApplication {
             document.getElementById('resource-id').value = resource.id;
             document.getElementById('resource-name').value = resource.name || '';
             document.getElementById('resource-category').value = resource.category || '';
-            // Build unit prices rows
-            const container = document.getElementById('resource-unitprices');
-            if (container) {
-                container.innerHTML = '';
-                const unitPrices = resource.unitPrices && Array.isArray(resource.unitPrices)
-                    ? resource.unitPrices
-                    : [
-                        resource.costPerUnit != null ? { unit: 'each', cost: resource.costPerUnit } : null,
-                        resource.costPerHour != null ? { unit: 'hour', cost: resource.costPerHour } : null,
-                        resource.costPerDay != null ? { unit: 'day', cost: resource.costPerDay } : null
-                    ].filter(Boolean);
-                if (unitPrices.length === 0) unitPrices.push({ unit: resource.unit || 'each', cost: 0 });
-                unitPrices.forEach(up => {
-                    this.addUnitPriceRow();
-                    const row = container.lastElementChild;
-                    row.querySelector('.rup-unit').value = up.unit;
-                    row.querySelector('.rup-cost').value = up.cost;
+            // Populate new pricing UI
+            // Hour block
+            const hourToggle = document.getElementById('hour-provide');
+            const hourBlock = document.getElementById('hour-rates-block');
+            const upList = Array.isArray(resource.unitPrices) ? resource.unitPrices : [];
+            const hourEntry = upList.find(u => u.unit === 'hour');
+            if (hourToggle && hourBlock) {
+                if (hourEntry && hourEntry.rates) {
+                    hourToggle.checked = true; hourBlock.style.display = '';
+                    const rates = hourEntry.rates || {};
+                    const setV = (id,val)=>{const el=document.getElementById(id); if(el) el.value = (val ?? '')};
+                    setV('hour-cost-standard', rates.standard);
+                    setV('hour-cost-ot1', rates.ot1);
+                    setV('hour-cost-ot2', rates.ot2);
+                    setV('hour-cost-bank', rates.bank_holiday);
+                } else {
+                    hourToggle.checked = false; hourBlock.style.display = 'none';
+                }
+            }
+            // Other units
+            const other = document.getElementById('resource-other-unitprices');
+            if (other) {
+                other.innerHTML='';
+                const legacy = [];
+                if (!hourEntry && resource.costPerHour != null) {
+                    // legacy hour to hour rates
+                    if (hourToggle && hourBlock) { hourToggle.checked = true; hourBlock.style.display=''; document.getElementById('hour-cost-standard').value = resource.costPerHour; }
+                }
+                if (resource.costPerUnit != null) legacy.push({ unit:'each', cost:resource.costPerUnit});
+                if (resource.costPerDay != null) legacy.push({ unit:'day', cost:resource.costPerDay});
+                const flatOthers = upList.filter(u => u.unit !== 'hour');
+                (flatOthers.length ? flatOthers : legacy).forEach(u => {
+                    this.addOtherUnitPriceRow();
+                    const row = other.lastElementChild; if (!row) return;
+                    const uSel = row.querySelector('.oru-unit'); const cInp = row.querySelector('.oru-cost');
+                    if (uSel) uSel.value = u.unit; if (cInp) cInp.value = u.cost;
                 });
             }
 
@@ -5059,9 +5099,9 @@ class CRMApplication {
                 name: formData.name,
                 category: formData.category,
                 // Normalize unit prices into common fields for backward compatibility
-                unit: formData.unitPrices?.[0]?.unit || existingResource.unit || 'each',
+                unit: (formData.unitPrices?.[0]?.unit === 'hour') ? 'hour' : (formData.unitPrices?.[0]?.unit || existingResource.unit || 'each'),
                 costPerUnit: (formData.unitPrices.find(u => u.unit === 'each')?.cost) ?? existingResource.costPerUnit ?? null,
-                costPerHour: (formData.unitPrices.find(u => u.unit === 'hour')?.cost) ?? existingResource.costPerHour ?? null,
+                costPerHour: (formData.unitPrices.find(u => u.unit === 'hour' && u.rates)?.rates?.standard) ?? existingResource.costPerHour ?? null,
                 costPerDay: (formData.unitPrices.find(u => u.unit === 'day')?.cost) ?? existingResource.costPerDay ?? null,
                 unitPrices: formData.unitPrices,
                 lastModifiedAt: new Date().toISOString(),
@@ -6525,17 +6565,40 @@ function setupLegacyCompatibility() {
         try {
             const row = selectEl.closest('.resource-unitprice-row');
             const hourWrap = row?.querySelector('.rup-hour-wrap');
-            if (hourWrap) hourWrap.style.display = (selectEl.value === 'hour') ? '' : 'none';
+            const costWrap = row?.querySelector('.rup-cost-wrap');
             const costInput = row?.querySelector('.rup-cost');
-            if (costInput) costInput.disabled = (selectEl.value === 'hour');
+            const hourCostWrap = row?.querySelector('.rup-hour-cost-wrap');
+            const hourCostInput = row?.querySelector('.rup-cost-hour');
+            const unitVal = selectEl.value;
+            if (hourWrap) hourWrap.style.display = (unitVal === 'hour') ? '' : 'none';
+            // Hide everything until a unit is chosen
+            if (!unitVal) {
+                if (costWrap) costWrap.style.display = 'none';
+                if (hourCostWrap) hourCostWrap.style.display = 'none';
+                if (costInput) costInput.disabled = true;
+                if (hourCostInput) hourCostInput.disabled = true;
+                return;
+            }
+            // Non-hour: show simple cost
+            if (unitVal !== 'hour') {
+                if (costWrap) costWrap.style.display = '';
+                if (costInput) costInput.disabled = false;
+                if (hourCostWrap) hourCostWrap.style.display = 'none';
+                if (hourCostInput) hourCostInput.disabled = true;
+                return;
+            }
+            // Hour: show hour-cost area but keep disabled until type is picked
+            if (costWrap) costWrap.style.display = 'none';
+            if (hourCostWrap) hourCostWrap.style.display = '';
+            if (hourCostInput) hourCostInput.disabled = true;
         } catch (e) { logError('onRupUnitChange error:', e); }
     };
 
     window.onRupHourTypeChange = (selectEl) => {
         try {
             const row = selectEl.closest('.resource-unitprice-row');
-            const costInput = row?.querySelector('.rup-cost');
-            if (costInput) costInput.disabled = false;
+            const hourCostInput = row?.querySelector('.rup-cost-hour');
+            if (hourCostInput) hourCostInput.disabled = false;
         } catch (e) { logError('onRupHourTypeChange error:', e); }
     };
 

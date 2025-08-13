@@ -2801,11 +2801,69 @@
         <!-- Pricing & Units -->
         <div class="form-section">
             <h3>Pricing & Units</h3>
-            <div id="resource-unitprices">
-                <!-- Rows dynamically added: .resource-unitprice-row -->
+            <!-- Hour block -->
+            <div class="card" style="padding: 0.75rem; margin-bottom: 0.75rem;">
+                <label style="display:flex; align-items:center; gap:0.5rem;">
+                    <input type="checkbox" id="hour-provide" onchange="window.onToggleHourRates()">
+                    Provide hourly rates
+                </label>
+                <div id="hour-rates-block" style="margin-top:0.5rem; display:none;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; align-items:end; margin-bottom:0.5rem;">
+                        <div>
+                            <label>Hour Type</label>
+                            <select class="hour-type-select" id="hour-type-standard" disabled>
+                                <option value="standard" selected>Standard</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Net Cost (£) *</label>
+                            <input type="number" id="hour-cost-standard" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; align-items:end; margin-bottom:0.5rem;">
+                        <div>
+                            <label>Hour Type</label>
+                            <select class="hour-type-select" id="hour-type-ot1" disabled>
+                                <option value="ot1" selected>Overtime 1 (OT1)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Net Cost (£)</label>
+                            <input type="number" id="hour-cost-ot1" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; align-items:end; margin-bottom:0.5rem;">
+                        <div>
+                            <label>Hour Type</label>
+                            <select class="hour-type-select" id="hour-type-ot2" disabled>
+                                <option value="ot2" selected>Overtime 2 (OT2)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Net Cost (£)</label>
+                            <input type="number" id="hour-cost-ot2" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem; align-items:end;">
+                        <div>
+                            <label>Hour Type</label>
+                            <select class="hour-type-select" id="hour-type-bank" disabled>
+                                <option value="bank_holiday" selected>Bank Holiday</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Net Cost (£)</label>
+                            <input type="number" id="hour-cost-bank" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                    </div>
+                    <small style="display:block; margin-top:0.5rem; color:#6b7280;">Standard is required. Other hour types are optional.</small>
+                </div>
             </div>
+
+            <!-- Other units -->
+            <div id="resource-other-unitprices"></div>
             <div style="margin-top: 0.75rem;">
-                <button type="button" class="secondary" onclick="window.addUnitPriceRow()">+ Add price for another unit</button>
+                <button type="button" class="secondary" onclick="window.addOtherUnitPriceRow()">+ Add price for another unit</button>
             </div>
         </div>
 
