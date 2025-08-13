@@ -2138,6 +2138,7 @@ class CRMApplication {
     async loadPriceListsData() {
         try {
             const priceLists = await db.loadAll('priceLists') || [];
+            const quotes = await db.loadAll('quotes') || [];
             console.log('loadPriceListsData - All Price Lists:', priceLists);
             priceLists.forEach(pl => console.log(`Price List "${pl.name}" has ${(pl.items || []).length} items:`, pl.items));
             const container = document.getElementById('pricelist-table');
@@ -2146,21 +2147,25 @@ class CRMApplication {
                 if (priceLists.length === 0) {
                     container.innerHTML = '<tr><td colspan="8">No price lists found. <button onclick="window.createPriceList()" class="button primary">Create First Price List</button></td></tr>';
                 } else {
-                    container.innerHTML = priceLists.map(priceList => `
+                    container.innerHTML = priceLists.map(priceList => {
+                        const usageCount = quotes.filter(q => (q.priceListId === priceList.id)).length;
+                        return `
                         <tr onclick="window.viewPriceListDetails('${priceList.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
                             <td><strong>${priceList.name || 'N/A'}</strong></td>
                             <td>${priceList.version || '1.0'}</td>
                             <td>${priceList.currency || 'GBP'}</td>
                             <td>${priceList.effectivePeriod || 'N/A'}</td>
+                            <td>${usageCount}</td>
                             <td>${priceList.isDefault ? 'Yes' : 'No'}</td>
                             <td><span class="status-badge ${priceList.status || 'active'}">${priceList.status || 'active'}</span></td>
                             <td>${this.formatDate(priceList.lastModifiedAt || priceList.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPriceList('${priceList.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPriceListDetails('${priceList.id}')" class="button primary small">View</button>
+                                <button onclick="window.deletePriceList('${priceList.id}')" class="button danger small" ${usageCount > 0 ? 'disabled title="Cannot delete: used in quotes"' : ''}>Delete</button>
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('');
                 }
             } else {
                 logError('Price Lists container not found: #pricelist-table');
@@ -5597,6 +5602,35 @@ class CRMApplication {
         }
     }
 
+    /**
+     * @description Delete a price list if not used in any quotes
+     */
+    async deletePriceList(id) {
+        try {
+            const priceList = await db.load('priceLists', id);
+            if (!priceList) {
+                uiModals.showToast('Price list not found', 'error');
+                return;
+            }
+            const quotes = await db.loadAll('quotes');
+            const usageCount = quotes.filter(q => q.priceListId === id).length;
+            if (usageCount > 0) {
+                uiModals.showToast(`Cannot delete. This price list is used in ${usageCount} quote(s).`, 'error');
+                return;
+            }
+            const confirmDelete = confirm(`Delete price list "${priceList.name}"? This cannot be undone.`);
+            if (!confirmDelete) return;
+            await db.delete('priceLists', id);
+            uiModals.showToast('Price list deleted', 'success');
+            if (this.currentPage === 'pricelists') {
+                await this.loadPriceListsData();
+            }
+        } catch (error) {
+            logError('Failed to delete price list:', error);
+            uiModals.showToast('Failed to delete price list', 'error');
+        }
+    }
+
     // ==================== SMART FILTERS FUNCTIONALITY ====================
 
     /**
@@ -6293,6 +6327,7 @@ function setupLegacyCompatibility() {
     window.createPriceList = () => app.createPriceList();
     window.savePriceList = () => app.savePriceList();
     window.updatePriceList = () => app.updatePriceList();
+    window.deletePriceList = (id) => app.deletePriceList(id);
 
     // Price List Items functions
     window.showAddResourceToPriceList = () => app.showAddResourceToPriceList();
