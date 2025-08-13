@@ -6366,6 +6366,9 @@ function setupLegacyCompatibility() {
     window.closeAddResourceModal = () => app.closeAddResourceModal();
     window.calculateMargin = () => app.calculateMargin();
     window.removePriceListItem = (id) => app.removePriceListItem(id);
+    // Add Resource modal interactions
+    window.onModalCategoryChange = () => app.onModalCategoryChange();
+    window.onModalUnitChange = () => app.onModalUnitChange();
 
     // Smart Filters functions
     window.filterPcNumbersByCompany = (query) => app.filterPcNumbersByCompany(query);
