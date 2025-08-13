@@ -1715,7 +1715,14 @@
                     </select>
                 </div>
                 <table>
-                    <thead><tr><th>Name</th><th>Category</th><th>Unit</th><th>Net Cost</th><th>Used in Price Lists</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th class="sortable" data-sort="name">Name ↕</th>
+                        <th class="sortable" data-sort="category">Category ↕</th>
+                        <th class="sortable" data-sort="unit">Unit ↕</th>
+                        <th class="sortable" data-sort="cost">Net Cost ↕</th>
+                        <th class="sortable" data-sort="usage">Used in Price Lists ↕</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="resources-list"></tbody>
                 </table>
             </div>
