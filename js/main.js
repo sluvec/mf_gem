@@ -5885,7 +5885,14 @@ class CRMApplication {
                 if (freeText) freeText.style.display = 'none';
                 // Filter resources by selected category and repopulate item dropdown
                 const all = await db.loadAll('resources');
-                const filtered = all.filter(r => (r.category || r.type || '').toLowerCase() === category);
+                const normalize = (v) => {
+                    const x = String(v || '').toLowerCase();
+                    if (x === 'materials') return 'material';
+                    if (x === 'vehicle') return 'vehicles';
+                    return x;
+                };
+                const selCat = normalize(category);
+                const filtered = all.filter(r => normalize(r.category || r.type || '') === selCat);
                 if (resourceSelect) {
                     resourceSelect.innerHTML = '<option value="">Select a resource...</option>';
                     filtered.forEach(resource => {
