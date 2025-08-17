@@ -6724,6 +6724,7 @@ function setupLegacyCompatibility() {
 
     // Resources functions
     window.showResourceModal = () => app.showResourceModal();
+    window.addOtherUnitPriceRow = () => app.addOtherUnitPriceRow();
     window.editResource = (id) => app.editResource(id);
     window.viewResourceDetails = (id) => app.viewResourceDetails(id);
     window.closeResourceDetailsModal = () => uiModals.closeModal('resource-details-modal');
