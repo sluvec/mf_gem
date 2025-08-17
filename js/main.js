@@ -5147,6 +5147,26 @@ class CRMApplication {
                 return null;
             }
 
+            // Validate duplicates
+            const seenUnits = new Set();
+            const dupUnits = new Set();
+            for (const e of entries) {
+                if (seenUnits.has(e.unit)) dupUnits.add(e.unit); else seenUnits.add(e.unit);
+            }
+            if (dupUnits.size > 0) {
+                const labelFor = (u) => {
+                    if (u.startsWith('hour_')) {
+                        const t = u.replace('hour_', '');
+                        const map = { standard: 'Hour Standard', ot1: 'Hour OT1', ot2: 'Hour OT2', overnight: 'Hour Overnight' };
+                        return map[t] || `Hour ${t}`;
+                    }
+                    return u.charAt(0).toUpperCase() + u.slice(1);
+                };
+                const list = Array.from(dupUnits).map(labelFor).join(', ');
+                uiModals.showToast(`Duplicate units not allowed: ${list}. Please remove duplicates.`, 'error');
+                return null;
+            }
+
             // Normalize hour_* units into hour rates
             const hourRates = { standard: null, ot1: null, ot2: null, overnight: null };
             const others = [];
