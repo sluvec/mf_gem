@@ -3397,9 +3397,20 @@ Next steps:
                             <small>Cost per unit (excluding VAT)</small>
                         </div>
                         <div>
-                            <label>Margin (%)</label>
+                            <label>Margin</label>
+                            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.25rem;">
+                                <label style="display:inline-flex; align-items:center; gap:0.25rem;">
+                                    <input type="radio" name="pricelist-item-margin-type" id="pricelist-item-margin-type-percent" checked>
+                                    %
+                                </label>
+                                <label style="display:inline-flex; align-items:center; gap:0.25rem;">
+                                    <input type="radio" name="pricelist-item-margin-type" id="pricelist-item-margin-type-fixed">
+                                    £
+                                </label>
+                            </div>
                             <input type="number" id="pricelist-item-margin" min="0" max="1000" step="0.1" placeholder="20" value="20">
-                            <small>Markup percentage</small>
+                            <input type="number" id="pricelist-item-margin-fixed" min="0" step="0.01" placeholder="10.00" style="display:none;">
+                            <small>Choose percent or fixed amount</small>
                         </div>
                         <div>
                             <label>Client Price (£)</label>

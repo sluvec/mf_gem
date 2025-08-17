@@ -6016,33 +6016,107 @@ class CRMApplication {
             }
             const item = items[idx];
 
+            // Load linked resource to constrain category/unit and set net costs
+            let resource = null;
+            if (item.resourceId) {
+                resource = await db.load('resources', item.resourceId);
+            }
+
             // Populate modal fields
             const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
             setVal('pricelist-item-pricelist-id', priceList.id);
             setVal('pricelist-item-index', item.id);
             setVal('pricelist-item-description', item.resourceName || '');
-            setVal('pricelist-item-category', item.resourceCategory || '');
-            setVal('pricelist-item-unit', item.unit || 'each');
-            setVal('pricelist-item-price', (item.netCost ?? 0));
-            // Prefer stored margin, else compute from net/client
-            const computedMargin = (item.netCost > 0 && item.clientPrice > 0) ? ((item.clientPrice - item.netCost) / item.netCost) * 100 : (item.margin ?? 0);
-            setVal('pricelist-item-margin', Number(computedMargin).toFixed(1));
-            // Compute client price from net + margin for display
-            const displayClient = (item.netCost ?? 0) * (1 + (parseFloat(document.getElementById('pricelist-item-margin')?.value || '0') / 100));
-            setVal('pricelist-item-client-price', displayClient.toFixed(2));
-            setVal('pricelist-item-notes', item.notes || '');
+            setVal('pricelist-item-category', (resource?.category || item.resourceCategory || ''));
+            // Category derived from resource should not be changed
+            const catEl = document.getElementById('pricelist-item-category');
+            if (catEl && resource) { catEl.disabled = true; }
 
-            // Recalculate client price when net or margin changes
+            // Build allowed units from resource
+            const unitEl = document.getElementById('pricelist-item-unit');
+            const allowedUnits = [];
+            const pushUnit = (value, label, cost) => allowedUnits.push({ value, label, cost });
+            if (unitEl) {
+                unitEl.innerHTML = '';
+                if (resource && Array.isArray(resource.unitPrices)) {
+                    const up = resource.unitPrices;
+                    // Non-hour units
+                    up.filter(u => u && u.unit && u.unit !== 'hour').forEach(u => pushUnit(u.unit, u.unit.charAt(0).toUpperCase()+u.unit.slice(1), Number(u.cost||0)));
+                    // Hour variants
+                    const hour = up.find(u => u.unit === 'hour' && u.rates);
+                    if (hour && hour.rates) {
+                        const map = [
+                            ['standard','Hour Standard'],
+                            ['ot1','Hour OT1'],
+                            ['ot2','Hour OT2'],
+                            ['overnight','Hour Overnight']
+                        ];
+                        map.forEach(([key,label]) => {
+                            const v = hour.rates[key];
+                            if (v != null && !isNaN(v)) pushUnit(`hour:${key}`, label, Number(v));
+                        });
+                    }
+                } else if (resource) {
+                    // Legacy fields fallback
+                    if (resource.costPerUnit != null) pushUnit('each','Each', Number(resource.costPerUnit));
+                    if (resource.costPerHour != null) pushUnit('hour:standard','Hour Standard', Number(resource.costPerHour));
+                    if (resource.costPerDay != null) pushUnit('day','Day', Number(resource.costPerDay));
+                } else {
+                    // No linked resource (free-text item). Keep generic options
+                    ['each','hour','day','week','month'].forEach(u => pushUnit(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
+                }
+                // Populate select
+                allowedUnits.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt.value; o.textContent = opt.label; unitEl.appendChild(o);
+                });
+            }
+
+            const unitKey = (item.unit === 'hour') ? `hour:${(item.labourRateType||'standard')}` : (item.unit || 'each');
+            if (unitEl) unitEl.value = allowedUnits.find(x => x.value === unitKey)?.value || (allowedUnits[0]?.value || 'each');
+
+            // Net cost derived from resource per selected unit and locked
             const priceEl = document.getElementById('pricelist-item-price');
-            const marginEl = document.getElementById('pricelist-item-margin');
+            const unitCostMap = Object.fromEntries(allowedUnits.map(x => [x.value, x.cost]));
+            const setNetFromUnit = () => { if (priceEl) { priceEl.value = (unitCostMap[unitEl.value] || 0).toFixed(2); priceEl.disabled = true; } };
+            if (unitEl) unitEl.onchange = setNetFromUnit;
+            setNetFromUnit();
+
+            // Margin UI: percent vs fixed
+            const marginTypePercent = document.getElementById('pricelist-item-margin-type-percent');
+            const marginTypeFixed = document.getElementById('pricelist-item-margin-type-fixed');
+            const marginPercEl = document.getElementById('pricelist-item-margin');
+            const marginFixedEl = document.getElementById('pricelist-item-margin-fixed');
             const clientEl = document.getElementById('pricelist-item-client-price');
-            const recalc = () => {
-                const net = parseFloat(priceEl?.value || '0');
-                const m = parseFloat(marginEl?.value || '0');
-                if (clientEl && !isNaN(net) && !isNaN(m)) clientEl.value = (net * (1 + (m/100))).toFixed(2);
+
+            const initComputedMargin = (item.netCost > 0 && item.clientPrice > 0) ? ((item.clientPrice - item.netCost) / item.netCost) * 100 : (item.margin ?? 0);
+            if (marginPercEl) marginPercEl.value = Number(initComputedMargin).toFixed(1);
+            if (clientEl) clientEl.value = ((parseFloat(priceEl?.value||'0')) * (1 + (parseFloat(marginPercEl?.value||'0')/100))).toFixed(2);
+
+            const syncMarginVisibility = () => {
+                const usePercent = !!marginTypePercent?.checked;
+                if (marginPercEl) marginPercEl.style.display = usePercent ? '' : 'none';
+                if (marginFixedEl) marginFixedEl.style.display = usePercent ? 'none' : '';
+                recalcClient();
             };
-            if (priceEl) priceEl.oninput = recalc;
-            if (marginEl) marginEl.oninput = recalc;
+            const recalcClient = () => {
+                const net = parseFloat(priceEl?.value || '0');
+                if (!clientEl || isNaN(net)) return;
+                if (marginTypeFixed?.checked) {
+                    const fixed = parseFloat(marginFixedEl?.value || '0');
+                    clientEl.value = (net + (isNaN(fixed) ? 0 : fixed)).toFixed(2);
+                } else {
+                    const perc = parseFloat(marginPercEl?.value || '0');
+                    clientEl.value = (net * (1 + ((isNaN(perc)?0:perc)/100))).toFixed(2);
+                }
+            };
+            if (marginTypePercent) marginTypePercent.onchange = syncMarginVisibility;
+            if (marginTypeFixed) marginTypeFixed.onchange = syncMarginVisibility;
+            if (marginPercEl) marginPercEl.oninput = recalcClient;
+            if (marginFixedEl) marginFixedEl.oninput = recalcClient;
+
+            syncMarginVisibility();
+            setVal('pricelist-item-notes', item.notes || '');
 
             // Hook submit handler
             const form = document.getElementById('pricelist-item-form');
@@ -6075,22 +6149,31 @@ class CRMApplication {
 
             const desc = document.getElementById('pricelist-item-description')?.value?.trim();
             const category = document.getElementById('pricelist-item-category')?.value;
-            const unit = document.getElementById('pricelist-item-unit')?.value || 'each';
+            const unitRaw = document.getElementById('pricelist-item-unit')?.value || 'each';
             const netCost = parseFloat(document.getElementById('pricelist-item-price')?.value || '0');
-            const marginPerc = parseFloat(document.getElementById('pricelist-item-margin')?.value || '0');
+            const useFixed = !!document.getElementById('pricelist-item-margin-type-fixed')?.checked;
+            const marginPercInput = parseFloat(document.getElementById('pricelist-item-margin')?.value || '0');
+            const marginFixedInput = parseFloat(document.getElementById('pricelist-item-margin-fixed')?.value || '0');
             const notes = document.getElementById('pricelist-item-notes')?.value?.trim();
             if (!desc) { uiModals.showToast('Please enter description', 'error'); return; }
             if (!category) { uiModals.showToast('Please select category', 'error'); return; }
             if (isNaN(netCost) || netCost <= 0) { uiModals.showToast('Please enter valid net cost', 'error'); return; }
-            if (isNaN(marginPerc) || marginPerc < 0) { uiModals.showToast('Please enter valid margin', 'error'); return; }
+            if ((!useFixed && (isNaN(marginPercInput) || marginPercInput < 0)) || (useFixed && (isNaN(marginFixedInput) || marginFixedInput < 0))) { uiModals.showToast('Please enter valid margin', 'error'); return; }
 
-            const clientPrice = netCost * (1 + (marginPerc/100));
+            const marginPerc = useFixed ? ((marginFixedInput / netCost) * 100) : marginPercInput;
+            const clientPrice = useFixed ? (netCost + marginFixedInput) : (netCost * (1 + (marginPerc/100)));
+
+            // Map unit and labour rate type
+            let unit = unitRaw;
+            let labourRateType;
+            if (unitRaw.startsWith('hour:')) { unit = 'hour'; labourRateType = unitRaw.split(':')[1] || 'standard'; }
 
             const updatedItem = {
                 ...items[idx],
                 resourceName: desc,
                 resourceCategory: category,
                 unit,
+                labourRateType,
                 netCost,
                 margin: marginPerc,
                 clientPrice,
