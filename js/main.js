@@ -458,10 +458,11 @@ class CRMApplication {
         container.innerHTML = `
             <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
                 <select id="${selectId}" style="min-width:260px;">
+                    <option value="">Select item...</option>
                     ${options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}">${o.name} — £${o.unitPrice.toFixed(2)}/${o.unit}</option>`).join('')}
                 </select>
                 <label style="font-size:0.875rem; color:#374151;">Qty</label>
-                <input id="${qtyId}" type="number" value="1" min="0" step="0.01" style="width:90px;" />
+                <input id="${qtyId}" type="number" value="1" min="0" step="1" style="width:90px;" />
                 <button id="btn-add-${category}" class="secondary">+ Add</button>
             </div>
             <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
@@ -483,10 +484,11 @@ class CRMApplication {
         if (!sel || !qtyEl) return;
         const selectedId = sel.value;
         const opt = sel.selectedOptions[0];
+        if (!opt || !opt.value) { uiModals.showToast('Please select an item first', 'warning'); return; }
         const name = opt?.textContent?.split(' — ')[0] || 'Item';
         const unit = opt?.dataset?.unit || 'unit';
         const unitPrice = parseFloat(opt?.dataset?.price || '0') || 0;
-        const quantity = parseFloat(qtyEl.value || '1') || 1;
+        const quantity = Math.max(0, Math.floor(parseFloat(qtyEl.value || '1') || 1));
         const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
         this.builderState.plItems.push({ id, category, name, unit, quantity, unitPrice, lineDiscount: 0, lineTotal: quantity * unitPrice });
         this.renderPlItemsTable(category, tableId);
@@ -500,7 +502,7 @@ class CRMApplication {
             <tr>
                 <td>${i.name}</td>
                 <td>${i.unit}</td>
-                <td><input type="number" value="${i.quantity}" min="0" step="0.01" style="width:90px" onchange="window.app.updatePlItemQty('${i.id}', this.value)"></td>
+                <td><input type="number" value="${i.quantity}" min="0" step="1" style="width:90px" onchange="window.app.updatePlItemQty('${i.id}', this.value)"></td>
                 <td>£${i.unitPrice.toFixed(2)}</td>
                 <td>£${(i.quantity * i.unitPrice).toFixed(2)}</td>
                 <td><button class="danger small" onclick="window.app.removePlItem('${i.id}')">Remove</button></td>
@@ -512,7 +514,7 @@ class CRMApplication {
     updatePlItemQty(itemId, newQty) {
         const item = (this.builderState.plItems || []).find(x => x.id === itemId);
         if (!item) return;
-        const q = parseFloat(newQty || '0') || 0;
+        const q = Math.max(0, Math.floor(parseFloat(newQty || '0') || 0));
         item.quantity = q;
         item.lineTotal = q * item.unitPrice;
         // Re-render category table
@@ -706,7 +708,6 @@ class CRMApplication {
         copy('quote-collection-county', 'quote-delivery-county');
         copy('quote-collection-postcode', 'quote-delivery-postcode');
     }
-
     /**
      * @description Save Quote from full-screen builder as Draft
      */
@@ -1499,7 +1500,6 @@ class CRMApplication {
             return 'N/A';
         }
     }
-
     /**
      * @description Setup listeners for dynamic field indicator updates
      */
@@ -2242,7 +2242,6 @@ class CRMApplication {
             logError('Failed to load activities data:', error);
         }
     }
-
     /**
      * @description Load Resources data
      */
@@ -2946,7 +2945,6 @@ class CRMApplication {
             uiModals.showToast('Failed to update activity', 'error');
         }
     }
-
     /**
      * @description View Activity Details - opens detailed view
      */
@@ -3723,7 +3721,6 @@ class CRMApplication {
             uiModals.showToast('Failed to load quote details', 'error');
         }
     }
-
     /**
      * @description Save new PC Number
      */
@@ -4508,7 +4505,6 @@ class CRMApplication {
             uiModals.showToast(errorMessage, 'error');
         }
     }
-
     /**
      * @description Switch between Activities List and Calendar views
      * @param {string} viewType - Either 'list' or 'calendar'
@@ -5293,7 +5289,6 @@ class CRMApplication {
             uiModals.showToast('Failed to load resource for editing', 'error');
         }
     }
-
     /**
      * @description Update resource
      */
@@ -6084,7 +6079,6 @@ class CRMApplication {
             logError('Failed to close add resource modal:', error);
         }
     }
-
     /**
      * @description Open Edit Price List Item modal populated with item data
      */
@@ -6865,7 +6859,6 @@ class CRMApplication {
  * @description Application instance
  */
 let app = null;
-
 /**
  * @description Initialize the CRM application
  */
