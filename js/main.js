@@ -5999,6 +5999,124 @@ class CRMApplication {
     }
 
     /**
+     * @description Open Edit Price List Item modal populated with item data
+     */
+    async editPriceListItem(itemId) {
+        try {
+            if (!this.currentPriceList) {
+                uiModals.showToast('No price list selected', 'error');
+                return;
+            }
+            const priceList = await db.load('priceLists', this.currentPriceList.id);
+            const items = priceList?.items || [];
+            const idx = items.findIndex(it => it.id === itemId);
+            if (idx === -1) {
+                uiModals.showToast('Item not found in this price list', 'error');
+                return;
+            }
+            const item = items[idx];
+
+            // Populate modal fields
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+            setVal('pricelist-item-pricelist-id', priceList.id);
+            setVal('pricelist-item-index', item.id);
+            setVal('pricelist-item-description', item.resourceName || '');
+            setVal('pricelist-item-category', item.resourceCategory || '');
+            setVal('pricelist-item-unit', item.unit || 'each');
+            setVal('pricelist-item-price', (item.netCost ?? 0));
+            // Prefer stored margin, else compute from net/client
+            const computedMargin = (item.netCost > 0 && item.clientPrice > 0) ? ((item.clientPrice - item.netCost) / item.netCost) * 100 : (item.margin ?? 0);
+            setVal('pricelist-item-margin', Number(computedMargin).toFixed(1));
+            // Compute client price from net + margin for display
+            const displayClient = (item.netCost ?? 0) * (1 + (parseFloat(document.getElementById('pricelist-item-margin')?.value || '0') / 100));
+            setVal('pricelist-item-client-price', displayClient.toFixed(2));
+            setVal('pricelist-item-notes', item.notes || '');
+
+            // Recalculate client price when net or margin changes
+            const priceEl = document.getElementById('pricelist-item-price');
+            const marginEl = document.getElementById('pricelist-item-margin');
+            const clientEl = document.getElementById('pricelist-item-client-price');
+            const recalc = () => {
+                const net = parseFloat(priceEl?.value || '0');
+                const m = parseFloat(marginEl?.value || '0');
+                if (clientEl && !isNaN(net) && !isNaN(m)) clientEl.value = (net * (1 + (m/100))).toFixed(2);
+            };
+            if (priceEl) priceEl.oninput = recalc;
+            if (marginEl) marginEl.oninput = recalc;
+
+            // Hook submit handler
+            const form = document.getElementById('pricelist-item-form');
+            if (form) {
+                form.onsubmit = async (e) => { e.preventDefault(); await this.savePriceListItem(); };
+            }
+
+            uiModals.openModal('pricelist-item-modal');
+            logDebug('Price list item edit modal opened for:', itemId);
+        } catch (error) {
+            logError('Failed to open edit price list item:', error);
+            uiModals.showToast('Failed to open item for editing', 'error');
+        }
+    }
+
+    /**
+     * @description Save edited Price List Item
+     */
+    async savePriceListItem() {
+        try {
+            const priceListId = document.getElementById('pricelist-item-pricelist-id')?.value;
+            const itemId = document.getElementById('pricelist-item-index')?.value;
+            if (!priceListId || !itemId) { uiModals.showToast('Missing item identifiers', 'error'); return; }
+
+            const priceList = await db.load('priceLists', priceListId);
+            if (!priceList) { uiModals.showToast('Price list not found', 'error'); return; }
+            const items = priceList.items || [];
+            const idx = items.findIndex(it => it.id === itemId);
+            if (idx === -1) { uiModals.showToast('Item not found', 'error'); return; }
+
+            const desc = document.getElementById('pricelist-item-description')?.value?.trim();
+            const category = document.getElementById('pricelist-item-category')?.value;
+            const unit = document.getElementById('pricelist-item-unit')?.value || 'each';
+            const netCost = parseFloat(document.getElementById('pricelist-item-price')?.value || '0');
+            const marginPerc = parseFloat(document.getElementById('pricelist-item-margin')?.value || '0');
+            const notes = document.getElementById('pricelist-item-notes')?.value?.trim();
+            if (!desc) { uiModals.showToast('Please enter description', 'error'); return; }
+            if (!category) { uiModals.showToast('Please select category', 'error'); return; }
+            if (isNaN(netCost) || netCost <= 0) { uiModals.showToast('Please enter valid net cost', 'error'); return; }
+            if (isNaN(marginPerc) || marginPerc < 0) { uiModals.showToast('Please enter valid margin', 'error'); return; }
+
+            const clientPrice = netCost * (1 + (marginPerc/100));
+
+            const updatedItem = {
+                ...items[idx],
+                resourceName: desc,
+                resourceCategory: category,
+                unit,
+                netCost,
+                margin: marginPerc,
+                clientPrice,
+                notes,
+                lastModifiedAt: new Date().toISOString(),
+                editedBy: this.currentUser || 'User'
+            };
+            items[idx] = updatedItem;
+
+            const updatedPriceList = { ...priceList, items, lastModifiedAt: new Date().toISOString(), editedBy: this.currentUser || 'User' };
+            await db.save('priceLists', updatedPriceList);
+            this.currentPriceList = updatedPriceList;
+
+            uiModals.showToast('Price list item updated', 'success');
+            this.closePriceListItemModal();
+            await this.loadPriceListItems(priceListId);
+        } catch (error) {
+            logError('Failed to save price list item:', error);
+            uiModals.showToast('Failed to save item', 'error');
+        }
+    }
+
+    closePriceListItemModal() {
+        try { uiModals.closeModal('pricelist-item-modal'); } catch (e) { /* no-op */ }
+    }
+    /**
      * @description Remove item from price list
      */
     async removePriceListItem(itemId) {
@@ -6788,6 +6906,8 @@ function setupLegacyCompatibility() {
     window.savePriceList = () => app.savePriceList();
     window.updatePriceList = () => app.updatePriceList();
     window.deletePriceList = (id) => app.deletePriceList(id);
+    window.editPriceListItem = (id) => app.editPriceListItem(id);
+    window.closePriceListItemModal = () => app.closePriceListItemModal();
     window.addUnitPriceRow = () => app.addUnitPriceRow();
     window.addUnitFromPicker = () => app.addUnitFromPicker();
     window.onRupUnitChange = (selectEl) => {
