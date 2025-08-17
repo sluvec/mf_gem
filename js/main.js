@@ -6223,7 +6223,8 @@ class CRMApplication {
             if (idx === -1) { uiModals.showToast('Item not found', 'error'); return; }
 
             const desc = document.getElementById('pricelist-item-description')?.value?.trim();
-            const category = document.getElementById('pricelist-item-category')?.value;
+            // Category field removed from edit modal; keep existing category from item if present
+            const category = items[idx]?.resourceCategory || '';
             const unitRaw = document.getElementById('pricelist-item-unit')?.value || 'each';
             const netCost = parseFloat(document.getElementById('pricelist-item-price')?.value || '0');
             const useFixed = !!document.getElementById('pricelist-item-margin-type-fixed')?.checked;
@@ -6231,7 +6232,7 @@ class CRMApplication {
             const marginFixedInput = parseFloat(document.getElementById('pricelist-item-margin-fixed')?.value || '0');
             const notes = document.getElementById('pricelist-item-notes')?.value?.trim();
             if (!desc) { uiModals.showToast('Please enter description', 'error'); return; }
-            if (!category) { uiModals.showToast('Please select category', 'error'); return; }
+            // No category validation needed during item edit
             if (isNaN(netCost) || netCost <= 0) { uiModals.showToast('Please enter valid net cost', 'error'); return; }
             if ((!useFixed && (isNaN(marginPercInput) || marginPercInput < 0)) || (useFixed && (isNaN(marginFixedInput) || marginFixedInput < 0))) { uiModals.showToast('Please enter valid margin', 'error'); return; }
 
