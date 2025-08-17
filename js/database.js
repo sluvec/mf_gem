@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 7; // Schema v7: indexes for normalized PC fields
+        this.version = 8; // Schema v8: add accountManagers store
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -215,6 +215,16 @@ export class Database {
                         ensureIndex('clientSource', 'clientSource');
                         ensureIndex('industry', 'industry');
                         ensureIndex('addressPostcode', 'addressPostcode');
+                    }
+                }
+
+                // Version 8 upgrades: Add accountManagers store
+                if (event.oldVersion < 8) {
+                    logInfo('Upgrading to version 8: Creating accountManagers store');
+                    if (!db.objectStoreNames.contains('accountManagers')) {
+                        const amStore = db.createObjectStore('accountManagers', { keyPath: 'id' });
+                        amStore.createIndex('name', 'name', { unique: true });
+                        amStore.createIndex('createdAt', 'createdAt', { unique: false });
                     }
                 }
 
@@ -424,7 +434,7 @@ export class Database {
         }
 
         const stats = {};
-        const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists'];
+        const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists', 'accountManagers'];
 
         for (const storeName of storeNames) {
             try {
@@ -445,7 +455,7 @@ export class Database {
      */
     async clearAllStores() {
         try {
-            const storeNames = ['pcNumbers', 'activities', 'resources', 'quotes', 'priceLists'];
+            const storeNames = ['pcNumbers', 'activities', 'resources', 'quotes', 'priceLists', 'accountManagers'];
             for (const storeName of storeNames) {
                 await this.clearStore(storeName);
             }
@@ -472,7 +482,7 @@ export class Database {
                 data: {}
             };
 
-            const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists'];
+            const storeNames = ['pcNumbers', 'activities', 'quotes', 'resources', 'priceLists', 'accountManagers'];
             
             for (const storeName of storeNames) {
                 backup.data[storeName] = await this.loadAll(storeName);

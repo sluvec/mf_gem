@@ -377,7 +377,9 @@
                             </div>
                             <div>
                                 <label>Account Manager *</label>
-                                <input type="text" id="pc-account-manager" required placeholder="Account manager name">
+                                <select id="pc-account-manager" required>
+                                    <option value="">Select Account Manager...</option>
+                                </select>
                             </div>
                         </div>
 
@@ -707,11 +709,6 @@
                         <label>Account Manager *</label>
                         <select id="builder-account-manager">
                             <option value="">Select Account Manager...</option>
-                            <option value="John Smith">John Smith</option>
-                            <option value="Sarah Johnson">Sarah Johnson</option>
-                            <option value="Mike Wilson">Mike Wilson</option>
-                            <option value="Emma Brown">Emma Brown</option>
-                            <option value="David Lee">David Lee</option>
                         </select>
                     </div>
                     <div>
@@ -1691,29 +1688,6 @@
                 <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
                     <label>Filter:</label>
                     <input type="text" id="resource-filter-name" placeholder="Name..." oninput="window.filterResourcesTable()">
-                    <select id="resource-filter-category" onchange="window.filterResourcesTable()">
-                        <option value="">All categories</option>
-                        <option value="labour">Labour</option>
-                        <option value="vehicles">Vehicles</option>
-                        <option value="material">Material</option>
-                        <option value="crates">Crates</option>
-                        <option value="other">Other</option>
-                    </select>
-                    <select id="resource-filter-unit" onchange="window.filterResourcesTable()">
-                        <option value="">All units</option>
-                        <option value="each">Each</option>
-                        <option value="hour">Hour</option>
-                        <option value="day">Day</option>
-                        <option value="week">Week</option>
-                        <option value="month">Month</option>
-                    </select>
-                    <input type="number" id="resource-filter-cost-min" placeholder="Cost min" step="0.01" style="width: 110px;" oninput="window.filterResourcesTable()">
-                    <input type="number" id="resource-filter-cost-max" placeholder="Cost max" step="0.01" style="width: 110px;" oninput="window.filterResourcesTable()">
-                    <select id="resource-filter-usage" onchange="window.filterResourcesTable()">
-                        <option value="">All usage</option>
-                        <option value="used">Used in PL</option>
-                        <option value="unused">Not used</option>
-                    </select>
                 </div>
                 <table>
                     <thead><tr>
@@ -1951,6 +1925,24 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Account Managers Management -->
+            <div class="card">
+                <h2>👤 Account Managers</h2>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end;">
+                    <div>
+                        <label for="new-account-manager-name">Add Account Manager</label>
+                        <input type="text" id="new-account-manager-name" placeholder="Enter name">
+                    </div>
+                    <div>
+                        <button onclick="window.addAccountManager()">Add</button>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label>Existing Account Managers</label>
+                    <ul id="account-managers-list" style="list-style: none; padding: 0; margin: 0.5rem 0 0 0;"></ul>
+                </div>
+            </div>
             
             <!-- System Information -->
             <div class="card">
@@ -2010,11 +2002,6 @@
                     <label>Account Manager *</label>
                     <select id="quote-modal-account-manager" required>
                         <option value="">Select Account Manager...</option>
-                        <option value="John Smith">John Smith</option>
-                        <option value="Sarah Johnson">Sarah Johnson</option>
-                        <option value="Mike Wilson">Mike Wilson</option>
-                        <option value="Emma Brown">Emma Brown</option>
-                        <option value="David Lee">David Lee</option>
                     </select>
                     <small style="color: #6b7280;">Choose the account manager for this quote</small>
                 </div>
@@ -2131,11 +2118,6 @@
                             <label>Account Manager *</label>
                             <select id="quote-edit-account-manager" required>
                                 <option value="">Select Account Manager...</option>
-                                <option value="John Smith">John Smith</option>
-                                <option value="Sarah Johnson">Sarah Johnson</option>
-                                <option value="Mike Wilson">Mike Wilson</option>
-                                <option value="Emma Brown">Emma Brown</option>
-                                <option value="David Lee">David Lee</option>
                             </select>
                         </div>
                     </div>
@@ -2307,7 +2289,9 @@
                         </div>
                         <div>
                             <label>Account Manager *</label>
-                            <input type="text" id="pc-edit-account-manager" placeholder="Account manager name">
+                            <select id="pc-edit-account-manager" required>
+                                <option value="">Select Account Manager...</option>
+                            </select>
                         </div>
                     </div>
                     <div>

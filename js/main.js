@@ -58,6 +58,9 @@ class CRMApplication {
                 pcNumber: ''
             }
         };
+
+        // Cache for account managers
+        this.accountManagersCache = [];
     }
 
     /**
@@ -85,6 +88,17 @@ class CRMApplication {
                     if (titleEl) titleEl.textContent = `New Quote for ${pc.pcNumber} — ${pc.company || ''}`;
                     // Prefill Collection address/contact from PC
                     this.prefillCollectionFromPc(pc);
+
+                    // Ensure AM selects are populated and default to PC's AM if present
+                    try {
+                        if (!this.accountManagersCache || this.accountManagersCache.length === 0) {
+                            this.accountManagersCache = await db.loadAll('accountManagers');
+                            this.accountManagersCache.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+                        }
+                        this.populateAllAccountManagerSelects();
+                        const amSelect = document.getElementById('quote-modal-account-manager');
+                        if (amSelect && pc.accountManager) amSelect.value = pc.accountManager;
+                    } catch (_) {}
 
                     // Show selected PC chip in smart input
                     const chipWrap = document.getElementById('builder-pc-selected');
@@ -128,6 +142,13 @@ class CRMApplication {
                 plItems: [],
                 categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
             };
+
+            // Load account managers and populate selects early
+            try {
+                this.accountManagersCache = await db.loadAll('accountManagers');
+                this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                this.populateAllAccountManagerSelects();
+            } catch (e) { logDebug('AM preload failed (non-blocking):', e); }
 
             // Populate price lists selector
             const priceListSelect = document.getElementById('quote-price-list');
@@ -1598,12 +1619,122 @@ class CRMApplication {
                 case 'pricelists':
                     await this.loadPriceListsData();
                     break;
+                case 'settings':
+                    await this.loadSettingsData();
+                    break;
                 default:
                     logDebug(`No data loading required for page: ${pageId}`);
                     break;
             }
         } catch (error) {
             logError(`Failed to load data for page ${pageId}:`, error);
+        }
+    }
+
+    /**
+     * @description Load and render settings data, including Account Managers
+     */
+    async loadSettingsData() {
+        try {
+            // Stats
+            const stats = await db.getStats();
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = String(val); };
+            set('settings-pc-count', stats.pcNumbers ?? '-');
+            set('settings-quotes-count', stats.quotes ?? '-');
+            set('settings-activities-count', stats.activities ?? '-');
+            set('settings-pricelists-count', stats.priceLists ?? '-');
+            set('settings-resources-count', stats.resources ?? '-');
+
+            // Current user
+            const userDisplay = document.getElementById('settings-current-user');
+            if (userDisplay) userDisplay.textContent = this.currentUser || '-';
+
+            // Account Managers list
+            await this.refreshAccountManagersUI();
+        } catch (error) {
+            logError('Failed to load settings data:', error);
+        }
+    }
+
+    async refreshAccountManagersUI() {
+        this.accountManagersCache = await db.loadAll('accountManagers');
+        this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        const list = document.getElementById('account-managers-list');
+        if (list) {
+            if (this.accountManagersCache.length === 0) {
+                list.innerHTML = '<li style="color:#6b7280;">No account managers yet</li>';
+            } else {
+                list.innerHTML = this.accountManagersCache.map(am => `
+                    <li style="display:flex; justify-content:space-between; align-items:center; padding:0.375rem 0; border-bottom:1px solid #e5e7eb;">
+                        <span>${am.name}</span>
+                        <button class="secondary" onclick="window.deleteAccountManager('${am.id}')">Delete</button>
+                    </li>
+                `).join('');
+            }
+        }
+        this.populateAllAccountManagerSelects();
+    }
+
+    populateAccountManagerSelect(selectEl, selectedValue = '') {
+        if (!selectEl) return;
+        const current = selectedValue || selectEl.value || '';
+        selectEl.innerHTML = '<option value="">Select Account Manager...</option>';
+        this.accountManagersCache.forEach(am => {
+            const opt = document.createElement('option');
+            opt.value = am.name;
+            opt.textContent = am.name;
+            if (am.name === current) opt.selected = true;
+            selectEl.appendChild(opt);
+        });
+    }
+
+    populateAllAccountManagerSelects() {
+        const ids = [
+            'pc-account-manager',
+            'pc-edit-account-manager',
+            'builder-account-manager',
+            'quote-modal-account-manager',
+            'quote-edit-account-manager'
+        ];
+        ids.forEach(id => this.populateAccountManagerSelect(document.getElementById(id)));
+    }
+
+    async addAccountManagerFromInput() {
+        const input = document.getElementById('new-account-manager-name');
+        const name = input?.value?.trim();
+        if (!name) { uiModals.showToast('Enter a name', 'warning'); return; }
+        const existing = (await db.loadAll('accountManagers')).find(am => (am.name || '').toLowerCase() === name.toLowerCase());
+        if (existing) { uiModals.showToast('This name already exists', 'warning'); return; }
+        await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
+        if (input) input.value = '';
+        uiModals.showToast('Account Manager added', 'success');
+        await this.refreshAccountManagersUI();
+    }
+
+    async deleteAccountManagerById(id) {
+        try {
+            const am = await db.load('accountManagers', id);
+            if (!am) { uiModals.showToast('Account Manager not found', 'error'); return; }
+            // Validate usage in pcNumbers, quotes, activities
+            const [pcs, quotes, activities] = await Promise.all([
+                db.loadAll('pcNumbers'), db.loadAll('quotes'), db.loadAll('activities')
+            ]);
+            const inUse = (
+                pcs.some(x => (x.accountManager || '') === am.name) ||
+                quotes.some(x => (x.accountManager || '') === am.name) ||
+                activities.some(x => (x.accountManager || '') === am.name)
+            );
+            if (inUse) {
+                uiModals.showToast('Cannot delete: this Account Manager is in use', 'error');
+                return;
+            }
+            if (!confirm('Delete this account manager?')) return;
+            await db.delete('accountManagers', id);
+            uiModals.showToast('Account Manager deleted', 'success');
+            await this.refreshAccountManagersUI();
+        } catch (e) {
+            logError('deleteAccountManager error:', e);
+            uiModals.showToast('Failed to delete account manager', 'error');
         }
     }
 
@@ -1969,7 +2100,10 @@ class CRMApplication {
      */
     async loadPcNumbersData() {
         try {
-            const pcNumbers = await db.loadAll('pcNumbers');
+            const [pcNumbers] = await Promise.all([
+                db.loadAll('pcNumbers'),
+                (async () => { try { this.accountManagersCache = await db.loadAll('accountManagers'); this.accountManagersCache.sort((a,b)=> (a.name||'').localeCompare(b.name||'')); this.populateAllAccountManagerSelects(); } catch(_){} })()
+            ]);
             const container = document.getElementById('pc-list');
             
             if (container) {
@@ -2106,11 +2240,7 @@ class CRMApplication {
             const priceLists = await db.loadAll('priceLists');
             const container = document.getElementById('resources-list');
             const nameFilter = (document.getElementById('resource-filter-name')?.value || '').toLowerCase();
-            const categoryFilter = (document.getElementById('resource-filter-category')?.value || '').toLowerCase();
-            const unitFilter = (document.getElementById('resource-filter-unit')?.value || '').toLowerCase();
-            const costMin = parseFloat(document.getElementById('resource-filter-cost-min')?.value || '');
-            const costMax = parseFloat(document.getElementById('resource-filter-cost-max')?.value || '');
-            const usageFilter = (document.getElementById('resource-filter-usage')?.value || '').toLowerCase();
+            // Removed other filters: category, unit, cost min/max, usage
             
             if (container) {
                 if (resources.length === 0) {
@@ -2151,12 +2281,7 @@ class CRMApplication {
                     const enrichedRows = rows.map(r => ({...r, usage: usageCountFor(r.id, r.unit)}));
                     // Apply filters
                     const filteredRows = enrichedRows.filter(row =>
-                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter)) &&
-                        (!categoryFilter || (row.category || '').toLowerCase() === categoryFilter) &&
-                        (!unitFilter || (row.unit || '').toLowerCase() === unitFilter) &&
-                        (isNaN(costMin) || (row.cost ?? Infinity) >= costMin) &&
-                        (isNaN(costMax) || (row.cost ?? -Infinity) <= costMax) &&
-                        (!usageFilter || (usageFilter === 'used' ? row.usage > 0 : row.usage === 0))
+                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter))
                     );
 
                     const formatCategory = (c) => {
@@ -6397,6 +6522,29 @@ async function initializeApplication() {
         
         // Setup global event handlers for backward compatibility
         setupLegacyCompatibility();
+
+        // One-time migration: seed Account Managers from existing data if store is empty
+        try {
+            const [existingAms, pcs, quotes, activities] = await Promise.all([
+                db.loadAll('accountManagers'),
+                db.loadAll('pcNumbers'),
+                db.loadAll('quotes'),
+                db.loadAll('activities')
+            ]);
+            if ((existingAms?.length || 0) === 0) {
+                const names = new Set();
+                pcs.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                quotes.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                activities.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                for (const name of Array.from(names).filter(Boolean)) {
+                    await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
+                }
+                app.accountManagersCache = await db.loadAll('accountManagers');
+                app.accountManagersCache.sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+                app.populateAllAccountManagerSelects();
+                logInfo(`Seeded ${app.accountManagersCache.length} Account Managers from existing data`);
+            }
+        } catch (e) { logError('AM migration failed:', e); }
         
         logInfo('✅ CRM Application started successfully');
             
@@ -6655,6 +6803,10 @@ function setupLegacyCompatibility() {
     window.clearPcFilter = () => app.clearPcFilter();
     window.clearQuoteFilter = () => app.clearQuoteFilter();
     window.clearActivityFilter = () => app.clearActivityFilter();
+
+    // Account Managers (Settings)
+    window.addAccountManager = () => app.addAccountManagerFromInput();
+    window.deleteAccountManager = (id) => app.deleteAccountManagerById(id);
 
     window.closePcModal = () => uiModals.closeModal('pc-modal');
     window.closePcEditModal = () => uiModals.closeModal('pc-edit-modal');
