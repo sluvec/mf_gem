@@ -3127,19 +3127,10 @@ Next steps:
             <div>
                 <label>Unit *</label>
                 <select id="modal-item-unit" onchange="window.onModalUnitChange()">
-                    <option value="hour">Hour</option>
-                    <option value="day">Day</option>
-                    <option value="each" selected>Each</option>
+                    <!-- Populated dynamically from selected resource; includes hour variants as single field -->
                 </select>
             </div>
-            <div id="modal-labour-rates" style="display: none;">
-                <label>Labour Rate Type</label>
-                <select id="modal-labour-rate-type">
-                    <option value="standard" selected>Standard Rate</option>
-                    <option value="ot1">OT1</option>
-                    <option value="ot2">OT2</option>
-                </select>
-            </div>
+            <!-- Removed separate Labour Rate Type; consolidated into Unit select dynamically -->
         </div>
         <div id="resource-info" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa;"></div>
         <label>Client Price (<span id="modal-price-currency">£</span>) *</label><input type="number" id="modal-client-price" step="0.01" min="0" oninput="window.calculateMargin()">

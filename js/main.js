@@ -5733,13 +5733,14 @@ class CRMApplication {
             if (!select) return;
 
             select.innerHTML = '<option value="">Select a resource...</option>';
-            
             resources.forEach(resource => {
+                const displayCost = resource.costPerUnit || resource.costPerHour || resource.costPerDay || 0;
+                const displayUnit = resource.unit || (resource.costPerHour ? 'hour' : resource.costPerDay ? 'day' : 'each');
                 const option = document.createElement('option');
                 option.value = resource.id;
-                option.textContent = `${resource.name} (${resource.category}) - £${(resource.costPerUnit || 0).toLocaleString()}`;
-                option.dataset.cost = resource.costPerUnit || 0;
-                option.dataset.unit = resource.unit || 'each';
+                option.textContent = `${resource.name} (${resource.category}) - £${displayCost.toLocaleString()}`;
+                option.dataset.cost = displayCost;
+                option.dataset.unit = displayUnit;
                 select.appendChild(option);
             });
 
@@ -5777,6 +5778,7 @@ class CRMApplication {
                 return;
             }
 
+            const resource = await db.load('resources', selectedOption.value);
             const cost = parseFloat(selectedOption.dataset.cost || 0);
             const unit = selectedOption.dataset.unit || 'each';
             
@@ -5786,6 +5788,39 @@ class CRMApplication {
                     <div><strong>Unit:</strong> ${unit}</div>
                 </div>
             `;
+
+            // Populate unit dropdown from resource, including hour variants in single field
+            if (unitSelect) {
+                const options = [];
+                const push = (value, label, c) => options.push({ value, label, cost: c });
+                if (resource && Array.isArray(resource.unitPrices)) {
+                    const up = resource.unitPrices;
+                    up.filter(u => u && u.unit && u.unit !== 'hour').forEach(u => push(u.unit, u.unit.charAt(0).toUpperCase()+u.unit.slice(1), Number(u.cost||0)));
+                    const hour = up.find(u => u.unit === 'hour' && u.rates);
+                    if (hour && hour.rates) {
+                        const map = [
+                            ['standard','Hour Standard'],
+                            ['ot1','Hour OT1'],
+                            ['ot2','Hour OT2'],
+                            ['overnight','Hour Overnight']
+                        ];
+                        map.forEach(([key,label]) => {
+                            const v = hour.rates[key];
+                            if (v != null && !isNaN(v)) push(`hour:${key}`, label, Number(v));
+                        });
+                    }
+                } else if (resource) {
+                    if (resource.costPerUnit != null) push('each','Each', Number(resource.costPerUnit));
+                    if (resource.costPerHour != null) push('hour:standard','Hour Standard', Number(resource.costPerHour));
+                    if (resource.costPerDay != null) push('day','Day', Number(resource.costPerDay));
+                } else {
+                    ['each','day','week','month'].forEach(u => push(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
+                }
+                unitSelect.innerHTML = '';
+                options.forEach(o => { const el = document.createElement('option'); el.value = o.value; el.textContent = o.label; el.dataset.cost = o.cost; unitSelect.appendChild(el); });
+                // Preselect matching resource unit if present
+                unitSelect.value = options.find(o => o.value.startsWith(unit))?.value || (options[0]?.value || 'each');
+            }
 
             // Auto-calculate suggested client price (with default 25% markup)
             const suggestedPrice = cost * 1.25;
@@ -5799,10 +5834,25 @@ class CRMApplication {
                 categorySelect.value = mapping[inferred] || '';
             }
 
-            // Force unit select to resource's unit
+            // When unit changes, update net cost preview and margin calc
             if (unitSelect) {
-                unitSelect.value = unit;
-                this.onModalUnitChange();
+                unitSelect.onchange = () => {
+                    const sel = unitSelect.options[unitSelect.selectedIndex];
+                    const uCost = parseFloat(sel?.dataset?.cost || '0');
+                    const info = document.getElementById('resource-info');
+                    if (info) {
+                        const uLabel = sel?.textContent || unitSelect.value;
+                        info.innerHTML = `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div><strong>Net Cost:</strong> £${uCost.toLocaleString()}</div>
+                                <div><strong>Unit:</strong> ${uLabel}</div>
+                            </div>
+                        `;
+                    }
+                    const client = document.getElementById('modal-client-price');
+                    if (client) client.value = (uCost * 1.25).toFixed(2);
+                    this.calculateMargin();
+                };
             }
 
         } catch (error) {
@@ -5943,7 +5993,19 @@ class CRMApplication {
 
             // Create price list item
             const itemId = `PLI-${Date.now()}`;
-            const netCost = resource?.costPerUnit || 0;
+            // Net cost from resource per unit selection
+            let netCost = 0;
+            if (resource && Array.isArray(resource.unitPrices)) {
+                if (unit === 'hour') {
+                    const hour = resource.unitPrices.find(u => u.unit === 'hour' && u.rates);
+                    netCost = hour?.rates?.[labourRateType || 'standard'] ?? 0;
+                } else {
+                    const found = resource.unitPrices.find(u => u.unit === unit);
+                    netCost = found?.cost ?? 0;
+                }
+            } else {
+                netCost = resource?.costPerUnit || resource?.costPerHour || resource?.costPerDay || 0;
+            }
             const margin = netCost > 0 ? ((clientPrice - netCost) / netCost) * 100 : 0;
 
             const priceListItem = {
