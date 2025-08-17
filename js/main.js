@@ -405,15 +405,27 @@ class CRMApplication {
         try {
             const items = Array.isArray(priceList?.items) ? priceList.items : [];
             if (items.length > 0) {
-                // Assume price list item shape: { id,name,category,unit,unitPrice }
+                // Use price list items to build options
+                const normalizeCategory = (val) => {
+                    const v = String(val || '').toLowerCase();
+                    if (v === 'material' || v === 'materials') return 'materials';
+                    if (v === 'vehicle' || v === 'vehicles') return 'vehicles';
+                    if (v === 'labour' || v === 'human' || v === 'human resources') return 'labour';
+                    if (v === 'crates') return 'materials';
+                    return ['labour','vehicles','materials','other'].includes(v) ? v : 'other';
+                };
+                const mapHourLabel = (rateType) => {
+                    const map = { standard: 'Hour Standard', ot1: 'Hour OT1', ot2: 'Hour OT2', overnight: 'Hour Overnight' };
+                    return map[String(rateType || 'standard').toLowerCase()] || 'Hour';
+                };
                 items.forEach(it => {
-                    const category = (it.category || it.type || 'other').toLowerCase();
-                    const cat = ['labour','vehicles','materials','other'].includes(category) ? category : 'other';
+                    const cat = normalizeCategory(it.resourceCategory || it.category || it.type || 'other');
+                    const unitLabel = (String(it.unit || '').toLowerCase() === 'hour') ? mapHourLabel(it.labourRateType) : (it.unit || 'unit');
                     byCat[cat].push({
-                        id: it.id || `${cat}-${it.name}`,
-                        name: it.name || 'Item',
-                        unit: it.unit || 'unit',
-                        unitPrice: parseFloat(it.unitPrice || 0)
+                        id: it.id || `${cat}-${it.resourceName || it.name || 'item'}`,
+                        name: it.resourceName || it.name || 'Item',
+                        unit: unitLabel,
+                        unitPrice: parseFloat(it.clientPrice ?? it.unitPrice ?? it.netCost ?? 0) || 0
                     });
                 });
             } else {
