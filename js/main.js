@@ -5765,7 +5765,7 @@ class CRMApplication {
     /**
      * @description Update resource info when resource is selected
      */
-    updateResourceInfo() {
+    async updateResourceInfo() {
         try {
             const select = document.getElementById('modal-resource-item-select');
             const unitSelect = document.getElementById('modal-item-unit');
