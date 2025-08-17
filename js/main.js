@@ -4971,20 +4971,57 @@ class CRMApplication {
             if (form) {
                 form.reset();
                 document.getElementById('resource-id').value = '';
-                // Reset hour block
-                const hourBlock = document.getElementById('hour-rates-block');
-                if (hourBlock) hourBlock.style.display = 'none';
-                const hourFields = ['hour-cost-standard','hour-cost-ot1','hour-cost-ot2','hour-cost-bank'];
-                hourFields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
                 // Reset other unit rows
                 const other = document.getElementById('resource-other-unitprices');
-                if (other) other.innerHTML = '';
-                // Reset unit picker
-                const picker = document.getElementById('unit-picker'); if (picker) picker.value = '';
+                if (other) {
+                    other.innerHTML = '';
+                    // Add one empty row by default
+                    this.addOtherUnitPriceRow();
+                }
             }
         } catch (error) {
             logError('Failed to clear resource form:', error);
         }
+    }
+
+    addOtherUnitPriceRow() {
+        try {
+            const container = document.getElementById('resource-other-unitprices');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'resource-other-row';
+            row.style.display = 'grid';
+            row.style.gridTemplateColumns = '2fr 2fr auto';
+            row.style.gap = '0.5rem';
+            row.style.marginBottom = '0.5rem';
+            row.innerHTML = `
+                <div>
+                    <label>Unit</label>
+                    <select class="oru-unit">
+                        <option value="">Select...</option>
+                        <option value="hour_standard">Hour Standard</option>
+                        <option value="hour_ot1">Hour OT1</option>
+                        <option value="hour_ot2">Hour OT2</option>
+                        <option value="hour_overnight">Hour Overnight</option>
+                        <option value="each">Each</option>
+                        <option value="day">Day</option>
+                        <option value="week">Week</option>
+                        <option value="month">Month</option>
+                        <option value="pack">Pack</option>
+                        <option value="roll">Roll</option>
+                        <option value="sheet">Sheet</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Net Price (£)</label>
+                    <input type="number" class="oru-cost" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div style="align-self:end;">
+                    <button type="button" class="secondary" onclick="this.closest('.resource-other-row').remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(row);
+        } catch (e) { logError('addOtherUnitPriceRow error:', e); }
     }
 
     addUnitPriceRow() {
@@ -5098,44 +5135,40 @@ class CRMApplication {
             const name = document.getElementById('resource-name')?.value?.trim();
             const category = document.getElementById('resource-category')?.value;
 
-            // Hour block
-            const provideHour = document.getElementById('hour-provide')?.checked;
-            let hourRates = null;
-            if (provideHour) {
-                const read = (id) => {
-                    const v = document.getElementById(id)?.value;
-                    return v === '' || v == null ? NaN : parseFloat(v);
-                };
-                const vStd = read('hour-cost-standard');
-                const vOt1 = read('hour-cost-ot1');
-                const vOt2 = read('hour-cost-ot2');
-                const vBank = read('hour-cost-bank');
-                if (isNaN(vStd)) {
-                    uiModals.showToast('Please provide Standard hourly rate', 'error');
-                    return null;
-                }
-                hourRates = {};
-                hourRates.standard = vStd;
-                if (!isNaN(vOt1)) hourRates.ot1 = vOt1;
-                if (!isNaN(vOt2)) hourRates.ot2 = vOt2;
-                if (!isNaN(vBank)) hourRates.bank_holiday = vBank;
-            }
-
-            // Other units
-            const otherRows = Array.from(document.querySelectorAll('#resource-other-unitprices .resource-other-row'));
-            const otherUnits = otherRows.map(r => ({
+            // Read unified unit rows
+            const rows = Array.from(document.querySelectorAll('#resource-other-unitprices .resource-other-row'));
+            const entries = rows.map(r => ({
                 unit: r.querySelector('.oru-unit')?.value,
                 cost: parseFloat(r.querySelector('.oru-cost')?.value || '')
             })).filter(x => x.unit && !isNaN(x.cost) && x.cost >= 0);
 
-            if (!name || !category || (!provideHour && otherUnits.length === 0)) {
+            if (!name || !category || entries.length === 0) {
                 uiModals.showToast('Please fill in Name, Category, and at least one Unit price', 'error');
                 return null;
             }
 
+            // Normalize hour_* units into hour rates
+            const hourRates = { standard: null, ot1: null, ot2: null, overnight: null };
+            const others = [];
+            entries.forEach(e => {
+                if (e.unit.startsWith('hour_')) {
+                    const t = e.unit.replace('hour_', '');
+                    if (t in hourRates) hourRates[t] = e.cost;
+                } else {
+                    others.push({ unit: e.unit, cost: e.cost });
+                }
+            });
+
             const unitPrices = [];
-            if (provideHour) unitPrices.push({ unit: 'hour', rates: hourRates });
-            unitPrices.push(...otherUnits);
+            if (hourRates.standard != null || hourRates.ot1 != null || hourRates.ot2 != null || hourRates.overnight != null) {
+                const rates = {};
+                if (hourRates.standard != null) rates.standard = hourRates.standard;
+                if (hourRates.ot1 != null) rates.ot1 = hourRates.ot1;
+                if (hourRates.ot2 != null) rates.ot2 = hourRates.ot2;
+                if (hourRates.overnight != null) rates.overnight = hourRates.overnight;
+                unitPrices.push({ unit: 'hour', rates });
+            }
+            unitPrices.push(...others);
 
             return { name, category, unitPrices };
         } catch (error) {
@@ -5159,38 +5192,29 @@ class CRMApplication {
             document.getElementById('resource-id').value = resource.id;
             document.getElementById('resource-name').value = resource.name || '';
             document.getElementById('resource-category').value = resource.category || '';
-            // Populate new pricing UI
-            // Hour block
-            const hourToggle = document.getElementById('hour-provide');
-            const hourBlock = document.getElementById('hour-rates-block');
+            // Populate new pricing UI rows
             const upList = Array.isArray(resource.unitPrices) ? resource.unitPrices : [];
-            const hourEntry = upList.find(u => u.unit === 'hour');
-            if (hourToggle && hourBlock) {
-                if (hourEntry && hourEntry.rates) {
-                    hourToggle.checked = true; hourBlock.style.display = '';
-                    const rates = hourEntry.rates || {};
-                    const setV = (id,val)=>{const el=document.getElementById(id); if(el) el.value = (val ?? '')};
-                    setV('hour-cost-standard', rates.standard);
-                    setV('hour-cost-ot1', rates.ot1);
-                    setV('hour-cost-ot2', rates.ot2);
-                    setV('hour-cost-bank', rates.bank_holiday);
-                } else {
-                    hourToggle.checked = false; hourBlock.style.display = 'none';
-                }
-            }
-            // Other units
             const other = document.getElementById('resource-other-unitprices');
             if (other) {
                 other.innerHTML='';
                 const legacy = [];
-                if (!hourEntry && resource.costPerHour != null) {
-                    // legacy hour to hour rates
-                    if (hourToggle && hourBlock) { hourToggle.checked = true; hourBlock.style.display=''; document.getElementById('hour-cost-standard').value = resource.costPerHour; }
-                }
                 if (resource.costPerUnit != null) legacy.push({ unit:'each', cost:resource.costPerUnit});
                 if (resource.costPerDay != null) legacy.push({ unit:'day', cost:resource.costPerDay});
+
+                // Map hour rates to separate hour_* rows
+                const hour = upList.find(u => u.unit === 'hour');
+                const rows = [];
+                const rates = hour?.rates || {};
+                if (rates.standard != null) rows.push({ unit:'hour_standard', cost:rates.standard });
+                if (rates.ot1 != null) rows.push({ unit:'hour_ot1', cost:rates.ot1 });
+                if (rates.ot2 != null) rows.push({ unit:'hour_ot2', cost:rates.ot2 });
+                const overnightVal = (rates.overnight != null) ? rates.overnight : (rates.bank_holiday != null ? rates.bank_holiday : null);
+                if (overnightVal != null) rows.push({ unit:'hour_overnight', cost:overnightVal });
+
                 const flatOthers = upList.filter(u => u.unit !== 'hour');
-                (flatOthers.length ? flatOthers : legacy).forEach(u => {
+                const all = [...rows, ...(flatOthers.length ? flatOthers : legacy)];
+                if (all.length === 0) { this.addOtherUnitPriceRow(); }
+                all.forEach(u => {
                     this.addOtherUnitPriceRow();
                     const row = other.lastElementChild; if (!row) return;
                     const uSel = row.querySelector('.oru-unit'); const cInp = row.querySelector('.oru-cost');
