@@ -2246,39 +2246,64 @@ class CRMApplication {
                 if (resources.length === 0) {
                     container.innerHTML = '<tr><td colspan="6">No resources found. <button onclick="window.showResourceModal()" class="button primary">Create First Resource</button></td></tr>';
                 } else {
-                    // Expand resources into rows per unit price
+                    // Expand resources into rows per unit price (split hour variants into separate rows)
                     const rows = [];
                     for (const r of resources) {
-                const unitPricesRaw = (r.unitPrices && Array.isArray(r.unitPrices)) ? r.unitPrices : [
-                            r.costPerUnit != null ? { unit: 'each', cost: r.costPerUnit } : null,
-                            r.costPerHour != null ? { unit: 'hour', cost: r.costPerHour } : null,
-                            r.costPerDay != null ? { unit: 'day', cost: r.costPerDay } : null
-                ].filter(Boolean);
-                // Merge hourly variants (standard/OT1/OT2/bank holiday) to separate lines if present
-                const unitPrices = unitPricesRaw.flatMap(up => {
-                    if (up.unit === 'hour' && Array.isArray(r.unitPrices)) {
-                        // When structured list exists, just return as-is
-                        return [up];
-                    }
-                    return [up];
-                });
                         const normalizedCategory = (r.category || r.type || '').toString().toLowerCase();
-                        unitPrices.forEach(up => {
-                            rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: up.cost, createdAt: r.createdAt });
-                        });
+                        const structured = Array.isArray(r.unitPrices) ? r.unitPrices : [];
+                        if (structured.length > 0) {
+                            for (const up of structured) {
+                                if (!up) continue;
+                                if (up.unit === 'hour' && up.rates && typeof up.rates === 'object') {
+                                    const ratePairs = [
+                                        ['standard', up.rates.standard],
+                                        ['ot1', up.rates.ot1],
+                                        ['ot2', up.rates.ot2],
+                                        ['overnight', up.rates.overnight ?? up.rates.bank_holiday]
+                                    ];
+                                    ratePairs.forEach(([rateType, val]) => {
+                                        if (val != null && !isNaN(val)) {
+                                            rows.push({
+                                                id: r.id,
+                                                name: r.name,
+                                                category: normalizedCategory,
+                                                unit: 'hour',
+                                                labourRateType: rateType,
+                                                cost: Number(val),
+                                                createdAt: r.createdAt
+                                            });
+                                        }
+                                    });
+                                } else if (up.unit) {
+                                    rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: up.unit, cost: Number(up.cost ?? 0), createdAt: r.createdAt });
+                                }
+                            }
+                        } else {
+                            // Legacy fields fallback
+                            if (r.costPerUnit != null) rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: 'each', cost: Number(r.costPerUnit), createdAt: r.createdAt });
+                            if (r.costPerHour != null) rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: 'hour', labourRateType: 'standard', cost: Number(r.costPerHour), createdAt: r.createdAt });
+                            if (r.costPerDay != null) rows.push({ id: r.id, name: r.name, category: normalizedCategory, unit: 'day', cost: Number(r.costPerDay), createdAt: r.createdAt });
+                        }
                     }
 
                     // Usage count per resource-unit across price lists
-                    const usageCountFor = (resId, unit) => {
+                    const usageCountFor = (resId, unit, labourRateType) => {
                         let count = 0;
                         for (const pl of priceLists) {
                             const items = Array.isArray(pl.items) ? pl.items : [];
-                            const match = items.some(it => (it.resourceId === resId) && ((it.unit || '').toLowerCase() === (unit || '').toLowerCase()));
+                            const match = items.some(it => {
+                                const itemUnit = (it.unit || '').toLowerCase();
+                                if ((unit || '').toLowerCase() === 'hour' && labourRateType) {
+                                    const itemRateType = (it.labourRateType || 'standard').toLowerCase();
+                                    return (it.resourceId === resId) && itemUnit === 'hour' && itemRateType === labourRateType.toLowerCase();
+                                }
+                                return (it.resourceId === resId) && itemUnit === (unit || '').toLowerCase();
+                            });
                             if (match) count += 1;
                         }
                         return count;
                     };
-                    const enrichedRows = rows.map(r => ({...r, usage: usageCountFor(r.id, r.unit)}));
+                    const enrichedRows = rows.map(r => ({...r, usage: usageCountFor(r.id, r.unit, r.labourRateType)}));
                     // Apply filters
                     const filteredRows = enrichedRows.filter(row =>
                         (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter))
@@ -2290,11 +2315,16 @@ class CRMApplication {
                         return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
                     };
 
+                    const formatUnit = (u, rateType) => {
+                        if ((u || '').toLowerCase() !== 'hour') return u || '-';
+                        const labelMap = { standard: 'Hour Standard', ot1: 'Hour OT1', ot2: 'Hour OT2', overnight: 'Hour Overnight' };
+                        return labelMap[(rateType || 'standard').toLowerCase()] || 'Hour';
+                    };
                     container.innerHTML = filteredRows.map(row => `
                         <tr>
                             <td><strong>${row.name || 'N/A'}</strong></td>
                             <td>${formatCategory(row.category)}</td>
-                            <td>${row.unit || '-'}</td>
+                            <td>${formatUnit(row.unit, row.labourRateType)}</td>
                             <td>£${(row.cost || 0).toLocaleString()}</td>
                             <td>${this.formatDate(row.createdAt)}</td>
                             <td>${row.usage}</td>
