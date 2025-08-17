@@ -5822,8 +5822,10 @@ class CRMApplication {
                 unitSelect.value = options.find(o => o.value.startsWith(unit))?.value || (options[0]?.value || 'each');
             }
 
-            // Auto-calculate suggested client price (with default 25% markup)
-            const suggestedPrice = cost * 1.25;
+            // Auto-calculate suggested client price (with default 25% markup) based on initial unit selection
+            const initialSel = unitSelect?.options?.[unitSelect.selectedIndex];
+            const baseCost = parseFloat(initialSel?.dataset?.cost || cost || 0);
+            const suggestedPrice = baseCost * 1.25;
             document.getElementById('modal-client-price').value = suggestedPrice.toFixed(2);
             this.calculateMargin();
             
@@ -5853,6 +5855,8 @@ class CRMApplication {
                     if (client) client.value = (uCost * 1.25).toFixed(2);
                     this.calculateMargin();
                 };
+                // Trigger once to ensure info reflects preselected unit
+                unitSelect.onchange();
             }
 
         } catch (error) {
@@ -5915,6 +5919,7 @@ class CRMApplication {
         try {
             const select = document.getElementById('modal-resource-item-select');
             const selectedOption = select.options[select.selectedIndex];
+            const unitSelect = document.getElementById('modal-item-unit');
             const clientPriceInput = document.getElementById('modal-client-price');
             const marginInfo = document.getElementById('margin-info');
             
@@ -5923,7 +5928,15 @@ class CRMApplication {
                 return;
             }
 
-            const netCost = parseFloat(selectedOption.dataset.cost || 0);
+            // Determine netCost from selected unit (supports hour variants)
+            let netCost = 0;
+            const selUnit = unitSelect?.value || '';
+            const selOption = unitSelect?.options?.[unitSelect.selectedIndex];
+            if (selOption && selOption.dataset && selOption.dataset.cost) {
+                netCost = parseFloat(selOption.dataset.cost);
+            } else {
+                netCost = parseFloat(selectedOption.dataset.cost || 0);
+            }
             const clientPrice = parseFloat(clientPriceInput.value || 0);
             
             if (netCost === 0) {
