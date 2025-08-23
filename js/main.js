@@ -671,12 +671,39 @@ class CRMApplication {
         // Reset other fields
         document.getElementById('unified-quantity').value = '1';
         document.getElementById('unified-price').value = '';
+        document.getElementById('unified-total').value = '';
         document.getElementById('unified-manual-price').checked = false;
         document.getElementById('unified-price').readOnly = true;
         document.getElementById('unified-price').style.background = '#f3f4f6';
         
         // Update unit dropdown for this category
         this.updateUnifiedUnitDropdown(mappedCategory);
+    }
+
+    // Phase 3: Update total price in real-time (Price × Quantity)
+    updateUnifiedTotal() {
+        const priceInput = document.getElementById('unified-price');
+        const quantityInput = document.getElementById('unified-quantity');
+        const totalInput = document.getElementById('unified-total');
+        
+        if (!priceInput || !quantityInput || !totalInput) return;
+        
+        const price = parseFloat(priceInput.value || '0') || 0;
+        const quantity = Math.max(0, parseFloat(quantityInput.value || '1') || 1);
+        const total = price * quantity;
+        
+        totalInput.value = total.toFixed(2);
+        
+        // Add visual feedback for non-zero totals
+        if (total > 0) {
+            totalInput.style.background = '#dcfce7';
+            totalInput.style.borderColor = '#16a34a';
+            totalInput.style.color = '#15803d';
+        } else {
+            totalInput.style.background = '#e0f2fe';
+            totalInput.style.borderColor = '#0ea5e9';
+            totalInput.style.color = '#0c4a6e';
+        }
     }
 
     updateUnifiedUnitDropdown(category) {
@@ -735,6 +762,9 @@ class CRMApplication {
             priceInput.readOnly = true;
             priceInput.style.background = '#f3f4f6';
         }
+        
+        // Update total price
+        this.updateUnifiedTotal();
     }
 
     onUnifiedResourceChange() {
@@ -784,6 +814,9 @@ class CRMApplication {
             priceInput.readOnly = true;
             priceInput.style.background = '#f3f4f6';
         }
+        
+        // Update total price
+        this.updateUnifiedTotal();
     }
 
     toggleManualPrice() {
@@ -802,6 +835,9 @@ class CRMApplication {
             // Reset to original price
             this.onUnifiedResourceChange();
         }
+        
+        // Update total price when manual override is toggled
+        this.updateUnifiedTotal();
     }
 
     addFromUnifiedPanel() {
@@ -901,6 +937,7 @@ class CRMApplication {
         quantityInput.value = '1';
         unitSelect.value = '';
         priceInput.value = '';
+        document.getElementById('unified-total').value = '';
         document.getElementById('unified-manual-price').checked = false;
         priceInput.readOnly = true;
         priceInput.style.background = '#f3f4f6';
