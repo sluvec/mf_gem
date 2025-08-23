@@ -1688,6 +1688,24 @@
                 <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
                     <label>Filter:</label>
                     <input type="text" id="resource-filter-name" placeholder="Name..." oninput="window.filterResourcesTable()">
+                    <select id="resource-filter-category" onchange="window.filterResourcesTable()">
+                        <option value="">All categories</option>
+                        <option value="labour">Labour</option>
+                        <option value="vehicles">Vehicles</option>
+                        <option value="material">Material</option>
+                        <option value="crates">Crates</option>
+                    </select>
+                    <select id="resource-filter-unit" onchange="window.filterResourcesTable()">
+                        <option value="">All units</option>
+                        <option value="each">Each</option>
+                        <option value="hour">Hour</option>
+                        <option value="day">Day</option>
+                        <option value="week">Week</option>
+                        <option value="month">Month</option>
+                        <option value="pack">Pack</option>
+                        <option value="roll">Roll</option>
+                        <option value="sheet">Sheet</option>
+                    </select>
                 </div>
                 <table>
                     <thead><tr>

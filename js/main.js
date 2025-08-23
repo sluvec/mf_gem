@@ -2251,7 +2251,8 @@ class CRMApplication {
             const priceLists = await db.loadAll('priceLists');
             const container = document.getElementById('resources-list');
             const nameFilter = (document.getElementById('resource-filter-name')?.value || '').toLowerCase();
-            // Removed other filters: category, unit, cost min/max, usage
+            const categoryFilter = (document.getElementById('resource-filter-category')?.value || '').toLowerCase();
+            const unitFilter = (document.getElementById('resource-filter-unit')?.value || '').toLowerCase();
             
             if (container) {
                 if (resources.length === 0) {
@@ -2317,7 +2318,9 @@ class CRMApplication {
                     const enrichedRows = rows.map(r => ({...r, usage: usageCountFor(r.id, r.unit, r.labourRateType)}));
                     // Apply filters
                     const filteredRows = enrichedRows.filter(row =>
-                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter))
+                        (!nameFilter || (row.name || '').toLowerCase().includes(nameFilter)) &&
+                        (!categoryFilter || (row.category || '').toLowerCase() === categoryFilter) &&
+                        (!unitFilter || (row.unit || '').toLowerCase() === unitFilter)
                     );
 
                     const formatCategory = (c) => {
