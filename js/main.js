@@ -482,7 +482,7 @@ class CRMApplication {
         const unitPrice = parseFloat(opt?.dataset?.price || '0') || 0;
         const quantity = Math.max(0, Math.floor(parseFloat(qtyEl.value || '1') || 1));
         const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        this.builderState.plItems.push({ id, category, name, unit, quantity, unitPrice, lineDiscount: 0, lineTotal: quantity * unitPrice });
+        this.builderState.plItems.push({ id, category, name, unit, quantity, unitPrice, lineDiscount: 0, lineTotal: quantity * unitPrice, isManualPrice: false, manualPrice: unitPrice });
         this.renderPlItemsTable(category, tableId);
         this.recalcBuilderTotals();
     }
@@ -490,16 +490,32 @@ class CRMApplication {
     renderPlItemsTable(category, tableId) {
         const tbody = document.getElementById(tableId);
         if (!tbody) return;
-        const rows = this.builderState.plItems.filter(i => i.category === category).map(i => `
+        const rows = this.builderState.plItems.filter(i => i.category === category).map(i => {
+            const currentPrice = i.isManualPrice ? i.manualPrice : i.unitPrice;
+            const priceStyle = i.isManualPrice ? 'background: #fef3c7; border: 1px solid #f59e0b;' : 'background: #f3f4f6;';
+            return `
             <tr>
                 <td>${i.name}</td>
                 <td>${i.unit}</td>
                 <td><input type="number" value="${i.quantity}" min="0" step="1" style="width:90px" onchange="window.app.updatePlItemQty('${i.id}', this.value)"></td>
-                <td>£${i.unitPrice.toFixed(2)}</td>
-                <td>£${(i.quantity * i.unitPrice).toFixed(2)}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="number" value="${currentPrice.toFixed(2)}" step="0.01" min="0" 
+                               style="width: 80px; ${priceStyle}" 
+                               ${i.isManualPrice ? '' : 'readonly'} 
+                               onchange="window.app.updatePlItemPrice('${i.id}', this.value)">
+                        <label style="display: flex; align-items: center; font-size: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" ${i.isManualPrice ? 'checked' : ''} 
+                                   onchange="window.app.togglePlItemManualPrice('${i.id}', this.checked)" 
+                                   style="margin-right: 0.25rem; transform: scale(0.8);">
+                            Manual
+                        </label>
+                    </div>
+                </td>
+                <td>£${(i.quantity * currentPrice).toFixed(2)}</td>
                 <td><button class="danger small" onclick="window.app.removePlItem('${i.id}')">Remove</button></td>
-            </tr>
-        `).join('');
+            </tr>`;
+        }).join('');
         tbody.innerHTML = rows || `<tr><td colspan="6" style="text-align:center; color:#6b7280;">No items added</td></tr>`;
     }
 
@@ -508,7 +524,42 @@ class CRMApplication {
         if (!item) return;
         const q = Math.max(0, Math.floor(parseFloat(newQty || '0') || 0));
         item.quantity = q;
-        item.lineTotal = q * item.unitPrice;
+        const currentPrice = item.isManualPrice ? item.manualPrice : item.unitPrice;
+        item.lineTotal = q * currentPrice;
+        // Re-render category table
+        const tableId = `builder-${item.category}-table`;
+        this.renderPlItemsTable(item.category, tableId);
+        this.recalcBuilderTotals();
+    }
+
+    // Phase 2: Manual price override for individual line items
+    updatePlItemPrice(itemId, newPrice) {
+        const item = (this.builderState.plItems || []).find(x => x.id === itemId);
+        if (!item || !item.isManualPrice) return;
+        
+        const price = Math.max(0, parseFloat(newPrice || '0') || 0);
+        item.manualPrice = price;
+        item.lineTotal = item.quantity * price;
+        
+        // Re-render category table
+        const tableId = `builder-${item.category}-table`;
+        this.renderPlItemsTable(item.category, tableId);
+        this.recalcBuilderTotals();
+    }
+
+    togglePlItemManualPrice(itemId, isManual) {
+        const item = (this.builderState.plItems || []).find(x => x.id === itemId);
+        if (!item) return;
+        
+        item.isManualPrice = isManual;
+        if (!isManual) {
+            // Reset to original price list price
+            item.manualPrice = item.unitPrice;
+        }
+        
+        const currentPrice = isManual ? item.manualPrice : item.unitPrice;
+        item.lineTotal = item.quantity * currentPrice;
+        
         // Re-render category table
         const tableId = `builder-${item.category}-table`;
         this.renderPlItemsTable(item.category, tableId);
@@ -645,15 +696,18 @@ class CRMApplication {
         }
         
         const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+        const isManualPrice = document.getElementById('unified-manual-price').checked;
         this.builderState.plItems.push({ 
             id, 
             category, 
             name, 
             unit, 
             quantity, 
-            unitPrice, 
+            unitPrice: isManualPrice ? unitPrice : parseFloat(selectedOption.dataset.price || '0'), 
             lineDiscount: 0, 
-            lineTotal: quantity * unitPrice 
+            lineTotal: quantity * unitPrice,
+            isManualPrice: isManualPrice,
+            manualPrice: unitPrice
         });
         
         // Re-render the current category table
@@ -669,11 +723,83 @@ class CRMApplication {
         priceInput.readOnly = true;
         priceInput.style.background = '#f3f4f6';
         
+        // Phase 2: Check for consolidation of duplicates
+        this.consolidateDuplicateItems();
+        
         uiModals.showToast('Item added to quote', 'success');
     }
 
+    // Phase 2: Consolidate duplicate items (same name, unit, price, category)
+    consolidateDuplicateItems() {
+        const itemsToRemove = [];
+        const processedItems = new Set();
+        
+        for (let i = 0; i < this.builderState.plItems.length; i++) {
+            const item = this.builderState.plItems[i];
+            if (processedItems.has(item.id)) continue;
+            
+            const currentPrice = item.isManualPrice ? item.manualPrice : item.unitPrice;
+            const duplicates = [];
+            
+            // Find all duplicates of this item
+            for (let j = i + 1; j < this.builderState.plItems.length; j++) {
+                const otherItem = this.builderState.plItems[j];
+                if (processedItems.has(otherItem.id)) continue;
+                
+                const otherPrice = otherItem.isManualPrice ? otherItem.manualPrice : otherItem.unitPrice;
+                
+                // Check if items are identical (same name, unit, price, category, manual price status)
+                if (item.name === otherItem.name && 
+                    item.unit === otherItem.unit && 
+                    item.category === otherItem.category &&
+                    Math.abs(currentPrice - otherPrice) < 0.01 && // Price comparison with tolerance
+                    item.isManualPrice === otherItem.isManualPrice) {
+                    
+                    duplicates.push(otherItem);
+                    processedItems.add(otherItem.id);
+                }
+            }
+            
+            // If duplicates found, consolidate them
+            if (duplicates.length > 0) {
+                const totalQuantity = item.quantity + duplicates.reduce((sum, dup) => sum + dup.quantity, 0);
+                item.quantity = totalQuantity;
+                item.lineTotal = totalQuantity * currentPrice;
+                
+                // Mark duplicates for removal
+                duplicates.forEach(dup => itemsToRemove.push(dup.id));
+                
+                // Show consolidation message
+                if (duplicates.length > 0) {
+                    uiModals.showToast(`Consolidated ${duplicates.length + 1} identical items: ${item.name}`, 'info');
+                }
+            }
+            
+            processedItems.add(item.id);
+        }
+        
+        // Remove duplicate items
+        itemsToRemove.forEach(id => {
+            const idx = this.builderState.plItems.findIndex(item => item.id === id);
+            if (idx >= 0) {
+                this.builderState.plItems.splice(idx, 1);
+            }
+        });
+        
+        // Re-render all category tables if consolidation occurred
+        if (itemsToRemove.length > 0) {
+            this.renderBuilderCategory('labour', 'quote-human');
+            this.renderBuilderCategory('vehicles', 'quote-vehicles');
+            this.renderBuilderCategory('materials', 'quote-materials');
+            this.renderBuilderCategory('other', 'quote-other');
+        }
+    }
+
     recalcBuilderTotals() {
-        const sumCat = cat => (this.builderState.plItems || []).filter(i => i.category === cat).reduce((a,b)=>a+(b.quantity*b.unitPrice),0);
+        const sumCat = cat => (this.builderState.plItems || []).filter(i => i.category === cat).reduce((a,b)=>{
+            const currentPrice = b.isManualPrice ? b.manualPrice : b.unitPrice;
+            return a + (b.quantity * currentPrice);
+        }, 0);
         const human = sumCat('labour');
         const vehicles = sumCat('vehicles');
         const materials = sumCat('materials');
