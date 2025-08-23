@@ -3083,15 +3083,32 @@ class CRMApplication {
         try {
             logDebug('Opening new quote modal', pcId ? `with PC ID: ${pcId}` : '');
             
-            // Load PC Numbers for dropdown
+            // Load PC Numbers and Companies for dropdowns
             const pcNumbers = await db.loadAll('pcNumbers');
+            const uniqueCompanies = Array.from(new Set(pcNumbers.map(pc => pc.company).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+            const companySelect = document.getElementById('quote-modal-company');
+            if (companySelect) {
+                companySelect.innerHTML = '<option value="">Select Company...</option>';
+                uniqueCompanies.forEach(c => { companySelect.innerHTML += `<option value="${c}">${c}</option>`; });
+            }
             const pcSelect = document.getElementById('quote-modal-pc');
             
             if (pcSelect) {
                 pcSelect.innerHTML = '<option value="">Select PC Number</option>';
-                pcNumbers.forEach(pc => {
-                    pcSelect.innerHTML += `<option value="${pc.id}" data-pc-number="${pc.pcNumber}">${pc.pcNumber} - ${pc.company}</option>`;
-                });
+                const populatePcOptions = (list) => {
+                    pcSelect.innerHTML = '<option value="">Select PC Number</option>';
+                    list.forEach(pc => {
+                        pcSelect.innerHTML += `<option value="${pc.id}" data-pc-number="${pc.pcNumber}" data-company="${pc.company||''}">${pc.pcNumber} - ${pc.company||''}</option>`;
+                    });
+                };
+                populatePcOptions(pcNumbers);
+                if (companySelect) {
+                    companySelect.onchange = () => {
+                        const val = companySelect.value;
+                        const filtered = val ? pcNumbers.filter(p => (p.company||'') === val) : pcNumbers;
+                        populatePcOptions(filtered);
+                    };
+                }
                 
                 // Attach immediate validation on selection (only when not locked)
                 pcSelect.onchange = async () => {
