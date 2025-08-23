@@ -5605,7 +5605,6 @@ class CRMApplication {
             // Pricing configuration (may be absent on edit modal)
             const markupStr = document.getElementById('pricelist-markup')?.value || '';
             const discountStr = document.getElementById('pricelist-discount')?.value || '';
-            const isDefault = !!document.getElementById('pricelist-is-default')?.checked;
 
             if (!name) {
                 uiModals.showToast('Please enter Price List Name', 'error');
@@ -5617,11 +5616,10 @@ class CRMApplication {
                 category,
                 currency,
                 status,
-                effectiveFrom,
-                effectiveTo,
+                effectiveFrom: undefined,
+                effectiveTo: undefined,
                 markup: markupStr !== '' ? parseFloat(markupStr) : undefined,
-                discount: discountStr !== '' ? parseFloat(discountStr) : undefined,
-                isDefault
+                discount: discountStr !== '' ? parseFloat(discountStr) : undefined
             };
         } catch (error) {
             logError('Failed to get price list form data:', error);
