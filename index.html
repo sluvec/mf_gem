@@ -831,7 +831,14 @@
 
                     <!-- Recycling Charges -->
                     <div class="category-section" style="margin-top: 1.5rem;">
-                        <h3 style="margin: 0 0 0.75rem 0;">♻ Recycling Charges</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; background: #f8fafc; border: 1px solid #e2e8f0;" onclick="window.app && window.app.toggleSection && window.app.toggleSection('recycling')">
+                            <h3 style="margin: 0; color: #16a34a;">♻ Recycling Charges</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span id="recycling-count" style="font-size: 0.875rem; color: #6b7280;">0 items</span>
+                                <span id="recycling-toggle" style="font-size: 1.2rem; color: #6b7280;">▼</span>
+                            </div>
+                        </div>
+                        <div id="recycling-content" style="display: block;">
                         <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
                             <div>
                                 <label>Type</label>
@@ -876,11 +883,19 @@
                             <thead><tr><th style="width:40%">Type</th><th>Mode</th><th>Details</th><th>Amount</th><th></th></tr></thead>
                             <tbody id="recycling-table"></tbody>
                         </table>
+                        </div>
                     </div>
 
                     <!-- Rebates -->
                     <div class="category-section" style="margin-top: 1.5rem;">
-                        <h3 style="margin: 0 0 0.75rem 0;">💰 Rebates</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; background: #f8fafc; border: 1px solid #e2e8f0;" onclick="window.app && window.app.toggleSection && window.app.toggleSection('rebates')">
+                            <h3 style="margin: 0; color: #ea580c;">💰 Rebates</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span id="rebates-count" style="font-size: 0.875rem; color: #6b7280;">0 items</span>
+                                <span id="rebates-toggle" style="font-size: 1.2rem; color: #6b7280;">▼</span>
+                            </div>
+                        </div>
+                        <div id="rebates-content" style="display: block;">
                         <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
                             <div>
                                 <label>Type</label>
@@ -932,11 +947,19 @@
                             <thead><tr><th style="width:40%">Type</th><th>Mode</th><th>Details</th><th>Amount</th><th></th></tr></thead>
                             <tbody id="rebates-table"></tbody>
                         </table>
+                        </div>
                     </div>
 
                     <!-- Other Costs (Manual) -->
                     <div class="category-section" style="margin-top: 1.5rem;">
-                        <h3 style="margin: 0 0 0.75rem 0;">📎 Other Costs (Manual)</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; background: #f8fafc; border: 1px solid #e2e8f0;" onclick="window.app && window.app.toggleSection && window.app.toggleSection('othercosts')">
+                            <h3 style="margin: 0; color: #7c3aed;">📎 Other Costs (Manual)</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span id="othercosts-count" style="font-size: 0.875rem; color: #6b7280;">0 items</span>
+                                <span id="othercosts-toggle" style="font-size: 1.2rem; color: #6b7280;">▼</span>
+                            </div>
+                        </div>
+                        <div id="othercosts-content" style="display: block;">
                         <div style="display:flex; gap:0.5rem; flex-wrap: wrap; align-items: end; margin-bottom: 0.5rem;">
                             <div>
                                 <label>Description</label>
@@ -954,10 +977,11 @@
                             <thead><tr><th style="width:60%">Description</th><th>Amount</th><th></th></tr></thead>
                             <tbody id="othercosts-table"></tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
-                <div class="summary">
-                    <h3>Quote Summary</h3>
+                <div class="summary" style="position: sticky; top: 20px; background: white; border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05); z-index: 10;">
+                    <h3 style="margin-top: 0; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.75rem;">💰 Quote Summary</h3>
                     <div class="summary-line"><span>Human Resources:</span><span id="sum-human">£0.00</span></div>
                     <div class="summary-line"><span>Vehicles:</span><span id="sum-vehicles">£0.00</span></div>
                     <div class="summary-line"><span>Materials:</span><span id="sum-materials">£0.00</span></div>

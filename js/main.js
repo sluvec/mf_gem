@@ -392,6 +392,9 @@ class CRMApplication {
                 // Phase 1: Initialize category tabs - default to 'human' tab
                 this.switchCategoryTab('human');
                 
+                // Phase 3: Initialize section counts
+                this.updateSectionCounts();
+                
                 this.recalcBuilderTotals();
             } else {
                 if (itemsSection) itemsSection.style.display = 'none';
@@ -715,6 +718,9 @@ class CRMApplication {
         this.renderPlItemsTable(category, tableId);
         this.recalcBuilderTotals();
         
+        // Phase 3: Highlight new row
+        this.highlightNewRow(tableId, id);
+        
         // Reset form
         select.value = '';
         quantityInput.value = '1';
@@ -727,6 +733,94 @@ class CRMApplication {
         this.consolidateDuplicateItems();
         
         uiModals.showToast('Item added to quote', 'success');
+    }
+
+    // Phase 3: Collapsible sections functionality
+    toggleSection(sectionName) {
+        const content = document.getElementById(`${sectionName}-content`);
+        const toggle = document.getElementById(`${sectionName}-toggle`);
+        
+        if (!content || !toggle) return;
+        
+        const isVisible = content.style.display !== 'none';
+        
+        if (isVisible) {
+            content.style.display = 'none';
+            toggle.textContent = '▶';
+            toggle.style.transform = 'rotate(0deg)';
+        } else {
+            content.style.display = 'block';
+            toggle.textContent = '▼';
+            toggle.style.transform = 'rotate(0deg)';
+        }
+        
+        // Add smooth transition effect
+        content.style.transition = 'all 0.3s ease-in-out';
+    }
+
+    // Phase 3: Update section item counts
+    updateSectionCounts() {
+        // Update recycling count
+        const recyclingCount = (this.builderState.recyclingItems || []).length;
+        const recyclingCountEl = document.getElementById('recycling-count');
+        if (recyclingCountEl) {
+            recyclingCountEl.textContent = `${recyclingCount} ${recyclingCount === 1 ? 'item' : 'items'}`;
+        }
+
+        // Update rebates count
+        const rebatesCount = (this.builderState.rebateItems || []).length;
+        const rebatesCountEl = document.getElementById('rebates-count');
+        if (rebatesCountEl) {
+            rebatesCountEl.textContent = `${rebatesCount} ${rebatesCount === 1 ? 'item' : 'items'}`;
+        }
+
+        // Update other costs count
+        const otherCostsCount = (this.builderState.otherCosts || []).length;
+        const otherCostsCountEl = document.getElementById('othercosts-count');
+        if (otherCostsCountEl) {
+            otherCostsCountEl.textContent = `${otherCostsCount} ${otherCostsCount === 1 ? 'item' : 'items'}`;
+        }
+    }
+
+    // Phase 3: Highlight new row with animation
+    highlightNewRow(tableId, itemId) {
+        setTimeout(() => {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            // Find the row with data for this item (look for the remove button with itemId)
+            const rows = table.querySelectorAll('tbody tr');
+            let targetRow = null;
+            
+            rows.forEach(row => {
+                const removeButton = row.querySelector(`button[onclick*="${itemId}"]`);
+                if (removeButton) {
+                    targetRow = row;
+                }
+            });
+            
+            if (targetRow) {
+                // Add highlight effect
+                targetRow.style.backgroundColor = '#dcfce7';
+                targetRow.style.border = '2px solid #16a34a';
+                targetRow.style.transform = 'scale(1.02)';
+                targetRow.style.transition = 'all 0.3s ease-in-out';
+                targetRow.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.3)';
+                
+                // Remove highlight after 2 seconds
+                setTimeout(() => {
+                    targetRow.style.backgroundColor = '';
+                    targetRow.style.border = '';
+                    targetRow.style.transform = '';
+                    targetRow.style.boxShadow = '';
+                    
+                    // Remove transition after animation completes
+                    setTimeout(() => {
+                        targetRow.style.transition = '';
+                    }, 300);
+                }, 2000);
+            }
+        }, 100); // Small delay to ensure row is rendered
     }
 
     // Phase 2: Consolidate duplicate items (same name, unit, price, category)
@@ -870,6 +964,7 @@ class CRMApplication {
                 <td>£${(x.amount||0).toFixed(2)}</td>
                 <td><button class="danger small" onclick="window.app.removeRecyclingItem('${x.id}')">Remove</button></td>
             </tr>`).join('') || `<tr><td colspan="5" style="text-align:center; color:#6b7280;">No recycling items</td></tr>`;
+        this.updateSectionCounts();
     }
     removeRecyclingItem(id) {
         const i=(this.builderState.recyclingItems||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.recyclingItems.splice(i,1);this.renderRecyclingTable();this.recalcBuilderTotals();}
@@ -910,6 +1005,7 @@ class CRMApplication {
                 <td>£${(x.amount||0).toFixed(2)}</td>
                 <td><button class="danger small" onclick="window.app.removeRebateItem('${x.id}')">Remove</button></td>
             </tr>`).join('') || `<tr><td colspan="5" style="text-align:center; color:#6b7280;">No rebates</td></tr>`;
+        this.updateSectionCounts();
     }
     removeRebateItem(id) {
         const i=(this.builderState.rebateItems||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.rebateItems.splice(i,1);this.renderRebatesTable();this.recalcBuilderTotals();}
@@ -935,6 +1031,7 @@ class CRMApplication {
                 <td>£${(x.amount||0).toFixed(2)}</td>
                 <td><button class="danger small" onclick="window.app.removeOtherCost('${x.id}')">Remove</button></td>
             </tr>`).join('') || `<tr><td colspan="3" style="text-align:center; color:#6b7280;">No other costs</td></tr>`;
+        this.updateSectionCounts();
     }
     removeOtherCost(id){
         const i=(this.builderState.otherCosts||[]).findIndex(r=>r.id===id); if(i>=0){this.builderState.otherCosts.splice(i,1);this.renderOtherCostsTable();this.recalcBuilderTotals();}
