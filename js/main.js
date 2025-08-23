@@ -425,14 +425,41 @@ class CRMApplication {
                     const map = { standard: 'Hour Standard', ot1: 'Hour OT1', ot2: 'Hour OT2', overnight: 'Hour Overnight' };
                     return map[String(rateType || 'standard').toLowerCase()] || 'Hour';
                 };
+                // Group items by resource name and category to avoid duplicates
+                const resourceMap = new Map();
+                
                 items.forEach(it => {
                     const cat = normalizeCategory(it.resourceCategory || it.category || it.type || 'other');
+                    const resourceName = it.resourceName || it.name || 'Item';
                     const unitLabel = (String(it.unit || '').toLowerCase() === 'hour') ? mapHourLabel(it.labourRateType) : (it.unit || 'unit');
-                    byCat[cat].push({
-                        id: it.id || `${cat}-${it.resourceName || it.name || 'item'}`,
-                        name: it.resourceName || it.name || 'Item',
-                        unit: unitLabel,
-                        unitPrice: parseFloat(it.clientPrice ?? it.unitPrice ?? it.netCost ?? 0) || 0
+                    const unitPrice = parseFloat(it.clientPrice ?? it.unitPrice ?? it.netCost ?? 0) || 0;
+                    
+                    const key = `${cat}-${resourceName}`;
+                    
+                    if (!resourceMap.has(key)) {
+                        resourceMap.set(key, {
+                            id: it.id || `${cat}-${resourceName}`,
+                            name: resourceName,
+                            category: cat,
+                            units: new Map() // Map of unit -> price
+                        });
+                    }
+                    
+                    // Add this unit-price combination
+                    resourceMap.get(key).units.set(unitLabel, unitPrice);
+                });
+                
+                // Convert to final structure - each resource appears once but with all units stored
+                resourceMap.forEach(resource => {
+                    // For display in dropdown, we'll use the resource name only
+                    // All units will be available in the units Map
+                    byCat[resource.category].push({
+                        id: resource.id,
+                        name: resource.name,
+                        units: resource.units, // Map of all available units with prices
+                        // For backward compatibility, set default unit and price (first available)
+                        unit: Array.from(resource.units.keys())[0] || 'unit',
+                        unitPrice: Array.from(resource.units.values())[0] || 0
                     });
                 });
             } else {
@@ -685,12 +712,13 @@ class CRMApplication {
                 const category = selectedOption.dataset.category;
                 const resourceId = selectedOption.value;
                 
-                // Find the specific unit price for this resource
+                // Find the specific unit price for this resource from the units Map
                 const options = this.builderState.categoryOptions[category] || [];
-                const resourceOption = options.find(o => o.id === resourceId && o.unit === selectedUnit);
+                const selectedResource = options.find(o => o.id === resourceId);
                 
-                if (resourceOption) {
-                    priceInput.value = resourceOption.unitPrice.toFixed(2);
+                if (selectedResource && selectedResource.units && selectedResource.units.has(selectedUnit)) {
+                    const unitPrice = selectedResource.units.get(selectedUnit);
+                    priceInput.value = unitPrice.toFixed(2);
                 } else {
                     priceInput.value = '';
                 }
@@ -723,10 +751,12 @@ class CRMApplication {
             const category = selectedOption.dataset.category;
             const resourceId = selectedOption.value;
             const options = this.builderState.categoryOptions[category] || [];
-            const resourceOptions = options.filter(o => o.id === resourceId);
-            const units = [...new Set(resourceOptions.map(o => o.unit))];
+            const selectedResource = options.find(o => o.id === resourceId);
             
-            if (unitSelect) {
+            if (selectedResource && selectedResource.units && unitSelect) {
+                // Get all units available for this resource
+                const units = Array.from(selectedResource.units.keys());
+                
                 unitSelect.innerHTML = '<option value="">Select unit...</option>' + 
                     units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
                 
@@ -811,11 +841,16 @@ class CRMApplication {
             const selectedOption = select.selectedOptions[0];
             name = selectedOption.textContent;
             
-            // Find the original price for this resource and unit
+            // Find the original price for this resource and unit from the units Map
             const resourceId = selectedOption.value;
             const options = this.builderState.categoryOptions[mappedCategory] || [];
-            const resourceOption = options.find(o => o.id === resourceId && o.unit === unitSelect.value);
-            originalUnitPrice = resourceOption ? resourceOption.unitPrice : 0;
+            const selectedResource = options.find(o => o.id === resourceId);
+            
+            if (selectedResource && selectedResource.units && selectedResource.units.has(unitSelect.value)) {
+                originalUnitPrice = selectedResource.units.get(unitSelect.value);
+            } else {
+                originalUnitPrice = 0;
+            }
         }
         
         // Validate unit selection
