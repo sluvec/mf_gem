@@ -610,8 +610,8 @@ class CRMApplication {
     }
 
     updateUnifiedAddPanel(category) {
-        const select = document.getElementById('unified-resource-select');
-        if (!select) return;
+        const resourceContainer = document.querySelector('#unified-add-panel .resource-select-container');
+        if (!resourceContainer) return;
 
         // Map category names to match builderState.categoryOptions
         const categoryMap = {
@@ -622,10 +622,24 @@ class CRMApplication {
         };
         
         const mappedCategory = categoryMap[category] || category;
-        const options = this.builderState.categoryOptions[mappedCategory] || [];
         
-        select.innerHTML = '<option value="">Choose a resource...</option>' + 
-            options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}" data-category="${mappedCategory}">${o.name}</option>`).join('');
+        // For "Other" category, show free text field
+        if (category === 'other') {
+            resourceContainer.innerHTML = `
+                <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Resource Name</label>
+                <input type="text" id="unified-resource-text" placeholder="Enter resource name..." style="width: 100%;">
+            `;
+        } else {
+            // For other categories, show dropdown with options
+            const options = this.builderState.categoryOptions[mappedCategory] || [];
+            resourceContainer.innerHTML = `
+                <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Select Resource</label>
+                <select id="unified-resource-select" style="width: 100%;" onchange="window.app && window.app.onUnifiedResourceChange && window.app.onUnifiedResourceChange()">
+                    <option value="">Choose a resource...</option>
+                    ${options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}" data-category="${mappedCategory}">${o.name}</option>`).join('')}
+                </select>
+            `;
+        }
         
         // Reset other fields
         document.getElementById('unified-quantity').value = '1';
@@ -633,10 +647,71 @@ class CRMApplication {
         document.getElementById('unified-manual-price').checked = false;
         document.getElementById('unified-price').readOnly = true;
         document.getElementById('unified-price').style.background = '#f3f4f6';
+        
+        // Update unit dropdown for this category
+        this.updateUnifiedUnitDropdown(mappedCategory);
+    }
+
+    updateUnifiedUnitDropdown(category) {
+        const unitSelect = document.getElementById('unified-unit-select');
+        if (!unitSelect) return;
+
+        // Get all unique units from price list items for this category
+        const options = this.builderState.categoryOptions[category] || [];
+        const units = [...new Set(options.map(o => o.unit))];
+        
+        unitSelect.innerHTML = '<option value="">Select unit...</option>' + 
+            units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+    }
+
+    onUnifiedUnitChange() {
+        const unitSelect = document.getElementById('unified-unit-select');
+        const priceInput = document.getElementById('unified-price');
+        
+        if (!unitSelect || !priceInput) return;
+        
+        const selectedUnit = unitSelect.value;
+        if (!selectedUnit) {
+            priceInput.value = '';
+            return;
+        }
+        
+        // Check if we have a selected resource
+        const resourceSelect = document.getElementById('unified-resource-select');
+        if (resourceSelect && resourceSelect.value) {
+            // Find the price for this resource and unit combination
+            const selectedOption = resourceSelect.selectedOptions[0];
+            if (selectedOption) {
+                const category = selectedOption.dataset.category;
+                const resourceId = selectedOption.value;
+                
+                // Find the specific unit price for this resource
+                const options = this.builderState.categoryOptions[category] || [];
+                const resourceOption = options.find(o => o.id === resourceId && o.unit === selectedUnit);
+                
+                if (resourceOption) {
+                    priceInput.value = resourceOption.unitPrice.toFixed(2);
+                } else {
+                    priceInput.value = '';
+                }
+            }
+        } else {
+            // For "Other" category or when no resource selected, reset price
+            priceInput.value = '';
+        }
+        
+        // Reset manual override
+        const manualCheckbox = document.getElementById('unified-manual-price');
+        if (manualCheckbox) {
+            manualCheckbox.checked = false;
+            priceInput.readOnly = true;
+            priceInput.style.background = '#f3f4f6';
+        }
     }
 
     onUnifiedResourceChange() {
         const select = document.getElementById('unified-resource-select');
+        const unitSelect = document.getElementById('unified-unit-select');
         const priceInput = document.getElementById('unified-price');
         const manualCheckbox = document.getElementById('unified-manual-price');
         
@@ -644,16 +719,41 @@ class CRMApplication {
         
         const selectedOption = select.selectedOptions[0];
         if (selectedOption && selectedOption.value) {
-            const price = parseFloat(selectedOption.dataset.price || '0');
-            priceInput.value = price.toFixed(2);
+            // Update unit dropdown based on selected resource
+            const category = selectedOption.dataset.category;
+            const resourceId = selectedOption.value;
+            const options = this.builderState.categoryOptions[category] || [];
+            const resourceOptions = options.filter(o => o.id === resourceId);
+            const units = [...new Set(resourceOptions.map(o => o.unit))];
+            
+            if (unitSelect) {
+                unitSelect.innerHTML = '<option value="">Select unit...</option>' + 
+                    units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
+                
+                // If only one unit available, auto-select it
+                if (units.length === 1) {
+                    unitSelect.value = units[0];
+                    this.onUnifiedUnitChange();
+                }
+            }
         } else {
+            // Reset unit dropdown to show all units for category
+            const currentTab = document.querySelector('.category-tab.active');
+            if (currentTab) {
+                const category = currentTab.id.replace('tab-', '');
+                const categoryMap = { 'human': 'labour', 'vehicles': 'vehicles', 'materials': 'materials', 'other': 'other' };
+                const mappedCategory = categoryMap[category] || category;
+                this.updateUnifiedUnitDropdown(mappedCategory);
+            }
             priceInput.value = '';
         }
         
         // Reset manual override
-        manualCheckbox.checked = false;
-        priceInput.readOnly = true;
-        priceInput.style.background = '#f3f4f6';
+        if (manualCheckbox) {
+            manualCheckbox.checked = false;
+            priceInput.readOnly = true;
+            priceInput.style.background = '#f3f4f6';
+        }
     }
 
     toggleManualPrice() {
@@ -675,21 +775,56 @@ class CRMApplication {
     }
 
     addFromUnifiedPanel() {
-        const select = document.getElementById('unified-resource-select');
         const quantityInput = document.getElementById('unified-quantity');
         const priceInput = document.getElementById('unified-price');
+        const unitSelect = document.getElementById('unified-unit-select');
         
-        if (!select || !quantityInput || !priceInput) return;
+        if (!quantityInput || !priceInput || !unitSelect) return;
         
-        const selectedOption = select.selectedOptions[0];
-        if (!selectedOption || !selectedOption.value) {
-            uiModals.showToast('Please select a resource first', 'warning');
+        // Get current active category
+        const currentTab = document.querySelector('.category-tab.active');
+        if (!currentTab) return;
+        
+        const category = currentTab.id.replace('tab-', '');
+        const categoryMap = { 'human': 'labour', 'vehicles': 'vehicles', 'materials': 'materials', 'other': 'other' };
+        const mappedCategory = categoryMap[category] || category;
+        
+        let name = '';
+        let originalUnitPrice = 0;
+        
+        // Handle different resource selection methods
+        if (category === 'other') {
+            // For "Other" category, get name from text input
+            const textInput = document.getElementById('unified-resource-text');
+            if (!textInput || !textInput.value.trim()) {
+                uiModals.showToast('Please enter a resource name', 'warning');
+                return;
+            }
+            name = textInput.value.trim();
+        } else {
+            // For other categories, get name from dropdown
+            const select = document.getElementById('unified-resource-select');
+            if (!select || !select.value) {
+                uiModals.showToast('Please select a resource first', 'warning');
+                return;
+            }
+            const selectedOption = select.selectedOptions[0];
+            name = selectedOption.textContent;
+            
+            // Find the original price for this resource and unit
+            const resourceId = selectedOption.value;
+            const options = this.builderState.categoryOptions[mappedCategory] || [];
+            const resourceOption = options.find(o => o.id === resourceId && o.unit === unitSelect.value);
+            originalUnitPrice = resourceOption ? resourceOption.unitPrice : 0;
+        }
+        
+        // Validate unit selection
+        if (!unitSelect.value) {
+            uiModals.showToast('Please select a unit type', 'warning');
             return;
         }
         
-        const name = selectedOption.textContent;
-        const unit = selectedOption.dataset.unit || 'unit';
-        const category = selectedOption.dataset.category || 'other';
+        const unit = unitSelect.value;
         const quantity = Math.max(1, Math.floor(parseFloat(quantityInput.value || '1') || 1));
         const unitPrice = parseFloat(priceInput.value || '0') || 0;
         
@@ -700,13 +835,14 @@ class CRMApplication {
         
         const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
         const isManualPrice = document.getElementById('unified-manual-price').checked;
+        
         this.builderState.plItems.push({ 
             id, 
-            category, 
+            category: mappedCategory, 
             name, 
             unit, 
             quantity, 
-            unitPrice: isManualPrice ? unitPrice : parseFloat(selectedOption.dataset.price || '0'), 
+            unitPrice: isManualPrice ? unitPrice : originalUnitPrice, 
             lineDiscount: 0, 
             lineTotal: quantity * unitPrice,
             isManualPrice: isManualPrice,
@@ -714,16 +850,21 @@ class CRMApplication {
         });
         
         // Re-render the current category table
-        const tableId = `builder-${category}-table`;
-        this.renderPlItemsTable(category, tableId);
+        const tableId = `builder-${mappedCategory}-table`;
+        this.renderPlItemsTable(mappedCategory, tableId);
         this.recalcBuilderTotals();
         
         // Phase 3: Highlight new row
         this.highlightNewRow(tableId, id);
         
         // Reset form
-        select.value = '';
+        if (category === 'other') {
+            document.getElementById('unified-resource-text').value = '';
+        } else {
+            document.getElementById('unified-resource-select').value = '';
+        }
         quantityInput.value = '1';
+        unitSelect.value = '';
         priceInput.value = '';
         document.getElementById('unified-manual-price').checked = false;
         priceInput.readOnly = true;

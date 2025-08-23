@@ -789,10 +789,16 @@
                         <!-- Unified Add Panel -->
                         <div id="unified-add-panel" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
                             <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
-                                <div style="flex: 1; min-width: 200px;">
+                                <div style="flex: 1; min-width: 200px;" class="resource-select-container">
                                     <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Select Resource</label>
                                     <select id="unified-resource-select" style="width: 100%;" onchange="window.app && window.app.onUnifiedResourceChange && window.app.onUnifiedResourceChange()">
                                         <option value="">Choose a resource...</option>
+                                    </select>
+                                </div>
+                                <div style="width: 120px;">
+                                    <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Unit Type</label>
+                                    <select id="unified-unit-select" style="width: 100%;" onchange="window.app && window.app.onUnifiedUnitChange && window.app.onUnifiedUnitChange()">
+                                        <option value="">Select unit...</option>
                                     </select>
                                 </div>
                                 <div style="width: 100px;">
