@@ -7459,6 +7459,11 @@ function setupLegacyCompatibility() {
     window.navigateToPage = (page) => app.navigateToPage(page);
     window.showPage = (page) => app.navigateToPage(page);
     
+    // Quote Builder additional sections functions
+    window.addRecyclingItem = () => app.addRecyclingItem();
+    window.addRebateItem = () => app.addRebateItem(); 
+    window.addOtherCostManual = () => app.addOtherCostManual();
+    
     // PC Numbers functionality
     window.showNewPcModal = () => {
         logDebug('Navigating to new PC page');
