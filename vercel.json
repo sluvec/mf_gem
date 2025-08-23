@@ -1,4 +1,5 @@
 {
+  "alias": ["mf-gem.vercel.app"],
   "rewrites": [
     {
       "source": "/",
