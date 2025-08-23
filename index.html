@@ -746,8 +746,6 @@
                 <div class="card">
                     <h2>Step 3: Build Quote</h2>
                     
-
-                    
                     <!-- NEW Sprint 3.2: Bulk Operations Panel -->
                     <div id="bulk-operations-panel" style="display: none; margin-bottom: 1.5rem; padding: 1rem; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -766,61 +764,68 @@
                         </div>
                     </div>
                     
-                    <!-- Existing Category Sections -->
-                    <div class="category-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="margin: 0;">Human Resources</h3>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.875rem; color: #666;">
-                                    <input type="checkbox" onchange="window.toggleCategorySelection('human')" id="select-all-human"> Select All
-                                </label>
+                    <!-- Phase 1: Category Tabs and Unified Add Panel -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <!-- Category Tabs -->
+                        <div style="display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 1rem;">
+                            <button id="tab-human" class="category-tab active" onclick="window.app && window.app.switchCategoryTab && window.app.switchCategoryTab('human')" 
+                                    style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: 600;">
+                                👥 Human Resources
+                            </button>
+                            <button id="tab-vehicles" class="category-tab" onclick="window.app && window.app.switchCategoryTab && window.app.switchCategoryTab('vehicles')" 
+                                    style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">
+                                🚛 Vehicles
+                            </button>
+                            <button id="tab-materials" class="category-tab" onclick="window.app && window.app.switchCategoryTab && window.app.switchCategoryTab('materials')" 
+                                    style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">
+                                📦 Materials
+                            </button>
+                            <button id="tab-other" class="category-tab" onclick="window.app && window.app.switchCategoryTab && window.app.switchCategoryTab('other')" 
+                                    style="padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280;">
+                                📎 Other
+                            </button>
+                        </div>
+                        
+                        <!-- Unified Add Panel -->
+                        <div id="unified-add-panel" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+                            <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Select Resource</label>
+                                    <select id="unified-resource-select" style="width: 100%;" onchange="window.app && window.app.onUnifiedResourceChange && window.app.onUnifiedResourceChange()">
+                                        <option value="">Choose a resource...</option>
+                                    </select>
+                                </div>
+                                <div style="width: 100px;">
+                                    <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Quantity</label>
+                                    <input type="number" id="unified-quantity" min="1" step="1" value="1" style="width: 100%;">
+                                </div>
+                                <div style="width: 120px;">
+                                    <label style="display: block; margin-bottom: 0.25rem; font-weight: 500;">Price</label>
+                                    <input type="number" id="unified-price" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="unified-manual-price" onchange="window.app && window.app.toggleManualPrice && window.app.toggleManualPrice()">
+                                    <label for="unified-manual-price" style="font-size: 0.875rem;">Manual override</label>
+                                </div>
+                                <button onclick="window.app && window.app.addFromUnifiedPanel && window.app.addFromUnifiedPanel()" 
+                                        style="background: #16a34a; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; cursor: pointer;">
+                                    + Add to Quote
+                                </button>
                             </div>
                         </div>
-                        <div id="quote-human"></div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="window.addLineItem('human')" class="secondary">+ Quick Add</button>
+                        
+                        <!-- Category Content Areas -->
+                        <div id="category-content-human" class="category-content" style="display: block;">
+                            <div id="quote-human"></div>
                         </div>
-                    </div>
-                    <div class="category-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="margin: 0;">Vehicles</h3>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.875rem; color: #666;">
-                                    <input type="checkbox" onchange="window.toggleCategorySelection('vehicles')" id="select-all-vehicles"> Select All
-                                </label>
-                            </div>
+                        <div id="category-content-vehicles" class="category-content" style="display: none;">
+                            <div id="quote-vehicles"></div>
                         </div>
-                        <div id="quote-vehicles"></div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="window.addLineItem('vehicles')" class="secondary">+ Quick Add</button>
+                        <div id="category-content-materials" class="category-content" style="display: none;">
+                            <div id="quote-materials"></div>
                         </div>
-                    </div>
-                    <div class="category-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="margin: 0;">Materials</h3>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.875rem; color: #666;">
-                                    <input type="checkbox" onchange="window.toggleCategorySelection('materials')" id="select-all-materials"> Select All
-                                </label>
-                            </div>
-                        </div>
-                        <div id="quote-materials"></div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="window.addLineItem('materials')" class="secondary">+ Quick Add</button>
-                        </div>
-                    </div>
-                     <div class="category-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="margin: 0;">Other</h3>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <label style="font-size: 0.875rem; color: #666;">
-                                    <input type="checkbox" onchange="window.toggleCategorySelection('other')" id="select-all-other"> Select All
-                                </label>
-                            </div>
-                        </div>
-                        <div id="quote-other"></div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="window.addLineItem('other')" class="secondary">+ Quick Add</button>
+                        <div id="category-content-other" class="category-content" style="display: none;">
+                            <div id="quote-other"></div>
                         </div>
                     </div>
 

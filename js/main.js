@@ -388,6 +388,10 @@ class CRMApplication {
                 this.renderBuilderCategory('vehicles', 'quote-vehicles');
                 this.renderBuilderCategory('materials', 'quote-materials');
                 this.renderBuilderCategory('other', 'quote-other');
+                
+                // Phase 1: Initialize category tabs - default to 'human' tab
+                this.switchCategoryTab('human');
+                
                 this.recalcBuilderTotals();
             } else {
                 if (itemsSection) itemsSection.style.display = 'none';
@@ -451,29 +455,17 @@ class CRMApplication {
     renderBuilderCategory(category, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
-        const options = this.builderState.categoryOptions[category] || [];
-        const selectId = `builder-${category}-select`;
-        const qtyId = `builder-${category}-qty`;
+        
         const tableId = `builder-${category}-table`;
+        
+        // Phase 1: Simplified rendering - just the table, no old controls
         container.innerHTML = `
-            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
-                <select id="${selectId}" style="min-width:260px;">
-                    <option value="">Select item...</option>
-                    ${options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}">${o.name} — £${o.unitPrice.toFixed(2)}/${o.unit}</option>`).join('')}
-                </select>
-                <label style="font-size:0.875rem; color:#374151;">Qty</label>
-                <input id="${qtyId}" type="number" value="1" min="0" step="1" style="width:90px;" />
-                <button id="btn-add-${category}" class="secondary">+ Add</button>
-            </div>
             <table style="width:100%; border:1px solid #e5e7eb; border-radius:6px;">
                 <thead><tr><th style="width:40%">Item</th><th>Unit</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th></th></tr></thead>
                 <tbody id="${tableId}"></tbody>
             </table>
         `;
-        const addBtn = document.getElementById(`btn-add-${category}`);
-        if (addBtn) {
-            addBtn.onclick = () => this.addPlItemFromSelect(category, selectId, qtyId, tableId);
-        }
+        
         // Render existing items of this category
         this.renderPlItemsTable(category, tableId);
     }
@@ -531,6 +523,153 @@ class CRMApplication {
             this.renderPlItemsTable(cat, `builder-${cat}-table`);
             this.recalcBuilderTotals();
         }
+    }
+
+    // Phase 1: New functions for category tabs and unified add panel
+    switchCategoryTab(category) {
+        // Update tab styles
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.style.borderBottom = '2px solid transparent';
+            tab.style.color = '#6b7280';
+            tab.style.fontWeight = 'normal';
+        });
+        
+        const activeTab = document.getElementById(`tab-${category}`);
+        if (activeTab) {
+            activeTab.style.borderBottom = '2px solid #3b82f6';
+            activeTab.style.color = '#3b82f6';
+            activeTab.style.fontWeight = '600';
+        }
+
+        // Show/hide category content
+        document.querySelectorAll('.category-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        const activeContent = document.getElementById(`category-content-${category}`);
+        if (activeContent) {
+            activeContent.style.display = 'block';
+        }
+
+        // Update unified add panel for current category
+        this.updateUnifiedAddPanel(category);
+    }
+
+    updateUnifiedAddPanel(category) {
+        const select = document.getElementById('unified-resource-select');
+        if (!select) return;
+
+        // Map category names to match builderState.categoryOptions
+        const categoryMap = {
+            'human': 'labour',
+            'vehicles': 'vehicles', 
+            'materials': 'materials',
+            'other': 'other'
+        };
+        
+        const mappedCategory = categoryMap[category] || category;
+        const options = this.builderState.categoryOptions[mappedCategory] || [];
+        
+        select.innerHTML = '<option value="">Choose a resource...</option>' + 
+            options.map(o => `<option value="${o.id}" data-unit="${o.unit}" data-price="${o.unitPrice}" data-category="${mappedCategory}">${o.name}</option>`).join('');
+        
+        // Reset other fields
+        document.getElementById('unified-quantity').value = '1';
+        document.getElementById('unified-price').value = '';
+        document.getElementById('unified-manual-price').checked = false;
+        document.getElementById('unified-price').readOnly = true;
+        document.getElementById('unified-price').style.background = '#f3f4f6';
+    }
+
+    onUnifiedResourceChange() {
+        const select = document.getElementById('unified-resource-select');
+        const priceInput = document.getElementById('unified-price');
+        const manualCheckbox = document.getElementById('unified-manual-price');
+        
+        if (!select || !priceInput) return;
+        
+        const selectedOption = select.selectedOptions[0];
+        if (selectedOption && selectedOption.value) {
+            const price = parseFloat(selectedOption.dataset.price || '0');
+            priceInput.value = price.toFixed(2);
+        } else {
+            priceInput.value = '';
+        }
+        
+        // Reset manual override
+        manualCheckbox.checked = false;
+        priceInput.readOnly = true;
+        priceInput.style.background = '#f3f4f6';
+    }
+
+    toggleManualPrice() {
+        const checkbox = document.getElementById('unified-manual-price');
+        const priceInput = document.getElementById('unified-price');
+        
+        if (!checkbox || !priceInput) return;
+        
+        if (checkbox.checked) {
+            priceInput.readOnly = false;
+            priceInput.style.background = 'white';
+            priceInput.focus();
+        } else {
+            priceInput.readOnly = true;
+            priceInput.style.background = '#f3f4f6';
+            // Reset to original price
+            this.onUnifiedResourceChange();
+        }
+    }
+
+    addFromUnifiedPanel() {
+        const select = document.getElementById('unified-resource-select');
+        const quantityInput = document.getElementById('unified-quantity');
+        const priceInput = document.getElementById('unified-price');
+        
+        if (!select || !quantityInput || !priceInput) return;
+        
+        const selectedOption = select.selectedOptions[0];
+        if (!selectedOption || !selectedOption.value) {
+            uiModals.showToast('Please select a resource first', 'warning');
+            return;
+        }
+        
+        const name = selectedOption.textContent;
+        const unit = selectedOption.dataset.unit || 'unit';
+        const category = selectedOption.dataset.category || 'other';
+        const quantity = Math.max(1, Math.floor(parseFloat(quantityInput.value || '1') || 1));
+        const unitPrice = parseFloat(priceInput.value || '0') || 0;
+        
+        if (unitPrice <= 0) {
+            uiModals.showToast('Please enter a valid price', 'warning');
+            return;
+        }
+        
+        const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+        this.builderState.plItems.push({ 
+            id, 
+            category, 
+            name, 
+            unit, 
+            quantity, 
+            unitPrice, 
+            lineDiscount: 0, 
+            lineTotal: quantity * unitPrice 
+        });
+        
+        // Re-render the current category table
+        const tableId = `builder-${category}-table`;
+        this.renderPlItemsTable(category, tableId);
+        this.recalcBuilderTotals();
+        
+        // Reset form
+        select.value = '';
+        quantityInput.value = '1';
+        priceInput.value = '';
+        document.getElementById('unified-manual-price').checked = false;
+        priceInput.readOnly = true;
+        priceInput.style.background = '#f3f4f6';
+        
+        uiModals.showToast('Item added to quote', 'success');
     }
 
     recalcBuilderTotals() {
