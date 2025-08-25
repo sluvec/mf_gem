@@ -5643,6 +5643,7 @@ class CRMApplication {
                         <option value="pack">Pack</option>
                         <option value="roll">Roll</option>
                         <option value="sheet">Sheet</option>
+                        <option value="miles">Miles</option>
                     </select>
                 </div>
                 <div>
@@ -5680,6 +5681,7 @@ class CRMApplication {
                         <option value="pack">Pack</option>
                         <option value="roll">Roll</option>
                         <option value="sheet">Sheet</option>
+                        <option value="miles">Miles</option>
                     </select>
                     <div class="rup-hour-wrap" style="display:none; margin-top: 0.5rem;">
                         <label>Hour Type *</label>
@@ -6414,7 +6416,7 @@ class CRMApplication {
                     if (resource.costPerHour != null) push('hour:standard','Hour Standard', Number(resource.costPerHour));
                     if (resource.costPerDay != null) push('day','Day', Number(resource.costPerDay));
                 } else {
-                    ['each','day','week','month'].forEach(u => push(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
+                    ['each','day','week','month','miles'].forEach(u => push(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
                 }
                 unitSelect.innerHTML = '';
                 options.forEach(o => { const el = document.createElement('option'); el.value = o.value; el.textContent = o.label; el.dataset.cost = o.cost; unitSelect.appendChild(el); });
@@ -6744,7 +6746,7 @@ class CRMApplication {
                     if (resource.costPerDay != null) pushUnit('day','Day', Number(resource.costPerDay));
                 } else {
                     // No linked resource (free-text item). Keep generic options
-                    ['each','hour','day','week','month'].forEach(u => pushUnit(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
+                    ['each','hour','day','week','month','miles'].forEach(u => pushUnit(u, u.charAt(0).toUpperCase()+u.slice(1), 0));
                 }
                 // Populate select
                 allowedUnits.forEach(opt => {
