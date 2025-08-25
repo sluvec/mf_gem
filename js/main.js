@@ -2253,14 +2253,51 @@ class CRMApplication {
                 this.db.loadAll('activities')
             ]);
 
-            // Count usage in each data type
+            // Debug logging
+            logDebug(`Calculating stats for AM: "${accountManagerName}"`);
+            logDebug(`Total data: PC Numbers: ${pcNumbers.length}, Quotes: ${quotes.length}, Price Lists: ${priceLists.length}, Activities: ${activities.length}`);
+            
+            // Debug: Log all unique account managers found in data
+            const allAMs = new Set();
+            pcNumbers.forEach(pc => { if (pc.accountManager) allAMs.add(`PC: "${pc.accountManager}"`); });
+            quotes.forEach(quote => { if (quote.accountManager) allAMs.add(`Quote: "${quote.accountManager}"`); });
+            priceLists.forEach(pl => { if (pl.accountManager) allAMs.add(`PL: "${pl.accountManager}"`); });
+            activities.forEach(activity => { if (activity.accountManager) allAMs.add(`Activity: "${activity.accountManager}"`); });
+            logDebug('All Account Managers found in data:', Array.from(allAMs).sort());
+            
+            // Count usage in each data type with debug
+            const pcMatches = pcNumbers.filter(pc => {
+                const matches = pc.accountManager === accountManagerName;
+                if (matches) logDebug(`PC Match: "${pc.accountManager}" === "${accountManagerName}" -> ${matches}`);
+                return matches;
+            });
+            
+            const quoteMatches = quotes.filter(quote => {
+                const matches = quote.accountManager === accountManagerName;
+                if (matches) logDebug(`Quote Match: "${quote.accountManager}" === "${accountManagerName}" -> ${matches}`);
+                return matches;
+            });
+            
+            const plMatches = priceLists.filter(pl => {
+                const matches = pl.accountManager === accountManagerName;
+                if (matches) logDebug(`PL Match: "${pl.accountManager}" === "${accountManagerName}" -> ${matches}`);
+                return matches;
+            });
+            
+            const activityMatches = activities.filter(activity => {
+                const matches = activity.accountManager === accountManagerName;
+                if (matches) logDebug(`Activity Match: "${activity.accountManager}" === "${accountManagerName}" -> ${matches}`);
+                return matches;
+            });
+
             const stats = {
-                pcNumbers: pcNumbers.filter(pc => pc.accountManager === accountManagerName).length,
-                quotes: quotes.filter(quote => quote.accountManager === accountManagerName).length,
-                priceLists: priceLists.filter(pl => pl.accountManager === accountManagerName).length,
-                activities: activities.filter(activity => activity.accountManager === accountManagerName).length
+                pcNumbers: pcMatches.length,
+                quotes: quoteMatches.length,
+                priceLists: plMatches.length,
+                activities: activityMatches.length
             };
 
+            logDebug(`Stats for "${accountManagerName}":`, stats);
             return stats;
         } catch (error) {
             logError('Error calculating Account Manager stats:', error);
