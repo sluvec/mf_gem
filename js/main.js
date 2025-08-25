@@ -2243,20 +2243,78 @@ class CRMApplication {
         }
     }
 
+    async calculateAccountManagerStats(accountManagerName) {
+        try {
+            // Load all data types
+            const [pcNumbers, quotes, priceLists, activities] = await Promise.all([
+                this.db.loadAll('pcNumbers'),
+                this.db.loadAll('quotes'),
+                this.db.loadAll('priceLists'),
+                this.db.loadAll('activities')
+            ]);
+
+            // Count usage in each data type
+            const stats = {
+                pcNumbers: pcNumbers.filter(pc => pc.accountManager === accountManagerName).length,
+                quotes: quotes.filter(quote => quote.accountManager === accountManagerName).length,
+                priceLists: priceLists.filter(pl => pl.accountManager === accountManagerName).length,
+                activities: activities.filter(activity => activity.accountManager === accountManagerName).length
+            };
+
+            return stats;
+        } catch (error) {
+            logError('Error calculating Account Manager stats:', error);
+            return { pcNumbers: 0, quotes: 0, priceLists: 0, activities: 0 };
+        }
+    }
+
     async refreshAccountManagersUI() {
         this.accountManagersCache = await db.loadAll('accountManagers');
         this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         const list = document.getElementById('account-managers-list');
         if (list) {
             if (this.accountManagersCache.length === 0) {
-                list.innerHTML = '<li style="color:#6b7280;">No account managers yet</li>';
+                list.innerHTML = '<tr><td colspan="6" style="padding: 1rem; text-align: center; color: #6b7280;">No account managers yet</td></tr>';
             } else {
-                list.innerHTML = this.accountManagersCache.map(am => `
-                    <li style="display:flex; justify-content:space-between; align-items:center; padding:0.375rem 0; border-bottom:1px solid #e5e7eb;">
-                        <span>${am.name}</span>
-                        <button class="secondary" onclick="window.deleteAccountManager('${am.id}')">Delete</button>
-                    </li>
-                `).join('');
+                // Calculate stats for each account manager
+                const rows = await Promise.all(this.accountManagersCache.map(async (am) => {
+                    const stats = await this.calculateAccountManagerStats(am.name);
+                    const total = stats.pcNumbers + stats.quotes + stats.priceLists + stats.activities;
+                    
+                    return `
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 0.75rem; font-weight: 500;">${am.name}</td>
+                            <td style="padding: 0.75rem; text-align: center;">
+                                <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;">
+                                    ${stats.pcNumbers}
+                                </span>
+                            </td>
+                            <td style="padding: 0.75rem; text-align: center;">
+                                <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;">
+                                    ${stats.quotes}
+                                </span>
+                            </td>
+                            <td style="padding: 0.75rem; text-align: center;">
+                                <span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;">
+                                    ${stats.priceLists}
+                                </span>
+                            </td>
+                            <td style="padding: 0.75rem; text-align: center;">
+                                <span style="display: inline-block; background: #fce7f3; color: #be185d; padding: 0.25rem 0.5rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500;">
+                                    ${stats.activities}
+                                </span>
+                            </td>
+                            <td style="padding: 0.75rem; text-align: center;">
+                                ${total > 0 ? 
+                                    `<button class="secondary" onclick="window.deleteAccountManager('${am.id}')" title="Cannot delete - Account Manager is in use" disabled style="opacity: 0.5; cursor: not-allowed;">Delete</button>` :
+                                    `<button class="secondary" onclick="window.deleteAccountManager('${am.id}')">Delete</button>`
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }));
+                
+                list.innerHTML = rows.join('');
             }
         }
         this.populateAllAccountManagerSelects();

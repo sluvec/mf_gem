@@ -1990,7 +1990,23 @@
                 </div>
                 <div style="margin-top: 1rem;">
                     <label>Existing Account Managers</label>
-                    <ul id="account-managers-list" style="list-style: none; padding: 0; margin: 0.5rem 0 0 0;"></ul>
+                    <div style="margin-top: 0.5rem;">
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #e5e7eb;">
+                            <thead>
+                                <tr style="background: #f9fafb;">
+                                    <th style="padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; font-weight: 600;">Name</th>
+                                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600;">PC Numbers</th>
+                                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600;">Quotes</th>
+                                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600;">Price Lists</th>
+                                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600;">Activities</th>
+                                    <th style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #e5e7eb; font-weight: 600;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="account-managers-list">
+                                <!-- Account managers will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             
@@ -3191,8 +3207,39 @@ Next steps:
             <!-- Removed separate Labour Rate Type; consolidated into Unit select dynamically -->
         </div>
         <div id="resource-info" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa;"></div>
-        <label>Client Price (<span id="modal-price-currency">£</span>) *</label><input type="number" id="modal-client-price" step="0.01" min="0" oninput="window.calculateMargin()">
-        <div id="margin-info" style="margin-top: 0.5rem;"></div>
+        
+        <!-- Pricing Information -->
+        <div class="form-section">
+            <h3>Pricing</h3>
+            <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div>
+                    <label>Net Cost (£) *</label>
+                    <input type="number" id="modal-net-cost" required min="0" step="0.01" placeholder="25.00" readonly style="background: #f3f4f6;">
+                    <small>Cost per unit (from resource)</small>
+                </div>
+                <div>
+                    <label>Margin</label>
+                    <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.25rem;">
+                        <label style="display:inline-flex; align-items:center; gap:0.25rem;">
+                            <input type="radio" name="modal-margin-type" id="modal-margin-type-percent" checked onchange="window.onModalMarginTypeChange()">
+                            %
+                        </label>
+                        <label style="display:inline-flex; align-items:center; gap:0.25rem;">
+                            <input type="radio" name="modal-margin-type" id="modal-margin-type-fixed" onchange="window.onModalMarginTypeChange()">
+                            £
+                        </label>
+                    </div>
+                    <input type="number" id="modal-margin-percent" min="0" max="1000" step="0.1" placeholder="20" value="20" oninput="window.calculateModalPrice()">
+                    <input type="number" id="modal-margin-fixed" min="0" step="0.01" placeholder="10.00" style="display:none;" oninput="window.calculateModalPrice()">
+                    <small>Choose percent or fixed amount</small>
+                </div>
+                <div>
+                    <label>Client Price (£) *</label>
+                    <input type="number" id="modal-client-price" step="0.01" min="0" readonly style="background: #f3f4f6;">
+                    <small>Auto-calculated from cost + margin</small>
+                </div>
+            </div>
+        </div>
         <div class="form-actions">
              <button onclick="window.addResourceToPriceList()">Add to Price List</button>
             <button onclick="window.closeAddResourceModal()" class="secondary">Cancel</button>
