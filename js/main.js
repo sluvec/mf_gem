@@ -766,7 +766,6 @@ class CRMApplication {
         // Update total price
         this.updateUnifiedTotal();
     }
-
     onUnifiedResourceChange() {
         const select = document.getElementById('unified-resource-select');
         const unitSelect = document.getElementById('unified-unit-select');
@@ -1555,7 +1554,6 @@ class CRMApplication {
             console.error('❌ Failed to check/load sample data:', error);
         }
     }
-    
     /**
      * @description Load sample data
      */
@@ -2356,7 +2354,6 @@ class CRMApplication {
         }
         this.populateAllAccountManagerSelects();
     }
-
     populateAccountManagerSelect(selectEl, selectedValue = '') {
         if (!selectEl) return;
         const current = selectedValue || selectEl.value || '';
@@ -3149,7 +3146,6 @@ class CRMApplication {
             text.textContent = message;
         }
     }
-
     /**
      * @description Hide loading overlay
      */
@@ -3950,7 +3946,6 @@ class CRMApplication {
         
         uiModals.closeModal('quote-modal');
     }
-
     /**
      * @description Save new quote
      */
@@ -4721,7 +4716,6 @@ class CRMApplication {
             field.classList.remove('pc-field-required', 'pc-field-quote-required');
         });
     }
-
     /**
      * @description Validate PC Number for Quote creation - requires additional fields
      * These fields are optional for PC Number creation but required for Quote creation
@@ -5481,7 +5475,6 @@ class CRMApplication {
             logError('Failed to refresh calendar view:', error);
         }
     }
-
     /**
      * @description Generate month calendar with caching and performance optimization
      * @returns {boolean} True if calendar generated successfully, false otherwise
@@ -6275,7 +6268,6 @@ class CRMApplication {
             uiModals.showToast('Failed to save price list', 'error');
         }
     }
-
     /**
      * @description Get price list form data
      */
@@ -6404,9 +6396,13 @@ class CRMApplication {
             await this.loadResourcesForPriceList();
             
             // Clear form
-            document.getElementById('modal-client-price').value = '';
-            document.getElementById('resource-info').innerHTML = '';
-            document.getElementById('margin-info').innerHTML = '';
+            const clientPriceInput = document.getElementById('modal-client-price');
+            const resourceInfo = document.getElementById('resource-info');
+            const marginInfo = document.getElementById('margin-info');
+
+            if (clientPriceInput) clientPriceInput.value = '';
+            if (resourceInfo) resourceInfo.innerHTML = '';
+            if (marginInfo) marginInfo.innerHTML = '';
 
             uiModals.openModal('add-resource-modal');
             logDebug('Add resource to price list modal opened');
@@ -6751,7 +6747,7 @@ class CRMApplication {
             await db.save('priceLists', updatedPriceList);
             this.currentPriceList = updatedPriceList;
 
-            uiModals.showToast(`"${resource.name}" added to price list successfully!`, 'success');
+            uiModals.showToast(`"${priceListItem.resourceName}" added to price list successfully!`, 'success');
             
             this.closeAddResourceModal();
             
@@ -7068,7 +7064,6 @@ class CRMApplication {
             logError('Failed to filter PC Numbers by account manager:', error);
         }
     }
-
     /**
      * @description Filter PC Numbers by PC number
      */
@@ -7619,7 +7614,6 @@ async function initializeApplication() {
         }
     }
 }
-
 /**
  * @description Setup legacy compatibility functions
  */
