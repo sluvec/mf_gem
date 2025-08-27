@@ -4208,6 +4208,17 @@ class CRMApplication {
                 return;
             }
             
+            // Ensure Account Managers dropdown is populated before setting value
+            try {
+                if (!this.accountManagersCache || this.accountManagersCache.length === 0) {
+                    this.accountManagersCache = await db.loadAll('accountManagers');
+                    this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                }
+                this.populateAllAccountManagerSelects();
+                const amSelect = document.getElementById('quote-edit-account-manager');
+                if (amSelect) amSelect.value = quoteData.accountManager || '';
+            } catch (_) {}
+            
             // Populate form fields
             const fields = [
                 { id: 'quote-edit-id', value: quoteData.id || '' },
