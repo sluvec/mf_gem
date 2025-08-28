@@ -8166,7 +8166,7 @@ function setupLegacyCompatibility() {
     
     // Add common missing functions
     const missingFunctions = [
-        'editActivity', 'editQuote', 'editPriceListItem',
+        'editActivity', 'editQuote',
         'editCurrentPriceListItem', 'deleteCurrentPriceListItem',
         'backToPriceListDetail', 'addLineItem', 'saveQuoteAsTemplate',
         'duplicateCurrentQuote'
