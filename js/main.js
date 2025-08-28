@@ -680,6 +680,14 @@ class CRMApplication {
         document.getElementById('unified-manual-price').checked = false;
         document.getElementById('unified-price').readOnly = true;
         document.getElementById('unified-price').style.background = '#f3f4f6';
+
+        // For Other category allow typing price per unit
+        if (mappedCategory === 'other') {
+            const priceEl = document.getElementById('unified-price');
+            const manualCb = document.getElementById('unified-manual-price');
+            if (priceEl) { priceEl.readOnly = false; priceEl.style.background = 'white'; }
+            if (manualCb) { manualCb.checked = true; }
+        }
         
         // Update unit dropdown for this category
         this.updateUnifiedUnitDropdown(mappedCategory);
@@ -764,12 +772,22 @@ class CRMApplication {
             priceInput.value = '';
         }
         
-        // Reset manual override
+        // Reset manual override (except for Other category which is always manual)
         const manualCheckbox = document.getElementById('unified-manual-price');
+        const currentTab = document.querySelector('.category-tab.active');
+        const cat = currentTab ? currentTab.id.replace('tab-','') : '';
+        const categoryMap = { 'human': 'labour', 'vehicles': 'vehicles', 'materials': 'materials', 'other': 'other' };
+        const mappedCategory = categoryMap[cat] || cat;
         if (manualCheckbox) {
-            manualCheckbox.checked = false;
-            priceInput.readOnly = true;
-            priceInput.style.background = '#f3f4f6';
+            if (mappedCategory === 'other') {
+                manualCheckbox.checked = true;
+                priceInput.readOnly = false;
+                priceInput.style.background = 'white';
+            } else {
+                manualCheckbox.checked = false;
+                priceInput.readOnly = true;
+                priceInput.style.background = '#f3f4f6';
+            }
         }
         
         // Update total price
@@ -816,11 +834,21 @@ class CRMApplication {
             priceInput.value = '';
         }
         
-        // Reset manual override
+        // Reset manual override (keep editable in Other category)
         if (manualCheckbox) {
-            manualCheckbox.checked = false;
-            priceInput.readOnly = true;
-            priceInput.style.background = '#f3f4f6';
+            const currentTab = document.querySelector('.category-tab.active');
+            const cat = currentTab ? currentTab.id.replace('tab-','') : '';
+            const categoryMap = { 'human': 'labour', 'vehicles': 'vehicles', 'materials': 'materials', 'other': 'other' };
+            const mappedCategory = categoryMap[cat] || cat;
+            if (mappedCategory === 'other') {
+                manualCheckbox.checked = true;
+                priceInput.readOnly = false;
+                priceInput.style.background = 'white';
+            } else {
+                manualCheckbox.checked = false;
+                priceInput.readOnly = true;
+                priceInput.style.background = '#f3f4f6';
+            }
         }
         
         // Update total price
@@ -832,6 +860,15 @@ class CRMApplication {
         const priceInput = document.getElementById('unified-price');
         
         if (!checkbox || !priceInput) return;
+
+        // In Other category, price is always manual/editable
+        const currentTab = document.querySelector('.category-tab.active');
+        const cat = currentTab ? currentTab.id.replace('tab-','') : '';
+        if (cat === 'other') {
+            priceInput.readOnly = false;
+            priceInput.style.background = 'white';
+            return;
+        }
         
         if (checkbox.checked) {
             priceInput.readOnly = false;
@@ -913,7 +950,8 @@ class CRMApplication {
         }
         
         const id = `pli-${Date.now()}-${Math.floor(Math.random()*1000)}`;
-        const isManualPrice = document.getElementById('unified-manual-price').checked;
+        let isManualPrice = document.getElementById('unified-manual-price').checked;
+        if (mappedCategory === 'other') { isManualPrice = true; }
         
         this.builderState.plItems.push({ 
             id, 
