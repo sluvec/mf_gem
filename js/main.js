@@ -3823,6 +3823,30 @@ class CRMApplication {
                 companySelect.innerHTML = '<option value="">Select Company...</option>';
                 uniqueCompanies.forEach(c => { companySelect.innerHTML += `<option value="${c}">${c}</option>`; });
             }
+
+            // Ensure Account Managers dropdown is populated
+            try {
+                if (!this.accountManagersCache || this.accountManagersCache.length === 0) {
+                    this.accountManagersCache = await db.loadAll('accountManagers');
+                    if ((this.accountManagersCache?.length || 0) === 0) {
+                        const [pcs, quotes, activities] = await Promise.all([
+                            db.loadAll('pcNumbers'),
+                            db.loadAll('quotes'),
+                            db.loadAll('activities')
+                        ]);
+                        const names = new Set();
+                        pcs.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                        quotes.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                        activities.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                        for (const name of Array.from(names).filter(Boolean)) {
+                            await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
+                        }
+                        this.accountManagersCache = await db.loadAll('accountManagers');
+                    }
+                    this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                }
+                this.populateAllAccountManagerSelects();
+            } catch (e) { logError('Failed to populate AM in quote modal:', e); }
             const pcSelect = document.getElementById('quote-modal-pc');
             
             if (pcSelect) {
@@ -3867,12 +3891,12 @@ class CRMApplication {
                             const amSelect = document.getElementById('quote-modal-account-manager');
                             const amSection = document.getElementById('quote-modal-account-manager-section');
                             if (amSelect) {
-                                if (pcData.accountManager) {
+                                if (pcData.accountManager && amSelect.options.length > 1) {
                                     amSelect.value = pcData.accountManager;
                                     amSelect.required = false;
                                     if (amSection) amSection.style.display = 'none';
                                 } else {
-                                    amSelect.value = '';
+                                    amSelect.value = pcData.accountManager || '';
                                     amSelect.required = true;
                                     if (amSection) amSection.style.display = '';
                                 }
@@ -3904,12 +3928,12 @@ class CRMApplication {
                         const amSelectInit = document.getElementById('quote-modal-account-manager');
                         const amSectionInit = document.getElementById('quote-modal-account-manager-section');
                         if (amSelectInit) {
-                            if (pcData?.accountManager) {
+                            if (pcData?.accountManager && amSelectInit.options.length > 1) {
                                 amSelectInit.value = pcData.accountManager;
                                 amSelectInit.required = false;
                                 if (amSectionInit) amSectionInit.style.display = 'none';
                             } else {
-                                amSelectInit.value = '';
+                                amSelectInit.value = pcData?.accountManager || '';
                                 amSelectInit.required = true;
                                 if (amSectionInit) amSectionInit.style.display = '';
                             }
