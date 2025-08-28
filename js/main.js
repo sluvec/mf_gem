@@ -4277,9 +4277,12 @@ class CRMApplication {
             
             // Ensure Account Managers dropdown is populated before setting value
             try {
+                logDebug('Quote Edit: Ensuring Account Managers are loaded...');
                 // Always refresh cache to avoid stale/empty lists on first visit
                 this.accountManagersCache = await db.loadAll('accountManagers');
+                logDebug(`Quote Edit: Loaded ${this.accountManagersCache.length} account managers from DB`);
                 if ((this.accountManagersCache?.length || 0) === 0) {
+                    logDebug('Quote Edit: No account managers found, seeding from existing data...');
                     const [pcs, quotes, activities] = await Promise.all([
                         db.loadAll('pcNumbers'),
                         db.loadAll('quotes'),
@@ -4289,16 +4292,28 @@ class CRMApplication {
                     pcs.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
                     quotes.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
                     activities.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                    logDebug(`Quote Edit: Found ${names.size} unique AM names to seed:`, Array.from(names));
                     for (const name of Array.from(names).filter(Boolean)) {
                         await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
                     }
                     this.accountManagersCache = await db.loadAll('accountManagers');
+                    logDebug(`Quote Edit: After seeding, cache has ${this.accountManagersCache.length} AMs`);
                 }
                 this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                 this.populateAllAccountManagerSelects();
+                
+                // Double-check the specific dropdown
                 const amSelect = document.getElementById('quote-edit-account-manager');
-                if (amSelect) amSelect.value = quoteData.accountManager || '';
-            } catch (_) {}
+                if (amSelect) {
+                    logDebug(`Quote Edit: AM dropdown has ${amSelect.options.length} options`);
+                    amSelect.value = quoteData.accountManager || '';
+                    logDebug(`Quote Edit: Set AM value to "${quoteData.accountManager || ''}"`);
+                } else {
+                    logError('Quote Edit: quote-edit-account-manager element not found');
+                }
+            } catch (e) { 
+                logError('Quote Edit: Failed to populate Account Managers:', e);
+            }
             
             // Populate form fields
             const fields = [
