@@ -2678,9 +2678,7 @@ class CRMApplication {
                 { id: 'quote-detail-account-manager', value: quoteData.accountManager || 'N/A' },
                 { id: 'quote-detail-value', value: quoteData.totalAmount ? `£${quoteData.totalAmount.toLocaleString()}` : 'N/A' },
                 { id: 'quote-detail-status', value: quoteData.status || 'draft' },
-                { id: 'quote-detail-valid-until', value: quoteData.validUntil ? new Date(quoteData.validUntil).toLocaleDateString() : 'N/A' },
                 { id: 'quote-detail-created-at', value: quoteData.createdAt ? new Date(quoteData.createdAt).toLocaleDateString() : 'N/A' },
-                { id: 'quote-detail-description', value: quoteData.description || 'No description' },
                 { id: 'quote-detail-version', value: quoteData.version || '1.0' },
                 { id: 'quote-detail-net-total', value: quoteData.netTotal ? `£${quoteData.netTotal.toLocaleString()}` : 'N/A' },
                 { id: 'quote-detail-vat-rate', value: quoteData.vatRate ? `${quoteData.vatRate}%` : '20%' },
@@ -4412,12 +4410,7 @@ class CRMApplication {
                 propertyTypeField.value = quoteData.propertyType;
             }
             
-            // Set valid until date if exists
-            const validUntilField = document.getElementById('quote-edit-valid-until');
-            if (validUntilField && quoteData.validUntil) {
-                const date = new Date(quoteData.validUntil);
-                validUntilField.value = date.toISOString().split('T')[0];
-            }
+
             
             // Show modal using uiModals
             await uiModals.openModal('quote-edit-modal');
@@ -4518,8 +4511,7 @@ class CRMApplication {
         if (vatAmountField) vatAmountField.value = vatAmount.toFixed(2);
         if (totalCostField) totalCostField.value = totalCost.toFixed(2);
         
-        const validUntilField = document.getElementById('quote-edit-valid-until');
-        const validUntil = validUntilField?.value ? new Date(validUntilField.value).toISOString() : null;
+
         
         return {
             quoteNumber: quoteNumber,
@@ -4535,8 +4527,7 @@ class CRMApplication {
             discount: discount,
             totalCost: totalCost,
             totalAmount: totalCost, // Keep totalAmount for backward compatibility
-            propertyType: propertyType,
-            validUntil: validUntil
+            propertyType: propertyType
         };
     }
 

@@ -1100,18 +1100,7 @@
                             </select>
                             <p class="field-note">Note: Once ISSUED, quote cannot be edited. WON/LOST are final states.</p>
                         </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label>Valid Until *</label>
-                            <input type="date" id="quote-valid-until" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label>Quote Title *</label>
-                            <input type="text" id="quote-title" placeholder="Brief quote description" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label>Description</label>
-                            <textarea id="quote-description" rows="2" placeholder="Detailed quote description..."></textarea>
-                        </div>
+
                         <div style="margin-bottom: 1rem;">
                             <label>Internal Notes</label>
                             <textarea id="quote-notes" rows="2" placeholder="Internal notes (not visible to client)..."></textarea>
@@ -1634,13 +1623,10 @@
                     <div><strong>Account Manager:</strong> <span id="quote-detail-account-manager"></span></div>
                     <div><strong>Value:</strong> <span id="quote-detail-value"></span></div>
                     <div><strong>Status:</strong> <span id="quote-detail-status"></span></div>
-                    <div><strong>Valid Until:</strong> <span id="quote-detail-valid-until"></span></div>
+
                     <div><strong>Created:</strong> <span id="quote-detail-created-at"></span></div>
                 </div>
-                <div style="margin-top: 1rem;">
-                    <strong>Description:</strong><br>
-                    <span id="quote-detail-description" style="white-space: pre-wrap;"></span>
-                </div>
+
                 <div class="form-actions">
                     <button onclick="window.editQuote(window.currentQuote.id)" class="warning">Edit Quote</button>
                     <button onclick="window.showNewQuoteModal()" class="primary">Create New Quote</button>
@@ -2194,10 +2180,6 @@
                     </div>
                     <div class="form-grid">
                         <div>
-                            <label>Valid Until</label>
-                            <input type="date" id="quote-edit-valid-until">
-                        </div>
-                        <div>
                             <label>Account Manager *</label>
                             <select id="quote-edit-account-manager" required>
                                 <option value="">Select Account Manager...</option>
@@ -2325,14 +2307,7 @@
                     </div>
                 </div>
 
-                <!-- Description -->
-                <div class="form-section">
-                    <h3>Description</h3>
-                    <div>
-                        <label>Quote Description</label>
-                        <textarea id="quote-edit-description" rows="4" placeholder="Detailed description of the quote..."></textarea>
-                    </div>
-                </div>
+
 
                 <div class="form-actions">
                     <button type="submit" class="primary">Update Quote</button>
