@@ -140,6 +140,9 @@ class CRMApplication {
                 currency: 'GBP',
                 vatRate: parseFloat(document.getElementById('quote-vat-rate')?.value || '20') || 20,
                 plItems: [],
+                recyclingItems: [],
+                rebateItems: [],
+                otherCosts: [],
                 categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
             };
 
