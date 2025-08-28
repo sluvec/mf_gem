@@ -1522,35 +1522,30 @@ class CRMApplication {
             const stats = await db.getStats();
             console.log('🔍 Database stats:', stats);
             
-            // Check if quotes exist and have proper totalAmount
+            // Check and repair existing quotes if needed (do NOT clear user data)
             const quotes = await db.loadAll('quotes');
             console.log('🔍 Existing quotes in database:', quotes.length, 'quotes');
-            
-            let needsReload = false;
-            if (stats.pcNumbers === 0 || quotes.length === 0) {
+
+            // Seed sample data ONLY if database is truly empty (no PCs and no Quotes)
+            const needsSeed = (stats.pcNumbers === 0) && (quotes.length === 0);
+            if (needsSeed) {
                 console.log('🔵 Database is empty, loading sample data...');
-                needsReload = true;
-            } else {
-                // Check if quotes have totalAmount field
-                const hasValidAmounts = quotes.every(quote => quote.totalAmount && quote.totalAmount > 0);
-                console.log('🔍 Quotes have valid totalAmount:', hasValidAmounts);
-                
-                quotes.forEach(quote => {
-                    console.log(`🔍 Quote ${quote.id}: totalAmount=${quote.totalAmount}, clientName=${quote.clientName}`);
-                });
-                
-                if (!hasValidAmounts) {
-                    console.log('🔵 Quotes missing totalAmount, clearing database and reloading...');
-                    // Clear quotes store and reload sample data
-                    await db.clearStore('quotes');
-                    needsReload = true;
-                }
-            }
-            
-            if (needsReload) {
                 await this.loadSampleData();
             } else {
-                console.log('🔍 Database contains valid data, skipping sample data load');
+                // Soft migration: ensure totalAmount present without deleting anything
+                let repaired = 0;
+                for (const q of quotes) {
+                    if (!(q.totalAmount > 0)) {
+                        const net = Number(q.netTotal || 0);
+                        const vat = Number(q.vatAmount || 0);
+                        const discount = Number(q.discount?.amount || q.discount || 0);
+                        const totalCost = Number(q.totalCost || (net + vat - discount));
+                        q.totalAmount = totalCost;
+                        try { await db.save('quotes', q); repaired++; } catch(_) {}
+                    }
+                }
+                if (repaired > 0) console.log(`🔵 Repaired ${repaired} quotes missing totalAmount`);
+                console.log('🔍 Database contains user data; sample load skipped');
             }
         } catch (error) {
             console.error('❌ Failed to check/load sample data:', error);
