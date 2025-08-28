@@ -4277,26 +4277,24 @@ class CRMApplication {
             
             // Ensure Account Managers dropdown is populated before setting value
             try {
-                if (!this.accountManagersCache || this.accountManagersCache.length === 0) {
-                    this.accountManagersCache = await db.loadAll('accountManagers');
-                    // Fallback: seed from existing data if store is empty
-                    if ((this.accountManagersCache?.length || 0) === 0) {
-                        const [pcs, quotes, activities] = await Promise.all([
-                            db.loadAll('pcNumbers'),
-                            db.loadAll('quotes'),
-                            db.loadAll('activities')
-                        ]);
-                        const names = new Set();
-                        pcs.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
-                        quotes.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
-                        activities.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
-                        for (const name of Array.from(names).filter(Boolean)) {
-                            await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
-                        }
-                        this.accountManagersCache = await db.loadAll('accountManagers');
+                // Always refresh cache to avoid stale/empty lists on first visit
+                this.accountManagersCache = await db.loadAll('accountManagers');
+                if ((this.accountManagersCache?.length || 0) === 0) {
+                    const [pcs, quotes, activities] = await Promise.all([
+                        db.loadAll('pcNumbers'),
+                        db.loadAll('quotes'),
+                        db.loadAll('activities')
+                    ]);
+                    const names = new Set();
+                    pcs.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                    quotes.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                    activities.forEach(x => { if (x?.accountManager) names.add(String(x.accountManager).trim()); });
+                    for (const name of Array.from(names).filter(Boolean)) {
+                        await db.save('accountManagers', { name, createdAt: new Date().toISOString() });
                     }
-                    this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    this.accountManagersCache = await db.loadAll('accountManagers');
                 }
+                this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                 this.populateAllAccountManagerSelects();
                 const amSelect = document.getElementById('quote-edit-account-manager');
                 if (amSelect) amSelect.value = quoteData.accountManager || '';
