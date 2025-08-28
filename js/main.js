@@ -2808,6 +2808,53 @@ class CRMApplication {
     }
 
     /**
+     * @description Delete PC Number
+     * @param {string} pcId - PC Number ID to delete
+     * @param {string} pcNumber - PC Number for confirmation
+     */
+    async deletePC(pcId, pcNumber) {
+        try {
+            // Confirm deletion
+            const confirmed = confirm(`Are you sure you want to delete PC Number "${pcNumber}"?\n\nThis action cannot be undone and will remove all associated data.`);
+            if (!confirmed) {
+                return;
+            }
+
+            logDebug(`Deleting PC Number: ${pcId} (${pcNumber})`);
+
+            // Check if there are related quotes that would be affected
+            const quotes = await db.loadAll('quotes');
+            const relatedQuotes = quotes.filter(quote => quote.pcId === pcId || quote.pcNumber === pcNumber);
+            
+            if (relatedQuotes.length > 0) {
+                const confirmed2 = confirm(`Warning: This PC Number has ${relatedQuotes.length} related quote(s).\n\nDeleting will also remove:\n• ${relatedQuotes.length} quote(s)\n\nContinue with deletion?`);
+                if (!confirmed2) {
+                    return;
+                }
+                
+                // Delete related quotes first
+                for (const quote of relatedQuotes) {
+                    await db.delete('quotes', quote.id);
+                    logDebug(`Deleted related quote: ${quote.id}`);
+                }
+            }
+
+            // Delete the PC Number
+            await db.delete('pcNumbers', pcId);
+            
+            // Refresh the PC Numbers list
+            await this.loadPcNumbersData();
+            
+            uiModals.showToast(`PC Number "${pcNumber}" deleted successfully`, 'success');
+            logDebug(`PC Number ${pcId} deleted successfully`);
+            
+        } catch (error) {
+            logError('Failed to delete PC Number:', error);
+            uiModals.showToast('Failed to delete PC Number', 'error');
+        }
+    }
+
+    /**
      * @description Add Activity for specific Quote
      * @param {string} quoteId - Quote ID
      */
@@ -2881,6 +2928,7 @@ class CRMApplication {
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
                                 <button onclick="window.addQuoteForPc('${pc.id}')" class="button success small">Add Quote</button>
+                                <button onclick="window.deletePC('${pc.id}', '${pc.pcNumber || 'Unknown'}')" class="button danger small">Delete</button>
                             </td>
                         </tr>
                     `).join('');
@@ -7517,6 +7565,7 @@ class CRMApplication {
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
                                 <button onclick="window.viewPcDetails('${pc.id}')" class="button primary small">View</button>
                                 <button onclick="window.addQuoteForPc('${pc.id}')" class="button success small">Add Quote</button>
+                                <button onclick="window.deletePC('${pc.id}', '${pc.pcNumber || 'Unknown'}')" class="button danger small">Delete</button>
                             </td>
                         </tr>
                     `).join('');
@@ -7902,6 +7951,11 @@ function setupLegacyCompatibility() {
         logDebug('Add Quote for PC requested for ID:', id);
         // Always open Step 1 modal first with PC locked
         await app.openQuoteModal(id);
+    };
+    
+    window.deletePC = async (id, pcNumber) => {
+        logDebug('Delete PC requested for ID:', id, 'PC Number:', pcNumber);
+        await app.deletePC(id, pcNumber);
     };
     
     window.addActivityForQuote = async (id) => {
