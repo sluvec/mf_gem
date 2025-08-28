@@ -717,7 +717,11 @@ class CRMApplication {
 
         // Get all unique units from price list items for this category
         const options = this.builderState.categoryOptions[category] || [];
-        const units = [...new Set(options.map(o => o.unit))];
+        let units = [...new Set(options.map(o => o.unit).filter(Boolean))];
+        // Fallback defaults for categories without predefined units (e.g., Other)
+        if (units.length === 0 || category === 'other') {
+            units = ['each', 'hour', 'day', 'week', 'month', 'miles'];
+        }
         
         unitSelect.innerHTML = '<option value="">Select unit...</option>' + 
             units.map(unit => `<option value="${unit}">${unit}</option>`).join('');
