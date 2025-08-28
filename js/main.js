@@ -286,12 +286,22 @@ class CRMApplication {
                     opt.value = pl.id; opt.textContent = pl.name || pl.id; priceListSelect.appendChild(opt);
                 });
                 priceListSelect.value = this.builderState.priceListId;
-                const pl = this.builderState.priceListId ? await db.load('priceLists', this.builderState.priceListId) : null;
-                await this.loadBuilderCategoryOptions(pl);
-                this.renderBuilderCategory('labour', 'quote-human');
-                this.renderBuilderCategory('vehicles', 'quote-vehicles');
-                this.renderBuilderCategory('materials', 'quote-materials');
-                this.renderBuilderCategory('other', 'quote-other');
+                
+                // Show Step 3 immediately for edit mode and trigger price list change logic
+                if (this.builderState.priceListId) {
+                    await this.handlePriceListChange();
+                } else {
+                    // If no price list, still show Step 3 for editing
+                    const itemsSection = document.getElementById('quote-items-section');
+                    if (itemsSection) itemsSection.style.display = '';
+                    
+                    const pl = this.builderState.priceListId ? await db.load('priceLists', this.builderState.priceListId) : null;
+                    await this.loadBuilderCategoryOptions(pl);
+                    this.renderBuilderCategory('labour', 'quote-human');
+                    this.renderBuilderCategory('vehicles', 'quote-vehicles');
+                    this.renderBuilderCategory('materials', 'quote-materials');
+                    this.renderBuilderCategory('other', 'quote-other');
+                }
             }
 
             // Render recycling/rebates/other cost tables
@@ -4410,7 +4420,21 @@ class CRMApplication {
                 propertyTypeField.value = quoteData.propertyType;
             }
             
-
+            // Populate and set price list if exists
+            const priceListField = document.getElementById('quote-edit-price-list-id');
+            if (priceListField) {
+                const priceLists = await db.loadAll('priceLists');
+                priceListField.innerHTML = '<option value="">Select price list...</option>';
+                priceLists.forEach(pl => {
+                    const opt = document.createElement('option');
+                    opt.value = pl.id; 
+                    opt.textContent = pl.name || pl.id; 
+                    priceListField.appendChild(opt);
+                });
+                if (quoteData.priceListId) {
+                    priceListField.value = quoteData.priceListId;
+                }
+            }
             
             // Show modal using uiModals
             await uiModals.openModal('quote-edit-modal');
