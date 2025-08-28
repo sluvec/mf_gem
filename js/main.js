@@ -6392,7 +6392,7 @@ class CRMApplication {
             if (items.length === 0) {
                 container.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #6b7280;">
                             No items found in this price list.<br>
                             <button onclick="window.showAddResourceToPriceList()" style="margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem;">Add First Item</button>
                         </td>
@@ -6402,6 +6402,10 @@ class CRMApplication {
                 container.innerHTML = items.map(item => {
                     const profit = item.clientPrice - item.netCost;
                     const marginColor = item.margin >= 20 ? '#059669' : item.margin >= 10 ? '#d97706' : '#dc2626';
+                    
+                    // Format date modified
+                    const dateModified = item.lastModifiedAt || item.createdAt || item.dateModified;
+                    const formattedDate = dateModified ? this.formatDate(dateModified) : 'N/A';
                     
                     return `
                         <tr>
@@ -6416,6 +6420,9 @@ class CRMApplication {
                                     ${item.margin.toFixed(1)}%
                                 </span><br>
                                 <small style="color: #6b7280;">+£${profit.toFixed(2)}</small>
+                            </td>
+                            <td style="color: #6b7280; font-size: 0.875rem;">
+                                ${formattedDate}
                             </td>
                             <td>
                                 <button onclick="window.editPriceListItem('${item.id}')" class="button warning small">Edit</button>
@@ -6475,13 +6482,23 @@ class CRMApplication {
                         valueA = a.margin || 0;
                         valueB = b.margin || 0;
                         break;
+                    case 'dateModified':
+                        valueA = new Date(a.lastModifiedAt || a.createdAt || a.dateModified || 0);
+                        valueB = new Date(b.lastModifiedAt || b.createdAt || b.dateModified || 0);
+                        break;
                     default:
                         return 0;
                 }
 
                 if (this.priceListSort.direction === 'asc') {
+                    if (column === 'dateModified') {
+                        return valueA.getTime() - valueB.getTime();
+                    }
                     return valueA - valueB;
                 } else {
+                    if (column === 'dateModified') {
+                        return valueB.getTime() - valueA.getTime();
+                    }
                     return valueB - valueA;
                 }
             });
@@ -6492,6 +6509,10 @@ class CRMApplication {
                 container.innerHTML = items.map(item => {
                     const profit = item.clientPrice - item.netCost;
                     const marginColor = item.margin >= 20 ? '#059669' : item.margin >= 10 ? '#d97706' : '#dc2626';
+                    
+                    // Format date modified
+                    const dateModified = item.lastModifiedAt || item.createdAt || item.dateModified;
+                    const formattedDate = dateModified ? this.formatDate(dateModified) : 'N/A';
                     
                     return `
                         <tr>
@@ -6506,6 +6527,9 @@ class CRMApplication {
                                     ${item.margin.toFixed(1)}%
                                 </span><br>
                                 <small style="color: #6b7280;">+£${profit.toFixed(2)}</small>
+                            </td>
+                            <td style="color: #6b7280; font-size: 0.875rem;">
+                                ${formattedDate}
                             </td>
                             <td>
                                 <button onclick="window.editPriceListItem('${item.id}')" class="button warning small">Edit</button>
