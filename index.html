@@ -1835,7 +1835,13 @@
             <div class="card">
                 <h2>Price List Items</h2>
                 <table>
-                    <thead><tr><th>Resource</th><th>Net Cost</th><th>Client Price</th><th>Margin %</th><th>Actions</th></tr></thead>
+                    <thead><tr>
+                        <th>Resource</th>
+                        <th class="sortable" onclick="window.app && window.app.sortPriceListItems && window.app.sortPriceListItems('netCost')">Net Cost</th>
+                        <th class="sortable" onclick="window.app && window.app.sortPriceListItems && window.app.sortPriceListItems('clientPrice')">Client Price</th>
+                        <th class="sortable" onclick="window.app && window.app.sortPriceListItems && window.app.sortPriceListItems('margin')">Margin %</th>
+                        <th>Actions</th>
+                    </tr></thead>
                     <tbody id="pricelist-items"></tbody>
                 </table>
             </div>

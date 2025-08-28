@@ -23,6 +23,12 @@ class CRMApplication {
         this.currentPage = 'dashboard';
         this.currentUser = null;
         
+        // Price list sorting state
+        this.priceListSort = {
+            column: null,
+            direction: 'asc'
+        };
+        
         // Constants for cleaner code
         this.ACTIVITY_VIEWS = ['list', 'calendar'];
         this.CALENDAR_VIEWS = ['month', 'week'];
@@ -6360,6 +6366,96 @@ class CRMApplication {
             logDebug(`Price list items loaded for: ${priceListId} (${items.length} items)`);
         } catch (error) {
             logError('Failed to load price list items:', error);
+        }
+    }
+
+    /**
+     * @description Sort price list items by column
+     */
+    sortPriceListItems(column) {
+        try {
+            if (!this.currentPriceList || !this.currentPriceList.items) return;
+
+            // Toggle direction if same column, otherwise start with asc
+            if (this.priceListSort.column === column) {
+                this.priceListSort.direction = this.priceListSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.priceListSort.column = column;
+                this.priceListSort.direction = 'asc';
+            }
+
+            // Update header indicators
+            document.querySelectorAll('#pricelist-detail .sortable').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            
+            const activeHeader = document.querySelector(`#pricelist-detail .sortable[onclick*="${column}"]`);
+            if (activeHeader) {
+                activeHeader.classList.add(this.priceListSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+
+            // Sort the items
+            const items = [...this.currentPriceList.items];
+            items.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (column) {
+                    case 'netCost':
+                        valueA = a.netCost || 0;
+                        valueB = b.netCost || 0;
+                        break;
+                    case 'clientPrice':
+                        valueA = a.clientPrice || 0;
+                        valueB = b.clientPrice || 0;
+                        break;
+                    case 'margin':
+                        valueA = a.margin || 0;
+                        valueB = b.margin || 0;
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (this.priceListSort.direction === 'asc') {
+                    return valueA - valueB;
+                } else {
+                    return valueB - valueA;
+                }
+            });
+
+            // Re-render the table with sorted items
+            const container = document.getElementById('pricelist-items');
+            if (container) {
+                container.innerHTML = items.map(item => {
+                    const profit = item.clientPrice - item.netCost;
+                    const marginColor = item.margin >= 20 ? '#059669' : item.margin >= 10 ? '#d97706' : '#dc2626';
+                    
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${item.resourceName}</strong><br>
+                                <small style="color: #6b7280;">${item.resourceCategory} • ${item.unit}</small>
+                            </td>
+                            <td>£${item.netCost.toLocaleString()}</td>
+                            <td>£${item.clientPrice.toLocaleString()}</td>
+                            <td>
+                                <span style="color: ${marginColor}; font-weight: 600;">
+                                    ${item.margin.toFixed(1)}%
+                                </span><br>
+                                <small style="color: #6b7280;">+£${profit.toFixed(2)}</small>
+                            </td>
+                            <td>
+                                <button onclick="window.editPriceListItem('${item.id}')" class="button warning small">Edit</button>
+                                <button onclick="window.removePriceListItem('${item.id}')" class="button danger small">Remove</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            logDebug(`Price list items sorted by ${column} (${this.priceListSort.direction})`);
+        } catch (error) {
+            logError('Failed to sort price list items:', error);
         }
     }
 
