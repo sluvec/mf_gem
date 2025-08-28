@@ -608,11 +608,12 @@ class CRMApplication {
 
     // Phase 1: New functions for category tabs and unified add panel
     switchCategoryTab(category) {
-        // Update tab styles
+        // Update tab styles and active class
         document.querySelectorAll('.category-tab').forEach(tab => {
             tab.style.borderBottom = '2px solid transparent';
             tab.style.color = '#6b7280';
             tab.style.fontWeight = 'normal';
+            tab.classList.remove('active');
         });
         
         const activeTab = document.getElementById(`tab-${category}`);
@@ -620,6 +621,7 @@ class CRMApplication {
             activeTab.style.borderBottom = '2px solid #3b82f6';
             activeTab.style.color = '#3b82f6';
             activeTab.style.fontWeight = '600';
+            activeTab.classList.add('active');
         }
 
         // Show/hide category content
