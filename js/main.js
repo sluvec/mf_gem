@@ -6257,7 +6257,8 @@ class CRMApplication {
             // Populate form
             document.getElementById('pricelist-id').value = priceList.id;
             document.getElementById('pricelist-name').value = priceList.name || '';
-            document.getElementById('pricelist-category').value = priceList.category || '';
+            document.getElementById('pricelist-currency').value = priceList.currency || 'GBP';
+            document.getElementById('pricelist-status').value = priceList.status || 'active';
             
             document.getElementById('pricelist-modal-title').textContent = 'Edit Price List';
             uiModals.openModal('pricelist-modal');
@@ -6429,17 +6430,8 @@ class CRMApplication {
     getPriceListFormData() {
         try {
             const name = document.getElementById('pricelist-name')?.value?.trim();
-            // Category may not exist on the New Price List page (if removed); default to 'General'
-            const categoryEl = document.getElementById('pricelist-category');
-            const category = categoryEl ? categoryEl.value : 'General';
-
-            // Currency and Status are present on the page
             const currency = document.getElementById('pricelist-currency')?.value || 'GBP';
             const status = document.getElementById('pricelist-status')?.value || 'active';
-
-            // Dates (use whichever fields exist)
-            const effectiveFrom = document.getElementById('pricelist-effective-from')?.value || document.getElementById('pricelist-valid-from')?.value || '';
-            const effectiveTo = document.getElementById('pricelist-effective-to')?.value || document.getElementById('pricelist-valid-until')?.value || '';
 
             // Pricing configuration (may be absent on edit modal)
             const markupStr = document.getElementById('pricelist-markup')?.value || '';
@@ -6452,11 +6444,8 @@ class CRMApplication {
 
             return {
                 name,
-                category,
                 currency,
                 status,
-                effectiveFrom: undefined,
-                effectiveTo: undefined,
                 markup: markupStr !== '' ? parseFloat(markupStr) : undefined,
                 discount: discountStr !== '' ? parseFloat(discountStr) : undefined
             };
