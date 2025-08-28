@@ -3817,14 +3817,39 @@ class CRMApplication {
                     }
                 };
 
-                // If pcId provided, pre-select and disable
+                // If pcId provided, pre-select and disable; also prefill company and AM
                 if (pcId) {
                     pcSelect.value = pcId;
                     pcSelect.disabled = true;
                     pcSelect.style.backgroundColor = '#f3f4f6'; // Gray background
                     pcSelect.style.cursor = 'not-allowed';
                     logDebug(`PC Number dropdown disabled and set to PC ID: ${pcId}`);
-                    
+
+                    // Prefill company select to match chosen PC
+                    try {
+                        const pcData = pcNumbers.find(p => p.id === pcId) || (await db.load('pcNumbers', pcId));
+                        const companyField = document.getElementById('quote-modal-company');
+                        if (companyField && pcData?.company) {
+                            companyField.value = pcData.company;
+                            // Optionally lock the company field visually
+                            companyField.style.backgroundColor = '#f3f4f6';
+                        }
+                        // Auto-set Account Manager from PC and hide AM section if available
+                        const amSelectInit = document.getElementById('quote-modal-account-manager');
+                        const amSectionInit = document.getElementById('quote-modal-account-manager-section');
+                        if (amSelectInit) {
+                            if (pcData?.accountManager) {
+                                amSelectInit.value = pcData.accountManager;
+                                amSelectInit.required = false;
+                                if (amSectionInit) amSectionInit.style.display = 'none';
+                            } else {
+                                amSelectInit.value = '';
+                                amSelectInit.required = true;
+                                if (amSectionInit) amSectionInit.style.display = '';
+                            }
+                        }
+                    } catch (_) {}
+
                     // Show locked message
                     const helpText = document.getElementById('pc-select-help');
                     const lockedText = document.getElementById('pc-select-locked');
