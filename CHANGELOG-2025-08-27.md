@@ -15,6 +15,7 @@
 - Fix: Updated IndexedDB version to 9 to resolve VersionError conflict and prevent database initialization failures.
 - Feat: Added 'Date Created' column to PC Numbers list with sortable functionality for better project tracking.
 - Fix: Account manager dropdown not opening in new PC Number form - added proper data loading when navigating to the form.
+- Fix: Date sorting functionality in PC Numbers list for Date Created and Date Modified columns now works correctly with formatted dates.
 
 I will keep appending any further changes made today to this file.
 
