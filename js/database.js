@@ -12,7 +12,7 @@ export class Database {
     constructor() {
         this.db = null;
         this.dbName = 'CRM_Database';
-        this.version = 8; // Schema v8: add accountManagers store
+        this.version = 9; // Schema v9: updated version to match browser state
         this.isInitialized = false;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
@@ -226,6 +226,12 @@ export class Database {
                         amStore.createIndex('name', 'name', { unique: true });
                         amStore.createIndex('createdAt', 'createdAt', { unique: false });
                     }
+                }
+
+                // Version 9 upgrades: Compatibility update (no schema changes)
+                if (event.oldVersion < 9) {
+                    logInfo('Upgrading to version 9: Compatibility update');
+                    // No schema changes needed, just version bump for compatibility
                 }
 
                 // Removed blocked upgrade notification to allow multiple tabs
