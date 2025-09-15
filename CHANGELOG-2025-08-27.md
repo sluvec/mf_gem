@@ -14,6 +14,7 @@
 - Fix: Removed "App is open in another tab" checking functionality to allow multiple browser tabs to work independently.
 - Fix: Updated IndexedDB version to 9 to resolve VersionError conflict and prevent database initialization failures.
 - Feat: Added 'Date Created' column to PC Numbers list with sortable functionality for better project tracking.
+- Fix: Account manager dropdown not opening in new PC Number form - added proper data loading when navigating to the form.
 
 I will keep appending any further changes made today to this file.
 
