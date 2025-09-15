@@ -2265,6 +2265,9 @@ class CRMApplication {
                 case 'pcnumbers':
                     await this.loadPcNumbersData();
                     break;
+                case 'new-pc':
+                    await this.loadNewPcPageData();
+                    break;
                 case 'pc-detail':
                     await this.loadPcDetailData();
                     break;
@@ -2895,6 +2898,29 @@ class CRMApplication {
         } catch (error) {
             logError('Failed to add activity for Quote:', error);
             uiModals.showToast('Failed to open activity form', 'error');
+        }
+    }
+
+    /**
+     * @description Load new PC page data
+     */
+    async loadNewPcPageData() {
+        try {
+            // Ensure account managers are loaded and populated
+            if (!this.accountManagersCache || this.accountManagersCache.length === 0) {
+                this.accountManagersCache = await db.loadAll('accountManagers');
+                this.accountManagersCache.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            }
+            
+            // Populate the account manager dropdown
+            this.populateAllAccountManagerSelects();
+            
+            // Clear the form to ensure fresh state
+            this.clearPcForm();
+            
+            logDebug('New PC page data loaded successfully');
+        } catch (error) {
+            logError('Failed to load new PC page data:', error);
         }
     }
 
