@@ -13,6 +13,7 @@
 - Fix: Microsoft Edge browser compatibility ensured for modal scrolling with Edge-specific CSS fixes and cross-browser support.
 - Fix: Removed "App is open in another tab" checking functionality to allow multiple browser tabs to work independently.
 - Fix: Updated IndexedDB version to 9 to resolve VersionError conflict and prevent database initialization failures.
+- Feat: Added 'Date Created' column to PC Numbers list with sortable functionality for better project tracking.
 
 I will keep appending any further changes made today to this file.
 
