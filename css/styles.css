@@ -192,6 +192,177 @@ tr:hover td { background: var(--primary-50); }
 .modal-content { 
     background: white; padding: var(--space-xl); border-radius: var(--radius-lg);
     width: 90%; max-width: 1000px; max-height: 90vh; overflow-y: auto;
+    /* Ensure proper scrolling behavior */
+    box-sizing: border-box;
+    margin: auto;
+    /* Add minimum height to prevent content from being squeezed */
+    min-height: 200px;
+    /* Cross-browser compatibility */
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    -ms-overflow-style: scrollbar; /* Edge scrollbar visibility */
+    scrollbar-width: thin; /* Firefox thin scrollbar */
+}
+
+/* Enhanced scrolling for long-form modals */
+.modal-content.scrollable {
+    /* Ensure the modal takes up the full available height when content is long */
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content.scrollable form {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px; /* Account for scrollbar */
+}
+
+/* Specific styling for PC edit modal to handle long forms */
+#pc-edit-modal .modal-content {
+    height: 90vh;
+    display: flex;
+    display: -webkit-flex; /* Safari/Webkit support */
+    display: -ms-flexbox; /* IE10+ support */
+    flex-direction: column;
+    -webkit-flex-direction: column; /* Safari/Webkit support */
+    -ms-flex-direction: column; /* IE10+ support */
+    overflow: hidden; /* Prevent outer overflow */
+    /* Edge-specific fixes */
+    -ms-overflow-style: scrollbar; /* Show scrollbar in Edge */
+}
+
+#pc-edit-modal .modal-content h2 {
+    flex-shrink: 0; /* Don't shrink the header */
+    -webkit-flex-shrink: 0; /* Safari/Webkit support */
+    -ms-flex-negative: 0; /* IE10+ support */
+    margin-bottom: var(--space-lg);
+}
+
+#pc-edit-modal .modal-content form {
+    flex: 1;
+    -webkit-flex: 1; /* Safari/Webkit support */
+    -ms-flex: 1; /* IE10+ support */
+    overflow-y: auto;
+    overflow-y: scroll; /* Force scrollbar visibility in Edge */
+    padding-right: 8px; /* Space for scrollbar */
+    margin-right: -8px; /* Compensate for padding */
+    /* Cross-browser scrolling improvements */
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    -ms-overflow-style: scrollbar; /* Edge scrollbar style */
+    scrollbar-width: thin; /* Firefox thin scrollbar */
+}
+
+/* Edge-specific scrollbar styling */
+#pc-edit-modal .modal-content form::-webkit-scrollbar {
+    width: 8px;
+}
+
+#pc-edit-modal .modal-content form::-webkit-scrollbar-track {
+    background: var(--neutral-100);
+    border-radius: 4px;
+}
+
+#pc-edit-modal .modal-content form::-webkit-scrollbar-thumb {
+    background: var(--neutral-400);
+    border-radius: 4px;
+}
+
+#pc-edit-modal .modal-content form::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-500);
+}
+
+#pc-edit-modal .form-actions {
+    flex-shrink: 0; /* Keep form actions always visible */
+    -webkit-flex-shrink: 0; /* Safari/Webkit support */
+    -ms-flex-negative: 0; /* IE10+ support */
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--neutral-200);
+    background: white;
+    position: sticky;
+    position: -webkit-sticky; /* Safari support */
+    bottom: 0;
+}
+
+/* Ensure new PC form page has proper scrolling */
+#new-pc {
+    min-height: 100vh;
+    padding-bottom: 2rem; /* Extra space at bottom */
+}
+
+#new-pc .form-actions {
+    margin-bottom: 2rem; /* Ensure form actions are not cut off */
+}
+
+/* ========================================
+   CROSS-BROWSER MODAL SCROLLING COMPATIBILITY
+   ======================================== */
+
+/* Microsoft Edge and Internet Explorer compatibility */
+@supports (-ms-overflow-style: scrollbar) {
+    .modal-content {
+        -ms-overflow-style: scrollbar;
+    }
+    
+    #pc-edit-modal .modal-content form {
+        -ms-overflow-style: scrollbar;
+        overflow-y: scroll; /* Force scrollbar visibility */
+    }
+}
+
+/* Firefox scrollbar styling */
+@-moz-document url-prefix() {
+    .modal-content {
+        scrollbar-width: thin;
+        scrollbar-color: var(--neutral-400) var(--neutral-100);
+    }
+    
+    #pc-edit-modal .modal-content form {
+        scrollbar-width: thin;
+        scrollbar-color: var(--neutral-400) var(--neutral-100);
+    }
+}
+
+/* Webkit browsers (Chrome, Safari, Edge Chromium) scrollbar styling */
+.modal-content::-webkit-scrollbar,
+#pc-edit-modal .modal-content form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track,
+#pc-edit-modal .modal-content form::-webkit-scrollbar-track {
+    background: var(--neutral-100);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb,
+#pc-edit-modal .modal-content form::-webkit-scrollbar-thumb {
+    background: var(--neutral-400);
+    border-radius: 4px;
+    border: 1px solid var(--neutral-200);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+#pc-edit-modal .modal-content form::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-500);
+}
+
+/* Edge Legacy (EdgeHTML) specific fixes */
+@supports (-ms-ime-align: auto) {
+    .modal {
+        -ms-scroll-chaining: none; /* Prevent scroll chaining */
+    }
+    
+    .modal-content {
+        -ms-overflow-style: scrollbar;
+        -ms-scroll-snap-type: none;
+    }
+    
+    #pc-edit-modal .modal-content form {
+        -ms-overflow-style: scrollbar;
+        -ms-scroll-snap-type: none;
+        -ms-touch-action: pan-y; /* Allow vertical touch scrolling */
+    }
 }
 .quote-builder { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
 .line-item { display: grid; grid-template-columns: 3fr 1fr 1.5fr 1fr auto; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
@@ -645,6 +816,30 @@ button,
         max-height: none;
         margin: 2.5vh auto;
         overflow-y: auto;
+    }
+    
+    /* Mobile-specific PC edit modal fixes */
+    #pc-edit-modal .modal-content {
+        height: 95vh;
+        display: flex;
+        display: -webkit-flex; /* Safari/Webkit support */
+        display: -ms-flexbox; /* IE10+ support */
+        flex-direction: column;
+        -webkit-flex-direction: column; /* Safari/Webkit support */
+        -ms-flex-direction: column; /* IE10+ support */
+        padding: var(--space-4);
+    }
+    
+    #pc-edit-modal .modal-content form {
+        flex: 1;
+        -webkit-flex: 1; /* Safari/Webkit support */
+        -ms-flex: 1; /* IE10+ support */
+        overflow-y: auto;
+        overflow-y: scroll; /* Force scrollbar in Edge mobile */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        -ms-overflow-style: scrollbar; /* Edge mobile scrollbar */
+        /* Mobile touch improvements */
+        touch-action: pan-y; /* Allow vertical scrolling only */
     }
     
     /* Form adjustments */

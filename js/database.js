@@ -228,21 +228,7 @@ export class Database {
                     }
                 }
 
-                // Notify on blocked upgrades
-                request.onblocked = () => {
-                    try {
-                        // Lazy import to avoid circular deps
-                        const warn = 'Database upgrade is blocked. Please close other open tabs of this app and reload.';
-                        console.warn('[WARNING]', warn);
-                        if (window?.uiModals?.showToast) {
-                            window.uiModals.showToast('Another tab is open. Please close other tabs and reload.', 'warning', 10000);
-                        } else if (window?.app?.uiModals?.showToast) {
-                            window.app.uiModals.showToast('Another tab is open. Please close other tabs and reload.', 'warning', 10000);
-                        }
-                    } catch (e) {
-                        console.warn('onblocked handler failed to notify user');
-                    }
-                };
+                // Removed blocked upgrade notification to allow multiple tabs
             };
         });
     }
