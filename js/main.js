@@ -2911,7 +2911,7 @@ class CRMApplication {
             
             if (container) {
                 if (pcNumbers.length === 0) {
-                    container.innerHTML = '<tr><td colspan="7">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
+                    container.innerHTML = '<tr><td colspan="8">No PC Numbers found. <button onclick="window.showNewPcModal()" class="button primary">Create First PC Number</button></td></tr>';
                 } else {
                     container.innerHTML = pcNumbers.map(pc => `
                         <tr onclick="window.viewPcDetails('${pc.id}')" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor=''">
@@ -2920,6 +2920,7 @@ class CRMApplication {
                             <td>${pc.projectTitle || 'N/A'}</td>
                             <td>${(pc.contactFirstName || '') + ' ' + (pc.contactLastName || '') || pc.contactName || 'N/A'}</td>
                             <td>${pc.accountManager || 'N/A'}</td>
+                            <td>${this.formatDate(pc.createdAt)}</td>
                             <td>${this.formatDate(pc.lastModifiedAt || pc.createdAt)}</td>
                             <td onclick="event.stopPropagation()">
                                 <button onclick="window.editPC('${pc.id}')" class="button warning small">Edit</button>
