@@ -2077,8 +2077,8 @@ class CRMApplication {
             
             // Handle different data types
             if (this.isDate(aValue) && this.isDate(bValue)) {
-                const aDate = new Date(aValue);
-                const bDate = new Date(bValue);
+                const aDate = this.parseDisplayDate(aValue);
+                const bDate = this.parseDisplayDate(bValue);
                 return ascending ? aDate - bDate : bDate - aDate;
             } else if (this.isNumber(aValue) && this.isNumber(bValue)) {
                 const aNum = parseFloat(aValue);
@@ -2123,7 +2123,39 @@ class CRMApplication {
      * @description Check if value is a date
      */
     isDate(value) {
-        return !isNaN(Date.parse(value)) && value.includes('-');
+        // Check for various date formats: ISO (YYYY-MM-DD), formatted (DD/MM/YYYY), or other parseable formats
+        if (!value || value === 'N/A') return false;
+        
+        // Check if it's a valid date that can be parsed
+        const parsed = Date.parse(value);
+        if (isNaN(parsed)) return false;
+        
+        // Additional checks for common date patterns
+        return value.includes('-') || value.includes('/') || value.includes(' ');
+    }
+
+    /**
+     * @description Parse display date format (DD/MM/YYYY HH:MM) back to Date object
+     */
+    parseDisplayDate(dateString) {
+        if (!dateString || dateString === 'N/A') return new Date(0);
+        
+        // Try direct parsing first (works for ISO dates)
+        let date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+        
+        // Handle DD/MM/YYYY HH:MM format
+        const match = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+        if (match) {
+            const [, day, month, year, hour, minute] = match;
+            // Note: Month is 0-indexed in JavaScript Date constructor
+            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
+        }
+        
+        // Fallback to basic parsing
+        return new Date(dateString);
     }
 
     /**
