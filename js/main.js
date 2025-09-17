@@ -22,6 +22,11 @@ class CRMApplication {
         };
         this.currentPage = 'dashboard';
         this.currentUser = null;
+        // Preview state
+        this.previewState = {
+            showDetailedPricing: true,
+            currentQuoteId: null
+        };
         
         // Price list sorting state
         this.priceListSort = {
@@ -1476,12 +1481,22 @@ class CRMApplication {
                 editedBy: this.currentUser || 'User'
             };
 
+            // Persist print settings defaults if missing
+            draft.printSettings = draft.printSettings || { showDetailedPricing: true, includeTerms: true, customNotes: '', headerText: '', footerText: '', termsAndConditions: '' };
+            // Capture terms and notes if present in UI
+            const termsEl = document.getElementById('quote-terms');
+            const notesEl = document.getElementById('quote-notes');
+            const defaultTerms = termsEl ? termsEl.value : '';
+            const internalNotes = notesEl ? notesEl.value : '';
+
+            draft.printSettings = draft.printSettings || { showDetailedPricing: true, includeTerms: true, customNotes: '', headerText: '', footerText: '', termsAndConditions: defaultTerms };
+            draft.internalNotes = internalNotes;
+
             await db.save('quotes', draft);
             uiModals.showToast(`Draft ${quoteNumber} saved`, 'success');
 
-            // Go to quotes list
-            await this.navigateToPage('quotes');
-            await this.loadQuotesData();
+            // Open preview after save
+            await this.openQuotePreview(draft.id);
 
         } catch (e) {
             logError('Failed to save draft from builder:', e);
@@ -1571,6 +1586,224 @@ class CRMApplication {
             this.hideLoadingOverlay();
             throw error;
         }
+    }
+
+    // =====================
+    // Quote Preview
+    // =====================
+    async openQuotePreview(quoteId) {
+        try {
+            const modal = document.getElementById('quote-preview-modal');
+            const content = document.getElementById('quote-preview-content');
+            if (!modal || !content) return;
+
+            this.previewState.currentQuoteId = quoteId;
+            const quote = await db.load('quotes', quoteId);
+            if (!quote) return;
+
+            // Ensure print settings
+            quote.printSettings = quote.printSettings || { showDetailedPricing: true, includeTerms: true, customNotes: '', headerText: '', footerText: '', termsAndConditions: '' };
+            this.previewState.showDetailedPricing = !!quote.printSettings.showDetailedPricing;
+
+            content.innerHTML = this.renderQuotePreviewHtml(quote);
+
+            // Attach editable handlers
+            content.querySelectorAll('.editable-section[contenteditable="true"]').forEach(el => {
+                el.addEventListener('input', async (e) => {
+                    try {
+                        const field = el.getAttribute('data-section');
+                        const q = await db.load('quotes', this.previewState.currentQuoteId);
+                        if (!q) return;
+                        q.printSettings = q.printSettings || {};
+                        q.printSettings[field] = el.innerHTML;
+                        await db.save('quotes', q);
+                    } catch (err) { logError('Failed to persist editable section:', err); }
+                });
+            });
+
+            modal.style.display = 'block';
+        } catch (e) {
+            logError('openQuotePreview error:', e);
+        }
+    }
+
+    togglePreviewPricingDetail() {
+        this.previewState.showDetailedPricing = !this.previewState.showDetailedPricing;
+        const quoteId = this.previewState.currentQuoteId;
+        if (!quoteId) return;
+        // Re-render
+        db.load('quotes', quoteId).then(q => {
+            if (!q) return;
+            const content = document.getElementById('quote-preview-content');
+            if (!content) return;
+            content.innerHTML = this.renderQuotePreviewHtml(q);
+        }).catch(err => logError('togglePreviewPricingDetail:', err));
+    }
+
+    printQuotePreview() {
+        // Use browser print
+        window.print();
+    }
+
+    renderQuotePreviewHtml(quote) {
+        const fmt = (n) => `£${(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        const items = quote.itemsPriceList || quote.items || [];
+        const labour = items.filter(i=>i.category==='labour');
+        const vehicles = items.filter(i=>i.category==='vehicles');
+        const materials = items.filter(i=>i.category==='materials');
+        const other = items.filter(i=>i.category==='other');
+        const sum = arr => arr.reduce((a,b)=> a + (Number(b.quantity||0) * Number(b.unitPrice||b.manualPrice||0)), 0);
+        const subtotalPL = (quote.subtotalPL != null ? Number(quote.subtotalPL) : (sum(labour)+sum(vehicles)+sum(materials)+sum(other)));
+        const recycling = Number(quote.recyclingTotal||0);
+        const rebates = Number(quote.rebatesTotal||0);
+        const otherCosts = Number(quote.otherCostsTotal||0);
+        const discountAmount = Number(quote.discount?.amount||0);
+        const net = Math.max(0, subtotalPL - discountAmount) + recycling + otherCosts + rebates;
+        const vatRate = Number(quote.vatRate||20);
+        const vat = (quote.vatAmount != null) ? Number(quote.vatAmount) : net * vatRate / 100;
+        const total = (quote.totalAmount != null) ? Number(quote.totalAmount) : net + vat;
+
+        const detail = this.previewState.showDetailedPricing;
+
+        const renderItemRows = (arr) => arr.map(i=>`
+            <tr class="pricing-detail-row">
+                <td>${i.name||''}</td>
+                <td>${i.unit||''}</td>
+                <td>${i.quantity||0}</td>
+                <td>${fmt(i.isManualPrice ? i.manualPrice : i.unitPrice)}</td>
+                <td>${fmt((i.quantity||0) * (i.isManualPrice ? i.manualPrice : i.unitPrice))}</td>
+            </tr>
+        `).join('');
+
+        const renderCategory = (title, arr) => `
+            <tr class="category-header"><th colspan="5">${title}</th></tr>
+            ${detail ? renderItemRows(arr) : ''}
+            <tr class="summary-only"><td colspan="4"><strong>${title} Total</strong></td><td><strong>${fmt(sum(arr))}</strong></td></tr>
+        `;
+
+        const recyclingItems = quote.recyclingItems||[];
+        const rebateItems = quote.rebateItems||[];
+        const otherManual = (quote.otherCostsManual||[]);
+
+        const renderSimpleRows = (arr, sign=1) => arr.map(x=>`
+            <tr>
+                <td colspan="4">${x.details||x.description||x.type||'-'}</td>
+                <td>${fmt(sign * Number(x.amount||0))}</td>
+            </tr>
+        `).join('');
+
+        return `
+        <div class="quote-document ${detail ? '' : 'summary-view'}">
+            <div class="quote-header">
+                <div class="company-info">
+                    <h1>Company Name</h1>
+                    <div class="editable-section" contenteditable="true" data-section="headerText">${quote.printSettings?.headerText||'Company address line 1, City, Postcode'}</div>
+                </div>
+                <div class="quote-number">
+                    <h2>${quote.quoteNumber||quote.id||''}</h2>
+                    <div>Date: ${quote.createdAt ? new Date(quote.createdAt).toLocaleDateString() : ''}</div>
+                </div>
+            </div>
+
+            <div class="quote-addresses">
+                <div class="address-block">
+                    <h3>Collection Address</h3>
+                    <div>${quote.collectionAddress?.contactName||''}</div>
+                    <div>${quote.collectionAddress?.address1||''}</div>
+                    <div>${quote.collectionAddress?.address2||''}</div>
+                    <div>${quote.collectionAddress?.city||''} ${quote.collectionAddress?.postcode||''}</div>
+                </div>
+                <div class="address-block">
+                    <h3>Delivery Address</h3>
+                    <div>${quote.deliveryAddress?.contactName||''}</div>
+                    <div>${quote.deliveryAddress?.address1||''}</div>
+                    <div>${quote.deliveryAddress?.address2||''}</div>
+                    <div>${quote.deliveryAddress?.city||''} ${quote.deliveryAddress?.postcode||''}</div>
+                </div>
+            </div>
+
+            <div class="pricing-section">
+                <h3>Pricing</h3>
+                <table class="pricing-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Unit</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${renderCategory('Labour', labour)}
+                        ${renderCategory('Vehicles', vehicles)}
+                        ${renderCategory('Materials', materials)}
+                        ${renderCategory('Other', other)}
+                    </tbody>
+                </table>
+
+                <div class="pricing-summary">
+                    <table>
+                        <tr><td>Subtotal (PL)</td><td style="text-align:right;">${fmt(subtotalPL)}</td></tr>
+                        ${discountAmount ? `<tr><td>Discount</td><td style="text-align:right;">- ${fmt(discountAmount)}</td></tr>` : ''}
+                        ${recycling ? `<tr><td>Recycling</td><td style="text-align:right;">${fmt(recycling)}</td></tr>` : ''}
+                        ${otherCosts ? `<tr><td>Other charges</td><td style="text-align:right;">${fmt(otherCosts)}</td></tr>` : ''}
+                        ${rebates ? `<tr><td>Rebates</td><td style="text-align:right;">${fmt(rebates)}</td></tr>` : ''}
+                        <tr><td>Net</td><td style="text-align:right;">${fmt(net)}</td></tr>
+                        <tr><td>VAT (${vatRate}%)</td><td style="text-align:right;">${fmt(vat)}</td></tr>
+                        <tr class="total-row"><td>Total</td><td style="text-align:right;">${fmt(total)}</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            ${recyclingItems.length ? `
+            <div class="pricing-section">
+                <h3>Recycling Items</h3>
+                <table class="pricing-table">
+                    <tbody>${renderSimpleRows(recyclingItems, 1)}</tbody>
+                </table>
+            </div>` : ''}
+
+            ${rebateItems.length ? `
+            <div class="pricing-section">
+                <h3>Rebates</h3>
+                <table class="pricing-table">
+                    <tbody>${renderSimpleRows(rebateItems, 1)}</tbody>
+                </table>
+            </div>` : ''}
+
+            ${otherManual.length ? `
+            <div class="pricing-section">
+                <h3>Other Charges</h3>
+                <table class="pricing-table">
+                    <tbody>${renderSimpleRows(otherManual, 1)}</tbody>
+                </table>
+            </div>` : ''}
+
+            <div class="pricing-section">
+                <h3>Notes</h3>
+                <div class="editable-section" contenteditable="true" data-section="customNotes">${quote.printSettings?.customNotes || ''}</div>
+            </div>
+
+            ${quote.printSettings?.includeTerms !== false ? `
+            <div class="pricing-section">
+                <h3>Terms & Conditions</h3>
+                <div class="editable-section" contenteditable="true" data-section="termsAndConditions">${quote.printSettings?.termsAndConditions || (document.getElementById('quote-terms')?.value || '')}</div>
+            </div>` : ''}
+
+            <div class="signature-section">
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div>Client Signature</div>
+                </div>
+                <div class="signature-block">
+                    <div class="signature-line"></div>
+                    <div>Company Representative</div>
+                </div>
+            </div>
+
+            <div class="editable-section" contenteditable="true" data-section="footerText" style="margin-top:2rem;">${quote.printSettings?.footerText || ''}</div>
+        </div>`;
     }
 
     /**
@@ -4248,6 +4481,8 @@ class CRMApplication {
                 items: []
             };
             
+            // Initialize print settings defaults
+            quoteData.printSettings = { showDetailedPricing: true, includeTerms: true, customNotes: '', headerText: '', footerText: '', termsAndConditions: '' };
             await db.save('quotes', quoteData);
             uiModals.showToast(`Quote ${quoteNumber} created successfully!`, 'success');
             
@@ -4262,10 +4497,10 @@ class CRMApplication {
             
             logDebug('Quote saved successfully:', quoteData);
             
-            // Immediately open Quote Edit Modal for further editing
+            // Immediately open Preview for print/export
             setTimeout(async () => {
-                await this.openQuoteEditModal(quoteData.id);
-            }, 500); // Small delay to allow modal transition
+                await this.openQuotePreview(quoteData.id);
+            }, 300);
             
         } catch (error) {
             logError('Failed to save quote:', error);

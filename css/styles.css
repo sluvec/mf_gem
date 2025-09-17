@@ -652,6 +652,268 @@ textarea:focus,
     .nav-grid .nav-row-1:nth-child(6) { grid-row: 3; grid-column: 2; }
 }
 
+
+/* Quote Preview Modal Styles */
+.preview-modal {
+    max-width: 1000px !important;
+    width: 90%;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.preview-actions button {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--neutral-300);
+    background: white;
+    cursor: pointer;
+    font-size: var(--text-sm);
+}
+
+.preview-actions button:hover {
+    background: var(--neutral-50);
+}
+
+.preview-actions button.primary {
+    background: var(--primary-500);
+    color: white;
+    border-color: var(--primary-500);
+}
+
+.preview-actions button.primary:hover {
+    background: var(--primary-600);
+}
+
+#quote-preview-content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--neutral-50);
+    padding: 1rem;
+}
+
+.quote-document {
+    background: white;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    min-height: 297mm;
+}
+
+.quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-500);
+}
+
+.company-info h1 {
+    color: var(--primary-600);
+    font-size: var(--text-2xl);
+    margin-bottom: 0.5rem;
+}
+
+.quote-number {
+    text-align: right;
+}
+
+.quote-number h2 {
+    color: var(--primary-600);
+    font-size: var(--text-xl);
+    margin-bottom: 0.5rem;
+}
+
+.quote-addresses {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.address-block {
+    padding: 1rem;
+    background: var(--neutral-50);
+    border-radius: var(--radius-md);
+}
+
+.address-block h3 {
+    color: var(--primary-600);
+    margin-bottom: 0.5rem;
+}
+
+.pricing-section {
+    margin: 2rem 0;
+}
+
+.pricing-section h3 {
+    color: var(--primary-600);
+    margin-bottom: 1rem;
+}
+
+.pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.pricing-table th {
+    background: var(--primary-50);
+    color: var(--primary-700);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: var(--font-semibold);
+}
+
+.pricing-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.pricing-table tr:hover {
+    background: var(--neutral-50);
+}
+
+.pricing-table .category-header {
+    background: var(--primary-100);
+    font-weight: var(--font-semibold);
+}
+
+.pricing-summary {
+    background: var(--neutral-50);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-top: 1rem;
+}
+
+.pricing-summary table {
+    width: 100%;
+}
+
+.pricing-summary td {
+    padding: 0.5rem 0;
+}
+
+.pricing-summary .total-row {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--primary-600);
+    border-top: 2px solid var(--primary-500);
+    padding-top: 0.75rem;
+}
+
+.editable-section {
+    border: 1px dashed var(--neutral-300);
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.editable-section:hover {
+    background: var(--primary-50);
+    border-color: var(--primary-300);
+}
+
+.editable-section.editing {
+    background: white;
+    border-color: var(--primary-500);
+    border-style: solid;
+}
+
+.signature-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+}
+
+.signature-block {
+    text-align: center;
+}
+
+.signature-line {
+    border-bottom: 2px solid var(--neutral-400);
+    margin: 3rem 0 0.5rem 0;
+}
+
+/* Print Styles */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .printable-area,
+    .printable-area * {
+        visibility: visible;
+    }
+    
+    .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    
+    .quote-document {
+        box-shadow: none;
+        margin: 0;
+        padding: 15mm;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .preview-header,
+    .preview-actions {
+        display: none !important;
+    }
+    
+    .editable-section {
+        border: none !important;
+        padding: 0 !important;
+    }
+    
+    .page-break {
+        page-break-after: always;
+    }
+}
+
+/* Toggle between detailed and summary views */
+.pricing-detail-row.hidden {
+    display: none;
+}
+
+.summary-only {
+    display: none;
+}
+
+.summary-view .pricing-detail-row {
+    display: none;
+}
+
+.summary-view .summary-only {
+    display: table-row;
+}
+
 .nav-menu li {
     display: flex;
     position: relative;

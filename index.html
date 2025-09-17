@@ -3462,6 +3462,24 @@ Next steps:
         </div>
     </div>
 
+    <!-- Quote Preview Modal -->
+    <div id="quote-preview-modal" class="modal" style="display:none;">
+        <div class="modal-content preview-modal">
+            <div class="preview-header no-print">
+                <h2 style="margin:0;">Quote Preview</h2>
+                <div class="preview-actions">
+                    <button id="preview-toggle-detail" class="secondary" onclick="window.app && window.app.togglePreviewPricingDetail && window.app.togglePreviewPricingDetail()">Toggle Detail/Summary</button>
+                    <button id="preview-print" class="primary" onclick="window.app && window.app.printQuotePreview && window.app.printQuotePreview()">Print / Save PDF</button>
+                    <button class="secondary" onclick="(function(){ const m=document.getElementById('quote-preview-modal'); if(m) m.style.display='none'; })()">Close</button>
+                </div>
+            </div>
+
+            <div id="quote-preview-content" class="printable-area">
+                <!-- Rendered dynamically by JS -->
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/main.js"></script>
   </body>
 </html>
