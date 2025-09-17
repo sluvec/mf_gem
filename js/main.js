@@ -2079,6 +2079,8 @@ class CRMApplication {
             if (this.isDate(aValue) && this.isDate(bValue)) {
                 const aDate = this.parseDisplayDate(aValue);
                 const bDate = this.parseDisplayDate(bValue);
+                console.log('Comparing dates:', aValue, '→', aDate, 'vs', bValue, '→', bDate);
+                console.log('Result:', ascending ? aDate - bDate : bDate - aDate);
                 return ascending ? aDate - bDate : bDate - aDate;
             } else if (this.isNumber(aValue) && this.isNumber(bValue)) {
                 const aNum = parseFloat(aValue);
@@ -2135,25 +2137,67 @@ class CRMApplication {
     }
 
     /**
-     * @description Parse display date format (DD/MM/YYYY HH:MM) back to Date object
+     * @description Parse display date format back to Date object
      */
     parseDisplayDate(dateString) {
         if (!dateString || dateString === 'N/A') return new Date(0);
         
+        // Debug logging to see what we're trying to parse
+        console.log('Parsing date string:', dateString);
+        
         // Try direct parsing first (works for ISO dates)
         let date = new Date(dateString);
         if (!isNaN(date.getTime())) {
+            console.log('Direct parse successful:', date);
             return date;
         }
         
-        // Handle DD/MM/YYYY HH:MM format
-        const match = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
-        if (match) {
-            const [, day, month, year, hour, minute] = match;
-            // Note: Month is 0-indexed in JavaScript Date constructor
-            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
+        // Handle various DD/MM/YYYY formats with optional time
+        // Patterns: DD/MM/YYYY HH:MM, DD/MM/YYYY, D/M/YYYY, etc.
+        const patterns = [
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/, // DD/MM/YYYY HH:MM
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, // DD/MM/YYYY
+            /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/, // DD/MM/YY
+        ];
+        
+        for (const pattern of patterns) {
+            const match = dateString.match(pattern);
+            if (match) {
+                const day = parseInt(match[1]);
+                const month = parseInt(match[2]) - 1; // 0-indexed
+                let year = parseInt(match[3]);
+                const hour = match[4] ? parseInt(match[4]) : 0;
+                const minute = match[5] ? parseInt(match[5]) : 0;
+                
+                // Handle 2-digit years
+                if (year < 100) {
+                    year += year < 50 ? 2000 : 1900;
+                }
+                
+                const parsedDate = new Date(year, month, day, hour, minute);
+                console.log('Pattern parse successful:', parsedDate, 'from pattern:', pattern);
+                return parsedDate;
+            }
         }
         
+        // Try parsing with UK locale interpretation
+        // Split by common separators and try to interpret
+        const parts = dateString.split(/[\s\/\-:]+/);
+        if (parts.length >= 3) {
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1;
+            const year = parseInt(parts[2]);
+            const hour = parts[3] ? parseInt(parts[3]) : 0;
+            const minute = parts[4] ? parseInt(parts[4]) : 0;
+            
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                const parsedDate = new Date(year, month, day, hour, minute);
+                console.log('Parts parse successful:', parsedDate);
+                return parsedDate;
+            }
+        }
+        
+        console.log('Parse failed, using fallback:', new Date(dateString));
         // Fallback to basic parsing
         return new Date(dateString);
     }
@@ -2172,7 +2216,7 @@ class CRMApplication {
         if (!dateString) return 'N/A';
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-GB', {
+            const formatted = date.toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: '2-digit', 
                 year: 'numeric'
@@ -2180,6 +2224,8 @@ class CRMApplication {
                 hour: '2-digit',
                 minute: '2-digit'
             });
+            console.log('Formatted date:', dateString, '→', formatted);
+            return formatted;
         } catch (error) {
             return 'N/A';
         }
