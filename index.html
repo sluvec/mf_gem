@@ -1496,6 +1496,21 @@
 
         </div>
 
+        <!-- Quote Preview Page -->
+        <div id="quote-preview" class="page" style="display:none;">
+            <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h1 style="margin:0;">Quote Preview</h1>
+                <div class="preview-actions no-print">
+                    <button onclick="window.app && window.app.navigateToPage && window.app.navigateToPage('quotes')" class="secondary">Back to Quotes</button>
+                    <button onclick="window.app && window.app.togglePreviewPricingDetail && window.app.togglePreviewPricingDetail()">Toggle Detail/Summary</button>
+                    <button class="primary" onclick="window.app && window.app.printQuotePreview && window.app.printQuotePreview()">Print / Save PDF</button>
+                </div>
+            </div>
+            <div id="quote-preview-page-content" class="printable-area">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+
         <div id="activity-detail" class="page">
             <h1 id="activity-detail-title">Activity Details</h1>
             

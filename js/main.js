@@ -1593,9 +1593,9 @@ class CRMApplication {
     // =====================
     async openQuotePreview(quoteId) {
         try {
+            const pageContent = document.getElementById('quote-preview-page-content');
             const modal = document.getElementById('quote-preview-modal');
-            const content = document.getElementById('quote-preview-content');
-            if (!modal || !content) return;
+            const modalContent = document.getElementById('quote-preview-content');
 
             this.previewState.currentQuoteId = quoteId;
             const quote = await db.load('quotes', quoteId);
@@ -1605,23 +1605,41 @@ class CRMApplication {
             quote.printSettings = quote.printSettings || { showDetailedPricing: true, includeTerms: true, customNotes: '', headerText: '', footerText: '', termsAndConditions: '' };
             this.previewState.showDetailedPricing = !!quote.printSettings.showDetailedPricing;
 
-            content.innerHTML = this.renderQuotePreviewHtml(quote);
+            const html = this.renderQuotePreviewHtml(quote);
 
-            // Attach editable handlers
-            content.querySelectorAll('.editable-section[contenteditable="true"]').forEach(el => {
-                el.addEventListener('input', async (e) => {
-                    try {
-                        const field = el.getAttribute('data-section');
-                        const q = await db.load('quotes', this.previewState.currentQuoteId);
-                        if (!q) return;
-                        q.printSettings = q.printSettings || {};
-                        q.printSettings[field] = el.innerHTML;
-                        await db.save('quotes', q);
-                    } catch (err) { logError('Failed to persist editable section:', err); }
+            if (pageContent) {
+                pageContent.innerHTML = html;
+                await this.navigateToPage('quote-preview');
+                // Attach editable handlers for page
+                pageContent.querySelectorAll('.editable-section[contenteditable="true"]').forEach(el => {
+                    el.addEventListener('input', async () => {
+                        try {
+                            const field = el.getAttribute('data-section');
+                            const q = await db.load('quotes', this.previewState.currentQuoteId);
+                            if (!q) return;
+                            q.printSettings = q.printSettings || {};
+                            q.printSettings[field] = el.innerHTML;
+                            await db.save('quotes', q);
+                        } catch (err) { logError('Failed to persist editable section:', err); }
+                    });
                 });
-            });
-
-            modal.style.display = 'block';
+            } else if (modal && modalContent) {
+                modalContent.innerHTML = html;
+                // Attach editable handlers for modal
+                modalContent.querySelectorAll('.editable-section[contenteditable="true"]').forEach(el => {
+                    el.addEventListener('input', async () => {
+                        try {
+                            const field = el.getAttribute('data-section');
+                            const q = await db.load('quotes', this.previewState.currentQuoteId);
+                            if (!q) return;
+                            q.printSettings = q.printSettings || {};
+                            q.printSettings[field] = el.innerHTML;
+                            await db.save('quotes', q);
+                        } catch (err) { logError('Failed to persist editable section:', err); }
+                    });
+                });
+                modal.style.display = 'block';
+            }
         } catch (e) {
             logError('openQuotePreview error:', e);
         }
@@ -1634,9 +1652,13 @@ class CRMApplication {
         // Re-render
         db.load('quotes', quoteId).then(q => {
             if (!q) return;
-            const content = document.getElementById('quote-preview-content');
-            if (!content) return;
-            content.innerHTML = this.renderQuotePreviewHtml(q);
+            const pageContent = document.getElementById('quote-preview-page-content');
+            if (pageContent && this.currentPage === 'quote-preview') {
+                pageContent.innerHTML = this.renderQuotePreviewHtml(q);
+                return;
+            }
+            const modalContent = document.getElementById('quote-preview-content');
+            if (modalContent) modalContent.innerHTML = this.renderQuotePreviewHtml(q);
         }).catch(err => logError('togglePreviewPricingDetail:', err));
     }
 
