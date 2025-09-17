@@ -1626,7 +1626,13 @@
         </div>
 
         <div id="quote-detail" class="page">
-            <h1 id="quote-detail-title">Quote Details</h1>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                <h1 id="quote-detail-title" style="margin:0;">Quote Details</h1>
+                <div class="no-print" style="display:flex; gap:0.5rem;">
+                    <button onclick="window.app && window.app.openQuotePreview && window.app.openQuotePreview(window.currentQuote?.id)" class="primary">Preview</button>
+                    <button onclick="window.app && window.app.printQuotePreview && window.app.printQuotePreview()">Print / Save PDF</button>
+                </div>
+            </div>
             
             <!-- Main Quote Data -->
             <div class="card">
