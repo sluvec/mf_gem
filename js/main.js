@@ -2137,69 +2137,53 @@ class CRMApplication {
     }
 
     /**
-     * @description Parse display date format back to Date object
+     * @description Parse display date format back to Date object (UK format: DD/MM/YYYY)
      */
     parseDisplayDate(dateString) {
         if (!dateString || dateString === 'N/A') return new Date(0);
         
-        // Debug logging to see what we're trying to parse
         console.log('Parsing date string:', dateString);
         
-        // Try direct parsing first (works for ISO dates)
-        let date = new Date(dateString);
-        if (!isNaN(date.getTime())) {
-            console.log('Direct parse successful:', date);
-            return date;
-        }
+        // NEVER use direct parsing for DD/MM/YYYY format as it gets interpreted as MM/DD/YYYY
+        // Always parse UK format manually
         
-        // Handle various DD/MM/YYYY formats with optional time
-        // Patterns: DD/MM/YYYY HH:MM, DD/MM/YYYY, D/M/YYYY, etc.
-        const patterns = [
-            /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/, // DD/MM/YYYY HH:MM
-            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, // DD/MM/YYYY
-            /^(\d{1,2})\/(\d{1,2})\/(\d{2})$/, // DD/MM/YY
-        ];
-        
-        for (const pattern of patterns) {
-            const match = dateString.match(pattern);
-            if (match) {
-                const day = parseInt(match[1]);
-                const month = parseInt(match[2]) - 1; // 0-indexed
-                let year = parseInt(match[3]);
-                const hour = match[4] ? parseInt(match[4]) : 0;
-                const minute = match[5] ? parseInt(match[5]) : 0;
-                
-                // Handle 2-digit years
-                if (year < 100) {
-                    year += year < 50 ? 2000 : 1900;
-                }
-                
-                const parsedDate = new Date(year, month, day, hour, minute);
-                console.log('Pattern parse successful:', parsedDate, 'from pattern:', pattern);
-                return parsedDate;
-            }
-        }
-        
-        // Try parsing with UK locale interpretation
-        // Split by common separators and try to interpret
-        const parts = dateString.split(/[\s\/\-:]+/);
-        if (parts.length >= 3) {
-            const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]) - 1;
-            const year = parseInt(parts[2]);
-            const hour = parts[3] ? parseInt(parts[3]) : 0;
-            const minute = parts[4] ? parseInt(parts[4]) : 0;
+        // Handle DD/MM/YYYY HH:MM format (which is what our formatDate produces)
+        const match = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+        if (match) {
+            const day = parseInt(match[1]);
+            const month = parseInt(match[2]) - 1; // 0-indexed for JavaScript Date
+            const year = parseInt(match[3]);
+            const hour = parseInt(match[4]);
+            const minute = parseInt(match[5]);
             
-            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                const parsedDate = new Date(year, month, day, hour, minute);
-                console.log('Parts parse successful:', parsedDate);
-                return parsedDate;
-            }
+            const parsedDate = new Date(year, month, day, hour, minute);
+            console.log('UK format parse successful:', dateString, '→', parsedDate);
+            console.log('Interpreted as:', day, '/', month + 1, '/', year, hour + ':' + minute);
+            return parsedDate;
         }
         
-        console.log('Parse failed, using fallback:', new Date(dateString));
-        // Fallback to basic parsing
-        return new Date(dateString);
+        // Handle DD/MM/YYYY format (no time)
+        const matchNoTime = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (matchNoTime) {
+            const day = parseInt(matchNoTime[1]);
+            const month = parseInt(matchNoTime[2]) - 1;
+            const year = parseInt(matchNoTime[3]);
+            
+            const parsedDate = new Date(year, month, day);
+            console.log('UK format (no time) parse successful:', dateString, '→', parsedDate);
+            return parsedDate;
+        }
+        
+        // Fallback: try to parse as ISO format or other standard formats
+        console.log('No UK pattern match, trying ISO/standard parsing');
+        const fallbackDate = new Date(dateString);
+        if (!isNaN(fallbackDate.getTime())) {
+            console.log('Fallback parse successful:', fallbackDate);
+            return fallbackDate;
+        }
+        
+        console.log('All parsing failed, returning epoch');
+        return new Date(0);
     }
 
     /**
