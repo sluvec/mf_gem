@@ -4,6 +4,7 @@
  */
 
 import { logDebug, logError, logInfo, generateId } from './utils.js';
+import { DATABASE } from './constants.js';
 
 /**
  * @description Global database connection and state management
@@ -11,11 +12,11 @@ import { logDebug, logError, logInfo, generateId } from './utils.js';
 export class Database {
     constructor() {
         this.db = null;
-        this.dbName = 'CRM_Database';
-        this.version = 9; // Schema v9: updated version to match browser state
+        this.dbName = DATABASE.NAME;
+        this.version = DATABASE.VERSION;
         this.isInitialized = false;
-        this.retryAttempts = 3;
-        this.retryDelay = 1000;
+        this.retryAttempts = DATABASE.RETRY_ATTEMPTS;
+        this.retryDelay = DATABASE.RETRY_DELAY_MS;
     }
 
     /**

@@ -6,6 +6,17 @@
 import { logInfo, logError, logDebug } from './utils.js';
 import { db } from './database.js';
 import { uiModals } from './ui-modals.js';
+import {
+    BUSINESS_RULES,
+    STATUS,
+    COLORS,
+    DISPLAY,
+    VIEWS,
+    CURRENCY,
+    DEFAULTS,
+    PAGES,
+    DISCOUNT_TYPE
+} from './constants.js';
 
 /**
  * @description Simplified CRM Application Class
@@ -16,51 +27,52 @@ class CRMApplication {
         this.currentPage = null;
         this.builderContext = { pcId: null, editingQuoteId: null };
         this.builderState = {
-            priceListId: '', currency: 'GBP', vatRate: 20,
-            plItems: [], recyclingItems: [], rebateItems: [], otherCosts: [],
+            priceListId: '',
+            currency: CURRENCY.DEFAULT,
+            vatRate: DEFAULTS.VAT_RATE,
+            plItems: [],
+            recyclingItems: [],
+            rebateItems: [],
+            otherCosts: [],
             categoryOptions: { labour: [], vehicles: [], materials: [], other: [] }
         };
-        this.currentPage = 'dashboard';
+        this.currentPage = PAGES.DASHBOARD;
         this.currentUser = null;
+
         // Preview state
         this.previewState = {
             showDetailedPricing: true,
             currentQuoteId: null
         };
-        
+
         // Price list sorting state
         this.priceListSort = {
             column: null,
             direction: 'asc'
         };
-        
-        // Constants for cleaner code
-        this.ACTIVITY_VIEWS = ['list', 'calendar'];
-        this.CALENDAR_VIEWS = ['month', 'week'];
-        this.ACTIVITY_STATUSES = ['pending', 'in-progress', 'completed', 'cancelled'];
-        
-        // UI Colors
-        this.COLORS = {
-            primary: '#3b82f6',
-            secondary: '#6b7280',
-            neutral: '#374151',
-            transparent: 'transparent',
-            white: 'white'
-        };
-        
-        // Display values
-        this.DISPLAY = {
-            none: 'none',
-            block: 'block',
-            flex: 'flex'
-        };
-        
+
+        // Constants from imported config
+        this.ACTIVITY_VIEWS = VIEWS.ACTIVITY;
+        this.CALENDAR_VIEWS = VIEWS.CALENDAR;
+        this.ACTIVITY_STATUSES = [
+            STATUS.ACTIVITY.PENDING,
+            STATUS.ACTIVITY.IN_PROGRESS,
+            STATUS.ACTIVITY.COMPLETED,
+            STATUS.ACTIVITY.CANCELLED
+        ];
+
+        // UI Colors from constants
+        this.COLORS = COLORS;
+
+        // Display values from constants
+        this.DISPLAY = DISPLAY;
+
         // Performance optimization - caching
         this.calendarCache = new Map();
         this.activitiesCache = null;
         this.lastActivitiesLoad = null;
-        this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-        
+        this.CACHE_DURATION = BUSINESS_RULES.CACHE.DURATION_MS;
+
         // Smart filters state
         this.activeFilters = {
             activities: {
@@ -81,10 +93,10 @@ class CRMApplication {
     async openQuoteBuilder(pcId = null) {
         try {
             // Navigate to builder page
-            await this.navigateToPage('quote-builder');
+            await this.navigateToPage(PAGES.QUOTE_BUILDER);
 
             // Track current page
-            this.currentPage = 'quote-builder';
+            this.currentPage = PAGES.QUOTE_BUILDER;
 
             // Prefill PC if provided
             // not editing mode
@@ -196,8 +208,8 @@ class CRMApplication {
                 uiModals.showToast('Quote not found', 'error');
                 return;
             }
-            await this.navigateToPage('quote-builder');
-            this.currentPage = 'quote-builder';
+            await this.navigateToPage(PAGES.QUOTE_BUILDER);
+            this.currentPage = PAGES.QUOTE_BUILDER;
             this.builderContext.editingQuoteId = quoteId;
             this.builderContext.pcId = quote.pcId || null;
 
@@ -1209,18 +1221,27 @@ class CRMApplication {
         const valEl = document.getElementById('quote-discount-value');
         let discountAmount = 0;
         if (typeEl && valEl) {
-            const t = typeEl.value || 'percent';
+            const t = typeEl.value || DISCOUNT_TYPE.PERCENT;
             const v = parseFloat(valEl.value || '0') || 0;
-            if (t === 'percent') discountAmount = Math.min(100, Math.max(0, v)) * subtotal / 100;
-            else discountAmount = Math.min(subtotal, Math.max(0, v));
+            if (t === DISCOUNT_TYPE.PERCENT) {
+                discountAmount = Math.min(
+                    BUSINESS_RULES.DISCOUNT.MAX_PERCENT,
+                    Math.max(BUSINESS_RULES.DISCOUNT.MIN_PERCENT, v)
+                ) * subtotal / 100;
+            } else {
+                discountAmount = Math.min(
+                    subtotal,
+                    Math.max(BUSINESS_RULES.DISCOUNT.MIN_AMOUNT, v)
+                );
+            }
         }
         // Non-discount sections
         const recycling = (this.builderState.recyclingItems||[]).reduce((a,b)=>a+(b.amount||0),0);
         const otherManual = (this.builderState.otherCosts||[]).reduce((a,b)=>a+(b.amount||0),0);
         const rebates = (this.builderState.rebateItems||[]).reduce((a,b)=>a+(b.amount||0),0); // negative values expected
 
-        const netAfterDiscount = Math.max(0, subtotal - discountAmount) + recycling + otherManual + rebates;
-        const vatRate = parseFloat(document.getElementById('quote-vat-rate')?.value || `${this.builderState.vatRate}`) || 20;
+        const netAfterDiscount = Math.max(BUSINESS_RULES.PRICE.MIN_VALUE, subtotal - discountAmount) + recycling + otherManual + rebates;
+        const vatRate = parseFloat(document.getElementById('quote-vat-rate')?.value || `${this.builderState.vatRate}`) || DEFAULTS.VAT_RATE;
         const vat = netAfterDiscount * vatRate / 100;
         const total = netAfterDiscount + vat;
 
@@ -1430,16 +1451,31 @@ class CRMApplication {
             const subtotalPL = sumCat('labour') + sumCat('vehicles') + sumCat('materials') + sumCat('other');
             const discTypeEl = document.getElementById('quote-discount-type');
             const discValEl = document.getElementById('quote-discount-value');
-            const discountType = discTypeEl ? discTypeEl.value : 'percent';
+            const discountType = discTypeEl ? discTypeEl.value : DISCOUNT_TYPE.PERCENT;
             const discountValue = discValEl ? parseFloat(discValEl.value || '0') || 0 : 0;
             let discountAmount = 0;
-            if (discountType === 'percent') discountAmount = Math.min(100, Math.max(0, discountValue)) * subtotalPL / 100;
-            else discountAmount = Math.min(subtotalPL, Math.max(0, discountValue));
+            if (discountType === DISCOUNT_TYPE.PERCENT) {
+                discountAmount = Math.min(
+                    BUSINESS_RULES.DISCOUNT.MAX_PERCENT,
+                    Math.max(BUSINESS_RULES.DISCOUNT.MIN_PERCENT, discountValue)
+                ) * subtotalPL / 100;
+            } else {
+                discountAmount = Math.min(
+                    subtotalPL,
+                    Math.max(BUSINESS_RULES.DISCOUNT.MIN_AMOUNT, discountValue)
+                );
+            }
             const recyclingTotal = (this.builderState.recyclingItems||[]).reduce((a,b)=>a+(b.amount||0),0);
             const otherCostsTotal = (this.builderState.otherCosts||[]).reduce((a,b)=>a+(b.amount||0),0);
             const rebatesTotal = (this.builderState.rebateItems||[]).reduce((a,b)=>a+(b.amount||0),0);
-            const netAfterDiscount = Math.max(0, subtotalPL - discountAmount) + recyclingTotal + otherCostsTotal + rebatesTotal;
-            const vatRateEffective = Math.max(0, Math.min(100, vatRate));
+            const netAfterDiscount = Math.max(
+                BUSINESS_RULES.PRICE.MIN_VALUE,
+                subtotalPL - discountAmount
+            ) + recyclingTotal + otherCostsTotal + rebatesTotal;
+            const vatRateEffective = Math.max(
+                BUSINESS_RULES.VAT.MIN_RATE,
+                Math.min(BUSINESS_RULES.VAT.MAX_RATE, vatRate)
+            );
             const vatAmount = netAfterDiscount * vatRateEffective / 100;
             const totalCost = netAfterDiscount + vatAmount;
 
@@ -1539,7 +1575,7 @@ class CRMApplication {
                 if (latest) { latest.status = 'pending'; latest.lastModifiedAt = new Date().toISOString(); await db.save('quotes', latest); }
             }
             uiModals.showToast('Quote sent to customer (awaiting approval)', 'success');
-            await this.navigateToPage('quotes');
+            await this.navigateToPage(PAGES.QUOTES);
             await this.loadQuotesData();
         } catch (e) {
             logError('sendQuoteFromBuilder error:', e);
@@ -1609,7 +1645,7 @@ class CRMApplication {
 
             if (pageContent) {
                 pageContent.innerHTML = html;
-                await this.navigateToPage('quote-preview');
+                await this.navigateToPage(PAGES.QUOTE_PREVIEW);
                 // Attach editable handlers for page
                 pageContent.querySelectorAll('.editable-section[contenteditable="true"]').forEach(el => {
                     el.addEventListener('input', async () => {
@@ -4142,7 +4178,7 @@ class CRMApplication {
                     <div style="margin-bottom: 1rem;">
                         <h4 style="margin: 0 0 0.5rem 0; color: #374151;">Project Links</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div><strong>PC Number:</strong> ${pcNumber ? `<a href="#" onclick="window.navigateToPage('pc-detail')" style="color: #3b82f6;">${pcNumber.pcNumber}</a>` : 'None'}</div>
+                            <div><strong>PC Number:</strong> ${pcNumber ? `<a href="#" onclick="window.navigateToPage(PAGES.PC_DETAIL)" style="color: #3b82f6;">${pcNumber.pcNumber}</a>` : 'None'}</div>
                             <div><strong>Quote:</strong> ${quote ? `<a href="#" onclick="window.viewQuoteDetails('${quote.id}')" style="color: #3b82f6;">${quote.id}</a>` : 'None'}</div>
                         </div>
                         ${pcNumber ? `<div style="margin-top: 0.5rem; color: #6b7280; font-size: 0.875rem;">Company: ${pcNumber.companyName}</div>` : ''}
@@ -4964,7 +5000,7 @@ class CRMApplication {
             window.currentQuote = quoteData;
             
             // Navigate to quote detail page
-            await this.navigateToPage('quote-detail');
+            await this.navigateToPage(PAGES.QUOTE_DETAIL);
             
             logDebug(`Quote details loaded for: ${quoteData.quoteNumber || quoteData.id}`);
             
@@ -5028,7 +5064,7 @@ class CRMApplication {
             
             // Clear form and navigate back
             this.clearPcForm();
-            await this.navigateToPage('pcnumbers');
+            await this.navigateToPage(PAGES.PC_NUMBERS);
             
         } catch (error) {
             logError('Failed to save PC Number:', error);
@@ -5657,7 +5693,7 @@ class CRMApplication {
             
             // Store current PC for detail view
             window.currentPC = pcData;
-            await this.navigateToPage('pc-detail');
+            await this.navigateToPage(PAGES.PC_DETAIL);
             
         } catch (error) {
             logError('Failed to open PC details:', error);
@@ -6695,7 +6731,7 @@ class CRMApplication {
 
             // Navigate to price list detail page
             this.currentPriceList = priceList;
-            await this.navigateToPage('pricelist-detail');
+            await this.navigateToPage(PAGES.PRICE_LIST_DETAIL);
             
             // Update page title
             const titleElement = document.getElementById('pricelist-title');
@@ -6895,7 +6931,7 @@ class CRMApplication {
     async createPriceList() {
         try {
             // Navigate to new price list page
-            await this.navigateToPage('new-pricelist');
+            await this.navigateToPage(PAGES.NEW_PRICE_LIST);
             logDebug('New price list page opened');
         } catch (error) {
             logError('Failed to create new price list:', error);
@@ -8301,7 +8337,7 @@ function setupLegacyCompatibility() {
     // PC Numbers functionality
     window.showNewPcModal = () => {
         logDebug('Navigating to new PC page');
-        app.navigateToPage('new-pc');
+        app.navigateToPage(PAGES.NEW_PC);
     };
     
     window.editPC = async (id) => {
